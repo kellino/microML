@@ -9,8 +9,8 @@ import qualified Text.Megaparsec.Lexer as L
 import Text.Megaparsec.String
 import Text.Megaparsec.Expr
 
-import Data.Functor.Identity
-import Data.Scientific
+import Data.Functor.Identity (Identity)
+import Data.Scientific (Scientific)
 import Data.Char (isLower, isUpper)
 
 promptBold :: String
@@ -111,13 +111,13 @@ boolOps =
      ,[ InfixL (reservedWord "and" *> pure (PrimBinOp OpAnd))
       , InfixL (reservedWord "or"  *> pure (PrimBinOp OpOr))] ]
 
---relation :: [[Operator (ParsecT Dec String Identity) Expr]]
+relation :: ParsecT Dec String Identity (Expr -> Expr -> Expr)
 relation = 
-    [ [ InfixL (symbol "<"  *> pure (PrimBinOp OpLt))
-      , InfixL (symbol ">"  *> pure (PrimBinOp OpGt))
-      , InfixL (symbol "<=" *> pure (PrimBinOp OpLe))
-      , InfixL (symbol ">=" *> pure (PrimBinOp OpLt))
-      , InfixL (symbol "=?" *> pure (PrimBinOp OpEq))] ]
+          symbol "<"  *> pure (PrimBinOp OpLt)
+      <|> symbol ">"  *> pure (PrimBinOp OpGt)
+      <|> symbol "<=" *> pure (PrimBinOp OpLe)
+      <|> symbol ">=" *> pure (PrimBinOp OpLt)
+      <|> symbol "=?" *> pure (PrimBinOp OpEq) 
       
 aTerm :: ParsecT Dec String Identity Expr
 aTerm = parens aExpr
@@ -165,7 +165,7 @@ indentParser = whereBlock <* eof
 -----------------
 
 exprParser :: ParsecT Dec String Identity Expr
-exprParser = try aExpr <|> bExpr <|> try varName <|> constructorName <|> parseString
+exprParser = try bExpr <|> aExpr <|> try varName <|> constructorName <|> parseString
 
 readExpr :: String -> Expr
 readExpr input = 
