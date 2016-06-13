@@ -13,6 +13,12 @@ import Data.Functor.Identity
 import Data.Scientific
 import Data.Char (isLower, isUpper)
 
+promptBold :: String
+promptBold = "\ESC[1m"
+
+promptUnBold :: String
+promptUnBold = "\ESC[0m"
+
 lineComment :: Parser ()
 lineComment = L.skipLineComment "#"
 
@@ -41,8 +47,6 @@ float = lexeme L.float
 symbol = L.symbol sc
 charLiteral = lexeme L.charLiteral
 parens = between (symbol "(") (symbol ")")
-braces = between (symbol "{") (symbol "}")
-angles = between (symbol "<") (symbol ">")
 brackets = between (symbol "[") (symbol "]")
 semicolon = symbol ";"
 comma = symbol ","
@@ -77,16 +81,13 @@ constructorName :: ParsecT Dec String Identity Expr
 constructorName = do name@(n:_) <- identifier
                      if isUpper n 
                         then return (Con name)
-                        else fail $ "\ESC[1m" ++ "a constructor must begin with a capital letter" ++ "\ESC[0m"
-
+                        else fail $ promptBold ++ "a constructor must begin with a capital letter" ++ promptUnBold 
 
 varName :: ParsecT Dec String Identity Expr
 varName = do name@(n:_) <- identifier
              if isLower n
                 then return (Var name)
-                else fail "\ESC[1ma variable must start with a lowercase letter\ESC[0m"
-
-
+                else fail $ promptBold ++ "a variable must start with a lowercase letter" ++ promptUnBold
 
 ------------------------
 -- Expression Parsers -- 
@@ -102,26 +103,39 @@ arithOps =
       , InfixL (symbol "-" *> pure (PrimBinOp OpSub))
       , InfixL (symbol "/" *> pure (PrimBinOp OpDiv))
       , InfixL (symbol "%" *> pure (PrimBinOp OpMod))
-      , InfixL (symbol "+" *> pure (PrimBinOp OpAdd))]]
+      , InfixL (symbol "+" *> pure (PrimBinOp OpAdd))] ]
 
 boolOps :: [[Operator (ParsecT Dec String Identity) Expr]]
 boolOps =
     [ [ Prefix (reservedWord "not" *> pure Not) ]
      ,[ InfixL (reservedWord "and" *> pure (PrimBinOp OpAnd))
-      , InfixL (reservedWord "or" *> pure (PrimBinOp OpOr))] 
-    ]
-      
+      , InfixL (reservedWord "or"  *> pure (PrimBinOp OpOr))] ]
 
+--relation :: [[Operator (ParsecT Dec String Identity) Expr]]
+relation = 
+    [ [ InfixL (symbol "<"  *> pure (PrimBinOp OpLt))
+      , InfixL (symbol ">"  *> pure (PrimBinOp OpGt))
+      , InfixL (symbol "<=" *> pure (PrimBinOp OpLe))
+      , InfixL (symbol ">=" *> pure (PrimBinOp OpLt))
+      , InfixL (symbol "=?" *> pure (PrimBinOp OpEq))] ]
+      
 aTerm :: ParsecT Dec String Identity Expr
 aTerm = parens aExpr
     <|> varName
+    <|> Double <$> try float
     <|> Num <$> integer
-
 
 bTerm :: ParsecT Dec String Identity Expr
 bTerm = parens bExpr
     <|> (reservedWord "true" *> pure (Boolean True))
     <|> (reservedWord "false" *> pure (Boolean False))
+    <|> rExpr
+
+rExpr = do
+    a1 <- aExpr
+    op <- relation
+    a2 <- aExpr
+    return $ op a1 a2
 
 
 -------------------------
@@ -143,16 +157,15 @@ pLineFold = L.lineFold scn $ \sc' ->
         let ps = some (alphaNumChar <|> char '-') `sepBy1` try sc'
         in unwords <$> ps <* scn
 
-parser :: Parser (String, [String])
-parser = whereBlock <* eof
+indentParser :: Parser (String, [String])
+indentParser = whereBlock <* eof
 
 -----------------
 -- File Parser --
 -----------------
 
 exprParser :: ParsecT Dec String Identity Expr
-exprParser = try aExpr <|> try bExpr <|> try varName <|> constructorName <|> parseString
-
+exprParser = try aExpr <|> bExpr <|> try varName <|> constructorName <|> parseString
 
 readExpr :: String -> Expr
 readExpr input = 
