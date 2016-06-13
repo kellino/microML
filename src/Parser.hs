@@ -1,6 +1,10 @@
 {-# LANGUAGE TupleSections #-}
 
-module Parser where
+module Parser (
+        exprParser
+      , readExpr
+      , parseFromFile
+        ) where
 
 import Syntax
 import Control.Monad (void)
