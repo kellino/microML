@@ -1,17 +1,7 @@
 module Syntax where
 
--------------------
--- Type Synonyms --
--------------------
-
 type ConstructorName = String
 type VarName = String
-
-
-----------------
--- Data Types --
-----------------
-
 
 data PrimitiveOp  = OpAdd
                   | OpSub
@@ -28,23 +18,23 @@ data PrimitiveOp  = OpAdd
                   | OpGt
                   deriving Show                           
                            
-data Expr   = Var VarName
-               | Con ConstructorName
-               | StringLit String
+data Expr   = Var  VarName
+               | Con  ConstructorName
                | App  Expr  Expr 
-               | Lam  Pat  Expr 
-             -- | Let  [Def ] Expr 
+               | Lam  Pat Expr 
+             -- | Let  Def Expr 
+               | StringLit String
                | PrimBinOp  PrimitiveOp Expr  Expr 
                | IfThenElse  Expr  Expr  Expr 
-               | Num  Integer
+               | Num Integer
+               | Double Double
                | Boolean  Bool
-               | UnaryMinus  Expr 
+             -- | UnaryMinus  Expr 
                | Not  Expr 
                deriving Show
 
-
 data Pat  = PVar  VarName
-             | PApp  ConstructorName Pat 
+             | PApp  ConstructorName Pat
              | Wildcard 
              | IntPat  Int
              | BoolPat  Bool
