@@ -66,6 +66,7 @@ semicolon = symbol ";"
 comma = symbol ","
 dot = symbol "."
 isType = symbol "::"
+arrow = symbol "->"
 
 reservedWord :: String -> ParsecT Dec String Identity ()
 reservedWord w = string w *> notFollowedBy alphaNumChar *> sc
@@ -82,20 +83,27 @@ identifier = lexeme (p >>= check)
                      then fail $ promptRed ++ show x ++ promptReset ++ " is a \ESC[1mreserved word\ESC[0m and cannot be used as an \ESC[1midentifier\ESC[0m" 
                      else return x
 
+charLit :: ParsecT Dec String Identity Expr
+charLit = do
+    void $ symbol "'" 
+    c <- L.charLiteral
+    void $ symbol "'"
+    return $ Char c
+
 stringLit :: ParsecT Dec String Identity Expr
 stringLit = stringLit >>= \str -> return $ StringLit str
     where
         stringLit = char '"' >> manyTill charLiteral (char '"')
 
-constructorName :: ParsecT Dec String Identity Expr
+constructorName :: ParsecT Dec String Identity String
 constructorName = do name@(n:_) <- identifier
                      if isUpper n 
-                        then return (Con name)
+                        then return name
                         else fail $ promptBold ++ "a constructor must begin with a capital letter" ++ promptReset 
 
 varName :: ParsecT Dec String Identity String
 varName = do name@(n:_) <- identifier
-             if isLower n
+             if isLower n 
                 then return name
                 else fail $ promptBold ++ "a variable must start with a lowercase letter" ++ promptReset
 
@@ -139,7 +147,7 @@ relation =
       
 aTerm :: ParsecT Dec String Identity Expr
 aTerm = parens aExpr
-    -- <|> varName
+    <|> Var <$> varName
     <|> Double <$> try float
     <|> Num <$> integer
 
@@ -150,7 +158,7 @@ bTerm = parens bExpr
     <|> rExpr
 
 lTerm = do
-    elems <- brackets $ aExpr `sepBy` comma
+    elems <- brackets $ termParser `sepBy` comma
     return $ foldr (\x xs -> App (App (Con "cons") x) xs) (Con "nil") elems
 
 rExpr :: ParsecT Dec String Identity Expr
@@ -177,20 +185,63 @@ ifthenelse = do
     stmt2 <- termParser
     return $ IfThenElse cond stmt1 stmt2
 
-{-lambda = do-}
-    {-void $ symbol "\\"-}
-    {-pats <- some (try pat)-}
-    {-void $ symbol "->"-}
-    {-body <- termParser-}
-    {-return $ Lam pats body-}
+lambda :: ParsecT Dec String Identity Expr
+lambda = do
+    void $ symbol "\\"
+    pats <- some pat
+    void arrow
+    body <- termParser
+    return $ Lam pats body
 
 listcons :: Expr -> Expr -> Expr
 listcons l r = App (App (Con "cons") l) r
                                  
 termParser :: ParsecT Dec String Identity Expr
-termParser = assignment <|> try ifthenelse <|> try bExpr <|> aExpr <|> lTerm
+termParser = parens termParser
+        <|> try assignment 
+        <|> try ifthenelse 
+        <|> try bExpr 
+        <|> aExpr 
+        <|> lTerm 
+        <|> stringLit 
+        <|> charLit 
+        <|> lambda
 
---pat = undefined
+--------------------
+-- PATTERN PARSER --
+--------------------
+
+{- by placing lambda expressions within a different constructor family, it is easier to "lift" them
+   into the global scope as they can be easily identified within the program's parse tree -}
+
+pat :: ParsecT Dec String Identity Pat
+pat = makeExprParser pTerms pTable <?> "pattern"
+    where pTable = [[ InfixR (symbol ":" >> return listcons')]]
+          
+pTerms = try varPat <|> try conPat <|> list <|> wildcard <|> intPat <|> boolPat <|> parens pat
+
+conPat = do
+    con <- constructorName
+    pats <- some pat
+    return $ PApp con pats
+
+varPat = PVar <$> varName 
+
+wildcard = do 
+    void $ symbol "_"
+    return Wildcard 
+
+intPat = IntPat . fromInteger <$> integer
+
+boolPat = BoolPat <$> boolLit
+    where boolLit = (reservedWord "true" >> return True)
+                <|> (reservedWord "false" >> return False)
+
+listcons' hd rst = PApp "Cons" [hd, rst]
+
+list = do
+    pats <- brackets $ pat `sepBy` comma
+    return $ foldr listcons' (PApp "Nil" []) pats
 
 -------------------------
 -- Indentation Parsers --
@@ -220,7 +271,7 @@ indentParser = whereBlock <* eof
 
 exprParser :: ParsecT Dec String Identity Expr
 -- exprParser = termParser <|> try varName <|> constructorName <|> stringLit
-exprParser = termParser <|> stringLit
+exprParser = termParser 
 
 readExpr :: String -> Expr
 readExpr input = 
