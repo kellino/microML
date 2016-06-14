@@ -22,14 +22,14 @@ data Expr   = Var  VarName
                | Con  ConstructorName
                | App  Expr  Expr 
                | Lam  Pat Expr 
-             -- | Let  Def Expr 
+               | Def Expr Expr 
                | StringLit String
                | PrimBinOp  PrimitiveOp Expr  Expr 
                | IfThenElse  Expr  Expr  Expr 
                | Num Integer
                | Double Double
                | Boolean  Bool
-             -- | UnaryMinus  Expr 
+               | Neg Expr
                | Not  Expr 
                deriving Show
 
