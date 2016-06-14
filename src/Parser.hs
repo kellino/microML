@@ -14,18 +14,32 @@ import Text.Megaparsec.String
 import Text.Megaparsec.Expr
 
 import Data.Functor.Identity (Identity)
-import Data.Scientific (Scientific)
 import Data.Char (isLower, isUpper)
+
+-------------------------
+-- PROMPT HIGHLIGHTING --
+-------------------------
 
 promptBold :: String
 promptBold = "\ESC[1m"
 
-promptUnBold :: String
-promptUnBold = "\ESC[0m"
+promptReset :: String
+promptReset = "\ESC[0m"
+
+promptRed :: String
+promptRed = "\ESC[31m"
+
+promptYellow :: String
+promptYellow = "\ESC[33m"
+
+---------------------------
+-- SYMBOLS & ATOM VALUES --
+---------------------------
 
 lineComment :: Parser ()
 lineComment = L.skipLineComment "#"
 
+-- using block comments in the style of sml
 blockComment :: Parser ()
 blockComment = L.skipBlockComment "(*" "*)"
 
@@ -36,10 +50,6 @@ scn = L.space (void spaceChar) lineComment blockComment
 -- space consumer for folds and blocks, i.e ignores newline characters
 sc :: Parser ()
 sc = L.space (void $ oneOf " \t") lineComment blockComment
-
--------------------------------
--- Symbols and Protected Ops --
--------------------------------
 
 lexeme :: Parser a -> Parser a
 lexeme = L.lexeme sc
@@ -56,54 +66,55 @@ semicolon = symbol ";"
 comma = symbol ","
 dot = symbol "."
 isType = symbol "::"
-colon = symbol ":"
 
 reservedWord :: String -> ParsecT Dec String Identity ()
 reservedWord w = string w *> notFollowedBy alphaNumChar *> sc
 
+-- a list of reserved words, not available for use as identifiers
 reserved :: [String]
-reserved = ["if", "then", "else", "true", "false", "let", "in", "and", "or", "not"]
+reserved = ["if", "then", "else", "true", "false", "let", "in", "and", "or", "not", "otherwise"]
 
 identifier :: Parser String
 identifier = lexeme (p >>= check)
     where 
         p = (:) <$> letterChar <*> many alphaNumChar
         check x = if x `elem` reserved
-                     then fail $ "keyword " ++ show x ++ " cannot be an identifier"
+                     then fail $ promptRed ++ show x ++ " is a reserved word and cannot be used as an identifier" ++ promptReset
                      else return x
 
-parseString :: ParsecT Dec String Identity Expr
-parseString = stringLit >>= \str -> return $ StringLit str
+stringLit :: ParsecT Dec String Identity Expr
+stringLit = stringLit >>= \str -> return $ StringLit str
     where
         stringLit = char '"' >> manyTill charLiteral (char '"')
-
--- generic number parser
-number :: Parser Data.Scientific.Scientific
-number = lexeme L.number
 
 constructorName :: ParsecT Dec String Identity Expr
 constructorName = do name@(n:_) <- identifier
                      if isUpper n 
                         then return (Con name)
-                        else fail $ promptBold ++ "a constructor must begin with a capital letter" ++ promptUnBold 
+                        else fail $ promptBold ++ "a constructor must begin with a capital letter" ++ promptReset 
 
-varName :: ParsecT Dec String Identity Expr
+varName :: ParsecT Dec String Identity String
 varName = do name@(n:_) <- identifier
              if isLower n
-                then return (Var name)
-                else fail $ promptBold ++ "a variable must start with a lowercase letter" ++ promptUnBold
+                then return name
+                else fail $ promptBold ++ "a variable must start with a lowercase letter" ++ promptReset
 
 ------------------------
 -- Expression Parsers -- 
 ------------------------
 
 aExpr, bExpr :: ParsecT Dec String Identity Expr
+-- expression parser for arithmetic
 aExpr = makeExprParser aTerm arithOps
+-- expression parser for boolean operations
 bExpr = makeExprParser bTerm boolOps
+-- expression parser for list operations
+lExpr = makeExprParser lTerm lOps
 
 arithOps :: [[Operator (ParsecT Dec String Identity) Expr]]
 arithOps =
-    [ [ InfixL (symbol "*" *> pure (PrimBinOp OpMul))
+    [ [ Prefix (symbol "-" >> return Neg) ]
+     ,[ InfixL (symbol "*" *> pure (PrimBinOp OpMul))
       , InfixL (symbol "-" *> pure (PrimBinOp OpSub))
       , InfixL (symbol "/" *> pure (PrimBinOp OpDiv))
       , InfixL (symbol "%" *> pure (PrimBinOp OpMod))
@@ -115,17 +126,20 @@ boolOps =
      ,[ InfixL (reservedWord "and" *> pure (PrimBinOp OpAnd))
       , InfixL (reservedWord "or"  *> pure (PrimBinOp OpOr))] ]
 
+lOps :: [[Operator (ParsecT Dec String Identity) Expr]]
+lOps = [ [InfixR (symbol ":" >> return listcons)] ]
+
 relation :: ParsecT Dec String Identity (Expr -> Expr -> Expr)
 relation = 
-          symbol "<"  *> pure (PrimBinOp OpLt)
+          symbol "<=" *> pure (PrimBinOp OpLe)
+      <|> symbol ">=" *> pure (PrimBinOp OpGe)
+      <|> symbol "<"  *> pure (PrimBinOp OpLt)
       <|> symbol ">"  *> pure (PrimBinOp OpGt)
-      <|> symbol "<=" *> pure (PrimBinOp OpLe)
-      <|> symbol ">=" *> pure (PrimBinOp OpLt)
-      <|> symbol "=?" *> pure (PrimBinOp OpEq) 
+      <|> symbol "==" *> pure (PrimBinOp OpEq)
       
 aTerm :: ParsecT Dec String Identity Expr
 aTerm = parens aExpr
-    <|> varName
+    -- <|> varName
     <|> Double <$> try float
     <|> Num <$> integer
 
@@ -135,12 +149,48 @@ bTerm = parens bExpr
     <|> (reservedWord "false" *> pure (Boolean False))
     <|> rExpr
 
+lTerm = do
+    elems <- brackets $ aExpr `sepBy` comma
+    return $ foldr (\x xs -> App (App (Con "cons") x) xs) (Con "nil") elems
+
+rExpr :: ParsecT Dec String Identity Expr
 rExpr = do
     a1 <- aExpr
     op <- relation
     a2 <- aExpr
     return $ op a1 a2
 
+assignment :: ParsecT Dec String Identity Expr
+assignment = do
+    var <- varName
+    void $ symbol ":="
+    expr <- termParser
+    return $ Def (Var var) expr
+
+ifthenelse :: ParsecT Dec String Identity Expr
+ifthenelse = do 
+    reservedWord "if"
+    cond <- termParser
+    reservedWord "then"
+    stmt1 <- termParser
+    reservedWord "else"
+    stmt2 <- termParser
+    return $ IfThenElse cond stmt1 stmt2
+
+{-lambda = do-}
+    {-void $ symbol "\\"-}
+    {-pats <- some (try pat)-}
+    {-void $ symbol "->"-}
+    {-body <- termParser-}
+    {-return $ Lam pats body-}
+
+listcons :: Expr -> Expr -> Expr
+listcons l r = App (App (Con "cons") l) r
+                                 
+termParser :: ParsecT Dec String Identity Expr
+termParser = try ifthenelse <|> try assignment <|> try bExpr <|> aExpr <|> lTerm
+
+--pat = undefined
 
 -------------------------
 -- Indentation Parsers --
@@ -169,7 +219,8 @@ indentParser = whereBlock <* eof
 -----------------
 
 exprParser :: ParsecT Dec String Identity Expr
-exprParser = try bExpr <|> aExpr <|> try varName <|> constructorName <|> parseString
+-- exprParser = termParser <|> try varName <|> constructorName <|> stringLit
+exprParser = termParser <|> stringLit
 
 readExpr :: String -> Expr
 readExpr input = 
