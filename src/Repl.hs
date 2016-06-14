@@ -3,7 +3,6 @@ module Repl where
 import Parser
 
 import Control.Monad.Trans
-import Control.Exception
 import System.Console.Repline
 import Data.List (isPrefixOf)
 import System.IO
@@ -27,14 +26,15 @@ initialize = liftIO getArt
 
 getArt :: IO ()
 getArt = do
-    file <- openFile "./utils/microArt" ReadMode
+    file <- openFile "/home/david/Programming/Haskell/microML/utils/microArt" ReadMode
     contents <- hGetContents file
     --putStr $ "Welcome to..." ++ "\n\n" ++ "\ESC[1m" ++ contents ++ "\ESC[0m"
     putStr $ "\ESC[1mWelcome to..." ++ "\n\n" ++ contents ++ "\ESC[0m"
     hClose file
 
 prompt :: String
-prompt = "\ESC[33mmicroML λ> \ESC[0m"
+--prompt = "\ESC[33mmicroML ⊦\ESC[0m "
+prompt = "\ESC[33mmicroML :→\ESC[0m "
 
 repl :: IO ()
 repl = evalRepl prompt cmd options (Word completer) initialize
