@@ -21,9 +21,10 @@ data PrimitiveOp  = OpAdd
 data Expr   = Var  VarName
                | Con  ConstructorName
                | App  Expr  Expr 
-               | Lam  Pat Expr 
+               | Lam  [Pat] Expr 
                | Def Expr Expr 
                | StringLit String
+               | Char Char
                | PrimBinOp  PrimitiveOp Expr  Expr 
                | IfThenElse  Expr  Expr  Expr 
                | Num Integer
@@ -34,7 +35,7 @@ data Expr   = Var  VarName
                deriving Show
 
 data Pat  = PVar  VarName
-             | PApp  ConstructorName Pat
+             | PApp ConstructorName [Pat]
              | Wildcard 
              | IntPat  Int
              | BoolPat  Bool
