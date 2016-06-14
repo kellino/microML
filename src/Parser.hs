@@ -32,9 +32,9 @@ promptRed = "\ESC[31m"
 promptYellow :: String
 promptYellow = "\ESC[33m"
 
----------------------------
--- SYMBOLS & ATOM VALUES --
----------------------------
+-----------------------------
+-- SYMBOLS & ATOMIC VALUES --
+-----------------------------
 
 lineComment :: Parser ()
 lineComment = L.skipLineComment "#"
@@ -62,11 +62,9 @@ symbol = L.symbol sc
 charLiteral = lexeme L.charLiteral
 parens = between (symbol "(") (symbol ")")
 brackets = between (symbol "[") (symbol "]")
-semicolon = symbol ";"
 comma = symbol ","
-dot = symbol "."
-isType = symbol "::"
 arrow = symbol "->"
+whiteSpace = lexeme spaceChar 
 
 reservedWord :: String -> ParsecT Dec String Identity ()
 reservedWord w = string w *> notFollowedBy alphaNumChar *> sc
@@ -185,16 +183,10 @@ ifthenelse = do
     stmt2 <- termParser
     return $ IfThenElse cond stmt1 stmt2
 
-lambda :: ParsecT Dec String Identity Expr
-lambda = do
-    void $ symbol "\\"
-    pats <- some pat
-    void arrow
-    body <- termParser
-    return $ Lam pats body
-
 listcons :: Expr -> Expr -> Expr
-listcons l r = App (App (Con "cons") l) r
+-- listcons l r is clearer, but ghc-mod is really bugging me to do the η reduction, so
+-- I've done it just to shut it up.
+listcons l = App (App (Con "cons") l)
                                  
 termParser :: ParsecT Dec String Identity Expr
 termParser = parens termParser
@@ -208,40 +200,74 @@ termParser = parens termParser
         <|> lambda
 
 --------------------
--- PATTERN PARSER --
+-- LAMBDA PARSER --
 --------------------
 
 {- by placing lambda expressions within a different constructor family, it is easier to "lift" them
    into the global scope as they can be easily identified within the program's parse tree -}
 
+lambda :: ParsecT Dec String Identity Expr
+lambda = do
+    void $ symbol "\\"
+    pats <- some pat
+    void arrow
+    body <- termParser
+    return $ Lam pats body
+
 pat :: ParsecT Dec String Identity Pat
 pat = makeExprParser pTerms pTable <?> "pattern"
     where pTable = [[ InfixR (symbol ":" >> return listcons')]]
           
-pTerms = try varPat <|> try conPat <|> list <|> wildcard <|> intPat <|> boolPat <|> parens pat
+          pTerms = try varPat <|> try conPat <|> list <|> wildcard <|> intPat <|> boolPat <|> parens pat
 
-conPat = do
-    con <- constructorName
-    pats <- some pat
-    return $ PApp con pats
+          conPat = do
+              con <- constructorName
+              pats <- some pat
+              return $ PApp con pats
 
-varPat = PVar <$> varName 
+          varPat = PVar <$> varName 
 
-wildcard = do 
-    void $ symbol "_"
-    return Wildcard 
+          wildcard = do 
+              void $ symbol "_"
+              return Wildcard 
 
-intPat = IntPat . fromInteger <$> integer
+          intPat = IntPat . fromInteger <$> integer
 
-boolPat = BoolPat <$> boolLit
-    where boolLit = (reservedWord "true" >> return True)
-                <|> (reservedWord "false" >> return False)
+          boolPat = BoolPat <$> boolLit
+              where boolLit = (reservedWord "true" >> return True)
+                          <|> (reservedWord "false" >> return False)
 
-listcons' hd rst = PApp "Cons" [hd, rst]
+          listcons' hd rst = PApp "Cons" [hd, rst]
 
-list = do
-    pats <- brackets $ pat `sepBy` comma
-    return $ foldr listcons' (PApp "Nil" []) pats
+          list = do
+              pats <- brackets $ pat `sepBy` comma
+              return $ foldr listcons' (PApp "Nil" []) pats
+
+---------------------------
+-- TYPE SIGNATURE PARSER --
+---------------------------
+
+typeSig :: ParsecT Dec String Identity Type
+typeSig = makeExprParser tyTerms tyTable <?> "type signature"
+    where tyTable = [[ InfixL (whiteSpace >> return TypeApp)]]
+          tyTerms = parens typeSig
+                <|> try primitiveType <|> try typeVar <|> dataType -- <|> listType
+
+          -- listType = TypeList <$> brackets typeSig
+          typeVar = TypeVar <$> varName
+          dataType = TypeData <$> constructorName
+          primitiveType = (reservedWord "Num" >> return (TypePrimitive TypeInt))
+                      <|> (reservedWord "Double" >> return (TypePrimitive TypeDouble))
+                      <|> (reservedWord "Bool" >> return (TypePrimitive TypeBool))
+
+
+typeSignature = do
+    name <- TypeVar <$> varName
+    void $ symbol "::"
+    types <- some typeSig `sepBy` symbol "->"
+    return $ TypeFunc name (concat types)
+    
+
 
 -------------------------
 -- Indentation Parsers --
@@ -270,8 +296,7 @@ indentParser = whereBlock <* eof
 -----------------
 
 exprParser :: ParsecT Dec String Identity Expr
--- exprParser = termParser <|> try varName <|> constructorName <|> stringLit
-exprParser = termParser 
+exprParser = termParser
 
 readExpr :: String -> Expr
 readExpr input = 
