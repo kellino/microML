@@ -5,7 +5,7 @@ Description:         A simple functional programming language which compiles to 
 Author:              David Kelly
 Maintainer:          dkellino@gmail.com
 
-Category:            Language
+Category:            Compiler
 
 Build-type:          Simple
 Cabal-version:       >=1.6
