@@ -79,7 +79,7 @@ identifier = lexeme (p >>= check)
     where 
         p = (:) <$> letterChar <*> many alphaNumChar
         check x = if x `elem` reserved
-                     then fail $ promptRed ++ show x ++ " is a reserved word and cannot be used as an identifier" ++ promptReset
+                     then fail $ promptRed ++ show x ++ promptReset ++ " is a \ESC[1mreserved word\ESC[0m and cannot be used as an \ESC[1midentifier\ESC[0m" 
                      else return x
 
 stringLit :: ParsecT Dec String Identity Expr
@@ -188,7 +188,7 @@ listcons :: Expr -> Expr -> Expr
 listcons l r = App (App (Con "cons") l) r
                                  
 termParser :: ParsecT Dec String Identity Expr
-termParser = try ifthenelse <|> try assignment <|> try bExpr <|> aExpr <|> lTerm
+termParser = assignment <|> try ifthenelse <|> try bExpr <|> aExpr <|> lTerm
 
 --pat = undefined
 
