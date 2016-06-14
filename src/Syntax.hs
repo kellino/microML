@@ -1,7 +1,22 @@
+-- very liberally borrowing from the github repo metafun by gergoerdi, but
+-- with a few simplifications and additions
+-- https://github.com/gergoerdi/metafun/tree/master/src
+
+
 module Syntax where
 
 type ConstructorName = String
 type VarName = String
+
+data TypePrimitive = TypeInt | TypeDouble | TypeBool deriving (Eq, Show)
+
+data Type = TypeVar String
+          | TypeFunc Type [Type]
+          | TypeApp Type Type
+          | TypeData String
+          | TypeList [Type]
+          | TypePrimitive TypePrimitive
+          deriving (Eq, Show)
 
 data PrimitiveOp  = OpAdd
                   | OpSub
@@ -18,25 +33,25 @@ data PrimitiveOp  = OpAdd
                   | OpGt
                   deriving Show                           
                            
-data Expr   = Var  VarName
-               | Con  ConstructorName
-               | App  Expr  Expr 
-               | Lam  [Pat] Expr 
-               | Def Expr Expr 
-               | StringLit String
-               | Char Char
-               | PrimBinOp  PrimitiveOp Expr  Expr 
-               | IfThenElse  Expr  Expr  Expr 
-               | Num Integer
-               | Double Double
-               | Boolean  Bool
-               | Neg Expr
-               | Not  Expr 
-               deriving Show
+data Expr = Var VarName
+          | Con  ConstructorName
+          | App  Expr  Expr 
+          | Lam  [Pat] Expr 
+          | Def Expr Expr 
+          | StringLit String
+          | Char Char
+          | PrimBinOp  PrimitiveOp Expr  Expr 
+          | IfThenElse  Expr  Expr  Expr 
+          | Num Integer
+          | Double Double
+          | Boolean  Bool
+          | Neg Expr
+          | Not  Expr 
+          deriving Show
 
-data Pat  = PVar  VarName
-             | PApp ConstructorName [Pat]
-             | Wildcard 
-             | IntPat  Int
-             | BoolPat  Bool
-             deriving Show
+data Pat = PVar VarName
+         | PApp ConstructorName [Pat]
+         | Wildcard 
+         | IntPat  Int
+         | BoolPat  Bool
+         deriving Show
