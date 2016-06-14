@@ -19,6 +19,8 @@ Executable microML
                      megaparsec,
                      repline,
                      mtl,
-                     scientific
+                     scientific,
+                     hspec-expectations,
+                     hspec-megaparsec
 
   ghc-options:       -Wall -O2 -fwarn-tabs -fno-warn-name-shadowing -fno-warn-missing-signatures -fno-warn-incomplete-patterns -fno-warn-unused-binds
