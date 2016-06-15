@@ -70,8 +70,9 @@ reservedWord :: String -> ParsecT Dec String Identity ()
 reservedWord w = string w *> notFollowedBy alphaNumChar *> sc
 
 -- a list of reserved words, not available for use as identifiers
+-- use Miranda style where blocks rather than let - in expressions. 
 reserved :: [String]
-reserved = ["if", "then", "else", "true", "false", "let", "in", "and", "or", "not", "otherwise"]
+reserved = ["if", "then", "else", "true", "false", "and", "or", "not", "otherwise", "where"]
 
 identifier :: Parser String
 identifier = lexeme (p >>= check)
@@ -250,24 +251,32 @@ pat = makeExprParser pTerms pTable <?> "pattern"
 typeSig :: ParsecT Dec String Identity Type
 typeSig = makeExprParser tyTerms tyTable <?> "type signature"
     where tyTable = [[ InfixL (whiteSpace >> return TypeApp)]]
-          tyTerms = parens typeSig
-                <|> try primitiveType <|> try typeVar <|> dataType -- <|> listType
 
-          -- listType = TypeList <$> brackets typeSig
+          tyTerms = try primitiveType 
+                <|> try typeVar 
+                <|> dataType 
+                <|> listType 
+                <|> curriedType
+
+          listType = TypeList <$> brackets typeSig
           typeVar = TypeVar <$> varName
           dataType = TypeData <$> constructorName
           primitiveType = (reservedWord "Num" >> return (TypePrimitive TypeInt))
                       <|> (reservedWord "Double" >> return (TypePrimitive TypeDouble))
                       <|> (reservedWord "Bool" >> return (TypePrimitive TypeBool))
+          curriedType = do
+              void $ symbol "("
+              expr <- some typeSig `sepBy` arrow
+              void $ symbol ")"
+              return $ TypeCurry (concat expr)
 
 
+typeSignature :: ParsecT Dec String Identity Type
 typeSignature = do
     name <- TypeVar <$> varName
     void $ symbol "::"
-    types <- some typeSig `sepBy` symbol "->"
+    types <- some typeSig `sepBy` arrow
     return $ TypeFunc name (concat types)
-    
-
 
 -------------------------
 -- Indentation Parsers --
