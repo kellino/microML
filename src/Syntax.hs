@@ -48,6 +48,7 @@ data Expr = Var VarName
           | Boolean  Bool
           | Neg Expr
           | Not  Expr 
+          | TypeSig Type [Type]
           deriving Show
 
 data Pat = PVar VarName

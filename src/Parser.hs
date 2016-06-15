@@ -270,13 +270,12 @@ typeSig = makeExprParser tyTerms tyTable <?> "type signature"
               void $ symbol ")"
               return $ TypeCurry (concat expr)
 
-
-typeSignature :: ParsecT Dec String Identity Type
-typeSignature = do
+typeParser :: ParsecT Dec String Identity Expr
+typeParser = do
     name <- TypeVar <$> varName
     void $ symbol "::"
     types <- some typeSig `sepBy` arrow
-    return $ TypeFunc name (concat types)
+    return $ TypeSig name (concat types)
 
 -------------------------
 -- Indentation Parsers --
@@ -305,7 +304,7 @@ indentParser = whereBlock <* eof
 -----------------
 
 exprParser :: ParsecT Dec String Identity Expr
-exprParser = termParser
+exprParser = try typeParser <|> termParser
 
 readExpr :: String -> Expr
 readExpr input = 
