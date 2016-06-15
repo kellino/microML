@@ -13,7 +13,7 @@ main = do
     if null args
        then repl
        else do 
-           res <- parseFromFile exprParser (head args) 
+           res <- parseFromFile exprParser (head args)
            case res of
              Left err -> print err
              Right xs -> print xs
