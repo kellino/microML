@@ -14,7 +14,8 @@ data Type = TypeVar String
           | TypeFunc Type [Type]
           | TypeApp Type Type
           | TypeData String
-          | TypeList [Type]
+          | TypeList Type
+          | TypeCurry [Type]
           | TypePrimitive TypePrimitive
           deriving (Eq, Show)
 
@@ -55,3 +56,4 @@ data Pat = PVar VarName
          | IntPat  Int
          | BoolPat  Bool
          deriving Show
+
