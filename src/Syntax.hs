@@ -10,6 +10,8 @@ type VarName = String
 
 data TypePrimitive = TypeInt | TypeDouble | TypeBool deriving (Eq, Show)
 
+data TypeDec = TypeAlias String [String] String deriving (Show)
+
 data Type = TypeVar String
           | TypeFunc Type [Type]
           | TypeApp Type Type
@@ -49,6 +51,7 @@ data Expr = Var VarName
           | Neg Expr
           | Not  Expr 
           | TypeSig Type [Type]
+          | Tuple [Expr] 
           deriving Show
 
 data Pat = PVar VarName

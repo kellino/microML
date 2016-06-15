@@ -64,6 +64,7 @@ parens = between (symbol "(") (symbol ")")
 brackets = between (symbol "[") (symbol "]")
 comma = symbol ","
 arrow = symbol "->"
+isA = symbol "::="
 whiteSpace = lexeme spaceChar 
 
 reservedWord :: String -> ParsecT Dec String Identity ()
@@ -72,7 +73,7 @@ reservedWord w = string w *> notFollowedBy alphaNumChar *> sc
 -- a list of reserved words, not available for use as identifiers
 -- use Miranda style where blocks rather than let - in expressions. 
 reserved :: [String]
-reserved = ["if", "then", "else", "true", "false", "and", "or", "not", "otherwise", "where"]
+reserved = ["if", "then", "else", "true", "false", "and", "or", "not", "otherwise", "where", "alias"]
 
 identifier :: Parser String
 identifier = lexeme (p >>= check)
@@ -188,9 +189,17 @@ listcons :: Expr -> Expr -> Expr
 -- listcons l r is clearer, but ghc-mod is really bugging me to do the η reduction, so
 -- I've done it just to shut it up.
 listcons l = App (App (Con "cons") l)
+
+tuple :: ParsecT Dec String Identity Expr
+tuple = do
+    void $ symbol "("
+    itms <- many termParser `sepBy` comma
+    void $ symbol ")"
+    return $ Tuple (concat itms)
                                  
 termParser :: ParsecT Dec String Identity Expr
-termParser = parens termParser
+termParser = try tuple
+        <|> parens termParser
         <|> try assignment 
         <|> try ifthenelse 
         <|> try bExpr 
@@ -276,6 +285,20 @@ typeParser = do
     void $ symbol "::"
     types <- some typeSig `sepBy` arrow
     return $ TypeSig name (concat types)
+
+----------------
+-- ADT Parser --
+----------------
+
+typeDec = typeAlias <?> "type declaration"
+    where
+        typeAlias = do
+            void $ reservedWord "alias"
+            con <- constructorName
+            params <- many varName
+            void isA
+            ty <- constructorName
+            return $ TypeAlias con params ty
 
 -------------------------
 -- Indentation Parsers --
