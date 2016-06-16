@@ -4,6 +4,7 @@ import Repl
 import Parser
 
 import System.Environment (getArgs)
+import Text.Megaparsec
 
 -- interim version for testing. Possibly to be rewritten with System.Console.GetOpt
 
@@ -13,7 +14,7 @@ main = do
     if null args
        then repl
        else do 
-           res <- parseFromFile exprParser (head args)
+           res <- parseFromFile parseWhole (head args)
            case res of
-             Left err -> print err
+             Left err -> print $ parseErrorPretty err
              Right xs -> print xs
