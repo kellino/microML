@@ -7,10 +7,12 @@ module Syntax where
 
 type ConstructorName = String
 type VarName = String
+type Dataname = String
+type ADTParam = String
 
 data TypePrimitive = TypeInt | TypeDouble | TypeBool deriving (Eq, Show)
 
-data TypeDec = TypeAlias String [String] String deriving (Show)
+data TypeDec = TypeAlias String [String] String deriving Show
 
 data Type = TypeVar String
           | TypeFunc Type [Type]
@@ -52,6 +54,9 @@ data Expr = Var VarName
           | Not  Expr 
           | TypeSig Type [Type]
           | Tuple [Expr] 
+          | ADT Expr Expr [Expr]
+          | DataCon Expr Expr
+          | TypeDecl TypeDec
           deriving Show
 
 data Pat = PVar VarName
