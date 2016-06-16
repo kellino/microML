@@ -1,9 +1,9 @@
 {-# LANGUAGE TupleSections #-}
 
 module Parser (
-        --exprParser
-        microMLParser
-      , readExpr
+        readExpr
+      , parseWhole
+      , exprParser
       , parseFromFile
         ) where
 
@@ -291,8 +291,9 @@ typeParser = do
 -- ADT Parser --
 ----------------
 
-typeDec = typeAlias <?> "type declaration"
+newTypes = adtDecl <?> "type declaration"
     where
+        typeAlias :: ParsecT Dec String Identity TypeDec
         typeAlias = do
             void $ reservedWord "alias"
             con <- constructorName
@@ -300,6 +301,24 @@ typeDec = typeAlias <?> "type declaration"
             void isA
             ty <- constructorName
             return $ TypeAlias con params ty
+
+
+adtDecl :: ParsecT Dec String Identity Expr
+adtDecl = do
+    newCon <- Con <$> constructorName
+    param <- Var <$> option "" varName 
+    void $ symbol "::="     -- same as Miranda
+    cons <- many dataCon `sepBy` symbol "|"
+    return $ ADT newCon param (concat cons)
+
+dataCon :: ParsecT Dec String Identity Expr
+dataCon = parens dataCon' <|> dataCon'
+
+dataCon' :: ParsecT Dec String Identity Expr
+dataCon' = do
+    newCon <- Con <$> constructorName
+    param <- Var <$> option "" varName
+    return $ DataCon newCon param
 
 -------------------------
 -- Indentation Parsers --
@@ -328,13 +347,14 @@ indentParser = whereBlock <* eof
 -----------------
 
 exprParser :: ParsecT Dec String Identity Expr
-exprParser = try typeParser <|> termParser
+exprParser = try newTypes <|> termParser
 
 readExpr :: String -> Expr
 readExpr input = 
-    case parse exprParser "microML" input of
-      Left err -> StringLit $ "No match: " ++ show err
+    case parse exprParser "microml" input of
+      Left err -> StringLit $ "no match: " ++ show (parseErrorPretty err)
       Right res -> res
 
-parseFromFile :: Parsec e String a -> String -> IO (Either (ParseError Char e) a)
+parseWhole = whiteSpace *> many exprParser <* eol
+
 parseFromFile p file = runParser p file <$> readFile file
