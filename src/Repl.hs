@@ -23,12 +23,10 @@ options = []
 initialize :: Repl ()
 initialize = liftIO getArt
 
-
 getArt :: IO ()
 getArt = do
     file <- openFile "/home/david/Programming/Haskell/microML/utils/microArt" ReadMode
     contents <- hGetContents file
-    --putStr $ "Welcome to..." ++ "\n\n" ++ "\ESC[1m" ++ contents ++ "\ESC[0m"
     putStr $ "\ESC[1mWelcome to..." ++ "\n\n" ++ contents ++ "\ESC[0m"
     hClose file
 
