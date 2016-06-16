@@ -12,7 +12,7 @@ type ADTParam = String
 
 data TypePrimitive = TypeInt | TypeDouble | TypeBool deriving (Eq, Show)
 
-data TypeDec = TypeAlias String [String] String deriving Show
+data TypeDec = TypeAlias String String String deriving Show
 
 data Type = TypeVar String
           | TypeFunc Type [Type]
@@ -45,18 +45,18 @@ data Expr = Var VarName
           | Def Expr Expr 
           | StringLit String
           | Char Char
-          | PrimBinOp  PrimitiveOp Expr  Expr 
-          | IfThenElse  Expr  Expr  Expr 
+          | PrimBinOp PrimitiveOp Expr  Expr 
+          | IfThenElse Expr Expr Expr 
           | Num Integer
           | Double Double
           | Boolean  Bool
           | Neg Expr
-          | Not  Expr 
+          | Not Expr 
           | TypeSig Type [Type]
           | Tuple [Expr] 
           | ADT Expr Expr [Expr]
           | DataCon Expr Expr
-          | TypeDecl TypeDec
+          | TypeDec TypeDec
           deriving Show
 
 data Pat = PVar VarName

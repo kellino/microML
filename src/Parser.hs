@@ -66,6 +66,7 @@ brackets = between (symbol "[") (symbol "]")
 comma = symbol ","
 arrow = symbol "->"
 isA = symbol "::="
+hasType = symbol "::"
 whiteSpace = lexeme spaceChar 
 
 reservedWord :: String -> ParsecT Dec String Identity ()
@@ -283,7 +284,7 @@ typeSig = makeExprParser tyTerms tyTable <?> "type signature"
 typeParser :: ParsecT Dec String Identity Expr
 typeParser = do
     name <- TypeVar <$> varName
-    void $ symbol "::"
+    void hasType
     types <- some typeSig `sepBy` arrow
     return $ TypeSig name (concat types)
 
@@ -291,23 +292,22 @@ typeParser = do
 -- ADT Parser --
 ----------------
 
-newTypes = adtDecl <?> "type declaration"
-    where
-        typeAlias :: ParsecT Dec String Identity TypeDec
-        typeAlias = do
-            void $ reservedWord "alias"
-            con <- constructorName
-            params <- many varName
-            void isA
-            ty <- constructorName
-            return $ TypeAlias con params ty
+newTypes = try typeAlias <|> try adtDecl <|> typeParser <?> "type declaration"
 
+typeAlias :: ParsecT Dec String Identity Expr
+typeAlias = do
+    void $ reservedWord "alias"
+    con <- constructorName
+    params <- option "" varName
+    void $ symbol ":="
+    ty <- constructorName
+    return $ TypeDec $ TypeAlias con params ty
 
 adtDecl :: ParsecT Dec String Identity Expr
 adtDecl = do
     newCon <- Con <$> constructorName
     param <- Var <$> option "" varName 
-    void $ symbol "::="     -- same as Miranda
+    void $ symbol "::=" 
     cons <- many dataCon `sepBy` symbol "|"
     return $ ADT newCon param (concat cons)
 
