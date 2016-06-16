@@ -1,16 +1,17 @@
 module Repl where
 
-import Parser
+import Eval
 
 import Control.Monad.Trans
 import System.Console.Repline
 import Data.List (isPrefixOf)
 import System.IO
 
+
 type Repl a = HaskelineT IO a
 
 cmd :: String -> Repl ()
-cmd input = liftIO $ print $ show . readExpr $ input
+cmd input = liftIO  $ print $ show . process $ input
 
 completer :: Monad m => String -> m [String]
 completer n = do
