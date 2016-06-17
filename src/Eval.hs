@@ -42,7 +42,6 @@ runParse_ input = case readExpr input of
                     Left err -> Left $ MLError $ parseErrorPretty err
                     Right val -> Right val
 
-
 ----------------
 -- EVALUATION --
 ----------------
@@ -77,6 +76,7 @@ eval (PrimBinOp OpMod unev1 unev2) = do
     evaled1  <- eval unev1
     evaled2 <- eval unev2
     evaled1 `mod'` evaled2
+eval _ = throwError $ MLError "not yet supported"
 
 add :: Expr -> Expr -> Expr
 add (Number a) (Number b) = Number $ a + b
