@@ -42,6 +42,11 @@ runParse_ input = case readExpr input of
                     Left err -> Left $ MLError $ parseErrorPretty err
                     Right val -> Right val
 
+
+----------------
+-- EVALUATION --
+----------------
+
 eval :: Expr -> Eval Expr
 eval (Con name) = return $ Con name
 eval (Number i) = return $ Number i
@@ -49,6 +54,7 @@ eval (Double i) = return $ Double i
 eval (StringLit str) = return $ StringLit str
 eval (Boolean b) = return $ Boolean b
 eval (Char c) = return $ Char c
+--eval (Def (Var x) exp) = return $ setVar x exp
 -- arithmetic
 -- incredibly ugly code here, but don't yet know how to make this more generic
 eval (PrimBinOp OpAdd unev1 unev2) = do
