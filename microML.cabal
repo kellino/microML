@@ -16,10 +16,11 @@ Executable microML
   
   -- Packages needed in order to build this package.
   Build-depends:     base >= 3,
-                     megaparsec,
-                     repline,
+                     megaparsec >= 5.0.0,
+                     repline >= 0.1.5.0,
                      mtl,
                      scientific,
+                     containers,
                      hspec-expectations,
                      hspec-megaparsec
 
