@@ -11,7 +11,8 @@ import System.IO
 type Repl a = HaskelineT IO a
 
 cmd :: String -> Repl ()
-cmd input = liftIO  $ print $ show . process $ input
+--cmd input = liftIO  $ print $ show . process $ input
+cmd input = liftIO $ process input
 
 completer :: Monad m => String -> m [String]
 completer n = do

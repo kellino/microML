@@ -349,11 +349,13 @@ indentParser = whereBlock <* eof
 exprParser :: ParsecT Dec String Identity Expr
 exprParser = try newTypes <|> termParser
 
-readExpr :: String -> Expr
-readExpr input = 
-    case parse exprParser "microml" input of
-      Left err -> StringLit $ "no match: " ++ show (parseErrorPretty err)
-      Right res -> res
+readExpr = parse exprParser "microML"
+
+{-readExpr :: String -> Expr-}
+{-readExpr input = -}
+    {-case parse exprParser "microml" input of-}
+      {-Left err -> StringLit $ "no match: " ++ show (parseErrorPretty err)-}
+      {-Right res -> res-}
 
 parseWhole = whiteSpace *> many exprParser <* eol
 
