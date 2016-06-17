@@ -10,9 +10,9 @@ type VarName = String
 type Dataname = String
 type ADTParam = String
 
-data TypePrimitive = TypeInt | TypeDouble | TypeBool deriving (Eq, Show)
+data TypePrimitive = TypeInt | TypeDouble | TypeBool deriving (Eq, Ord, Show)
 
-data TypeDec = TypeAlias String String String deriving Show
+data TypeDec = TypeAlias String String String deriving (Eq, Ord, Show)
 
 data Type = TypeVar String
           | TypeFunc Type [Type]
@@ -21,7 +21,7 @@ data Type = TypeVar String
           | TypeList Type
           | TypeCurry [Type]
           | TypePrimitive TypePrimitive
-          deriving (Eq, Show)
+          deriving (Eq, Ord, Show)
 
 data PrimitiveOp  = OpAdd
                   | OpSub
@@ -36,7 +36,7 @@ data PrimitiveOp  = OpAdd
                   | OpLt
                   | OpGe
                   | OpGt
-                  deriving Show                           
+                  deriving (Eq, Ord, Show)                          
                            
 data Expr = Var VarName
           | Con  ConstructorName
@@ -57,11 +57,11 @@ data Expr = Var VarName
           | ADT Expr Expr [Expr]
           | DataCon Expr Expr
           | TypeDec TypeDec
-          deriving Show
+          deriving (Eq, Ord, Show)
 
 data Pat = PVar VarName
          | PApp ConstructorName [Pat]
          | Wildcard 
          | IntPat  Int
          | BoolPat  Bool
-         deriving Show
+         deriving (Eq, Ord, Show)
