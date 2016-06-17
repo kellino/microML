@@ -11,8 +11,9 @@ import Syntax
 import Control.Monad.Except
 import Control.Monad.Reader
 import qualified Data.Map as Map
+import Text.Megaparsec.Error (parseErrorPretty)
 
-data MLError = Default String deriving Show
+data MLError = MLError String deriving Show
 
 newtype Eval a = Eval { unEval :: ReaderT SymTable (ExceptT MLError IO) a }
     deriving (Monad, Functor, Applicative, MonadReader SymTable, MonadError MLError, MonadIO)
@@ -26,7 +27,7 @@ runAppT code action = do
                          Left b  -> Left b
                          Right a -> Right a
 
-testEnv = Map.fromList [("x", Num 42)]
+testEnv = Map.fromList [("x", Number 42)]
 
 process :: String -> IO ()
 process input = do 
@@ -38,16 +39,63 @@ textToEval input = either throwError eval (runParse_ input)
 
 runParse_ :: String -> Either MLError Expr
 runParse_ input = case readExpr input of
-                    Left err -> Left $ Default $ show err
+                    Left err -> Left $ MLError $ parseErrorPretty err
                     Right val -> Right val
 
 eval :: Expr -> Eval Expr
 eval (Con name) = return $ Con name
-eval (Num i) = return $ Num i
+eval (Number i) = return $ Number i
 eval (Double i) = return $ Double i
 eval (StringLit str) = return $ StringLit str
 eval (Boolean b) = return $ Boolean b
 eval (Char c) = return $ Char c
--- simple arithmetic test
-eval (PrimBinOp OpAdd (Num a) (Num b)) = return $ Num (a + b)
-eval (PrimBinOp OpAdd (Double a) (Double b)) = return $ Double (a + b)
+-- arithmetic
+-- incredibly ugly code here, but don't yet know how to make this more generic
+eval (PrimBinOp OpAdd unev1 unev2) = do
+    evaled1 <- eval unev1
+    evaled2 <- eval unev2
+    return $ evaled1 `add` evaled2
+eval (PrimBinOp OpSub unev1 unev2) = do
+    evaled1  <- eval unev1
+    evaled2 <- eval unev2
+    return $ evaled1 `sub` evaled2
+eval (PrimBinOp OpMul unev1 unev2) = do
+    evaled1  <- eval unev1
+    evaled2 <- eval unev2
+    return $ evaled1 `mul` evaled2
+eval (PrimBinOp OpDiv unev1 unev2) = do
+    evaled1  <- eval unev1
+    evaled2 <- eval unev2
+    return $ evaled1 `div'` evaled2
+eval (PrimBinOp OpMod unev1 unev2) = do
+    evaled1  <- eval unev1
+    evaled2 <- eval unev2
+    return $ evaled1 `mod'` evaled2
+
+add :: Expr -> Expr -> Expr
+add (Number a) (Number b) = Number $ a + b
+add (Double a) (Double b) = Double $ a + b
+add (Number a) (Double b) = Double $ realToFrac a + b
+add (Double a) (Number b) = Double $ a + realToFrac b
+
+sub :: Expr -> Expr -> Expr
+sub (Number a) (Number b) = Number $ a - b
+sub (Double a) (Double b) = Double $ a - b
+sub (Number a) (Double b) = Double $ realToFrac a - b
+sub (Double a) (Number b) = Double $ a - realToFrac b
+
+mul :: Expr -> Expr -> Expr
+mul (Number a) (Number b) = Number $ a * b
+mul (Double a) (Double b) = Double $ a * b
+mul (Number a) (Double b) = Double $ realToFrac a * b
+mul (Double a) (Number b) = Double $ a * realToFrac b
+
+-- simplistic handling of division
+div' :: Expr -> Expr -> Expr
+div' (Number a) (Number b) = Double $ realToFrac a / realToFrac b
+div' (Double a) (Double b) = Double $ a / b
+div' (Number a) (Double b) = Double $ realToFrac a / b
+div' (Double a) (Number b) = Double $ a / realToFrac b
+
+mod' :: Expr -> Expr -> Expr
+mod' (Number a) (Number b) = Number $ a `mod` b
