@@ -13,7 +13,7 @@ import Control.Monad.Reader
 import qualified Data.Map as Map
 import Text.Megaparsec.Error (parseErrorPretty)
 
-data MLError = MLError String deriving Show
+data MLError = MLError String | MathsError String deriving Show
 
 newtype Eval a = Eval { unEval :: ReaderT SymTable (ExceptT MLError IO) a }
     deriving (Monad, Functor, Applicative, MonadReader SymTable, MonadError MLError, MonadIO)
@@ -66,11 +66,11 @@ eval (PrimBinOp OpMul unev1 unev2) = do
 eval (PrimBinOp OpDiv unev1 unev2) = do
     evaled1  <- eval unev1
     evaled2 <- eval unev2
-    return $ evaled1 `div'` evaled2
+    evaled1 `div'` evaled2
 eval (PrimBinOp OpMod unev1 unev2) = do
     evaled1  <- eval unev1
     evaled2 <- eval unev2
-    return $ evaled1 `mod'` evaled2
+    evaled1 `mod'` evaled2
 
 add :: Expr -> Expr -> Expr
 add (Number a) (Number b) = Number $ a + b
@@ -91,11 +91,13 @@ mul (Number a) (Double b) = Double $ realToFrac a * b
 mul (Double a) (Number b) = Double $ a * realToFrac b
 
 -- simplistic handling of division
-div' :: Expr -> Expr -> Expr
-div' (Number a) (Number b) = Double $ realToFrac a / realToFrac b
-div' (Double a) (Double b) = Double $ a / b
-div' (Number a) (Double b) = Double $ realToFrac a / b
-div' (Double a) (Number b) = Double $ a / realToFrac b
+div' :: Expr -> Expr -> Eval Expr
+div' (Number a) (Number b) = return $ Double $ realToFrac a / realToFrac b
+div' (Double a) (Double b) = return $ Double $ a / b
+div' (Number a) (Double b) = return $ Double $ realToFrac a / b
+div' (Double a) (Number b) = return $ Double $ a / realToFrac b
+div' _ _ = throwError $ MathsError "are you sure you've only entered numbers?"
 
-mod' :: Expr -> Expr -> Expr
-mod' (Number a) (Number b) = Number $ a `mod` b
+mod' :: Expr -> Expr -> Eval Expr
+mod' (Number a) (Number b) = return $ Number $ a `mod` b
+mod' _ _ = throwError $ MathsError "the modulo operator only works on whole numbers"
