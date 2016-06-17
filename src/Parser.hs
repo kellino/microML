@@ -151,7 +151,7 @@ aTerm :: ParsecT Dec String Identity Expr
 aTerm = parens aExpr
     <|> Var <$> varName
     <|> Double <$> try float
-    <|> Num <$> integer
+    <|> Number <$> integer
 
 bTerm :: ParsecT Dec String Identity Expr
 bTerm = parens bExpr
@@ -195,13 +195,12 @@ listcons l = App (App (Con "cons") l)
 tuple :: ParsecT Dec String Identity Expr
 tuple = do
     void $ symbol "("
-    itms <- many termParser `sepBy` comma
+    itms <- some (bExpr <|> aExpr <|> stringLit <|> charLit) `sepBy` comma
     void $ symbol ")"
     return $ Tuple (concat itms)
                                  
 termParser :: ParsecT Dec String Identity Expr
-termParser = try tuple
-        <|> parens termParser
+termParser = try tuple -- not working, but don't know why
         <|> try assignment 
         <|> try ifthenelse 
         <|> try bExpr 
@@ -210,6 +209,7 @@ termParser = try tuple
         <|> stringLit 
         <|> charLit 
         <|> lambda
+        <|> parens termParser
 
 --------------------
 -- LAMBDA PARSER --
@@ -272,7 +272,7 @@ typeSig = makeExprParser tyTerms tyTable <?> "type signature"
           listType = TypeList <$> brackets typeSig
           typeVar = TypeVar <$> varName
           dataType = TypeData <$> constructorName
-          primitiveType = (reservedWord "Num" >> return (TypePrimitive TypeInt))
+          primitiveType = (reservedWord "Number" >> return (TypePrimitive TypeInt))
                       <|> (reservedWord "Double" >> return (TypePrimitive TypeDouble))
                       <|> (reservedWord "Bool" >> return (TypePrimitive TypeBool))
           curriedType = do
@@ -350,12 +350,6 @@ exprParser :: ParsecT Dec String Identity Expr
 exprParser = try newTypes <|> termParser
 
 readExpr = parse exprParser "microML"
-
-{-readExpr :: String -> Expr-}
-{-readExpr input = -}
-    {-case parse exprParser "microml" input of-}
-      {-Left err -> StringLit $ "no match: " ++ show (parseErrorPretty err)-}
-      {-Right res -> res-}
 
 parseWhole = whiteSpace *> many exprParser <* eol
 

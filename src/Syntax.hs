@@ -47,7 +47,7 @@ data Expr = Var VarName
           | Char Char
           | PrimBinOp PrimitiveOp Expr  Expr 
           | IfThenElse Expr Expr Expr 
-          | Num Integer
+          | Number Integer
           | Double Double
           | Boolean  Bool
           | Neg Expr
@@ -65,4 +65,3 @@ data Pat = PVar VarName
          | IntPat  Int
          | BoolPat  Bool
          deriving Show
-
