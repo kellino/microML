@@ -53,7 +53,9 @@ eval (Double i) = return $ Double i
 eval (StringLit str) = return $ StringLit str
 eval (Boolean b) = return $ Boolean b
 eval (Char c) = return $ Char c
---eval (Def (Var x) exp) = return $ setVar x exp
+eval (PrimBinOp OpOr (Boolean a) (Boolean b)) = return $ Boolean $ a || b
+eval (PrimBinOp OpAnd (Boolean a) (Boolean b)) = return $ Boolean $ a && b
+eval (PrimBinOp OpEq a b) = return $ Boolean $ a == b
 -- arithmetic
 -- incredibly ugly code here, but don't yet know how to make this more generic
 eval (PrimBinOp OpAdd unev1 unev2) = do
