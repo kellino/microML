@@ -16,7 +16,7 @@ cmd input = liftIO $ process input
 
 completer :: Monad m => String -> m [String]
 completer n = do
-    let comps = ["map", "filter", "foldl", "foldr"]
+    let comps = ["true", "false", "and", "or", "not", "otherwise"]
     return $ filter (isPrefixOf n) comps
 
 options :: [(String, [String] -> Repl ())]
