@@ -28,6 +28,7 @@ data PrimitiveOp  = OpAdd
                   | OpMul
                   | OpDiv
                   | OpMod
+                  | OpExp
                   | OpOr
                   | OpAnd
                   | OpEq

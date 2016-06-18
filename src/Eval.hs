@@ -10,10 +10,10 @@ import Parser
 import Syntax
 import Control.Monad.Except
 import Control.Monad.Reader
-import qualified Data.Map as Map
+import qualified Data.Map.Strict as Map
 import Text.Megaparsec.Error (parseErrorPretty)
 
-data MLError = MLError String | MathsError String deriving Show
+data MLError = MLError String | MathsError String | NotSet String deriving Show
 
 newtype Eval a = Eval { unEval :: ReaderT SymTable (ExceptT MLError IO) a }
     deriving (Monad, Functor, Applicative, MonadReader SymTable, MonadError MLError, MonadIO)
@@ -42,22 +42,46 @@ runParse_ input = case readExpr input of
                     Left err -> Left $ MLError $ parseErrorPretty err
                     Right val -> Right val
 
+setLocal atom exp env = local (const $ Map.insert atom exp env) (eval exp)
+
+defineVar :: Expr -> Eval Expr
+defineVar (Def (Var x) exp) = do
+    env <- ask
+    setLocal x exp env
+defineVar _ = throwError $ MLError "can only bind to Atom type valaues"
+
+getVar :: Expr -> Eval Expr
+getVar (Var x) = do
+    env <- ask
+    case Map.lookup x env of
+      Just y -> return y
+      Nothing -> throwError $ NotSet "this variable has not yet been set"
+
 ----------------
 -- EVALUATION --
 ----------------
 
 eval :: Expr -> Eval Expr
+-- primitives
+eval exp@(Var _) = getVar exp
 eval (Con name) = return $ Con name
 eval (Number i) = return $ Number i
 eval (Double i) = return $ Double i
 eval (StringLit str) = return $ StringLit str
 eval (Boolean b) = return $ Boolean b
 eval (Char c) = return $ Char c
+eval (Tuple xs) = return $ Tuple xs
+-- boolean operators
+eval (Not x) = return $ Not x
 eval (PrimBinOp OpOr (Boolean a) (Boolean b)) = return $ Boolean $ a || b
 eval (PrimBinOp OpAnd (Boolean a) (Boolean b)) = return $ Boolean $ a && b
-eval (PrimBinOp OpEq a b) = return $ Boolean $ a == b
--- arithmetic
--- incredibly ugly code here, but don't yet know how to make this more generic
+eval (PrimBinOp OpEq a b) = do
+    a' <- eval a
+    b' <- eval b
+    return $ Boolean $ a' == b' 
+eval exp@(Def _ _) = defineVar exp
+
+-- arithmetic: incredibly ugly code here, but don't yet know how to make this more generic
 eval (PrimBinOp OpAdd unev1 unev2) = do
     evaled1 <- eval unev1
     evaled2 <- eval unev2
@@ -78,6 +102,11 @@ eval (PrimBinOp OpMod unev1 unev2) = do
     evaled1  <- eval unev1
     evaled2 <- eval unev2
     evaled1 `mod'` evaled2
+eval (PrimBinOp OpExp unev1 unev2) = do
+    evaled1 <- eval unev1
+    evaled2 <- eval unev2
+    evaled1 `exp'` evaled2
+
 eval _ = throwError $ MLError "not yet supported"
 
 add :: Expr -> Expr -> Expr
@@ -109,3 +138,9 @@ div' _ _ = throwError $ MathsError "are you sure you've only entered numbers?"
 mod' :: Expr -> Expr -> Eval Expr
 mod' (Number a) (Number b) = return $ Number $ a `mod` b
 mod' _ _ = throwError $ MathsError "the modulo operator only works on whole numbers"
+
+exp' :: Expr -> Expr -> Eval Expr
+exp' (Number a) (Number b) = return $ Number $ a^b
+exp' (Number a) (Double b) = return $ Double $ realToFrac a**b
+exp' (Double a) (Number b) = return $ Double $ a ^ b
+exp' (Double a) (Double b) = return $ Double $ a**b

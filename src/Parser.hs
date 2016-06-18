@@ -128,7 +128,8 @@ arithOps =
       , InfixL (symbol "-" *> pure (PrimBinOp OpSub))
       , InfixL (symbol "/" *> pure (PrimBinOp OpDiv))
       , InfixL (symbol "%" *> pure (PrimBinOp OpMod))
-      , InfixL (symbol "+" *> pure (PrimBinOp OpAdd))] ]
+      , InfixL (symbol "+" *> pure (PrimBinOp OpAdd))
+      , InfixL (symbol "^" *> pure (PrimBinOp OpExp))] ]
 
 boolOps :: [[Operator (ParsecT Dec String Identity) Expr]]
 boolOps =
@@ -195,13 +196,13 @@ listcons l = App (App (Con "cons") l)
 tuple :: ParsecT Dec String Identity Expr
 tuple = do
     void $ symbol "("
-    itms <- some (bExpr <|> aExpr <|> stringLit <|> charLit) `sepBy` comma
+    itms <- some (bExpr <|> stringLit) `sepBy` comma
     void $ symbol ")"
     return $ Tuple (concat itms)
-                                 
+
 termParser :: ParsecT Dec String Identity Expr
-termParser = try tuple -- not working, but don't know why
-        <|> try assignment 
+termParser = 
+            try assignment 
         <|> try ifthenelse 
         <|> try bExpr 
         <|> aExpr 
@@ -347,10 +348,11 @@ indentParser = whereBlock <* eof
 -----------------
 
 exprParser :: ParsecT Dec String Identity Expr
-exprParser = try newTypes <|> termParser
+exprParser = try newTypes <|> try tuple <|> termParser
 
 readExpr = parse exprParser "microML"
 
-parseWhole = whiteSpace *> many exprParser <* eol
+parseWhole :: ParsecT Dec String Identity [Expr]
+parseWhole = many $ exprParser <* eol
 
 parseFromFile p file = runParser p file <$> readFile file
