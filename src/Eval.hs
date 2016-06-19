@@ -107,6 +107,12 @@ eval (PrimBinOp OpExp unev1 unev2) = do
     evaled2 <- eval unev2
     evaled1 `exp'` evaled2
 
+eval (IfThenElse cond exp1 exp2) = do
+    c <- eval cond
+    e1 <- eval exp1
+    e2 <- eval exp2
+    return $ IfThenElse c e1 e2
+
 eval _ = throwError $ MLError "not yet supported"
 
 add :: Expr -> Expr -> Expr
