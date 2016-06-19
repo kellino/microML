@@ -1,4 +1,5 @@
 {-# LANGUAGE TupleSections #-}
+{-# LANGUAGE TypeFamilies #-}
 
 module Parser (
         exprParser
@@ -18,6 +19,7 @@ import Data.Functor.Identity (Identity)
 import Data.Char (isLower, isUpper)
 
 type MLParser = ParsecT Dec String Identity
+type RawData t e = [Either (ParseError t e) Expr]
 
 -------------------------
 -- PROMPT HIGHLIGHTING --
@@ -356,8 +358,13 @@ exprParser = try tuple <|> try newTypes <|> termParser
 readExpr :: String -> Either (ParseError Char Dec) Expr
 readExpr = parse exprParser "microML"
 
-parseProg :: MLParser [Expr]
-parseProg = between scn eof (exprParser `sepEndBy` scn)
+{-parseProg :: MLParser [Expr]-}
+{-parseProg = between scn eof (exprParser `sepEndBy` scn)-}
+
+parseProg :: Parser (RawData Char Dec)
+parseProg = between scn eof (e `sepEndBy` scn)
+    where e = withRecovery recover (Right <$> exprParser)
+          recover err = Left err <$ manyTill anyChar eol
 
 parseFromFile :: Parsec e String a -> String -> IO (Either (ParseError Char e) a)
 parseFromFile p file = runParser p file <$> readFile file
