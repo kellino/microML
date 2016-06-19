@@ -10,6 +10,8 @@ type VarName = String
 type Dataname = String
 type ADTParam = String
 
+type Program = [Expr]
+
 data TypePrimitive = TypeInt | TypeDouble | TypeBool deriving (Eq, Ord, Show)
 
 data TypeDec = TypeAlias String String String deriving (Eq, Ord, Show)
