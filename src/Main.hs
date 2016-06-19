@@ -14,7 +14,6 @@ main = do
     if null args
        then repl
        else do 
-           -- contents <- readFile (head args)
            res <- parseFromFile parseProg (head args)
            case res of
              Left err -> print $ parseErrorPretty err
