@@ -125,6 +125,8 @@ aExpr = makeExprParser aTerm arithOps
 bExpr = makeExprParser bTerm boolOps
 -- expression parser for list operations
 lExpr = makeExprParser lTerm lOps
+-- expression parser for relational operations
+rExpr = makeExprParser rTerm relationOps
 
 arithOps :: [[Operator MLParser Expr]]
 arithOps =
@@ -145,14 +147,14 @@ boolOps =
 lOps :: [[Operator MLParser Expr]]
 lOps = [ [InfixR (symbol ":" >> return listcons)] ]
 
-relation :: MLParser (Expr -> Expr -> Expr)
-relation = 
-          symbol "<=" *> pure (PrimBinOp OpLe)
-      <|> symbol ">=" *> pure (PrimBinOp OpGe)
-      <|> symbol "<"  *> pure (PrimBinOp OpLt)
-      <|> symbol ">"  *> pure (PrimBinOp OpGt)
-      <|> symbol "==" *> pure (PrimBinOp OpEq)
-      
+relationOps :: [[Operator MLParser Expr]]
+relationOps = 
+    [ [ InfixL (symbol "<=" *> pure (PrimBinOp OpLe))
+      , InfixL (symbol ">=" *> pure (PrimBinOp OpGe))
+      , InfixL (symbol "<"  *> pure (PrimBinOp OpLt))
+      , InfixL (symbol ">"  *> pure (PrimBinOp OpGt))
+      , InfixL (symbol "==" *> pure (PrimBinOp OpEq))]]
+
 aTerm :: MLParser Expr
 aTerm = parens aExpr
     <|> Var <$> varName
@@ -168,12 +170,10 @@ lTerm = do
     elems <- brackets $ termParser `sepBy` comma
     return $ foldr (\x xs -> App (App (Con "cons") x) xs) (Con "nil") elems
 
-rExpr :: MLParser Expr
-rExpr = do
-    a1 <- aExpr 
-    op <- relation
-    a2 <- aExpr
-    return $ op a1 a2
+rTerm :: MLParser Expr
+rTerm = parens rExpr
+    <|> try bTerm
+    <|> aTerm
 
 assignment :: MLParser Expr
 assignment = do
