@@ -1,14 +1,14 @@
-Name:                microML
-Version:             0.0.1
-Synopsis:            Functional Programming for BBC micro:bit
-Description:         A simple functional programming language which compiles to C++
-Author:              David Kelly
-Maintainer:          dkellino@gmail.com
+Name:           microML
+Version:        0.0.1
+Synopsis:       Functional Programming for BBC micro:bit
+Description:    A simple functional programming language which compiles to C++
+Author:         David Kelly
+Maintainer:     dkellino@gmail.com
 
-Category:            Compiler
+Category:       Compiler
 
-Build-type:          Simple
-Cabal-version:       >=1.6
+Build-type:     Simple
+Cabal-version:  >=1.6
 
 Executable microML
   hs-source-dirs:    src
@@ -22,6 +22,7 @@ Executable microML
                      scientific,
                      containers,
                      hspec-expectations,
-                     hspec-megaparsec
+                     hspec-megaparsec,
+                     c-dsl >= 0.3.1
 
-  ghc-options:       -Wall -O2 -fwarn-tabs -fno-warn-name-shadowing -fno-warn-missing-signatures -fno-warn-incomplete-patterns -fno-warn-unused-binds
+  ghc-options:   -Wall -O2 -fwarn-tabs -fno-warn-name-shadowing -fno-warn-missing-signatures -fno-warn-incomplete-patterns -fno-warn-unused-binds
