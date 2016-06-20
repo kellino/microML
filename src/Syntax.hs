@@ -46,6 +46,7 @@ data Expr = Var VarName
           | App  Expr  Expr 
           | Lam  [Pat] Expr 
           | Def Expr Expr 
+          | List [Expr]
           | StringLit String
           | Char Char
           | PrimBinOp PrimitiveOp Expr  Expr 

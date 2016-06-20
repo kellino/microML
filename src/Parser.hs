@@ -123,8 +123,6 @@ aExpr, bExpr :: MLParser Expr
 aExpr = makeExprParser aTerm arithOps
 -- expression parser for boolean operations
 bExpr = makeExprParser bTerm boolOps
--- expression parser for list operations
-lExpr = makeExprParser lTerm lOps
 -- expression parser for relational operations
 rExpr = makeExprParser rTerm relationOps
 
@@ -143,9 +141,6 @@ boolOps =
     [ [ Prefix (reservedWord "not" *> pure Not) ]
      ,[ InfixL (reservedWord "and" *> pure (PrimBinOp OpAnd))
       , InfixL (reservedWord "or"  *> pure (PrimBinOp OpOr))] ]
-
-lOps :: [[Operator MLParser Expr]]
-lOps = [ [InfixR (symbol ":" >> return listcons)] ]
 
 relationOps :: [[Operator MLParser Expr]]
 relationOps = 
@@ -166,10 +161,11 @@ bTerm = parens bExpr
     <|> (reservedWord "true" *> pure (Boolean True))
     <|> (reservedWord "false" *> pure (Boolean False))
 
-lTerm :: MLParser Expr
-lTerm = do
+-- allows mixed value lists which is definitely not what we want!
+listParser :: MLParser Expr
+listParser = do
     elems <- brackets $ termParser `sepBy` comma
-    return $ foldr (\x xs -> App (App (Con "cons") x) xs) (Con "nil") elems
+    return $ List elems
 
 rTerm :: MLParser Expr
 rTerm = parens rExpr
@@ -193,17 +189,13 @@ ifthenelse = do
     stmt2 <- termParser
     return $ IfThenElse cond stmt1 stmt2
 
-listcons :: Expr -> Expr -> Expr
--- listcons l r is clearer, but ghc-mod is really bugging me to do the η reduction, so
--- I've done it just to shut it up.
-listcons l = App (App (Con "cons") l)
-
 tuple :: MLParser Expr
 tuple = do
-    -- void $ symbol "("
-    itms <- some (bTerm <|> stringLit <|> aTerm) `sepBy` comma
-    -- void $ symbol ")"
-    return $ Tuple (concat itms)
+    itms <- (bTerm <|> stringLit <|> aTerm) `sepBy` comma
+    return $ Tuple itms
+
+tupleParser :: MLParser Expr
+tupleParser = parens tuple
 
 termParser :: MLParser Expr
 termParser = 
@@ -212,14 +204,11 @@ termParser =
         <|> try ifthenelse 
         <|> try bExpr 
         <|> aExpr 
-        <|> lTerm 
+        <|> listParser
         <|> stringLit 
         <|> charLit 
         <|> lambda
         <|> parens termParser
-
-tupleParser :: MLParser Expr
-tupleParser = parens tuple
 
 --------------------
 -- LAMBDA PARSER --
