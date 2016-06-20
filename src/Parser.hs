@@ -80,7 +80,7 @@ reservedWord w = string w *> notFollowedBy alphaNumChar *> sc
 -- a list of reserved words, not available for use as identifiers
 -- use Miranda style where blocks rather than let - in expressions. 
 reserved :: [String]
-reserved = ["if", "then", "else", "true", "false", "and", "or", "not", "otherwise", "where", "alias"]
+reserved = ["if", "then", "else", "true", "false", "and", "or", "not", "otherwise", "where", "alias", "using"]
 
 identifier :: Parser String
 identifier = lexeme (p >>= check)
@@ -166,6 +166,7 @@ bTerm = parens bExpr
     <|> (reservedWord "true" *> pure (Boolean True))
     <|> (reservedWord "false" *> pure (Boolean False))
 
+lTerm :: MLParser Expr
 lTerm = do
     elems <- brackets $ termParser `sepBy` comma
     return $ foldr (\x xs -> App (App (Con "cons") x) xs) (Con "nil") elems
@@ -199,9 +200,9 @@ listcons l = App (App (Con "cons") l)
 
 tuple :: MLParser Expr
 tuple = do
-    void $ symbol "("
-    itms <- some (aExpr <|> stringLit) `sepBy` comma
-    void $ symbol ")"
+    -- void $ symbol "("
+    itms <- some (bTerm <|> stringLit <|> aTerm) `sepBy` comma
+    -- void $ symbol ")"
     return $ Tuple (concat itms)
 
 termParser :: MLParser Expr
@@ -216,6 +217,9 @@ termParser =
         <|> charLit 
         <|> lambda
         <|> parens termParser
+
+tupleParser :: MLParser Expr
+tupleParser = parens tuple
 
 --------------------
 -- LAMBDA PARSER --
@@ -353,13 +357,10 @@ indentParser = whereBlock <* eof
 -----------------
 
 exprParser :: MLParser Expr
-exprParser = try tuple <|> try newTypes <|> termParser
+exprParser = try tupleParser <|> try newTypes <|> termParser 
 
 readExpr :: String -> Either (ParseError Char Dec) Expr
 readExpr = parse exprParser "microML"
-
-{-parseProg :: MLParser [Expr]-}
-{-parseProg = between scn eof (exprParser `sepEndBy` scn)-}
 
 parseProg :: Parser (RawData Char Dec)
 parseProg = between scn eof (e `sepEndBy` scn)
