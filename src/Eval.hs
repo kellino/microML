@@ -13,8 +13,6 @@ import Control.Monad.Reader
 import qualified Data.Map.Strict as Map
 import Text.Megaparsec.Error (parseErrorPretty)
 
--- data MLError = MLError String | MathsError String | NotSet String | AlreadySet String deriving Show
-
 newtype Eval a = Eval { unEvaled :: ReaderT SymTable (ExceptT MLError IO) a }
     deriving (Monad, Functor, Applicative, MonadReader SymTable, MonadError MLError, MonadIO)
 
@@ -27,8 +25,8 @@ runAppT code action = do
                          Left b  -> Left b
                          Right a -> Right a
 
-testEnv = Map.fromList [("x", Number 42)]
 
+-- how do we update this on the fly? 
 table :: SymTable
 table = Map.empty
 
