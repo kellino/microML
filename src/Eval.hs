@@ -72,7 +72,7 @@ eval (StringLit str) = return $ StringLit str
 eval (Boolean b) = return $ Boolean b
 eval (Char c) = return $ Char c
 eval (Tuple xs) = return $ Tuple xs
---eval ()
+eval (TypeSig _ _) = throwError $ Unsupported "Unfortunately, you can't enter a type signature at the prompt"
 -- boolean operators
 eval (Not x) = return $ Not x
 eval (PrimBinOp OpOr (Boolean a) (Boolean b)) = return $ Boolean $ a || b
