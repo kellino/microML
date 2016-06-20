@@ -69,3 +69,9 @@ data Pat = PVar VarName
          | IntPat  Int
          | BoolPat  Bool
          deriving (Eq, Ord, Show)
+
+data MLError = MLError String 
+             | MathsError String 
+             | NotSet String 
+             | AlreadySet String 
+             deriving Show

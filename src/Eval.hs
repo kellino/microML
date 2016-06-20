@@ -13,7 +13,7 @@ import Control.Monad.Reader
 import qualified Data.Map.Strict as Map
 import Text.Megaparsec.Error (parseErrorPretty)
 
-data MLError = MLError String | MathsError String | NotSet String | AlreadySet String deriving Show
+-- data MLError = MLError String | MathsError String | NotSet String | AlreadySet String deriving Show
 
 newtype Eval a = Eval { unEvaled :: ReaderT SymTable (ExceptT MLError IO) a }
     deriving (Monad, Functor, Applicative, MonadReader SymTable, MonadError MLError, MonadIO)
@@ -74,6 +74,7 @@ eval (StringLit str) = return $ StringLit str
 eval (Boolean b) = return $ Boolean b
 eval (Char c) = return $ Char c
 eval (Tuple xs) = return $ Tuple xs
+--eval ()
 -- boolean operators
 eval (Not x) = return $ Not x
 eval (PrimBinOp OpOr (Boolean a) (Boolean b)) = return $ Boolean $ a || b
