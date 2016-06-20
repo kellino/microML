@@ -13,25 +13,28 @@ import Control.Monad.Reader
 import qualified Data.Map.Strict as Map
 import Text.Megaparsec.Error (parseErrorPretty)
 
-data MLError = MLError String | MathsError String | NotSet String deriving Show
+data MLError = MLError String | MathsError String | NotSet String | AlreadySet String deriving Show
 
-newtype Eval a = Eval { unEval :: ReaderT SymTable (ExceptT MLError IO) a }
+newtype Eval a = Eval { unEvaled :: ReaderT SymTable (ExceptT MLError IO) a }
     deriving (Monad, Functor, Applicative, MonadReader SymTable, MonadError MLError, MonadIO)
 
 type SymTable = Map.Map String Expr
 
 runAppT :: MonadIO m => SymTable -> Eval b -> ExceptT MLError m b
 runAppT code action = do
-    res <- liftIO $ runExceptT $ runReaderT (unEval action) code
+    res <- liftIO $ runExceptT $ runReaderT (unEvaled action) code
     ExceptT $ return $ case res of
                          Left b  -> Left b
                          Right a -> Right a
 
 testEnv = Map.fromList [("x", Number 42)]
 
+table :: SymTable
+table = Map.empty
+
 process :: String -> IO ()
 process input = do 
-    out <- runExceptT $ runAppT testEnv $ textToEval input
+    out <- runExceptT $ runAppT table $ textToEval input
     either print print out
 
 textToEval :: String -> Eval Expr
@@ -42,20 +45,19 @@ runParse_ input = case readExpr input of
                     Left err -> Left $ MLError $ parseErrorPretty err
                     Right val -> Right val
 
-setLocal atom exp env = local (const $ Map.insert atom exp env) (eval exp)
-
-defineVar :: Expr -> Eval Expr
-defineVar (Def (Var x) exp) = do
-    env <- ask
-    setLocal x exp env
-defineVar _ = throwError $ MLError "can only bind to Atom type valaues"
-
 getVar :: Expr -> Eval Expr
 getVar (Var x) = do
     env <- ask
     case Map.lookup x env of
       Just y -> return y
       Nothing -> throwError $ NotSet "this variable has not yet been set"
+
+setVar :: Expr -> Eval Expr
+setVar (Def (Var x) exp) = do
+    env <- ask
+    case Map.lookup x env of 
+      Just _ -> throwError $ AlreadySet "this variable has already been assigned a value"
+      Nothing -> local (const $ Map.insert x exp env) (eval exp)
 
 ----------------
 -- EVALUATION --
@@ -64,6 +66,7 @@ getVar (Var x) = do
 eval :: Expr -> Eval Expr
 -- primitives
 eval exp@(Var _) = getVar exp
+eval def@(Def _ _) = setVar def
 eval (Con name) = return $ Con name
 eval (Number i) = return $ Number i
 eval (Double i) = return $ Double i
@@ -79,7 +82,10 @@ eval (PrimBinOp OpEq a b) = do
     a' <- eval a
     b' <- eval b
     return $ Boolean $ a' == b' 
-eval exp@(Def _ _) = defineVar exp
+eval (PrimBinOp OpLt a b) = do
+    a' <- eval a
+    b' <- eval b
+    return $ Boolean $ a' < b'
 
 -- arithmetic: incredibly ugly code here, but don't yet know how to make this more generic
 eval (PrimBinOp OpAdd unev1 unev2) = do
