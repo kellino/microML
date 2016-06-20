@@ -74,4 +74,5 @@ data MLError = MLError String
              | MathsError String 
              | NotSet String 
              | AlreadySet String 
+             | Unsupported String
              deriving Show
