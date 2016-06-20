@@ -1,8 +1,6 @@
-{-# LANGUAGE FlexibleContexts #-}
-
 module Repl where
 
-import Eval2
+import Eval
 
 import Control.Monad.Trans
 import System.Console.Repline
@@ -12,6 +10,7 @@ import System.IO
 
 type Repl a = HaskelineT IO a
 
+cmd :: MonadIO m => String -> m ()
 cmd input = liftIO $ process input
 
 completer :: Monad m => String -> m [String]
@@ -33,8 +32,7 @@ getArt = do
     hClose file
 
 prompt :: String
---prompt = "\ESC[33mmicroML ⊦\ESC[0m "
-prompt = "\ESC[33mmicroML :→\ESC[0m "
+prompt = "\ESC[33mmicroML ⊦\ESC[0m "
 
-{-repl :: IO ()-}
-{-repl = evalRepl prompt cmd options (Word completer) initialize-}
+repl :: IO ()
+repl = evalRepl prompt cmd options (Word completer) initialize
