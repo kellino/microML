@@ -25,7 +25,6 @@ runAppT code action = do
                          Left b  -> Left b
                          Right a -> Right a
 
-
 -- how do we update this on the fly? 
 table :: SymTable
 table = Map.empty
@@ -56,6 +55,7 @@ setVar (Def (Var x) exp) = do
     case Map.lookup x env of 
       Just _ -> throwError $ AlreadySet "this variable has already been assigned a value"
       Nothing -> local (const $ Map.insert x exp env) (eval exp)
+      -- Nothing -> Map.insert x exp env >> (eval exp)
 
 ----------------
 -- EVALUATION --
