@@ -4,6 +4,7 @@ type Name = String
 
 data Expr
   = Var Name
+  | Constructor Name
   | App Expr Expr
   | Lam Name Expr
   | Let Name Expr Expr
