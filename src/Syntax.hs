@@ -1,78 +1,42 @@
--- very liberally borrowing from the github repo metafun by gergoerdi, but
--- with a few simplifications and additions
--- https://github.com/gergoerdi/metafun/tree/master/src
-
-
 module Syntax where
 
-type ConstructorName = String
-type VarName = String
-type Dataname = String
-type ADTParam = String
+type Name = String
 
-type Program = [Expr]
+data Expr
+  = Var Name
+  | App Expr Expr
+  | Lam Name Expr
+  | Let Name Expr Expr
+  | Lit Lit
+  | If Expr Expr Expr
+  | Op Binop Expr Expr
+  deriving (Show, Eq, Ord)
 
-data TypePrimitive = TypeInt | TypeDouble | TypeBool deriving (Eq, Ord, Show)
+data Lit
+  = Number Integer
+  | Boolean Bool
+  | Char Char
+  | Double Double
+  | String String
+  deriving (Show, Eq, Ord)
 
-data TypeDec = TypeAlias String String String deriving (Eq, Ord, Show)
+data Binop = 
+        OpAdd
+      | OpSub
+      | OpMul
+      | OpDiv
+      | OpMod
+      | OpExp
+      | OpOr
+      | OpAnd
+      | OpEq
+      | OpNe
+      | OpLe
+      | OpLt
+      | OpGe
+      | OpGt
+      deriving (Eq, Ord, Show)         
 
-data Type = TypeVar String
-          | TypeFunc Type [Type]
-          | TypeApp Type Type
-          | TypeData String
-          | TypeList Type
-          | TypeCurry [Type]
-          | TypePrimitive TypePrimitive
-          deriving (Eq, Ord, Show)
+data Program = Program [Decl] Expr deriving Eq
 
-data PrimitiveOp  = OpAdd
-                  | OpSub
-                  | OpMul
-                  | OpDiv
-                  | OpMod
-                  | OpExp
-                  | OpOr
-                  | OpAnd
-                  | OpEq
-                  | OpNe
-                  | OpLe
-                  | OpLt
-                  | OpGe
-                  | OpGt
-                  deriving (Eq, Ord, Show)                          
-                           
-data Expr = Var VarName
-          | Con  ConstructorName
-          | App  Expr  Expr 
-          | Lam  [Pat] Expr 
-          | Def Expr Expr 
-          | List [Expr]
-          | StringLit String
-          | Char Char
-          | PrimBinOp PrimitiveOp Expr  Expr 
-          | IfThenElse Expr Expr Expr 
-          | Number Integer
-          | Double Double
-          | Boolean  Bool
-          | Neg Expr
-          | Not Expr 
-          | TypeSig Type [Type]
-          | Tuple [Expr] 
-          | ADT Expr Expr [Expr]
-          | DataCon Expr Expr
-          | TypeDec TypeDec
-          deriving (Eq, Ord, Show)
-
-data Pat = PVar VarName
-         | PApp ConstructorName [Pat]
-         | Wildcard 
-         | IntPat  Int
-         | BoolPat  Bool
-         deriving (Eq, Ord, Show)
-
-data MLError = MLError String 
-             | MathsError String 
-             | NotSet String 
-             | AlreadySet String 
-             | Unsupported String
-             deriving Show
+type Decl = (String, Expr)
