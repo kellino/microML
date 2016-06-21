@@ -10,6 +10,7 @@ data Value
   | VBool Bool
   | VDouble Double
   | VClosure String Expr TermEnv
+  deriving (Eq, Ord)
 
 type TermEnv = Map.Map String Value
 type Interpreter t = Identity t
@@ -22,7 +23,6 @@ instance Show Value where
     show (VBool b)   = show b
     show (VDouble d) = show d
     show VClosure{}  = "<<closure>>"
-
 
 eval :: TermEnv -> Expr -> Interpreter Value
 eval env expr = case expr of
@@ -49,20 +49,18 @@ eval env expr = case expr of
           OpExp -> a' `exp'` b'
           OpOr  -> a' `or'`  b'
           OpAnd -> a' `and'` b'
-          {-OpEq  -> a' == b'-}
-          {-OpLe  -> a' <= b'-}
-          {-OpLt  -> a' <  b'-}
-          {-OpGe  -> a' >= b'-}
-          {-OpGt  -> a' >  b'-}
+          OpEq  -> return $ VBool $ a' == b'
+          OpLe  -> return $ VBool $ a' <= b'
+          OpLt  -> return $ VBool $ a' <  b'
+          OpGe  -> return $ VBool $ a' >= b'
+          OpGt  -> return $ VBool $ a' >  b'
     _     -> error "not yet supported"
-
-
 
 -- helper functions --
 
-or' = undefined
 and' = undefined
---or' (Boolean a) (Boolean b) = Boolean $ a || b
+or' = undefined
+--or' (Lit (Boolean a)) (Lit (Boolean b)) = return $ VBool $ a || b
 
 --and' (Boolean a) (Boolean b) = Boolean $ a && b
 
@@ -91,3 +89,8 @@ exp' (VNum a) (VNum b) = return $ VNum $ a^b
 exp' (VNum a) (VDouble b) = return $ VDouble $ realToFrac a**b
 exp' (VDouble a) (VNum b) = return $ VDouble $ a ^ b
 exp' (VDouble a) (VDouble b) = return $ VDouble $ a**b
+
+runEval :: TermEnv -> String -> Expr -> (Value, TermEnv)
+runEval env x exp =
+    let res = runIdentity (eval env exp)
+     in (res, Map.insert x res env)
