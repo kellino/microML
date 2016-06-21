@@ -12,6 +12,8 @@ import Text.Megaparsec.Expr
 import Control.Monad (void)
 
 type MLParser = ParsecT Dec String Identity
+type FileName = String
+type Input = String
 
 varName :: MLParser String
 varName = do name@(n:_) <- identifier
@@ -157,9 +159,9 @@ topLevel = do
 program :: MLParser [Binding]
 program = many topLevel
 
-parseExpr :: String -> Either (ParseError Char Dec) Expr
-parseExpr input = parse (contents expr) "<stdin>" input
+parseExpr :: Input -> Either (ParseError Char Dec) Expr
+parseExpr = parse (contents expr) "<stdin>" 
 
-parseProgram :: String -> String -> Either (ParseError Char Dec) [Binding]
-parseProgram fname input = parse (contents program) fname input
+parseProgram :: FileName -> Input -> Either (ParseError Char Dec) [Binding]
+parseProgram = parse (contents program) 
 
