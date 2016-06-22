@@ -12,7 +12,7 @@ data Value
   | VClosure String Expr TermEnv
   | VString String
   | VChar Char
-  | VList [Expr]
+  | VList [Value]
   deriving (Eq, Ord)
 
 type TermEnv = Map.Map String Value
