@@ -37,10 +37,12 @@ constructor = do
     x <- constructorName
     return $ Constructor x
 
+number :: MLParser Expr
 number = do
     n <- integer
     return (Lit (Number n))
 
+double :: MLParser Expr
 double = do
     n <- float
     return (Lit (Double n))
@@ -168,14 +170,20 @@ letDecl = do
     body <- expr
     return (name, foldr Lam body args)
 
+mainDecl :: MLParser Binding
+mainDecl = do
+    reservedWord "main"
+    void $ symbol "="
+    body <- expr
+    return ("main", body)
+
 val :: MLParser Binding
 val = do
     ex <- expr
-    -- same syntax here as in ghci
-    return ("it", ex)
+    return ("it", ex) --  same syntax here as in ghci
 
 decl :: MLParser Binding
-decl = try letDecl <|> val 
+decl = try letDecl <|> val <|> mainDecl
 
 topLevel :: MLParser Binding
 topLevel = do 
