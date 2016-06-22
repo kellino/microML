@@ -10,6 +10,7 @@ data Value
   | VBool Bool
   | VDouble Double
   | VClosure String Expr TermEnv
+  | VString String
   deriving (Eq, Ord)
 
 type TermEnv = Map.Map String Value
@@ -41,20 +42,26 @@ eval env expr = case expr of
         a' <- eval env a
         b' <- eval env b
         case op of
-          OpAdd -> a' `add` b'
-          OpSub -> a' `sub`  b'
-          OpMul -> a' `mul`  b'
-          OpDiv -> a' `div'` b'
-          OpMod -> a' `mod'` b'
-          OpExp -> a' `exp'` b'
-          OpOr  -> a' `or'`  b'
-          OpAnd -> a' `and'` b'
+          OpAdd -> return $ a' `add` b'
+          OpSub -> return $ a' `sub`  b'
+          OpMul -> return $ a' `mul`  b'
+          OpDiv -> return $ a' `div'` b'
+          OpMod -> return $ a' `mod'` b'
+          OpExp -> return $ a' `exp'` b'
+          OpOr  -> return $ a' `or'`  b'
+          OpAnd -> return $ a' `and'` b'
           OpEq  -> return $ VBool $ a' == b'
           OpLe  -> return $ VBool $ a' <= b'
           OpLt  -> return $ VBool $ a' <  b'
           OpGe  -> return $ VBool $ a' >= b'
           OpGt  -> return $ VBool $ a' >  b'
-    _     -> error "not yet supported"
+    -- placeholder so repl doesn't crash during testing
+    UnaryMinus ex -> do
+        ex' <- eval env ex
+        case ex' of
+          VNum n    -> return $ VNum (negate n)
+          VDouble d -> return $ VDouble (negate d)
+    _     -> return $ VString "not yet supported"
 
 -- helper functions --
 
@@ -64,31 +71,37 @@ or' = undefined
 
 --and' (Boolean a) (Boolean b) = Boolean $ a && b
 
-add (VNum a) (VNum b) = return $ VNum $ a + b
-add (VDouble a) (VDouble b) = return $ VDouble $ a + b
-add (VNum a) (VDouble b) = return $  VDouble $ realToFrac a + b
-add (VDouble a) (VNum b) = return $ VDouble $ a + realToFrac b
+add :: Value -> Value -> Value
+add (VNum a) (VNum b) = VNum $ a + b
+add (VDouble a) (VDouble b) = VDouble $ a + b
+add (VNum a) (VDouble b) = VDouble $ realToFrac a + b
+add (VDouble a) (VNum b) = VDouble $ a + realToFrac b
 
-sub (VNum a) (VNum b) = return $ VNum $ a - b
-sub (VDouble a) (VDouble b) = return $ VDouble $ a - b
-sub (VNum a) (VDouble b) = return $ VDouble $ realToFrac a - b
-sub (VDouble a) (VNum b) = return $ VDouble $ a - realToFrac b
+sub :: Value -> Value -> Value
+sub (VNum a) (VNum b) = VNum $ a - b
+sub (VDouble a) (VDouble b) = VDouble $ a - b
+sub (VNum a) (VDouble b) = VDouble $ realToFrac a - b
+sub (VDouble a) (VNum b) = VDouble $ a - realToFrac b
 
-mul (VDouble a) (VDouble b) = return $ VDouble $ a * b
-mul (VNum a) (VDouble b) = return $ VDouble $ realToFrac a * b
-mul (VDouble a) (VNum b) = return $ VDouble $ a * realToFrac b
+mul :: Value -> Value -> Value
+mul (VDouble a) (VDouble b) = VDouble $ a * b
+mul (VNum a) (VDouble b) = VDouble $ realToFrac a * b
+mul (VDouble a) (VNum b) = VDouble $ a * realToFrac b
 
-div' (VNum a) (VNum b) = return $ VDouble $ realToFrac a / realToFrac b
-div' (VDouble a) (VDouble b) = return $ VDouble $ a / b
-div' (VNum a) (VDouble b) = return $ VDouble $ realToFrac a / b
-div' (VDouble a) (VNum b) = return $ VDouble $ a / realToFrac b
+div' :: Value -> Value -> Value
+div' (VNum a) (VNum b) = VDouble $ realToFrac a / realToFrac b
+div' (VDouble a) (VDouble b) = VDouble $ a / b
+div' (VNum a) (VDouble b) = VDouble $ realToFrac a / b
+div' (VDouble a) (VNum b) = VDouble $ a / realToFrac b
 
-mod' (VNum a) (VNum b) = return $ VNum $ a `mod` b
+mod' :: Value -> Value -> Value
+mod' (VNum a) (VNum b) = VNum $ a `mod` b
 
-exp' (VNum a) (VNum b) = return $ VNum $ a^b
-exp' (VNum a) (VDouble b) = return $ VDouble $ realToFrac a**b
-exp' (VDouble a) (VNum b) = return $ VDouble $ a ^ b
-exp' (VDouble a) (VDouble b) = return $ VDouble $ a**b
+exp' :: Value -> Value -> Value
+exp' (VNum a) (VNum b) = VNum $ a^b
+exp' (VNum a) (VDouble b) = VDouble $ realToFrac a**b
+exp' (VDouble a) (VNum b) = VDouble $ a ^ b
+exp' (VDouble a) (VDouble b) = VDouble $ a**b
 
 runEval :: TermEnv -> String -> Expr -> (Value, TermEnv)
 runEval env x exp =

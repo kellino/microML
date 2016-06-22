@@ -67,12 +67,14 @@ aExpr = makeExprParser aTerm arithOps
 
 aTerm :: MLParser Expr
 aTerm = parens aExpr
+    <|> Var <$> try varName
     <|> try double
     <|> try number
 
 arithOps :: [[Operator MLParser Expr]]
 arithOps =
-    [ [ InfixL (symbol "*" *> pure (Op OpMul))
+    [ [ Prefix (symbol "-" *> pure UnaryMinus)]
+    , [ InfixL (symbol "*" *> pure (Op OpMul))
       , InfixL (symbol "-" *> pure (Op OpSub))
       , InfixL (symbol "/" *> pure (Op OpDiv))
       , InfixL (symbol "%" *> pure (Op OpMod))
