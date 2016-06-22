@@ -53,7 +53,7 @@ reserved = ["if", "then", "else", "let", "true", "false", "and", "or", "not", "o
 identifier :: Parser String
 identifier = lexeme (p >>= check)
     where 
-        p = (:) <$> letterChar <*> many alphaNumChar
+        p = (:) <$> letterChar <*> many alphaNumChar 
         check x = if x `elem` reserved
                      then fail $ show x ++ " is a \ESC[1mreserved word\ESC[0m and cannot be used as an \ESC[1midentifier\ESC[0m" 
                      else return x

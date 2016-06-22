@@ -38,6 +38,7 @@ data Binop =
       | OpLt
       | OpGe
       | OpGt
+      | OpCom
       deriving (Eq, Ord, Show)         
 
 data Program = Program [Decl] Expr deriving Eq
