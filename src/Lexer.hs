@@ -60,8 +60,7 @@ identifier = lexeme (p >>= check)
 
 contents :: Parser a -> Parser a
 contents p = do
-    void whiteSpace 
+    -- void $ try whiteSpace 
     r <- p
     eof
     return r
-
