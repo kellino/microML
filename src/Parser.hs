@@ -67,21 +67,20 @@ aExpr = makeExprParser aTerm arithOps
 
 aTerm :: MLParser Expr
 aTerm = parens aExpr
-    <|> Var <$> try varName
+    <|> Var <$> varName
     <|> try double
-    <|> try number
+    <|> number
 
 arithOps :: [[Operator MLParser Expr]]
 arithOps =
-     [ [ Prefix (symbol "-" *> pure UnaryMinus) ]
+     [ [ Prefix (symbol "-" *> pure UnaryMinus)
+       , Prefix (symbol "+" >> return id) ]
      , [ InfixL (symbol "^" *> pure (Op OpExp)) ] 
      , [ InfixL (symbol "*" *> pure (Op OpMul))
      ,   InfixL (symbol "/" *> pure (Op OpDiv))
      ,   InfixL (symbol "%" *> pure (Op OpMod)) ]
      , [ InfixL (symbol "+" *> pure (Op OpAdd))
-     ,   InfixL (symbol "-" *> pure (Op OpSub)) ]
-    
-    ]
+     ,   InfixL (symbol "-" *> pure (Op OpSub)) ] ]
 
 -- relational operators
 rExpr = makeExprParser rTerm relationOps
@@ -89,7 +88,7 @@ rExpr = makeExprParser rTerm relationOps
 rTerm :: MLParser Expr
 rTerm = parens rExpr
     <|> try bool
-    <|> aTerm
+    <|> try aExpr
 
 relationOps :: [[Operator MLParser Expr]]
 relationOps = 
@@ -97,17 +96,18 @@ relationOps =
       , InfixL (symbol ">=" *> pure (Op OpGe))
       , InfixL (symbol "<"  *> pure (Op OpLt))
       , InfixL (symbol ">"  *> pure (Op OpGt))
-      , InfixL (symbol "==" *> pure (Op OpEq))]]
+      , InfixL (symbol "==" *> pure (Op OpEq)) ] ]
 
 ---------------------
 -- GENERAL PARSERS --
 ---------------------
 
 atomicExpr :: MLParser Expr
-atomicExpr = parens expr
+atomicExpr = 
+             parens expr
+         <|> try rExpr
+         <|> try aExpr
          <|> bExpr
-         <|> aExpr
-         <|> rExpr
          <|> ifThenElse
          <|> lambda
          <|> variable
