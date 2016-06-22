@@ -12,6 +12,7 @@ data Value
   | VClosure String Expr TermEnv
   | VString String
   | VChar Char
+  | VList [Expr]
   deriving (Eq, Ord)
 
 type TermEnv = Map.Map String Value
@@ -26,6 +27,7 @@ instance Show Value where
     show (VDouble d)   = show d
     show (VString str) = show str
     show (VChar c)     = show c
+    show (VList ls)    = show ls  -- this is not correct
     show VClosure{}    = "<<closure>>"
 
 eval :: TermEnv -> Expr -> Interpreter Value
@@ -34,10 +36,16 @@ eval env expr = case expr of
     Lit (Double k)   -> return $ VDouble k
     Lit (String str) -> return $ VString str
     Lit (Char c)     -> return $ VChar c
+    -- List xs          -> return $ VList $ map (eval env) xs
     Lam x body       -> return (VClosure x body env)
     Var x            -> do
         let Just v = Map.lookup x env
         return v
+    App func arg     -> do
+        VClosure s exp env' <- eval env func
+        args <- eval env arg
+        let newEnv = Map.insert s args env'
+        eval newEnv exp
     If cond tr fl    -> do
         VBool br <- eval env cond
         if br

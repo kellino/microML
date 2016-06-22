@@ -111,6 +111,7 @@ atomicExpr = parens expr
          <|> variable
          <|> stringLit
          <|> charLit
+         <|> list
 
 charLit :: MLParser Expr
 charLit = do
@@ -125,6 +126,11 @@ stringLit = do
     str <- many $ alphaNumChar <|> spaceChar
     void $ symbol "\""
     return $ Lit $ String str
+
+list :: MLParser Expr
+list = do
+    contents <- brackets $ atomicExpr `sepBy` comma
+    return $ List contents
 
 lambda :: MLParser Expr
 lambda = do

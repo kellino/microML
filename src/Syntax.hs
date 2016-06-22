@@ -10,6 +10,7 @@ data Expr
   | Let Name Expr Expr
   | Lit Lit
   | UnaryMinus Expr
+  | List [Expr]
   | If Expr Expr Expr
   | Op Binop Expr Expr
   deriving (Show, Eq, Ord)
