@@ -11,6 +11,7 @@ data Value
   | VDouble Double
   | VClosure String Expr TermEnv
   | VString String
+  | VChar Char
   deriving (Eq, Ord)
 
 type TermEnv = Map.Map String Value
@@ -20,20 +21,24 @@ emptyTmenv :: TermEnv
 emptyTmenv = Map.empty
 
 instance Show Value where
-    show (VNum n)    = show n
-    show (VBool b)   = show b
-    show (VDouble d) = show d
-    show VClosure{}  = "<<closure>>"
+    show (VNum n)      = show n
+    show (VBool b)     = show b
+    show (VDouble d)   = show d
+    show (VString str) = show str
+    show (VChar c)     = show c
+    show VClosure{}    = "<<closure>>"
 
 eval :: TermEnv -> Expr -> Interpreter Value
 eval env expr = case expr of
-    Lit (Number k) -> return $ VNum k
-    Lit (Double k) -> return $ VDouble k
-    Lam x body     -> return (VClosure x body env)
-    Var x          -> do
+    Lit (Number k)   -> return $ VNum k
+    Lit (Double k)   -> return $ VDouble k
+    Lit (String str) -> return $ VString str
+    Lit (Char c)     -> return $ VChar c
+    Lam x body       -> return (VClosure x body env)
+    Var x            -> do
         let Just v = Map.lookup x env
         return v
-    If cond tr fl  -> do
+    If cond tr fl    -> do
         VBool br <- eval env cond
         if br
            then eval env tr
@@ -55,12 +60,12 @@ eval env expr = case expr of
           OpLt  -> return $ VBool $ a' <  b'
           OpGe  -> return $ VBool $ a' >= b'
           OpGt  -> return $ VBool $ a' >  b'
-    -- placeholder so repl doesn't crash during testing
     UnaryMinus ex -> do
         ex' <- eval env ex
         case ex' of
           VNum n    -> return $ VNum (negate n)
           VDouble d -> return $ VDouble (negate d)
+
     _     -> return $ VString "not yet supported"
 
 -- helper functions --

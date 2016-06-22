@@ -109,6 +109,22 @@ atomicExpr = parens expr
          <|> ifThenElse
          <|> lambda
          <|> variable
+         <|> stringLit
+         <|> charLit
+
+charLit :: MLParser Expr
+charLit = do
+    void $ symbol "'"
+    c <- alphaNumChar <|> spaceChar
+    void $ symbol "'"
+    return $ Lit $ Char c
+
+stringLit :: MLParser Expr
+stringLit = do
+    void $ symbol "\""
+    str <- many $ alphaNumChar <|> spaceChar
+    void $ symbol "\""
+    return $ Lit $ String str
 
 lambda :: MLParser Expr
 lambda = do
@@ -147,10 +163,11 @@ letDecl = do
 val :: MLParser Binding
 val = do
     ex <- expr
+    -- same syntax here as in ghci
     return ("it", ex)
 
 decl :: MLParser Binding
-decl = try letDecl <|> val
+decl = try letDecl <|> val 
 
 topLevel :: MLParser Binding
 topLevel = do 
