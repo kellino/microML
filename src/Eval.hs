@@ -36,6 +36,7 @@ eval env expr = case expr of
     Lit (Double k)   -> return $ VDouble k
     Lit (String str) -> return $ VString str
     Lit (Char c)     -> return $ VChar c
+    Lit (Boolean b)  -> return $ VBool b
     -- List xs          -> return $ VList $ map (eval env) xs
     Lam x body       -> return (VClosure x body env)
     Var x            -> do
@@ -63,6 +64,7 @@ eval env expr = case expr of
           OpExp -> return $ a' `exp'` b'
           OpOr  -> return $ a' `or'`  b'
           OpAnd -> return $ a' `and'` b'
+          -- OpCom -> return $ 
           OpEq  -> return $ VBool $ a' == b'
           OpLe  -> return $ VBool $ a' <= b'
           OpLt  -> return $ VBool $ a' <  b'
@@ -78,11 +80,9 @@ eval env expr = case expr of
 
 -- helper functions --
 
-and' = undefined
-or' = undefined
---or' (Lit (Boolean a)) (Lit (Boolean b)) = return $ VBool $ a || b
+or' (VBool a) (VBool b) = VBool $ a || b
 
---and' (Boolean a) (Boolean b) = Boolean $ a && b
+and' (VBool a) (VBool b)  = VBool $ a && b
 
 add :: Value -> Value -> Value
 add (VNum a) (VNum b) = VNum $ a + b
@@ -97,6 +97,7 @@ sub (VNum a) (VDouble b) = VDouble $ realToFrac a - b
 sub (VDouble a) (VNum b) = VDouble $ a - realToFrac b
 
 mul :: Value -> Value -> Value
+mul (VNum a) (VNum b) = VNum $ a * b
 mul (VDouble a) (VDouble b) = VDouble $ a * b
 mul (VNum a) (VDouble b) = VDouble $ realToFrac a * b
 mul (VDouble a) (VNum b) = VDouble $ a * realToFrac b

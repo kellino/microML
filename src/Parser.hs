@@ -17,7 +17,7 @@ type Input = String
 
 varName :: MLParser String
 varName = do name@(n:_) <- identifier
-             if isLower n 
+             if isLower n
                 then return name
                 else fail "a variable must start with a lowercase letter"
 
@@ -73,13 +73,15 @@ aTerm = parens aExpr
 
 arithOps :: [[Operator MLParser Expr]]
 arithOps =
-    [ [ Prefix (symbol "-" *> pure UnaryMinus)]
-    , [ InfixL (symbol "*" *> pure (Op OpMul))
-      , InfixL (symbol "-" *> pure (Op OpSub))
-      , InfixL (symbol "/" *> pure (Op OpDiv))
-      , InfixL (symbol "%" *> pure (Op OpMod))
-      , InfixL (symbol "+" *> pure (Op OpAdd))
-      , InfixL (symbol "^" *> pure (Op OpExp))] ]
+     [ [ Prefix (symbol "-" *> pure UnaryMinus) ]
+     , [ InfixL (symbol "^" *> pure (Op OpExp)) ] 
+     , [ InfixL (symbol "*" *> pure (Op OpMul))
+     ,   InfixL (symbol "/" *> pure (Op OpDiv))
+     ,   InfixL (symbol "%" *> pure (Op OpMod)) ]
+     , [ InfixL (symbol "+" *> pure (Op OpAdd))
+     ,   InfixL (symbol "-" *> pure (Op OpSub)) ]
+    
+    ]
 
 -- relational operators
 rExpr = makeExprParser rTerm relationOps
