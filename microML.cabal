@@ -21,6 +21,7 @@ Executable microML
                      mtl,
                      scientific,
                      containers,
+                     transformers,
                      hspec-expectations,
                      hspec-megaparsec,
                      c-dsl >= 0.3.1
