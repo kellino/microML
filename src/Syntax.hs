@@ -8,6 +8,7 @@ data Expr
   | App Expr Expr
   | Lam Name Expr
   | Let Name Expr Expr
+  | FixPoint Expr
   | Lit Lit
   | UnaryMinus Expr
   | List [Expr]
