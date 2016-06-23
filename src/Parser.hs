@@ -160,7 +160,6 @@ expr = do
 
 type Binding = (String, Expr)
 
-
 letDecl :: MLParser Binding
 letDecl = do
     reservedWord "let"
@@ -200,6 +199,23 @@ topLevel = do
     x <- decl
     void $ optional $ symbol ";"
     return x
+
+
+--------------------------
+-- TOP SIGNATURE PARSER --
+--------------------------
+
+{-typeParser = do-}
+    {-types <- type' `sepBy1` arrow-}
+    {-return $ foldr1 TypFun tys-}
+        {-where type' = makeExprParser terms table <?> "type expression"-}
+              {-table = [ [ InfixR (whiteSpace >> return TApp) ] ]-}
+              {-term = parens ty <|> listTy <|> try primitiveTy <|> try tyVar <|> dataTy-}
+              {-listTy = TyList <$> brackets ty-}
+              {-tyVar = TyVar <$> TvName <$> varName-}
+              {-dataTy = TyData <$> constructorName-}
+              {-primitiveTy = (reservedWord "Number" >> return (TyPrimitive TyNum))-}
+                        {-<|> (reservedWord "Boolean" >> return (TyPrimitive TyBool))-}
 
 program :: MLParser [Binding]
 program = many topLevel
