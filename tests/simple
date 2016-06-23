@@ -1,6 +1,0 @@
-true
-2 * (2 + 3)
-filter :: a
-2 + 2
-x := 5
-alias MyType = StringLit
