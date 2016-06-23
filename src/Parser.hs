@@ -1,6 +1,5 @@
 module Parser (
-    parseExpr
-  , parseProgram
+    parseProgram
 ) where
 
 import Syntax
@@ -69,7 +68,7 @@ aExpr = makeExprParser aTerm arithOps
 
 aTerm :: MLParser Expr
 aTerm = parens aExpr
-    <|> Var <$> varName
+    <|> variable
     <|> try double
     <|> number
 
@@ -193,9 +192,6 @@ topLevel = do
 
 program :: MLParser [Binding]
 program = many topLevel
-
-parseExpr :: Input -> Either (ParseError Char Dec) Expr
-parseExpr = parse (contents expr) "<stdin>" 
 
 parseProgram :: FileName -> Input -> Either (ParseError Char Dec) [Binding]
 parseProgram = parse (contents program) 
