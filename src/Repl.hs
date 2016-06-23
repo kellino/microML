@@ -8,6 +8,7 @@ import Control.Monad.State.Strict
 import System.Console.Repline
 import Data.List (foldl', isPrefixOf)
 import System.IO
+--import Text.Megaparsec.Error
 
 data ReplState = ReplState
     { termEnv :: TermEnv }
@@ -17,9 +18,10 @@ initState = ReplState emptyTmenv
 
 type Repl a = HaskelineT (StateT ReplState IO) a
 
-liftError :: Show e => Either e a -> Repl a
+liftError :: (Show a1, MonadIO m) => Either a1 a -> HaskelineT m a
 liftError (Right val) = return val
 liftError (Left err) = do
+    --liftIO $ print $ parseErrorPretty err 
     liftIO $ print err
     abort
 

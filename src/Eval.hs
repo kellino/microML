@@ -12,7 +12,7 @@ data Value
   | VClosure String Expr TermEnv
   | VString String
   | VChar Char
-  | VList [Value]
+  | VList [Identity Value]
   deriving (Eq, Ord)
 
 type TermEnv = Map.Map String Value
@@ -28,7 +28,7 @@ instance Show Value where
     show (VString str) = show str
     show (VChar c)     = show c
     show (VList ls)    = show ls  -- this is not correct
-    show VClosure{}    = "<<closure>>"
+    show VClosure{}    = "\ESC[1m<<closure>>\ESC[0m"
 
 eval :: TermEnv -> Expr -> Interpreter Value
 eval env expr = case expr of
@@ -37,11 +37,14 @@ eval env expr = case expr of
     Lit (String str) -> return $ VString str
     Lit (Char c)     -> return $ VChar c
     Lit (Boolean b)  -> return $ VBool b
-    -- List xs          -> return $ VList $ map (eval env) xs
+    List xs          -> return $ VList $ map (eval env) xs
     Lam x body       -> return (VClosure x body env)
-    Var x            -> do
-        let Just v = Map.lookup x env
-        return v
+    Var x            -> 
+        case Map.lookup x env of
+          Just v -> return v
+          Nothing -> return $ VString "value not found"
+        {-let Just v = Map.lookup x env-}
+        {-return v-}
     App func arg     -> do
         VClosure s exp env' <- eval env func
         args <- eval env arg

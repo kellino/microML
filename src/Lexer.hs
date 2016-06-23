@@ -48,7 +48,7 @@ reservedWord :: String -> Parser ()
 reservedWord w = string w *> notFollowedBy alphaNumChar *> sc
 
 reserved :: [String]
-reserved = ["if", "then", "else", "let", "true", "false", "and", "or", "not", "otherwise", "where", "alias", "using", "main"]
+reserved = ["if", "then", "else", "let", "true", "false", "and", "or", "not", "otherwise", "where", "alias", "using", "main", "rec"]
 
 identifier :: Parser String
 identifier = lexeme (p >>= check)
