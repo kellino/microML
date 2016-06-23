@@ -13,6 +13,7 @@ data Value
   | VString String
   | VChar Char
   | VList [Identity Value]
+  | VError String
   deriving (Eq, Ord)
 
 type TermEnv = Map.Map String Value
@@ -28,6 +29,7 @@ instance Show Value where
     show (VString str) = show str
     show (VChar c)     = show c
     show (VList ls)    = show ls  -- this is not correct
+    show (VError str)  = show str
     show VClosure{}    = "\ESC[1m<<closure>>\ESC[0m"
 
 eval :: TermEnv -> Expr -> Interpreter Value
@@ -42,9 +44,7 @@ eval env expr = case expr of
     Var x            -> 
         case Map.lookup x env of
           Just v -> return v
-          Nothing -> return $ VString "value not found"
-        {-let Just v = Map.lookup x env-}
-        {-return v-}
+          Nothing -> return $ VError "value not found"
     App func arg     -> do
         VClosure s exp env' <- eval env func
         args <- eval env arg
@@ -67,7 +67,6 @@ eval env expr = case expr of
           OpExp -> return $ a' `exp'` b'
           OpOr  -> return $ a' `or'`  b'
           OpAnd -> return $ a' `and'` b'
-          -- OpCom -> return $ 
           OpEq  -> return $ VBool $ a' == b'
           OpLe  -> return $ VBool $ a' <= b'
           OpLt  -> return $ VBool $ a' <  b'
@@ -79,7 +78,7 @@ eval env expr = case expr of
           VNum n    -> return $ VNum (negate n)
           VDouble d -> return $ VDouble (negate d)
 
-    _     -> return $ VString "not yet supported"
+    _     -> return $ VError "not yet supported"
 
 -- helper functions --
 
@@ -92,33 +91,39 @@ add (VNum a) (VNum b) = VNum $ a + b
 add (VDouble a) (VDouble b) = VDouble $ a + b
 add (VNum a) (VDouble b) = VDouble $ realToFrac a + b
 add (VDouble a) (VNum b) = VDouble $ a + realToFrac b
+add _ _                  = VError "please check your calculation..."
 
 sub :: Value -> Value -> Value
 sub (VNum a) (VNum b) = VNum $ a - b
 sub (VDouble a) (VDouble b) = VDouble $ a - b
 sub (VNum a) (VDouble b) = VDouble $ realToFrac a - b
 sub (VDouble a) (VNum b) = VDouble $ a - realToFrac b
+sub _ _                  = VError "please check your calculation..."
 
 mul :: Value -> Value -> Value
 mul (VNum a) (VNum b) = VNum $ a * b
 mul (VDouble a) (VDouble b) = VDouble $ a * b
 mul (VNum a) (VDouble b) = VDouble $ realToFrac a * b
 mul (VDouble a) (VNum b) = VDouble $ a * realToFrac b
+mul _ _                  = VError "please check your calculation..."
 
 div' :: Value -> Value -> Value
 div' (VNum a) (VNum b) = VDouble $ realToFrac a / realToFrac b
 div' (VDouble a) (VDouble b) = VDouble $ a / b
 div' (VNum a) (VDouble b) = VDouble $ realToFrac a / b
 div' (VDouble a) (VNum b) = VDouble $ a / realToFrac b
+div' _ _                  = VError "please check your calculation..."
 
 mod' :: Value -> Value -> Value
 mod' (VNum a) (VNum b) = VNum $ a `mod` b
+mod' _ _                  = VError "please check your calculation..."
 
 exp' :: Value -> Value -> Value
 exp' (VNum a) (VNum b) = VNum $ a^b
 exp' (VNum a) (VDouble b) = VDouble $ realToFrac a**b
 exp' (VDouble a) (VNum b) = VDouble $ a ^ b
 exp' (VDouble a) (VDouble b) = VDouble $ a**b
+exp' _ _                  = VError "please check your calculation..."
 
 runEval :: TermEnv -> String -> Expr -> (Value, TermEnv)
 runEval env x exp =
