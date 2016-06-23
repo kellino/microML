@@ -160,6 +160,7 @@ expr = do
 
 type Binding = (String, Expr)
 
+
 letDecl :: MLParser Binding
 letDecl = do
     reservedWord "let"
@@ -168,6 +169,16 @@ letDecl = do
     void $ symbol "="
     body <- expr
     return (name, foldr Lam body args)
+
+letrecDecl :: MLParser Binding
+letrecDecl = do
+    reservedWord "let"
+    reservedWord "rec"
+    name <- varName
+    args <- many varName
+    void $ symbol "="
+    body <- expr
+    return (name, FixPoint $ foldr Lam body (name:args))
 
 mainDecl :: MLParser Binding
 mainDecl = do
@@ -182,7 +193,7 @@ val = do
     return ("it", ex) --  same syntax here as in ghci
 
 decl :: MLParser Binding
-decl = try letDecl <|> val <|> mainDecl
+decl = try letrecDecl <|> try letDecl <|> val <|> mainDecl
 
 topLevel :: MLParser Binding
 topLevel = do 

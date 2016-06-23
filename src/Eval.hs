@@ -39,16 +39,21 @@ eval env expr = case expr of
     Lit (String str) -> return $ VString str
     Lit (Char c)     -> return $ VChar c
     Lit (Boolean b)  -> return $ VBool b
-    List xs          -> return $ VList $ map (eval env) xs
-    Lam x body       -> return (VClosure x body env)
+    List xs          -> return $ VList $ map (eval env) xs -- placeholder, this isn't right
+    Lam x body       -> return $ VClosure x body env
+    Let x e body     -> do
+        e' <- eval env e
+        let newEnv = Map.insert x e' env
+        eval newEnv body
+    FixPoint e       -> eval env (App e (FixPoint e))
     Var x            -> 
         case Map.lookup x env of
           Just v -> return v
           Nothing -> return $ VError "value not found"
     App func arg     -> do
-        VClosure s exp env' <- eval env func
+        VClosure s exp closure <- eval env func
         args <- eval env arg
-        let newEnv = Map.insert s args env'
+        let newEnv = Map.insert s args closure
         eval newEnv exp
     If cond tr fl    -> do
         VBool br <- eval env cond
@@ -77,7 +82,6 @@ eval env expr = case expr of
         case ex' of
           VNum n    -> return $ VNum (negate n)
           VDouble d -> return $ VDouble (negate d)
-
     _     -> return $ VError "not yet supported"
 
 -- helper functions --
