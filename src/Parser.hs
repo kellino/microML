@@ -27,95 +27,57 @@ constructorName = do name@(n:_) <- identifier
                         else fail "a constructor must begin with a capital letter" 
 
 variable :: MLParser Expr
-variable = do
-    x <- varName
-    return $ Var x
+variable = varName >>= \var -> return $ Var var
 
 constructor :: MLParser Expr
-constructor = do
-    x <- constructorName
-    return $ Constructor x
+constructor = constructorName >>= \c -> return $ Constructor c
 
 number :: MLParser Expr
-number = do
-    n <- integer
-    return (Lit (Number n))
+number = integer >>= \n -> return (Lit (Number n))
 
 double :: MLParser Expr
-double = do
-    n <- float
-    return (Lit (Double n))
+double = float >>= \d -> return (Lit (Double d))
 
 ------------------------
 -- EXPRESSION PARSERS --
 ------------------------
 
--- boolean operators
-bExpr = makeExprParser bool boolOps
+atomicExpr =
+        parens expr
+    <|> bool
+    <|> try double <|> number
+    <|> ifThenElse
+    <|> lambda
+    <|> variable
+    <|> charLit
+    <|> stringLit
+
+term = makeExprParser atomicExpr table
+    where 
+        table = [ [ Prefix (symbol "-" *> pure UnaryMinus)
+                ,   Prefix (symbol "+" >> return id) ]
+                , [ InfixL (symbol "^" *> pure (Op OpExp)) ] 
+                , [ InfixL (symbol "*" *> pure (Op OpMul))
+                ,   InfixL (symbol "/" *> pure (Op OpDiv))
+                ,   InfixL (symbol "%" *> pure (Op OpMod)) ]
+                , [ InfixL (symbol "+" *> pure (Op OpAdd))
+                ,   InfixL (symbol "-" *> pure (Op OpSub)) ] 
+                , [ InfixL (symbol "<=" *> pure (Op OpLe))
+                ,   InfixL (symbol ">=" *> pure (Op OpGe))
+                ,   InfixL (symbol "<"  *> pure (Op OpLt))
+                ,   InfixL (symbol ">"  *> pure (Op OpGt)) ]
+                , [ InfixL (symbol "==" *> pure (Op OpEq)) ] 
+                , [ InfixL (reservedWord "and" *> pure (Op OpAnd))
+                ,   InfixL (reservedWord "or"  *> pure (Op OpOr))] ]
+
 
 bool :: MLParser Expr
-bool = parens bExpr
-    <|> (reservedWord "true" *> pure (Lit (Boolean True)))
-    <|> (reservedWord "false" *> pure (Lit (Boolean False)))
-
-boolOps :: [[Operator MLParser Expr]]
-boolOps =
-    [ [ InfixL (reservedWord "and" *> pure (Op OpAnd))
-      , InfixL (reservedWord "or"  *> pure (Op OpOr))] ]
-
--- arithemtic operators
-aExpr = makeExprParser aTerm arithOps
-
-aTerm :: MLParser Expr
-aTerm = parens aExpr
-    <|> try variable
-    <|> try double
-    <|> number
-
-arithOps :: [[Operator MLParser Expr]]
-arithOps =
-     [ [ Prefix (symbol "-" *> pure UnaryMinus)
-       , Prefix (symbol "+" >> return id) ]
-     , [ InfixL (symbol "^" *> pure (Op OpExp)) ] 
-     , [ InfixL (symbol "*" *> pure (Op OpMul))
-     ,   InfixL (symbol "/" *> pure (Op OpDiv))
-     ,   InfixL (symbol "%" *> pure (Op OpMod)) ]
-     , [ InfixL (symbol "+" *> pure (Op OpAdd))
-     ,   InfixL (symbol "-" *> pure (Op OpSub)) ] ]
-
--- relational operators
-rExpr = makeExprParser rTerm relationOps
-
-rTerm :: MLParser Expr
-rTerm = parens rExpr
-    <|> try bool
-    <|> try aExpr
-
-relationOps :: [[Operator MLParser Expr]]
-relationOps = 
-    [ [ InfixL (symbol "<=" *> pure (Op OpLe))
-      , InfixL (symbol ">=" *> pure (Op OpGe))
-      , InfixL (symbol "<"  *> pure (Op OpLt))
-      , InfixL (symbol ">"  *> pure (Op OpGt))
-      , InfixL (symbol "==" *> pure (Op OpEq)) ] ]
+bool = (reservedWord "true" *> pure (Lit (Boolean True)))
+   <|> (reservedWord "false" *> pure (Lit (Boolean False)))
 
 ---------------------
 -- GENERAL PARSERS --
 ---------------------
-
-atomicExpr :: MLParser Expr
-atomicExpr = 
-             parens expr
-         <|> parens atomicExpr
-         <|> try rExpr
-         <|> aExpr
-         <|> bExpr
-         <|> ifThenElse
-         <|> lambda
-         <|> variable
-         <|> stringLit
-         <|> charLit
-         <|> list
 
 charLit :: MLParser Expr
 charLit = do
@@ -130,11 +92,6 @@ stringLit = do
     str <- many $ alphaNumChar <|> spaceChar
     void $ symbol "\""
     return $ Lit $ String str
-
-list :: MLParser Expr
-list = do
-    contents <- brackets $ atomicExpr `sepBy` comma
-    return $ List contents
 
 lambda :: MLParser Expr
 lambda = do
@@ -156,7 +113,7 @@ ifThenElse = do
 
 expr :: MLParser Expr
 expr = do
-    es <- some atomicExpr
+    es <- some term
     return $ foldl1 App es
 
 type Binding = (String, Expr)
@@ -172,7 +129,6 @@ letDecl = do
 
 letRecDecl :: MLParser (String, Expr)
 letRecDecl = do
-  reservedWord "let"
   reservedWord "rec"
   name <- varName
   args <- many varName
