@@ -68,7 +68,7 @@ aExpr = makeExprParser aTerm arithOps
 
 aTerm :: MLParser Expr
 aTerm = parens aExpr
-    <|> variable
+    <|> try variable
     <|> try double
     <|> number
 
@@ -106,8 +106,9 @@ relationOps =
 atomicExpr :: MLParser Expr
 atomicExpr = 
              parens expr
+         <|> parens atomicExpr
          <|> try rExpr
-         <|> try aExpr
+         <|> aExpr
          <|> bExpr
          <|> ifThenElse
          <|> lambda
@@ -169,15 +170,15 @@ letDecl = do
     body <- expr
     return (name, foldr Lam body args)
 
-letrecDecl :: MLParser Binding
-letrecDecl = do
-    reservedWord "let"
-    reservedWord "rec"
-    name <- varName
-    args <- many varName
-    void $ symbol "="
-    body <- expr
-    return (name, FixPoint $ foldr Lam body (name:args))
+letRecDecl :: MLParser (String, Expr)
+letRecDecl = do
+  reservedWord "let"
+  reservedWord "rec"
+  name <- varName
+  args <- many varName
+  void $ symbol "="
+  body <- expr
+  return (name, FixPoint $ foldr Lam body (name:args))
 
 mainDecl :: MLParser Binding
 mainDecl = do
@@ -192,14 +193,13 @@ val = do
     return ("it", ex) --  same syntax here as in ghci
 
 decl :: MLParser Binding
-decl = try letrecDecl <|> try letDecl <|> val <|> mainDecl
+decl = try letRecDecl <|> try letDecl <|> val <|> mainDecl
 
 topLevel :: MLParser Binding
 topLevel = do 
     x <- decl
     void $ optional $ symbol ";"
     return x
-
 
 --------------------------
 -- TOP SIGNATURE PARSER --

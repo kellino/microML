@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Syntax where
 
 type Name = String
@@ -42,7 +44,6 @@ data Binop =
       | OpCom
       deriving (Eq, Ord, Show)         
 
-
 data Type = 
         TVar TVar
       | TCon TyCon
@@ -51,7 +52,6 @@ data Type =
 
 data TVar = TV { tvName :: Name } deriving (Show, Eq, Ord)
 data TyCon = AlgTyCon { tyId :: Name } | PrimTyCon { tyId :: Name } deriving (Show, Eq, Ord)
-
 
 data Program = Program [Decl] Expr deriving Eq
 

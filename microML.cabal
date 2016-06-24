@@ -29,6 +29,7 @@ executable microML
                      megaparsec >= 5.0.0,
                      repline >= 0.1.5.0,
                      mtl,
+                     text,
                      scientific,
                      containers,
                      transformers,
