@@ -70,7 +70,6 @@ term = makeExprParser atomicExpr table
                 , [ InfixL (reservedWord "and" *> pure (Op OpAnd))
                 ,   InfixL (reservedWord "or"  *> pure (Op OpOr))] ]
 
-
 bool :: MLParser Expr
 bool = (reservedWord "true" *> pure (Lit (Boolean True)))
    <|> (reservedWord "false" *> pure (Lit (Boolean False)))
@@ -136,20 +135,13 @@ letRecDecl = do
   body <- expr
   return (name, FixPoint $ foldr Lam body (name:args))
 
-mainDecl :: MLParser Binding
-mainDecl = do
-    reservedWord "main"
-    void $ symbol "="
-    body <- expr
-    return ("main", body)
-
 val :: MLParser Binding
 val = do
     ex <- expr
     return ("it", ex) --  same syntax here as in ghci
 
 decl :: MLParser Binding
-decl = try letRecDecl <|> try letDecl <|> val <|> mainDecl
+decl = try letRecDecl <|> try letDecl <|> val
 
 topLevel :: MLParser Binding
 topLevel = do 
