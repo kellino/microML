@@ -60,6 +60,7 @@ identifier = lexeme (p >>= check)
 
 contents :: Parser a -> Parser a
 contents p = do
+    _ <- optional scn
     r <- p
     eof
     return r
