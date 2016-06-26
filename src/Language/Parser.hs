@@ -52,6 +52,7 @@ atomicExpr =
     <|> variable
     <|> charLit
     <|> stringLit
+    <|> list
 
 term :: MLParser Expr
 term = makeExprParser atomicExpr table
@@ -70,12 +71,19 @@ term = makeExprParser atomicExpr table
                 ,   InfixL (symbol ">"  *> pure (Op OpGt)) ]
                 , [ InfixL (symbol "==" *> pure (Op OpEq)) ] 
                 , [ InfixL (reservedWord "and" *> pure (Op OpAnd))
-                ,   InfixL (reservedWord "or"  *> pure (Op OpOr))] ]
+                ,   InfixL (reservedWord "or"  *> pure (Op OpOr))] 
+                ,  [ InfixR (symbol ":" >> return listCons) ] ]
                 -- TODO $, compose (easy here for infix op), $, .. 
+        listCons l r = List (Cons l (Cons r Nil))
 
 bool :: MLParser Expr
 bool = (reservedWord "true" *> pure (Lit (Boolean True)))
    <|> (reservedWord "false" *> pure (Lit (Boolean False)))
+
+list = do
+    elems <- brackets $ expr `sepBy` comma
+    return $ List $ foldr Cons Nil elems
+    -- return $ foldr (\x xs -> App (App (Constructor "cons") x) xs) (Constructor "nil") elems
 
 ---------------------
 -- GENERAL PARSERS --

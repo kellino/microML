@@ -13,10 +13,12 @@ data Expr
   | FixPoint Expr
   | Lit Lit
   | UnaryMinus Expr
-  | List [Expr]
+  | List List 
   | If Expr Expr Expr
   | Op Binop Expr Expr
   deriving (Show, Eq, Ord)
+
+data List = Nil | Cons Expr List deriving (Show, Ord, Eq) 
 
 data Lit
   = Number Integer

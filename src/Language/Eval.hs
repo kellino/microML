@@ -12,7 +12,7 @@ data Value
   | VClosure String Expr TermEnv
   | VString String
   | VChar Char
-  | VList [Identity Value]
+  | VList [Value]
   | VError String
   deriving (Eq, Ord)
 
@@ -39,7 +39,11 @@ eval env expr = case expr of
     Lit (String str) -> return $ VString str
     Lit (Char c)     -> return $ VChar c
     Lit (Boolean b)  -> return $ VBool b
-    List xs          -> return $ VList $ map (eval env) xs -- placeholder, this isn't right
+    --List xs          -> return $ VList $ map (eval env) xs -- placeholder, this isn't right
+    List xs          ->
+        case xs of
+          Nil -> return $ VList []
+          _   -> return $ VError "not yet supported"
     Lam x body       -> return $ VClosure x body env
     Let x e body     -> do
         e' <- eval env e
