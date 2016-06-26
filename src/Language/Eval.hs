@@ -1,6 +1,6 @@
-module Eval where
+module Language.Eval where
 
-import Syntax
+import Language.Syntax
 
 import Control.Monad.Identity
 import qualified Data.Map as Map
@@ -49,7 +49,7 @@ eval env expr = case expr of
     Var x            -> 
         case Map.lookup x env of
           Just v -> return v
-          Nothing -> return $ VError "value not found"
+          Nothing -> return $ VError "this name has not yet been set to a value"
     App func arg     -> do
         VClosure s exp closure <- eval env func
         args <- eval env arg

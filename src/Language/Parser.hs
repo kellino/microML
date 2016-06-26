@@ -1,9 +1,9 @@
-module Parser (
+module Language.Parser (
     parseProgram
 ) where
 
-import Syntax
-import Lexer
+import Language.Syntax
+import Language.Lexer
 import Data.Functor.Identity (Identity)
 import Data.Char (isLower, isUpper)
 import Text.Megaparsec
@@ -42,6 +42,7 @@ double = float >>= \d -> return (Lit (Double d))
 -- EXPRESSION PARSERS --
 ------------------------
 
+atomicExpr :: MLParser Expr
 atomicExpr =
         parens expr
     <|> bool
@@ -52,6 +53,7 @@ atomicExpr =
     <|> charLit
     <|> stringLit
 
+term :: MLParser Expr
 term = makeExprParser atomicExpr table
     where 
         table = [ [ Prefix (symbol "-" *> pure UnaryMinus)
@@ -69,6 +71,7 @@ term = makeExprParser atomicExpr table
                 , [ InfixL (symbol "==" *> pure (Op OpEq)) ] 
                 , [ InfixL (reservedWord "and" *> pure (Op OpAnd))
                 ,   InfixL (reservedWord "or"  *> pure (Op OpOr))] ]
+                -- TODO $, compose (easy here for infix op), $, .. 
 
 bool :: MLParser Expr
 bool = (reservedWord "true" *> pure (Lit (Boolean True)))
@@ -124,16 +127,10 @@ letDecl = do
     args <- many varName
     void $ symbol "="
     body <- expr
-    return (name, foldr Lam body args)
-
-letRecDecl :: MLParser (String, Expr)
-letRecDecl = do
-  reservedWord "rec"
-  name <- varName
-  args <- many varName
-  void $ symbol "="
-  body <- expr
-  return (name, FixPoint $ foldr Lam body (name:args))
+    if name `elem` (words . removeControlChar . show) body
+       then return (name, FixPoint $ foldr Lam body (name:args))
+       else return (name, foldr Lam body args)
+           where removeControlChar = filter (\x -> x `notElem` ['(', ')', '\"'])
 
 val :: MLParser Binding
 val = do
@@ -141,7 +138,7 @@ val = do
     return ("it", ex) --  same syntax here as in ghci
 
 decl :: MLParser Binding
-decl = try letRecDecl <|> try letDecl <|> val
+decl = try letDecl <|> val
 
 topLevel :: MLParser Binding
 topLevel = do 

@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Syntax where
+module Language.Syntax where
 
 type Name = String
 

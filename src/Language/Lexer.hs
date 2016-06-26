@@ -1,4 +1,4 @@
-module Lexer where
+module Language.Lexer where
 
 import Control.Monad (void)
 import Text.Megaparsec

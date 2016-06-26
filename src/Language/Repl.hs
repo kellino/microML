@@ -1,10 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Repl where
+module Language.Repl where
 
-import Syntax
-import Parser
-import Eval
+import Language.Syntax
+import Language.Parser
+import Language.Eval
 
 import Control.Monad.State.Strict
 import System.Console.Repline

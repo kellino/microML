@@ -1,6 +1,6 @@
-module Main where
+module Language.Main where
 
-import Repl 
+import Language.Repl 
 
 
 -- interim version for testing. Possibly to be rewritten with System.Console.GetOpt
