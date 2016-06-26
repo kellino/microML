@@ -71,10 +71,7 @@ term = makeExprParser atomicExpr table
                 ,   InfixL (symbol ">"  *> pure (Op OpGt)) ]
                 , [ InfixL (symbol "==" *> pure (Op OpEq)) ] 
                 , [ InfixL (reservedWord "and" *> pure (Op OpAnd))
-                ,   InfixL (reservedWord "or"  *> pure (Op OpOr))] 
-                ,  [ InfixR (symbol ":" >> return listCons) ] ]
-                -- TODO $, compose (easy here for infix op), $, .. 
-        listCons l r = List (Cons l (Cons r Nil))
+                ,   InfixL (reservedWord "or"  *> pure (Op OpOr))] ]
 
 bool :: MLParser Expr
 bool = (reservedWord "true" *> pure (Lit (Boolean True)))
@@ -82,8 +79,38 @@ bool = (reservedWord "true" *> pure (Lit (Boolean True)))
 
 list = do
     elems <- brackets $ expr `sepBy` comma
-    return $ List $ foldr Cons Nil elems
-    -- return $ foldr (\x xs -> App (App (Constructor "cons") x) xs) (Constructor "nil") elems
+    return $ List elems
+
+--------------------
+-- PATTERN PARSER --
+--------------------
+
+pat :: MLParser Expr
+pat = makeExprParser pats table <?> "pattern"
+    where 
+        table = [ [ InfixR (symbol ":" >> return listCons) ] ]
+        pats =  parens pats
+            <|> wildcard 
+            <|> varPat
+            <|> try doublePat
+            <|> numPat
+            <|> boolPat
+        wildcard = do 
+            void $ symbol "_"
+            return $ Pat Wildcard
+        -- listCons h r = PApp "cons" [h, r]
+        listCons = undefined
+        boolPat = (reservedWord "true" *> pure (Pat (PBool True)))
+              <|> (reservedWord "false" *> pure (Pat (PBool False)))
+        varPat = do
+            var <- varName
+            return $ Pat $ PVar var
+        doublePat = do
+            d <- float
+            return $ Pat $ PDouble d
+        numPat = do
+            n <- integer
+            return $ Pat $ PNum n
 
 ---------------------
 -- GENERAL PARSERS --
