@@ -12,13 +12,12 @@ data Expr
   | Let Name Expr Expr
   | FixPoint Expr
   | Lit Lit
+  | Pat Pat
   | UnaryMinus Expr
-  | List List 
+  | List [Expr]
   | If Expr Expr Expr
   | Op Binop Expr Expr
   deriving (Show, Eq, Ord)
-
-data List = Nil | Cons Expr List deriving (Show, Ord, Eq) 
 
 data Lit
   = Number Integer
@@ -27,6 +26,15 @@ data Lit
   | Double Double
   | String String
   deriving (Show, Eq, Ord)
+
+data Pat =
+        PVar Name
+      | PApp Name [Pat]
+      | Wildcard
+      | PNum Integer
+      | PDouble Double
+      | PBool Bool
+      deriving (Show, Eq, Ord)
 
 data Binop = 
         OpAdd
