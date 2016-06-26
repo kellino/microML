@@ -12,7 +12,7 @@ data Value
   | VClosure String Expr TermEnv
   | VString String
   | VChar Char
-  | VList [Value]
+  | VList [Identity Value]
   | VError String
   deriving (Eq, Ord)
 
@@ -28,7 +28,7 @@ instance Show Value where
     show (VDouble d)   = show d
     show (VString str) = show str
     show (VChar c)     = show c
-    show (VList ls)    = show ls  -- this is not correct
+    show (VList contents) = show contents
     show (VError str)  = show str
     show VClosure{}    = "\ESC[1m<<closure>>\ESC[0m"
 
@@ -39,12 +39,8 @@ eval env expr = case expr of
     Lit (String str) -> return $ VString str
     Lit (Char c)     -> return $ VChar c
     Lit (Boolean b)  -> return $ VBool b
-    --List xs          -> return $ VList $ map (eval env) xs -- placeholder, this isn't right
-    List xs          ->
-        case xs of
-          Nil -> return $ VList []
-          _   -> return $ VError "not yet supported"
     Lam x body       -> return $ VClosure x body env
+    List contents    -> return $ VList $ map (eval env) contents
     Let x e body     -> do
         e' <- eval env e
         let newEnv = Map.insert x e' env
