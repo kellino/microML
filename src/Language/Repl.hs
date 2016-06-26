@@ -19,6 +19,15 @@ initState = ReplState emptyTmenv
 
 type Repl a = HaskelineT (StateT ReplState IO) a
 
+--------------
+-- COMMANDS --
+--------------
+
+using :: [String] -> Repl ()
+using args = do
+    contents <- liftIO $ readFile (unwords args)
+    exec contents
+
 liftError :: (Show a1, MonadIO m) => Either a1 a -> HaskelineT m a
 liftError (Right val) = return val
 liftError (Left err) = do
@@ -40,7 +49,6 @@ exec code = do
       Just x -> do
           let (val, _) = runEval (termEnv st') "it" x
           liftIO $ print val
-
 
 cmd = exec
 
