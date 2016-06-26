@@ -1,4 +1,4 @@
-module Language.Main where
+module Main where
 
 import Language.Repl 
 
