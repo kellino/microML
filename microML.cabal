@@ -11,7 +11,7 @@ Build-type:     Simple
 Cabal-version:  >=1.6
 
 test-suite microMLTest
-  hs-source-dirs:    tests, src
+  hs-source-dirs:    tests, src/Language
   main-is:           Main.hs
   type:              exitcode-stdio-1.0
   ghc-options:       -Wall -threaded
