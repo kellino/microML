@@ -34,6 +34,7 @@ data Pat =
       | PNum Integer
       | PDouble Double
       | PBool Bool
+      | PList [Pat]
       deriving (Show, Eq, Ord)
 
 data Binop = 
