@@ -1,0 +1,3 @@
+let id = \x -> x
+let const = \x y -> x
+let compose p x = \y -> p (x y)
