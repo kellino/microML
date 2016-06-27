@@ -1,7 +1,14 @@
-module Main where
+module Main  where
 
-import Language.Repl 
+import Repl.Repl
+import System.Environment (getArgs)
+
 
 main :: IO ()
-main = repl (return ())
---main = repl (using ["src/Libs/standard.mml"])
+main = do
+  args <- getArgs
+  case args of
+    []      -> shell (return ())
+    [fname] -> shell (load [fname])
+    ["test", fname] -> shell (load [fname] >> browse [] >> quit ())
+    _ -> putStrLn "invalid arguments"
