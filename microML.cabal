@@ -28,6 +28,7 @@ executable microML
   Build-depends:     base >= 3,
                      parsec,
                      repline >= 0.1.5.0,
+                     process,
                      mtl,
                      text,
                      pretty,
