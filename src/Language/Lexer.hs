@@ -43,12 +43,14 @@ arrow = symbol "->"
 isA = symbol "::="
 hasType = symbol "::"
 whiteSpace = lexeme spaceChar 
+operator = lexeme $ oneOf ".$!"
 
 reservedWord :: String -> Parser ()
 reservedWord w = string w *> notFollowedBy alphaNumChar *> sc
 
 reserved :: [String]
-reserved = ["if", "then", "else", "let", "true", "false", "and", "or", "not", "otherwise", "where", "alias", "using", "main", "rec"]
+reserved = ["if", "then", "else", "let", "true", "false", "and", "or", "not", 
+            "otherwise", "where", "alias", "using", "infixL", "infixR", "infix", "postfix", "prefix"]
 
 identifier :: Parser String
 identifier = lexeme (p >>= check)

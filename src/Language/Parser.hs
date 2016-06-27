@@ -13,6 +13,7 @@ import Control.Monad (void)
 type MLParser = ParsecT Dec String Identity
 type FileName = String
 type Input = String
+type Binding = (String, Expr)
 
 varName :: MLParser String
 varName = do name@(n:_) <- identifier
@@ -144,8 +145,6 @@ expr :: MLParser Expr
 expr = do
     es <- some term
     return $ foldl1 App es
-
-type Binding = (String, Expr)
 
 letDecl :: MLParser Binding
 letDecl = do

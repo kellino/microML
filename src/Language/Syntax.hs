@@ -3,7 +3,12 @@
 module Language.Syntax where
 
 type Name = String
+type Decl = (String, Expr)
 
+
+data Program = Program [Decl] Expr deriving Eq
+
+-- fundamental lambda calculus
 data Expr
   = Var Name
   | Constructor Name
@@ -17,9 +22,10 @@ data Expr
   | List [Expr]
   | If Expr Expr Expr
   | Op Binop Expr Expr
-  | Case Expr [Match]
+-- | Case Expr [Match]
   deriving (Show, Eq, Ord)
 
+-- literal types
 data Lit
   = Number Integer
   | Boolean Bool
@@ -28,11 +34,7 @@ data Lit
   | String String
   deriving (Show, Eq, Ord)
 
-data Match = Match 
-    { _matchName :: Name
-      , _matchPats :: [Match]
-    } deriving (Eq, Show, Ord)
-    
+-- pattern matching types
 data Pat =
         PVar Name
       | PApp Name [Pat]
@@ -43,6 +45,7 @@ data Pat =
       | PDouble Double
       deriving (Show, Eq, Ord)
 
+-- fundamental binary operators
 data Binop = 
         OpAdd
       | OpSub
@@ -61,6 +64,16 @@ data Binop =
       | OpCom
       deriving (Eq, Ord, Show)         
 
-data Program = Program [Decl] Expr deriving Eq
+data Assoc
+    = OpLeft
+  | OpRight
+  | OpNone
+  | OpPrefix
+  | OpPostfix
+  deriving Show
 
-type Decl = (String, Expr)
+data OperatorDef = OperatorDef 
+    { oassoc :: Assoc
+    , oprec :: Integer
+    , otok :: Name
+    } deriving Show
