@@ -17,6 +17,7 @@ data Expr
   | List [Expr]
   | If Expr Expr Expr
   | Op Binop Expr Expr
+  | Case Expr [Match]
   deriving (Show, Eq, Ord)
 
 data Lit
@@ -27,14 +28,19 @@ data Lit
   | String String
   deriving (Show, Eq, Ord)
 
+data Match = Match 
+    { _matchName :: Name
+      , _matchPats :: [Match]
+    } deriving (Eq, Show, Ord)
+    
 data Pat =
         PVar Name
       | PApp Name [Pat]
-      | Wildcard
+      | PLit Lit
+      | PWild
+      | PBool Bool
       | PNum Integer
       | PDouble Double
-      | PBool Bool
-      | PList [Pat]
       deriving (Show, Eq, Ord)
 
 data Binop = 
@@ -54,15 +60,6 @@ data Binop =
       | OpGt
       | OpCom
       deriving (Eq, Ord, Show)         
-
-data Type = 
-        TVar TVar
-      | TCon TyCon
-      | TApp Type Type
-      deriving (Show, Eq, Ord)
-
-data TVar = TV { tvName :: Name } deriving (Show, Eq, Ord)
-data TyCon = AlgTyCon { tyId :: Name } | PrimTyCon { tyId :: Name } deriving (Show, Eq, Ord)
 
 data Program = Program [Decl] Expr deriving Eq
 

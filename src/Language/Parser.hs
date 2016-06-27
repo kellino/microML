@@ -85,32 +85,24 @@ list = do
 -- PATTERN PARSER --
 --------------------
 
-pat :: MLParser Expr
 pat = makeExprParser pats table <?> "pattern"
     where 
         table = [ [ InfixR (symbol ":" >> return listCons) ] ]
         pats =  parens pats
             <|> wildcard 
-            <|> varPat
-            <|> try doublePat
-            <|> numPat
-            <|> boolPat
+            <|> try patDouble
+            <|> patNum
+            <|> patBool
+            <|> patVar
+        patVar = varName >>= \name -> return $ Pat $ PVar name
         wildcard = do 
             void $ symbol "_"
-            return $ Pat Wildcard
-        -- listCons h r = PApp "cons" [h, r]
+            return $ Pat PWild
         listCons = undefined
-        boolPat = (reservedWord "true" *> pure (Pat (PBool True)))
-              <|> (reservedWord "false" *> pure (Pat (PBool False)))
-        varPat = do
-            var <- varName
-            return $ Pat $ PVar var
-        doublePat = do
-            d <- float
-            return $ Pat $ PDouble d
-        numPat = do
-            n <- integer
-            return $ Pat $ PNum n
+        patNum = integer >>= \n -> return $ Pat (PLit (Number n)) 
+        patDouble = float >>= \d -> return $ Pat (PLit (Double d))
+        patBool = (reservedWord "true" *> pure (Pat (PLit (Boolean True))))
+              <|> (reservedWord "false" *> pure (Pat (PLit (Boolean False))))
 
 ---------------------
 -- GENERAL PARSERS --
@@ -185,21 +177,8 @@ topLevel = do
 -- TOP SIGNATURE PARSER --
 --------------------------
 
-{-typeParser = do-}
-    {-types <- type' `sepBy1` arrow-}
-    {-return $ foldr1 TypFun tys-}
-        {-where type' = makeExprParser terms table <?> "type expression"-}
-              {-table = [ [ InfixR (whiteSpace >> return TApp) ] ]-}
-              {-term = parens ty <|> listTy <|> try primitiveTy <|> try tyVar <|> dataTy-}
-              {-listTy = TyList <$> brackets ty-}
-              {-tyVar = TyVar <$> TvName <$> varName-}
-              {-dataTy = TyData <$> constructorName-}
-              {-primitiveTy = (reservedWord "Number" >> return (TyPrimitive TyNum))-}
-                        {-<|> (reservedWord "Boolean" >> return (TyPrimitive TyBool))-}
-
 program :: MLParser [Binding]
 program = many topLevel
 
 parseProgram :: FileName -> Input -> Either (ParseError Char Dec) [Binding]
 parseProgram = parse (contents program) 
-
