@@ -160,16 +160,18 @@ generalize env t  = Forall as t
 
 ops :: Map.Map Binop Type
 ops = Map.fromList [
-      (Add, (typeInt `TArr` (typeInt `TArr` typeInt)))
-    , (Mul, (typeInt `TArr` (typeInt `TArr` typeInt)))
-    , (Sub, (typeInt `TArr` (typeInt `TArr` typeInt)))
-    , (Eql, (typeInt `TArr` (typeInt `TArr` typeBool)))
+      (OpAdd, typeInt `TArr` (typeInt `TArr` typeInt))
+    , (OpMul, typeInt `TArr` (typeInt `TArr` typeInt))
+    , (OpSub, typeInt `TArr` (typeInt `TArr` typeInt))
+    , (OpEq, typeInt `TArr` (typeInt `TArr` typeBool))
   ]
 
 infer :: Expr -> Infer Type
 infer expr = case expr of
-  Lit (LInt _)  -> return $ typeInt
-  Lit (LBool _) -> return $ typeBool
+  Lit (LInt _)  -> return typeInt
+  Lit (LDouble _) -> return typeDouble
+  Lit (LBoolean _) -> return typeBool
+  Lit (LString _) -> return typeString
 
   Var x -> lookupEnv x
 
@@ -191,12 +193,6 @@ infer expr = case expr of
     let sc = generalize env t1
     t2 <- inEnv (x, sc) (infer e2)
     return t2
-
-  Fix e1 -> do
-    t1 <- infer e1
-    tv <- fresh
-    uni (tv `TArr` tv) t1
-    return tv
 
   Op op e1 e2 -> do
     t1 <- infer e1

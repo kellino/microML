@@ -10,18 +10,37 @@ data Expr
   | Let Name Expr Expr
   | Lit Lit
   | If Expr Expr Expr
-  | Fix Expr
+  | FixPoint Expr
   | Op Binop Expr Expr
+  | UnaryMinus Expr
   deriving (Show, Eq, Ord)
 
 data Lit
   = LInt Integer
   | LDouble Double
-  | LBool Bool
+  | LBoolean Bool
+  | LString String
+  | LChar Char
+
   deriving (Show, Eq, Ord)
 
-data Binop = Add | Sub | Mul | Eql
-  deriving (Eq, Ord, Show)
+data Binop = 
+        OpAdd
+      | OpSub
+      | OpMul
+      | OpDiv
+      | OpMod
+      | OpExp
+      | OpOr
+      | OpAnd
+      | OpEq
+      | OpNe
+      | OpLe
+      | OpLt
+      | OpGe
+      | OpGt
+      | OpCom
+      deriving (Eq, Ord, Show)      
 
 data Program = Program [Decl] Expr deriving Eq
 

@@ -30,13 +30,13 @@ class Pretty p where
   ppr :: Int -> p -> Doc
 
 instance Pretty Name where
-  ppr _ x = text x
+  ppr _ = text 
 
 instance Pretty TVar where
   ppr _ (TV x) = text x
 
 instance Pretty Type where
-  ppr p (TArr a b) = (parensIf (isArrow a) (ppr p a)) <+> text "->" <+> ppr p b
+  ppr p (TArr a b) = parensIf (isArrow a) (ppr p a) <+> text "->" <+> ppr p b
     where
       isArrow TArr{} = True
       isArrow _ = False
@@ -48,10 +48,10 @@ instance Pretty Scheme where
   ppr p (Forall ts t) = text "forall" <+> hcat (punctuate space (map (ppr p) ts)) <> text "." <+> ppr p t
 
 instance Pretty Binop where
-  ppr _ Add = text "+"
-  ppr _ Sub = text "-"
-  ppr _ Mul = text "*"
-  ppr _ Eql = text "=="
+  ppr _ OpAdd = text "+"
+  ppr _ OpSub = text "-"
+  ppr _ OpMul = text "*"
+  ppr _ OpEq  = text "=="
 
 instance Pretty Expr where
   ppr p (Var a) = ppr p a
@@ -60,19 +60,22 @@ instance Pretty Expr where
   ppr p (Let a b c) = text "let" <> ppr p a <+> text  "=" <+> ppr p b <+> text "in" <+> ppr p c
   ppr p (Lit a) = ppr p a
   ppr p (Op o a b) = parensIf (p>0) $ ppr p a <+> ppr p o <+> ppr p b
-  ppr p (Fix a) = parensIf (p>0) $ text "fix" <> ppr p a
+  ppr p (FixPoint a) = parensIf (p>0) $ text "fix" <> ppr p a
   ppr p (If a b c) =
     text "if" <> ppr p a <+>
     text "then" <+> ppr p b <+>
     text "else" <+> ppr p c
 
 instance Pretty Lit where
-  ppr _ (LInt i) = integer i
-  ppr _ (LBool True) = text "True"
-  ppr _ (LBool False) = text "False"
+  ppr _ (LInt i)         = integer i
+  ppr _ (LDouble d)      = double d
+  ppr _ (LBoolean True)  = text "True"
+  ppr _ (LBoolean False) = text "False"
+  ppr _ (LChar c)        = char c
+  ppr _ (LString str)    = text str
 
 instance Pretty Constraint where
-  ppr p (a, b) = (ppr p a) <+> text " ~ " <+> (ppr p b)
+  ppr p (a, b) = ppr p a <+> text " ~ " <+> ppr p b
 
 instance Pretty [Constraint] where
   ppr p cs = vcat (punctuate space (map (ppr p) cs))
