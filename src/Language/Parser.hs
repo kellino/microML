@@ -136,6 +136,14 @@ ifthen = do
   fl <- aexp
   return (If cond tr fl)
 
+mlCase :: Parser Expr
+mlCase = do
+    reserved "case"
+    e1 <- expr
+    reserved "of"
+    pats <- many expr
+    return $ Case e1 pats
+
 aexp :: Parser Expr
 aexp =
       parens expr
@@ -146,6 +154,7 @@ aexp =
   <|> try letrecin
   <|> letin
   <|> lambda
+  <|> mlCase
   <|> variable
   <|> stringLit
 
