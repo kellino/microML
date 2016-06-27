@@ -26,7 +26,7 @@ executable microML
   
   -- Packages needed in order to build this package.
   Build-depends:     base >= 3,
-                     megaparsec >= 5.0.0,
+                     parsec,
                      repline >= 0.1.5.0,
                      mtl,
                      text,

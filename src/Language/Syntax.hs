@@ -2,11 +2,11 @@
 
 module Language.Syntax where
 
+import qualified Text.Parsec.Expr as Ex
+import Text.Parsec
+import Control.Monad.Identity (Identity)
+
 type Name = String
-type Decl = (String, Expr)
-
-
-data Program = Program [Decl] Expr deriving Eq
 
 -- fundamental lambda calculus
 data Expr
@@ -21,7 +21,7 @@ data Expr
   | UnaryMinus Expr
   | List [Expr]
   | If Expr Expr Expr
-  | Op Binop Expr Expr
+  | Binop Name Expr Expr
 -- | Case Expr [Match]
   deriving (Show, Eq, Ord)
 
@@ -72,8 +72,17 @@ data Assoc
   | OpPostfix
   deriving Show
 
+data Decl 
+    = LetDecl Expr
+  | OpDecl OperatorDef
+  deriving Show
+
 data OperatorDef = OperatorDef 
     { oassoc :: Assoc
     , oprec :: Integer
     , otok :: Name
     } deriving Show
+
+type Op x = Ex.Operator String ParseState Identity x
+type Parser a = Parsec String ParseState a
+data ParseState = ParseState [OperatorDef] deriving Show
