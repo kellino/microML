@@ -9,6 +9,6 @@ main = do
   args <- getArgs
   case args of
     []      -> shell (return ())
-    [fname] -> shell (load [fname])
-    ["test", fname] -> shell (load [fname] >> browse [] >> quit ())
+    [fname] -> shell (using [fname])
+    ["test", fname] -> shell (using [fname] >> browse [] >> quit ())
     _ -> putStrLn "invalid arguments"

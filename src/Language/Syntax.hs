@@ -4,6 +4,7 @@ type Name = String
 
 data Expr
   = Var Name
+  | Constructor Name
   | App Expr Expr
   | Lam Name Expr
   | Let Name Expr Expr
@@ -15,6 +16,7 @@ data Expr
 
 data Lit
   = LInt Integer
+  | LDouble Double
   | LBool Bool
   deriving (Show, Eq, Ord)
 

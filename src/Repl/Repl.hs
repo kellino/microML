@@ -23,7 +23,6 @@ import Control.Monad.State.Strict
 import Data.List (isPrefixOf, foldl')
 
 import System.Exit
-import System.Environment
 import System.Console.Repline
 
 -------------------------------------------------------------------------------
@@ -66,7 +65,7 @@ exec update source = do
 
   -- Create the new environment
   let st' = st { tmctx = foldl' evalDef (tmctx st) mod
-               , tyctx = tyctx' <> (tyctx st)
+               , tyctx = tyctx' <> tyctx st
                }
 
   -- Update the interpreter state
@@ -99,8 +98,8 @@ browse _ = do
   liftIO $ mapM_ putStrLn $ ppenv (tyctx st)
 
 -- :load command
-load :: [String] -> Repl ()
-load args = do
+using :: [String] -> Repl ()
+using args = do
   contents <- liftIO $ L.readFile (unwords args)
   exec True contents
 
@@ -124,21 +123,21 @@ quit _ = liftIO exitSuccess
 -- Prefix tab completer
 defaultMatcher :: MonadIO m => [(String, CompletionFunc m)]
 defaultMatcher = [
-    (":load"  , fileCompleter)
+    (":using"  , fileCompleter)
   --, (":type"  , values)
   ]
 
 -- Default tab completer
 comp :: (Monad m, MonadState IState m) => WordCompleter m
 comp n = do
-  let cmds = [":load", ":type", ":browse", ":quit"]
+  let cmds = [":using", ":type", ":browse", ":quit"]
   Env.TypeEnv ctx <- gets tyctx
   let defs = Map.keys ctx
   return $ filter (isPrefixOf n) (cmds ++ defs)
 
 options :: [(String, [String] -> Repl ())]
 options = [
-    ("load"   , load)
+    ("using"   , using)
   , ("browse" , browse)
   , ("quit"   , quit)
   , ("type"   , typeof)
@@ -151,6 +150,9 @@ options = [
 completer :: CompleterStyle (StateT IState IO)
 completer = Prefix (wordCompleter comp) defaultMatcher
 
+prompt :: String
+prompt = "\ESC[33mmicroML ⊦\ESC[0m "
+
 shell :: Repl a -> IO ()
 shell pre = flip evalStateT initState
-     $ evalRepl "Poly> " cmd options completer pre
+     $ evalRepl prompt cmd options completer pre

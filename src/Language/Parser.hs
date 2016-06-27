@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Language.Parser (
-  parseExpr,
+ -- parseExpr,
   parseModule
 ) where
 
@@ -11,38 +11,56 @@ import Text.Parsec.Text.Lazy (Parser)
 import qualified Text.Parsec.Expr as Ex
 import qualified Text.Parsec.Token as Tok
 
+import Data.Char (isLower, isUpper)
 import qualified Data.Text.Lazy as L
 
 import Language.Lexer
 import Language.Syntax
 
+varName = do
+    name@(n:_) <- identifier
+    if isLower n
+       then return name
+       else fail "a variable name must start with a lowercase letter"
+
+constructorName = do
+    name@(n:_) <- identifier
+    if isUpper n
+       then return name
+       else fail "a \ESC[1mconstructor\ESC[0m must start with a capital letter"
+
 integer :: Parser Integer
 integer = Tok.integer lexer
 
+float :: Parser Double
+float = Tok.float lexer
+
 variable :: Parser Expr
-variable = do
-  x <- identifier
-  return (Var x)
+variable = varName >>= \n -> return $ Var n
+
+constructor :: Parser Expr
+constructor = constructorName >>= \c -> return $ Constructor c
 
 number :: Parser Expr
-number = do
-  n <- integer
-  return (Lit (LInt (fromIntegral n)))
+number = integer >>= \n -> return (Lit (LInt n))
+
+double :: Parser Expr
+double = float >>= \d -> return (Lit (LDouble d))
 
 bool :: Parser Expr
 bool = (reserved "True" >> return (Lit (LBool True)))
     <|> (reserved "False" >> return (Lit (LBool False)))
 
-fix :: Parser Expr
-fix = do
-  reservedOp "fix"
-  x <- aexp
-  return (Fix x)
+{-fix :: Parser Expr-}
+{-fix = do-}
+  {-reservedOp "fix"-}
+  {-x <- aexp-}
+  {-return (Fix x)-}
 
 lambda :: Parser Expr
 lambda = do
   reservedOp "\\"
-  args <- many identifier
+  args <- many varName
   reservedOp "->"
   body <- expr
   return $ foldr Lam body args
@@ -50,7 +68,7 @@ lambda = do
 letin :: Parser Expr
 letin = do
   reserved "let"
-  x <- identifier
+  x <- varName
   reservedOp "="
   e1 <- expr
   reserved "in"
@@ -84,7 +102,6 @@ aexp =
   <|> bool
   <|> number
   <|> ifthen
-  <|> fix
   <|> try letrecin
   <|> letin
   <|> lambda
@@ -120,21 +137,21 @@ type Binding = (String, Expr)
 letdecl :: Parser Binding
 letdecl = do
   reserved "let"
-  name <- identifier
-  args <- many identifier
+  name <- varName
+  args <- many varName
   reservedOp "="
   body <- expr
-  return $ (name, foldr Lam body args)
+  return (name, foldr Lam body args)
 
 letrecdecl :: Parser (String, Expr)
 letrecdecl = do
   reserved "let"
   reserved "rec"
-  name <- identifier
+  name <- varName
   args <- many identifier
   reservedOp "="
   body <- expr
-  return $ (name, Fix $ foldr Lam body (name:args))
+  return (name, Fix $ foldr Lam body (name:args))
 
 val :: Parser Binding
 val = do
@@ -153,8 +170,8 @@ top = do
 modl ::  Parser [Binding]
 modl = many top
 
-parseExpr :: L.Text -> Either ParseError Expr
-parseExpr input = parse (contents expr) "<stdin>" input
+{-parseExpr :: L.Text -> Either ParseError Expr-}
+{-parseExpr = parse (contents expr) "<stdin>"-}
 
 parseModule ::  FilePath -> L.Text -> Either ParseError [(String, Expr)]
-parseModule fname input = parse (contents modl) fname input
+parseModule = parse (contents modl)
