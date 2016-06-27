@@ -24,6 +24,7 @@ import Data.List (isPrefixOf, foldl')
 
 import System.Exit
 import System.Console.Repline
+import qualified System.Process as S
 
 -------------------------------------------------------------------------------
 -- Types
@@ -116,6 +117,10 @@ typeof args = do
 quit :: a -> Repl ()
 quit _ = liftIO exitSuccess
 
+-- access the shell
+sh :: [String] -> Repl ()
+sh arg = liftIO $ S.callCommand (unwords arg)
+
 -------------------------------------------------------------------------------
 -- Interactive Shell
 -------------------------------------------------------------------------------
@@ -124,23 +129,23 @@ quit _ = liftIO exitSuccess
 defaultMatcher :: MonadIO m => [(String, CompletionFunc m)]
 defaultMatcher = [
     (":using"  , fileCompleter)
-  --, (":type"  , values)
   ]
 
 -- Default tab completer
 comp :: (Monad m, MonadState IState m) => WordCompleter m
 comp n = do
-  let cmds = [":using", ":type", ":browse", ":quit"]
-  Env.TypeEnv ctx <- gets tyctx
-  let defs = Map.keys ctx
-  return $ filter (isPrefixOf n) (cmds ++ defs)
+    let cmds = [":using", ":type", ":browse", ":quit", ":"]
+    Env.TypeEnv ctx <- gets tyctx
+    let defs = Map.keys ctx
+    return $ filter (isPrefixOf n) (cmds ++ defs)
 
 options :: [(String, [String] -> Repl ())]
 options = [
-    ("using"   , using)
+    ("using"  , using)
   , ("browse" , browse)
   , ("quit"   , quit)
   , ("type"   , typeof)
+  , ("!"  , sh)
   ]
 
 -------------------------------------------------------------------------------
