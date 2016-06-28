@@ -12,7 +12,7 @@ data Value
   | VClosure String Expr TermEnv
   | VString String
   | VChar Char
-  | VList [Identity Value]
+  | VList [Interpreter Value]
   | VError String
   deriving (Eq, Ord)
 
@@ -23,30 +23,30 @@ emptyTmenv :: TermEnv
 emptyTmenv = Map.empty
 
 instance Show Value where
-    show (VNum n)      = show n
-    show (VBool b)     = show b
-    show (VDouble d)   = show d
-    show (VString str) = show str
-    show (VChar c)     = show c
-    show (VList contents) = show contents
-    show (VError str)  = show str
-    show VClosure{}    = "\ESC[1m<<closure>>\ESC[0m"
+    show (VNum n)         = show n
+    show (VBool b)        = show b
+    show (VDouble d)      = show d
+    show (VString str)    = show str
+    show (VChar c)        = show c
+    show (VList xs)       = show xs
+    show (VError str)     = show str
+    show VClosure{}       = "\ESC[1m<<closure>>\ESC[0m"
 
 eval :: TermEnv -> Expr -> Interpreter Value
 eval env expr = case expr of
-    Lit (LInt k)   -> return $ VNum k
+    Lit (LInt k)      -> return $ VNum k
     Lit (LDouble k)   -> return $ VDouble k
     Lit (LString str) -> return $ VString str
     Lit (LChar c)     -> return $ VChar c
     Lit (LBoolean b)  -> return $ VBool b
-    Lam x body       -> return $ VClosure x body env
-    -- List contents    -> return $ VList $ map (eval env) contents
-    Let x e body     -> do
+    Lam x body        -> return $ VClosure x body env
+    List xs           -> return $ VList $ map (eval env) xs
+    Let x e body      -> do
         e' <- eval env e
         let newEnv = Map.insert x e' env
         eval newEnv body
-    FixPoint e       -> eval env (App e (FixPoint e))
-    Var x            -> 
+    FixPoint e        -> eval env (App e (FixPoint e))
+    Var x             -> 
         case Map.lookup x env of
           Just v -> return v
           Nothing -> return $ VError "this name has not yet been set to a value"
