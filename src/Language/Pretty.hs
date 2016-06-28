@@ -13,10 +13,10 @@ module Language.Pretty (
   pptype
 ) where
 
-import Language.Env
-import Language.Type
+import Language.Typing.Env
+import Language.Typing.Type
 import Language.Syntax
-import Language.Infer
+import Language.Typing.Infer
 
 import Text.PrettyPrint
 import qualified Data.Map as Map
