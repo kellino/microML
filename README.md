@@ -36,6 +36,6 @@ microML ⊦ 120
 TODO
 ====
 
-Working in type inference at the moment...
-Compiler to C++ (for the micro:bit)
-A bit more syntactic sugar
++ Working on type inference at the moment...
++ Compiler to C++ (for the micro:bit)
++ A bit more syntactic sugar
