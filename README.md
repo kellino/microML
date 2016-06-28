@@ -28,6 +28,10 @@ microML ⊦ 3
 More complex things can be entered at the repl as well (at the moment everything must be on one line)
 
 ```ml
+microML ⊦ let compose x y = \z -> x (y z)
+microML ⊦ compose inc inc 2
+microML ⊦ 4
+
 microML ⊦ let fact n = if (n == 0) then 1 else n * (fact (n-1))
 microML ⊦ fact 5
 microML ⊦ 120
