@@ -5,16 +5,20 @@ module Repl.Pretty  where
 
 import Language.Typing.Type
 import Language.Syntax
-import Language.Typing.Env
+--import Language.Typing.Env
+import Language.Typing.TypeError
 
 import Text.PrettyPrint
-import qualified Data.Map as Map
+--import qualified Data.Map as Map
 
 ppsig :: (String, TypeScheme) -> String
 ppsig (a, b) = a ++ " :: " ++ ppscheme b
 
 ppscheme :: TypeScheme -> String
 ppscheme = render . ppr 0
+
+ppTypeError :: TypeError -> String
+ppTypeError = render . ppError
 
 {-ppenv :: Env -> [String]-}
 {-ppenv env = map ppsig $ Map.toList env-}
@@ -30,7 +34,7 @@ instance Pretty Name where
 
 instance Pretty TVar where
     ppr _ (TV x) = text x
-    
+
 instance Pretty Type where
     ppr p (TArr a b) = ifParens (isArrow a) (ppr p a) <+> text "->" <+> ppr p b
         where 
