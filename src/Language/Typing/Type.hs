@@ -1,18 +1,20 @@
-module Language.Typing.Type where
+module Language.Typing.Type  where
+
+import Unbound.LocallyNameless
 
 newtype TVar = TV String
-  deriving (Show, Eq, Ord)
+    deriving (Show, Eq, Ord)
 
-data Type
-  = TVar TVar
-  | TCon String
-  | TArr Type Type
-  deriving (Show, Eq, Ord)
+data Type 
+    = TVar (Name TVar)
+    | TCon String
+    | TArr Type Type
+    deriving (Show, Eq, Ord)
 
-data Scheme = Forall [TVar] Type
-  deriving (Show, Eq, Ord)
+data TypeScheme = Forall [TVar] Type
+    deriving (Show, Eq, Ord)
 
-typeInt    = TCon "Int"
+typeInt, typeDouble, typeBool :: Type
+typeInt    = TCon "Integer"
 typeDouble = TCon "Double"
-typeBool   = TCon "Bool"
-typeString = TCon "String"
+typeBool   = TCon "Boolean"
