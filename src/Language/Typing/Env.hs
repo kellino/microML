@@ -1,19 +1,32 @@
-module Language.Typing.Env where
+module Language.Typing.Env (
+  Env(..),
+  empty,
+  lookup,
+  remove,
+  extend,
+  extends,
+  merge,
+  mergeEnvs,
+  singleton,
+  keys,
+  fromList,
+  toList,
+) where
+
+import Prelude hiding (lookup)
 
 import Language.Syntax
 import Language.Typing.Type
 
+import Data.Foldable hiding (toList)
 import qualified Data.Map as Map
-import Data.Foldable (foldl')
 
-data Env = TypeEnv { types :: Map.Map Name Scheme}
+-------------------------------------------------------------------------------
+-- Typing Environment
+-------------------------------------------------------------------------------
 
-------------------------
--- TYPING ENVIRONMENT --
-------------------------
-
--- auxiliary functions for manipulating the type environment, largely derived from
--- write you a haskell
+data Env = TypeEnv { types :: Map.Map Name Scheme }
+  deriving (Eq, Show)
 
 empty :: Env
 empty = TypeEnv Map.empty
@@ -21,11 +34,14 @@ empty = TypeEnv Map.empty
 extend :: Env -> (Name, Scheme) -> Env
 extend env (x, s) = env { types = Map.insert x s (types env) }
 
-delete :: Env -> Name -> Env
-delete (TypeEnv env) x = TypeEnv (Map.delete x env)
+remove :: Env -> Name -> Env
+remove (TypeEnv env) var = TypeEnv (Map.delete var env)
+
+extends :: Env -> [(Name, Scheme)] -> Env
+extends env xs = env { types = Map.union (Map.fromList xs) (types env) }
 
 lookup :: Name -> Env -> Maybe Scheme
-lookup k (TypeEnv env) = Map.lookup k env
+lookup key (TypeEnv tys) = Map.lookup key tys
 
 merge :: Env -> Env -> Env
 merge (TypeEnv a) (TypeEnv b) = TypeEnv (Map.union a b)
@@ -33,8 +49,11 @@ merge (TypeEnv a) (TypeEnv b) = TypeEnv (Map.union a b)
 mergeEnvs :: [Env] -> Env
 mergeEnvs = foldl' merge empty
 
-listKeys :: Env -> [Name]
-listKeys (TypeEnv env) = Map.keys env
+singleton :: Name -> Scheme -> Env
+singleton x y = TypeEnv (Map.singleton x y)
+
+keys :: Env -> [Name]
+keys (TypeEnv env) = Map.keys env
 
 fromList :: [(Name, Scheme)] -> Env
 fromList xs = TypeEnv (Map.fromList xs)
@@ -43,5 +62,5 @@ toList :: Env -> [(Name, Scheme)]
 toList (TypeEnv env) = Map.toList env
 
 instance Monoid Env where
-    mempty  = empty
-    mappend = merge
+  mempty = empty
+  mappend = merge
