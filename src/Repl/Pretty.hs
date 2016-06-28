@@ -1,18 +1,9 @@
 {-# Language FlexibleInstances #-}
 {-# Language TypeSynonymInstances #-}
 
-module Language.Pretty (
-  ppconstraint,
-  ppconstraints,
-  ppdecl,
-  ppenv,
-  ppexpr,
-  ppscheme,
-  ppsubst,
-  ppsignature,
-  pptype
-) where
+module Language.Pretty  where
 
+import Language.Typing.Substitutable
 import Language.Typing.Env
 import Language.Typing.Type
 import Language.Syntax
@@ -24,7 +15,6 @@ import qualified Data.Map as Map
 parensIf ::  Bool -> Doc -> Doc
 parensIf True = parens
 parensIf False = id
-
 
 class Pretty p where
   ppr :: Int -> p -> Doc
@@ -43,7 +33,7 @@ instance Pretty Type where
   ppr p (TVar a) = ppr p a
   ppr _ (TCon a) = text a
 
-instance Pretty Scheme where
+instance Pretty TypeScheme where
   ppr p (Forall [] t) = ppr p t
   ppr p (Forall ts t) = text "forall" <+> hcat (punctuate space (map (ppr p) ts)) <> text "." <+> ppr p t
 
@@ -84,16 +74,16 @@ instance Pretty Subst where
   ppr _ (Subst s) = vcat (punctuate space (map pprSub $ Map.toList s))
     where pprSub (a, b) = ppr 0 a <+> text "~" <+> ppr 0 b
 
-instance Show TypeError where
-  show (UnificationFail a b) =
-    concat ["Cannot unify types: \n\t", pptype a, "\nwith \n\t", pptype b]
-  show (InfiniteType (TV a) b) =
-    concat ["Cannot construct the infinite type: ", a, " = ", pptype b]
-  show (Ambigious cs) =
-    concat ["Cannot not match expected type: '" ++ pptype a ++ "' with actual type: '" ++ pptype b ++ "'\n" | (a,b) <- cs]
-  show (UnboundVariable a) = "Not in scope: " ++ a
+{-instance Show TypeError where-}
+  {-show (UnificationFail a b) =-}
+    {-concat ["Cannot unify types: \n\t", pptype a, "\nwith \n\t", pptype b]-}
+  {-show (InfiniteType (TV a) b) =-}
+    {-concat ["Cannot construct the infinite type: ", a, " = ", pptype b]-}
+  {-show (Ambigious cs) =-}
+    {-concat ["Cannot not match expected type: '" ++ pptype a ++ "' with actual type: '" ++ pptype b ++ "'\n" | (a,b) <- cs]-}
+  {-show (UnboundVariable a) = "Not in scope: " ++ a-}
 
-ppscheme :: Scheme -> String
+ppscheme :: TypeScheme -> String
 ppscheme = render . ppr 0
 
 pptype :: Type -> String
@@ -102,7 +92,7 @@ pptype = render . ppr 0
 ppexpr :: Expr -> String
 ppexpr = render . ppr 0
 
-ppsignature :: (String, Scheme) -> String
+ppsignature :: (String, TypeScheme) -> String
 ppsignature (a, b) = a ++ " : " ++ ppscheme b
 
 ppdecl :: (String, Expr) -> String

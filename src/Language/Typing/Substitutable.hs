@@ -7,6 +7,7 @@ import Control.Monad (replicateM)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 
+
 type Subst = Map.Map TVar Type
 
 
