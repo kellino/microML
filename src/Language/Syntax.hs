@@ -10,6 +10,7 @@ data Expr
   | Lam Name Expr
   | Let Name Expr Expr
   | Lit Lit
+  | List [Expr]
   | If Expr Expr Expr
   | FixPoint Expr
   | Op Binop Expr Expr

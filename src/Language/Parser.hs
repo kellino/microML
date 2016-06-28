@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Language.Parser (
-  parseModule
+  parseProgram
 ) where
 
 import Text.Parsec
@@ -101,6 +101,14 @@ bool :: Parser Expr
 bool = (reserved "true" >> return (Lit (LBoolean True)))
     <|> (reserved "false" >> return (Lit (LBoolean False)))
 
+
+list :: Parser Expr
+list = do
+    void $ char '['
+    elems <- aexp `sepBy` char ','
+    void $ char ']'
+    return $ List elems
+
 lambda :: Parser Expr
 lambda = do
   reservedOp "\\"
@@ -155,6 +163,7 @@ aexp =
   <|> try binary <|> try octal <|> try hex <|> try double
   <|> number
   <|> ifthen
+  <|> list
   <|> try letrecin
   <|> letin
   <|> lambda
@@ -238,5 +247,5 @@ top = do
 modl ::  Parser [Binding]
 modl = many top
 
-parseModule ::  FilePath -> L.Text -> Either ParseError [(String, Expr)]
-parseModule = parse (contents modl)
+parseProgram ::  FilePath -> L.Text -> Either ParseError [(String, Expr)]
+parseProgram = parse (contents modl)
