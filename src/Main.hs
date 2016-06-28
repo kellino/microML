@@ -10,5 +10,5 @@ main = do
   case args of
     []      -> shell (return ())
     [fname] -> shell (using [fname])
-    ["test", fname] -> shell (using [fname] >> browse [] >> quit ())
+    -- ["test", fname] -> shell (using [fname] >> browse [] >> quit ())
     _ -> putStrLn "invalid arguments"
