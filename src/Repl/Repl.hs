@@ -86,9 +86,6 @@ showOutput arg st =
 cmd :: String -> Repl ()
 cmd source = exec True (L.pack source)
 
-
-
-
 {-exec :: L.Text -> HaskelineT (Control.Monad.State.Strict.StateT IState IO) ()-}
 {-exec code = do-}
     {-st <- get-}
