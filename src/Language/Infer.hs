@@ -168,48 +168,54 @@ ops = Map.fromList [
 
 infer :: Expr -> Infer Type
 infer expr = case expr of
-  Lit (LInt _)  -> return typeInt
-  Lit (LDouble _) -> return typeDouble
-  Lit (LBoolean _) -> return typeBool
-  Lit (LString _) -> return typeString
+    Lit (LInt _)  -> return typeInt
+    Lit (LDouble _) -> return typeDouble
+    Lit (LBoolean _) -> return typeBool
+    Lit (LString _) -> return typeString
 
-  Var x -> lookupEnv x
+    Var x -> lookupEnv x
 
-  Lam x e -> do
-    tv <- fresh
-    t <- inEnv (x, Forall [] tv) (infer e)
-    return (tv `TArr` t)
+    Lam x e -> do
+      tv <- fresh
+      t <- inEnv (x, Forall [] tv) (infer e)
+      return (tv `TArr` t)
 
-  App e1 e2 -> do
-    t1 <- infer e1
-    t2 <- infer e2
-    tv <- fresh
-    uni t1 (t2 `TArr` tv)
-    return tv
+    App e1 e2 -> do
+      t1 <- infer e1
+      t2 <- infer e2
+      tv <- fresh
+      uni t1 (t2 `TArr` tv)
+      return tv
 
-  Let x e1 e2 -> do
-    env <- ask
-    t1 <- infer e1
-    let sc = generalize env t1
-    t2 <- inEnv (x, sc) (infer e2)
-    return t2
+    Let x e1 e2 -> do
+      env <- ask
+      t1 <- infer e1
+      let sc = generalize env t1
+      t2 <- inEnv (x, sc) (infer e2)
+      return t2
 
-  Op op e1 e2 -> do
-    t1 <- infer e1
-    t2 <- infer e2
-    tv <- fresh
-    let u1 = t1 `TArr` (t2 `TArr` tv)
-        u2 = ops Map.! op
-    uni u1 u2
-    return tv
+    Op op e1 e2 -> do
+      t1 <- infer e1
+      t2 <- infer e2
+      tv <- fresh
+      let u1 = t1 `TArr` (t2 `TArr` tv)
+          u2 = ops Map.! op
+      uni u1 u2
+      return tv
 
-  If cond tr fl -> do
-    t1 <- infer cond
-    t2 <- infer tr
-    t3 <- infer fl
-    uni t1 typeBool
-    uni t2 t3
-    return t2
+    If cond tr fl -> do
+      t1 <- infer cond
+      t2 <- infer tr
+      t3 <- infer fl
+      uni t1 typeBool
+      uni t2 t3
+      return t2
+
+    FixPoint e1 -> do
+      t1 <- infer e1
+      tv <- fresh
+      uni (tv `TArr` tv) t1
+      return tv
 
 inferTop :: Env -> [(String, Expr)] -> Either TypeError Env
 inferTop env [] = Right env
