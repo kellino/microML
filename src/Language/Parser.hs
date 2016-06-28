@@ -54,6 +54,7 @@ number = Lx.integer >>= \n -> return (Lit (LInt n))
 double :: Parser Expr
 double = float >>= \d -> return (Lit (LDouble d))
 
+{- base formats use erlang style syntax, ie. 2#, 8# ad 16# -}
 binary :: Parser Expr
 binary = do
     _ <- string "2#"
@@ -73,6 +74,8 @@ hex = do
     h <- many1 hexDigit
     return $ Lit (LInt $ baseToDec readHex h)
 
+-- readHex and readOct return lists of tuples, so this function simply lifts out the
+-- desired number
 baseToDec :: (t -> [(c, b)]) -> t -> c
 baseToDec f n = (fst . head) $ f n
 
@@ -83,6 +86,7 @@ stringLit = do
     void $ char '"'
     return $ Lit (LString s)
 
+escaped :: ParsecT L.Text u Identity Char
 escaped = do
     void $ char '\\'
     x <- oneOf "\\\"nrt"
@@ -136,8 +140,8 @@ ifthen = do
   fl <- aexp
   return (If cond tr fl)
 
-mlCase :: Parser Expr
-mlCase = do
+caseOf :: Parser Expr
+caseOf = do
     reserved "case"
     e1 <- expr
     reserved "of"
@@ -154,7 +158,7 @@ aexp =
   <|> try letrecin
   <|> letin
   <|> lambda
-  <|> mlCase
+  <|> caseOf
   <|> variable
   <|> stringLit
 
@@ -164,43 +168,57 @@ term = Ex.buildExpressionParser table aexp
 infixOp :: String -> (a -> a -> a) -> Ex.Assoc -> Op a
 infixOp x f = Ex.Infix (reservedOp x >> return f)
 
-table = [ [ infixOp "^" (Op OpExp) Ex.AssocLeft ]
-        , [ infixOp  "*" (Op OpMul) Ex.AssocLeft
-        ,   infixOp  "/" (Op OpDiv) Ex.AssocLeft
-        ,   infixOp  "%" (Op OpMod) Ex.AssocLeft ]
-        , [ infixOp  "+" (Op OpAdd) Ex.AssocLeft
-        ,   infixOp  "-" (Op OpSub) Ex.AssocLeft ]
-        , [ infixOp  "<="  (Op OpLe) Ex.AssocLeft
-        ,   infixOp  ">="  (Op OpGe) Ex.AssocLeft
-        ,   infixOp  "<"   (Op OpLt) Ex.AssocLeft
-        ,   infixOp  ">"   (Op OpGt) Ex.AssocLeft]
-        , [ infixOp  "=="  (Op OpEq) Ex.AssocLeft] ]
+table = [ [ infixOp "^"   (Op OpExp) Ex.AssocLeft ]
+        , [ infixOp "*"   (Op OpMul) Ex.AssocLeft
+        ,   infixOp "/"   (Op OpDiv) Ex.AssocLeft
+        ,   infixOp "%"   (Op OpMod) Ex.AssocLeft ]
+        , [ infixOp "+"   (Op OpAdd) Ex.AssocLeft
+        ,   infixOp "-"   (Op OpSub) Ex.AssocLeft ]
+        , [ infixOp "<="  (Op OpLe)  Ex.AssocLeft
+        ,   infixOp ">="  (Op OpGe)  Ex.AssocLeft
+        ,   infixOp "<"   (Op OpLt)  Ex.AssocLeft
+        ,   infixOp ">"   (Op OpGt)  Ex.AssocLeft ]
+        , [ infixOp "=="  (Op OpEq)  Ex.AssocLeft ] 
+        , [ infixOp "and" (Op OpAnd) Ex.AssocLeft
+        ,   infixOp "or"  (Op OpOr)  Ex.AssocLeft ] ]
 
 expr :: Parser Expr
 expr = do
-  es <- many1 term
-  return (foldl1 App es)
+    es <- many1 term
+    return (foldl1 App es)
 
 type Binding = (String, Expr)
 
-letdecl :: Parser Binding
-letdecl = do
-  reserved "let"
-  name <- varName
-  args <- many varName
-  reservedOp "="
-  body <- expr
-  return (name, foldr Lam body args)
+{-letdecl :: Parser Binding-}
+{-letdecl = do-}
+    {-reserved "let"-}
+    {-name <- varName-}
+    {-args <- many varName-}
+    {-reservedOp "="-}
+    {-body <- expr-}
+    {-return (name, foldr Lam body args)-}
 
-letrecdecl :: Parser (String, Expr)
-letrecdecl = do
-  reserved "let"
-  reserved "rec"
-  name <- varName
-  args <- many identifier
-  reservedOp "="
-  body <- expr
-  return (name, FixPoint $ foldr Lam body (name:args))
+letDecl :: Parser Binding
+letDecl = do
+    reserved "let"
+    name <- varName
+    args <- many varName
+    void $ reservedOp "="
+    body <- expr
+    if name `elem` (words . removeControlChar . show) body
+       then return (name, FixPoint $ foldr Lam body (name:args))
+       else return (name, foldr Lam body args)
+           where removeControlChar = filter (\x -> x `notElem` ['(', ')', '\"'])
+
+{-letrecdecl :: Parser (String, Expr)-}
+{-letrecdecl = do-}
+  {-reserved "let"-}
+  {-reserved "rec"-}
+  {-name <- varName-}
+  {-args <- many identifier-}
+  {-reservedOp "="-}
+  {-body <- expr-}
+  {-return (name, FixPoint $ foldr Lam body (name:args))-}
 
 val :: Parser Binding
 val = do
@@ -208,7 +226,8 @@ val = do
   return ("it", ex)
 
 decl :: Parser Binding
-decl = try letrecdecl <|> letdecl <|> val
+decl = try letDecl <|> val
+--decl = try letrecdecl <|> letdecl <|> val
 
 top :: Parser Binding
 top = do

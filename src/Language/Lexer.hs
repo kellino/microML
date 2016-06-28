@@ -12,7 +12,7 @@ type Op a = Ex.Operator L.Text () Identity a
 type Operators a = Ex.OperatorTable L.Text () Identity a
 
 reservedNames :: [String]
-reservedNames = [ "let", "in", "fix", "rec", "if", "then", "else", "case", "of" ]
+reservedNames = [ "let", "in", "fix", "rec", "if", "then", "else", "case", "of", "and", "or", "not", "xor"]
 
 reservedOps :: [String]
 reservedOps = [ "->", "\\", "+", "*", "-", "=", "==", "%", "^", "/", "<=", ">=", ">", "<"]
