@@ -49,7 +49,6 @@ generalize :: Env -> Type -> TypeScheme
 generalize env t = Forall as t
     where as = Set.toList $ ftv t `Set.difference` ftv env
 
-
 nullSubst :: Subst
 nullSubst = Map.empty
 
