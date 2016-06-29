@@ -12,6 +12,7 @@ import Language.Parser
 import Language.Typing.Env as Env
 import Language.Typing.Infer
 
+import Data.Monoid
 import qualified Data.Map as Map
 import qualified Data.Text.Lazy as L
 import qualified Data.Text.Lazy.IO as L
@@ -65,7 +66,7 @@ exec update source = do
 
   -- Create the new environment
   let st' = st { termEnv = foldl' evalDef (termEnv st) mod
-      , typeEnv = typeEnv' -- <> (typeEnv st)
+      , typeEnv = typeEnv' <> typeEnv st
                }
 
   -- Update the interpreter state
@@ -86,6 +87,7 @@ showOutput arg st =
 
 cmd :: String -> Repl ()
 cmd source = exec True (L.pack source)
+
 -------------------------------------------------------------------------------
 -- Commands
 -------------------------------------------------------------------------------
@@ -141,7 +143,7 @@ comp n = do
 options :: [(String, [String] -> Repl ())]
 options = [
     ("using"  , using)
-  --, ("browse" , browse)
+  -- , ("browse" , browse)
   , ("quit"   , quit)
   , ("type"   , typeof)
   , ("!"  , sh)
@@ -156,6 +158,14 @@ completer = Prefix (wordCompleter comp) defaultMatcher
 
 prompt :: String
 prompt = "\ESC[33mmicroML ⊦\ESC[0m "
+
+{-banner = -}
+    {-"            _               ___  ___ _       \n" ++-}
+    {-"           (_)              |  \\/  || |      \n" ++-}
+    {-"  _ __ ___  _  ___ _ __ ___ | .  . || |      \n" ++-}
+    {-" | '_ ` _ \\| |/ __| '__/ _ \\| |\\/| || |      \n" ++-}
+    {-" | | | | | | | (__| | | (_) | |  | || |____  \n" ++-}
+    {-" |_| |_| |_|_|\\___|_|  \\___/\\_|  |_/\\_____/  \n"-}
 
 shell :: Repl a -> IO ()
 shell pre = flip evalStateT initState
