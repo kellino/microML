@@ -1,6 +1,8 @@
 module Language.Syntax where
 
 type Name = String
+type VarName = String
+type ConName = String
 
 data Expr
   = Var Name
@@ -15,6 +17,7 @@ data Expr
   | FixPoint Expr
   | Op Binop Expr Expr
   | UnaryMinus Expr
+  | Pat Pat
   deriving (Show, Eq, Ord)
 
 data Lit
@@ -43,6 +46,16 @@ data Binop =
       | OpGt
       | OpCom
       deriving (Eq, Ord, Show)      
+
+data Pat
+    = Wildcard
+  | PApp String [Expr]
+  | PVar VarName
+  | PCon ConName
+  | PInt Integer
+  | PDouble Double
+  | PBool Bool
+  deriving (Eq, Ord, Show)
 
 data Program = Program [Decl] Expr deriving Eq
 
