@@ -10,6 +10,7 @@ import Repl.Pretty
 import Language.Syntax
 import Language.Parser
 import Language.Typing.Env as Env
+import Language.Typing.Infer
 
 import qualified Data.Map as Map
 import qualified Data.Text.Lazy as L
@@ -36,6 +37,7 @@ initState :: IState
 initState = IState Env.empty emptyTmenv
 
 type Repl a = HaskelineT (StateT IState IO) a
+
 liftError :: Show e => Either e a -> Repl a
 liftError (Right val) = return val
 liftError (Left err) = do
@@ -50,21 +52,40 @@ evalDef :: TermEnv -> (String, Expr) -> TermEnv
 evalDef env (nm, ex) = termEnv'
   where (val, termEnv') = runEval env nm ex
 
-exec :: L.Text -> HaskelineT (Control.Monad.State.Strict.StateT IState IO) ()
-exec code = do
-    st <- get
-    new <- liftError $ parseProgram "<stdin>" code
-    let st' = st { termEnv = foldl' evalDef (termEnv st) new }
-    put st'
-    case Prelude.lookup "it" new of
-      Nothing -> return ()
-      Just x -> do
-          let (val, _) = runEval (termEnv st') "it" x
-          liftIO $ print val
+exec :: Bool -> L.Text -> Repl ()
+exec update source = do
+  -- Get the current interpreter state
+  st <- get
+
+  -- Parser ( returns AST )
+  mod <- liftError $ parseProgram "<stdin>" source
+
+  -- Type Inference ( returns Typing Environment )
+  typeEnv' <- liftError $ inferTop (typeEnv st) mod
+
+  -- Create the new environment
+  let st' = st { termEnv = foldl' evalDef (termEnv st) mod
+      , typeEnv = typeEnv' -- <> (typeEnv st)
+               }
+
+  -- Update the interpreter state
+  when update (put st')
+
+  -- If a value is entered, print it.
+  case Prelude.lookup "it" mod of
+    Nothing -> return ()
+    Just ex -> do
+      let (val, _) = runEval (termEnv st') "it"  ex
+      showOutput (show val) st'
+
+showOutput :: String -> IState -> Repl ()
+showOutput arg st = 
+  case Env.lookup "it" (typeEnv st)  of
+    Just val -> liftIO $ putStrLn $ ppsig (arg, val)
+    Nothing -> return ()
 
 cmd :: String -> Repl ()
-cmd source = exec $ L.pack source
-
+cmd source = exec True (L.pack source)
 -------------------------------------------------------------------------------
 -- Commands
 -------------------------------------------------------------------------------
@@ -79,7 +100,7 @@ cmd source = exec $ L.pack source
 using :: [String] -> Repl ()
 using args = do
   contents <- liftIO $ L.readFile (unwords args)
-  exec contents
+  exec True contents
 
 -- :type command
 typeof :: [String] -> Repl ()
