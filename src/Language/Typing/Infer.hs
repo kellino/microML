@@ -25,7 +25,6 @@ import Data.List (nub)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 
-
 -- | Inference monad
 type Infer a = (RWST Env [Constraint] InferState (Except TypeError) a)             
 
@@ -109,6 +108,8 @@ ops = Map.fromList [
     , (OpMul, typeInt `TArr` (typeInt `TArr` typeInt))
     , (OpSub, typeInt `TArr` (typeInt `TArr` typeInt))
     , (OpEq, typeInt `TArr` (typeInt `TArr` typeBool))
+    , (OpMod, typeInt `TArr` (typeInt `TArr` typeInt))
+    , (OpLt, typeInt `TArr` (typeInt `TArr` typeBool))
   ]
 
 infer :: Expr -> Infer Type
