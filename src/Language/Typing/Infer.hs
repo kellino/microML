@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE TypeSynonymInstances #-}
 
 module Language.Typing.Infer (
   Constraint,
@@ -94,7 +95,7 @@ fresh = do
 
 instantiate ::  TypeScheme -> Infer Type
 instantiate (Forall as t) = do
-    as' <- mapM $ const fresh
+    as' <- mapM (\_ -> fresh) as
     let s = Subst $ Map.fromList $ zip as as'
     return $ apply s t
 
@@ -112,8 +113,11 @@ ops = Map.fromList [
 
 infer :: Expr -> Infer Type
 infer expr = case expr of
-  Lit (LInt _)  -> return typeInt
+  Lit (LInt _)     -> return typeInt
+  Lit (LDouble _)  -> return typeDouble
   Lit (LBoolean _) -> return typeBool
+  Lit (LString _)  -> return typeString
+  Lit (LChar _)    -> return typeChar
 
   Var x -> lookupEnv x
 
