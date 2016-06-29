@@ -79,6 +79,13 @@ hex = do
 baseToDec :: (t -> [(c, b)]) -> t -> c
 baseToDec f n = (fst . head) $ f n
 
+charLit :: Parser Expr
+charLit = do
+    void $ char '\''
+    c <- letter
+    void $ char '\''
+    return $ Lit (LChar c)
+
 stringLit :: ParsecT L.Text u Identity Expr
 stringLit = do
     void $ char '"'
@@ -169,6 +176,7 @@ aexp =
   <|> caseOf
   <|> variable
   <|> stringLit
+  <|> charLit
 
 term :: Parser Expr
 term = Ex.buildExpressionParser table aexp
@@ -189,6 +197,7 @@ table = [ [ infixOp "^"   (Op OpExp) Ex.AssocLeft ]
         , [ infixOp "=="  (Op OpEq)  Ex.AssocLeft ] 
         , [ infixOp "and" (Op OpAnd) Ex.AssocLeft
         ,   infixOp "or"  (Op OpOr)  Ex.AssocLeft ] ]
+        -- add in not equal to
 
 expr :: Parser Expr
 expr = do
