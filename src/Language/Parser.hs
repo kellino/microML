@@ -196,8 +196,11 @@ table = [ [ infixOp "^"   (Op OpExp) Ex.AssocLeft ]
         ,   infixOp ">"   (Op OpGt)  Ex.AssocLeft ]
         , [ infixOp "=="  (Op OpEq)  Ex.AssocLeft ] 
         , [ infixOp "and" (Op OpAnd) Ex.AssocLeft
-        ,   infixOp "or"  (Op OpOr)  Ex.AssocLeft ] ]
-        -- add in not equal to
+        ,   infixOp "or"  (Op OpOr)  Ex.AssocLeft ] 
+  , [ Ex.Infix (reservedOp "." >> return compose) Ex.AssocRight ]]
+        -- add in not equal to /=
+
+compose l r = App l r
 
 expr :: Parser Expr
 expr = do
