@@ -200,7 +200,7 @@ table = [ [ infixOp "^"   (Op OpExp) Ex.AssocLeft ]
   , [ Ex.Infix (reservedOp "." >> return compose) Ex.AssocRight ]]
         -- add in not equal to /=
 
-compose l r = App l r
+compose l r = App l r 
 
 expr :: Parser Expr
 expr = do
