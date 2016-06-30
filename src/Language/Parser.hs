@@ -111,7 +111,7 @@ bool = (reserved "true" >> return (Lit (LBoolean True)))
 list :: Parser Expr
 list = do
     void $ char '['
-    elems <- aexp `sepBy` char ','
+    elems <- expr `sepBy` string ", " -- fix this!
     void $ char ']'
     return $ List elems
 
@@ -194,13 +194,11 @@ table = [ [ infixOp "^"   (Op OpExp) Ex.AssocLeft ]
         ,   infixOp ">="  (Op OpGe)  Ex.AssocLeft
         ,   infixOp "<"   (Op OpLt)  Ex.AssocLeft
         ,   infixOp ">"   (Op OpGt)  Ex.AssocLeft ]
-        , [ infixOp "=="  (Op OpEq)  Ex.AssocLeft ] 
+        , [ infixOp "=="  (Op OpEq)  Ex.AssocLeft 
+        ,   infixOp "/="  (Op OpNotEq) Ex.AssocLeft ] 
         , [ infixOp "and" (Op OpAnd) Ex.AssocLeft
-        ,   infixOp "or"  (Op OpOr)  Ex.AssocLeft ] 
-  , [ Ex.Infix (reservedOp "." >> return compose) Ex.AssocRight ]]
-        -- add in not equal to /=
+        ,   infixOp "or"  (Op OpOr)  Ex.AssocLeft ] ]
 
-compose l r = App l r 
 
 expr :: Parser Expr
 expr = do

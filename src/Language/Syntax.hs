@@ -1,5 +1,7 @@
 module Language.Syntax where
 
+import qualified Data.Text as T
+
 type Name = String
 type VarName = String
 type ConName = String
@@ -44,7 +46,7 @@ data Binop =
       | OpLt
       | OpGe
       | OpGt
-      | OpCom
+      | OpNotEq
       deriving (Eq, Ord, Show)      
 
 data Pat
@@ -56,6 +58,13 @@ data Pat
   | PDouble Double
   | PBool Bool
   deriving (Eq, Ord, Show)
+
+data MLError
+    = Default T.Text
+
+instance Show MLError where
+    show (Default msg) = show msg
+
 
 data Program = Program [Decl] Expr deriving Eq
 
