@@ -104,18 +104,18 @@ generalize env t  = Forall as t
 
 ops :: Map.Map Binop Type
 ops = Map.fromList [
-      (OpAdd, typeInt `TArr` (typeInt `TArr` typeInt))
-    , (OpMul, typeInt `TArr` (typeInt `TArr` typeInt))
-    , (OpSub, typeInt `TArr` (typeInt `TArr` typeInt))
-    , (OpEq, typeInt `TArr` (typeInt `TArr` typeBool))
-    , (OpMod, typeInt `TArr` (typeInt `TArr` typeInt))
-    , (OpLt, typeInt `TArr` (typeInt `TArr` typeBool))
+      (OpAdd, typeNum `TArr` (typeNum `TArr` typeNum))
+    , (OpMul, typeNum `TArr` (typeNum `TArr` typeNum))
+    , (OpSub, typeNum `TArr` (typeNum `TArr` typeNum))
+    , (OpEq, typeNum `TArr` (typeNum `TArr` typeBool))
+    , (OpMod, typeNum `TArr` (typeNum `TArr` typeNum))
+    , (OpLt, typeNum `TArr` (typeNum `TArr` typeBool))
   ]
 
 infer :: Expr -> Infer Type
 infer expr = case expr of
-  Lit (LInt _)     -> return typeInt
-  Lit (LDouble _)  -> return typeDouble
+  Lit (LInt _)     -> return typeNum
+  Lit (LDouble _)  -> return typeNum
   Lit (LBoolean _) -> return typeBool
   Lit (LString _)  -> return typeString
   Lit (LChar _)    -> return typeChar

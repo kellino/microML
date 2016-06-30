@@ -12,9 +12,10 @@ data Type
 data TypeScheme = Forall [TVar] Type
     deriving (Show, Eq, Ord)
 
-typeInt, typeDouble, typeBool :: Type
-typeInt    = TCon "Integer"
-typeDouble = TCon "Double"
+--typeInt, typeDouble, typeBool :: Type
+--typeInt    = TCon "Integer"
+--typeDouble = TCon "Double"
+typeNum    = TCon "Number"
 typeBool   = TCon "Boolean"
 typeString = TCon "String"
 typeChar   = TCon "Char"
