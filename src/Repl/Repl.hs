@@ -12,7 +12,7 @@ import Language.Parser
 import Language.Typing.Env as Env
 import Language.Typing.Infer
 
-import Data.Monoid
+import Data.Monoid 
 import qualified Data.Map as Map
 import qualified Data.Text.Lazy as L
 import qualified Data.Text.Lazy.IO as L
@@ -39,15 +39,11 @@ initState = IState Env.empty emptyTmenv
 
 type Repl a = HaskelineT (StateT IState IO) a
 
-liftError :: Show e => Either e a -> Repl a
-liftError (Right val) = return val
-liftError (Left err) = do
+hoistError :: Show e => Either e a -> Repl a
+hoistError (Right val) = return val
+hoistError (Left err) = do
   liftIO $ print err
   abort
-
--------------------------------------------------------------------------------
--- Execution
--------------------------------------------------------------------------------
 
 evalDef :: TermEnv -> (String, Expr) -> TermEnv
 evalDef env (nm, ex) = termEnv'
@@ -59,10 +55,10 @@ exec update source = do
   st <- get
 
   -- Parser ( returns AST )
-  mod <- liftError $ parseProgram "<stdin>" source
+  mod <- hoistError $ parseProgram "<stdin>" source
 
   -- Type Inference ( returns Typing Environment )
-  typeEnv' <- liftError $ inferTop (typeEnv st) mod
+  typeEnv' <- hoistError $ inferTop (typeEnv st) mod
 
   -- Create the new environment
   let st' = st { termEnv = foldl' evalDef (termEnv st) mod
@@ -111,8 +107,7 @@ typeof args = do
   let arg = unwords args
   case Env.lookup arg (typeEnv st) of
     Just val -> liftIO $ putStrLn $ ppsig (arg, val)
-    Nothing -> liftIO $ putStrLn "value not found"
-    -- Nothing -> exec $ L.pack arg
+    Nothing -> exec False $ L.pack arg
 
 -- :quit command
 quit :: a -> Repl ()
