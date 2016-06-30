@@ -94,6 +94,10 @@ cmd source = exec True (L.pack source)
   {-st <- get-}
   {-liftIO $ mapM_ putStrLn $ ppenv (typeEnv st)-}
 
+-- :?
+help :: [String] -> HaskelineT (Control.Monad.State.Strict.StateT IState IO) ()
+help = return $ liftIO $ putStrLn "can't help you on that one"
+
 -- :load command
 using :: [String] -> Repl ()
 using args = do
@@ -137,11 +141,12 @@ comp n = do
 
 options :: [(String, [String] -> Repl ())]
 options = [
-    ("using"  , using)
+    ("using", using)
   -- , ("browse" , browse)
-  , ("quit"   , quit)
-  , ("type"   , typeof)
-  , ("!"  , sh)
+  , ("quit" ,  quit)
+  , ("type" , typeof)
+  , ("!"    , sh)
+  , ("?"    , help)
   ]
 
 -------------------------------------------------------------------------------
@@ -154,14 +159,16 @@ completer = Prefix (wordCompleter comp) defaultMatcher
 prompt :: String
 prompt = "\ESC[33mmicroML ⊦\ESC[0m "
 
-{-banner = -}
-    {-"            _               ___  ___ _       \n" ++-}
-    {-"           (_)              |  \\/  || |      \n" ++-}
-    {-"  _ __ ___  _  ___ _ __ ___ | .  . || |      \n" ++-}
-    {-" | '_ ` _ \\| |/ __| '__/ _ \\| |\\/| || |      \n" ++-}
-    {-" | | | | | | | (__| | | (_) | |  | || |____  \n" ++-}
-    {-" |_| |_| |_|_|\\___|_|  \\___/\\_|  |_/\\_____/  \n"-}
+banner :: String
+banner = "\ESC[1;31m" ++
+        "            _               ___  ___ _       \n" ++
+        "           (_)              |  \\/  || |      \n" ++
+        "  _ __ ___  _  ___ _ __ ___ | .  . || |               \ESC[33;1mversion 0.01\ESC[1;31m\n" ++
+        " | '_ ` _ \\| |/ __| '__/ _ \\| |\\/| || |           \ESC[33;1mfor help type :?\ESC[1;31m\n" ++
+        " | | | | | | | (__| | | (_) | |  | || |____  \n" ++
+        " |_| |_| |_|_|\\___|_|  \\___/\\_|  |_/\\_____/  \ESC[0m"
 
-shell :: Repl a -> IO ()
-shell pre = flip evalStateT initState
-     $ evalRepl prompt cmd options completer pre
+
+ini = liftIO $ putStrLn $ banner ++ "\n\n" ++ "\ESC[1mWelcome to microML\ESC[0m\n\n" 
+
+shell = flip evalStateT initState $ evalRepl prompt cmd options completer ini 
