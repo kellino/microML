@@ -107,62 +107,73 @@ ops = Map.fromList [
       (OpAdd, typeNum `TArr` (typeNum `TArr` typeNum))
     , (OpMul, typeNum `TArr` (typeNum `TArr` typeNum))
     , (OpSub, typeNum `TArr` (typeNum `TArr` typeNum))
-    , (OpEq, typeNum `TArr` (typeNum `TArr` typeBool))
     , (OpMod, typeNum `TArr` (typeNum `TArr` typeNum))
+    , (OpExp, typeNum `TArr` (typeNum `TArr` typeNum))
+    , (OpLe, typeNum `TArr` (typeNum `TArr` typeBool))
+    , (OpGe, typeNum `TArr` (typeNum `TArr` typeBool))
+    , (OpLe, typeNum `TArr` (typeNum `TArr` typeBool))
+    , (OpGt, typeNum `TArr` (typeNum `TArr` typeBool))
     , (OpLt, typeNum `TArr` (typeNum `TArr` typeBool))
+    , (OpEq, typeNum `TArr` (typeNum `TArr` typeBool))
+    , (OpNotEq, typeNum `TArr` (typeNum `TArr` typeBool))
   ]
 
 infer :: Expr -> Infer Type
 infer expr = case expr of
-  Lit (LInt _)     -> return typeNum
-  Lit (LDouble _)  -> return typeNum
-  Lit (LBoolean _) -> return typeBool
-  Lit (LString _)  -> return typeString
-  Lit (LChar _)    -> return typeChar
+    Lit (LInt _)     -> return typeNum
+    Lit (LDouble _)  -> return typeNum
+    Lit (LBoolean _) -> return typeBool
+    Lit (LString _)  -> return typeString
+    Lit (LChar _)    -> return typeChar
+    List xs          -> return typeList     -- only a temporary measure for checking
 
-  Var x -> lookupEnv x
+    {-List xs -> do-}
+        {-let elems = map infer xs-}
+        {-return -}
 
-  Lam x e -> do
-    tv <- fresh
-    t <- inEnv (x, Forall [] tv) (infer e)
-    return (tv `TArr` t)
+    Var x -> lookupEnv x
 
-  App e1 e2 -> do
-    t1 <- infer e1
-    t2 <- infer e2
-    tv <- fresh
-    uni t1 (t2 `TArr` tv)
-    return tv
+    Lam x e -> do
+        tv <- fresh
+        t <- inEnv (x, Forall [] tv) (infer e)
+        return (tv `TArr` t)
 
-  Let x e1 e2 -> do
-    env <- ask
-    t1 <- infer e1
-    let sc = generalize env t1
-    t2 <- inEnv (x, sc) (infer e2)
-    return t2
+    App e1 e2 -> do
+        t1 <- infer e1
+        t2 <- infer e2
+        tv <- fresh
+        uni t1 (t2 `TArr` tv)
+        return tv
 
-  FixPoint e1 -> do
-    t1 <- infer e1
-    tv <- fresh
-    uni (tv `TArr` tv) t1
-    return tv
+    Let x e1 e2 -> do
+        env <- ask
+        t1 <- infer e1
+        let sc = generalize env t1
+        t2 <- inEnv (x, sc) (infer e2)
+        return t2
 
-  Op op e1 e2 -> do
-    t1 <- infer e1
-    t2 <- infer e2
-    tv <- fresh
-    let u1 = t1 `TArr` (t2 `TArr` tv)
-        u2 = ops Map.! op
-    uni u1 u2
-    return tv
+    FixPoint e1 -> do
+        t1 <- infer e1
+        tv <- fresh
+        uni (tv `TArr` tv) t1
+        return tv
 
-  If cond tr fl -> do
-    t1 <- infer cond
-    t2 <- infer tr
-    t3 <- infer fl
-    uni t1 typeBool
-    uni t2 t3
-    return t2
+    Op op e1 e2 -> do
+        t1 <- infer e1
+        t2 <- infer e2
+        tv <- fresh
+        let u1 = t1 `TArr` (t2 `TArr` tv)
+            u2 = ops Map.! op
+        uni u1 u2
+        return tv
+
+    If cond tr fl -> do
+        t1 <- infer cond
+        t2 <- infer tr
+        t3 <- infer fl
+        uni t1 typeBool
+        uni t2 t3
+        return t2
 
 inferTop :: Env -> [(String, Expr)] -> Either TypeError Env
 inferTop env [] = Right env
