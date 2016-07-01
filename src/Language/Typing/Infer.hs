@@ -26,7 +26,7 @@ import qualified Data.Map as Map
 import qualified Data.Set as Set
 
 -- | Inference monad
-type Infer a = (RWST Env [Constraint] InferState (Except TypeError) a)             
+type Infer a = (RWST Env [Constraint] InferState (Except TypeError) a)  
 
 -- | Inference state
 data InferState = InferState { count :: Int }
@@ -125,11 +125,7 @@ infer expr = case expr of
     Lit (LBoolean _) -> return typeBool
     Lit (LString _)  -> return typeString
     Lit (LChar _)    -> return typeChar
-    List xs          -> return typeList     -- only a temporary measure for checking
-
-    {-List xs -> do-}
-        {-let elems = map infer xs-}
-        {-return -}
+    List _           -> return typeList     -- only a temporary measure for checking
 
     Var x -> lookupEnv x
 
