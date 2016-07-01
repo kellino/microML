@@ -21,6 +21,7 @@ import Control.Monad (void)
 import Language.Lexer
 import qualified Language.Lexer as Lx
 import Language.Syntax
+import Language.ListPrimitives
 
 varName :: Parser String
 varName = do
@@ -111,7 +112,7 @@ bool = (reserved "true" >> return (Lit (LBoolean True)))
 list :: Parser Expr
 list = do
     void $ char '['
-    elems <- expr `sepBy` string ", " -- fix this!
+    elems <- expr `sepBy` (string "," <|> string ", ")
     void $ char ']'
     return $ List elems
 
@@ -177,6 +178,7 @@ aexp =
   <|> variable
   <|> stringLit
   <|> charLit
+  <|> hd <|> tl <|> initial    -- list primitives
 
 term :: Parser Expr
 term = Ex.buildExpressionParser table aexp
@@ -184,6 +186,7 @@ term = Ex.buildExpressionParser table aexp
 infixOp :: String -> (a -> a -> a) -> Ex.Assoc -> Op a
 infixOp x f = Ex.Infix (reservedOp x >> return f)
 
+table :: [[Op Expr]]
 table = [ [ infixOp "^"   (Op OpExp) Ex.AssocLeft ]
         , [ infixOp "*"   (Op OpMul) Ex.AssocLeft
         ,   infixOp "/"   (Op OpDiv) Ex.AssocLeft
@@ -197,13 +200,29 @@ table = [ [ infixOp "^"   (Op OpExp) Ex.AssocLeft ]
         , [ infixOp "=="  (Op OpEq)  Ex.AssocLeft 
         ,   infixOp "/="  (Op OpNotEq) Ex.AssocLeft ] 
         , [ infixOp "and" (Op OpAnd) Ex.AssocLeft
-        ,   infixOp "or"  (Op OpOr)  Ex.AssocLeft ] ]
-
+        ,   infixOp "or"  (Op OpOr)  Ex.AssocLeft ] 
+        , [ infixOp ":" cons Ex.AssocRight] 
+        , [ infixOp "." compose Ex.AssocRight] ]
 
 expr :: Parser Expr
 expr = do
     es <- many1 term
     return (foldl1 App es)
+
+----------------
+-- PRIMITIVES --
+----------------
+
+hd :: ParsecT L.Text () Identity Expr
+hd = reserved "head" >> expr >>= \foldable -> return $ car foldable
+
+tl :: ParsecT L.Text () Identity Expr
+tl = reserved "tail" >> expr >>= \foldable -> return $ cdr foldable
+
+initial :: ParsecT L.Text () Identity Expr
+initial = reserved "init" >> expr >>= \foldable -> return $ init' foldable
+
+compose = undefined
 
 --------------
 -- PATTERNS --
