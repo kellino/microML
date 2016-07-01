@@ -1,7 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Language.Parser (
-  parseProgram
+    decl
+  , parseProgram
 ) where
 
 import Text.Parsec
@@ -136,24 +137,24 @@ letin = do
 
 letrecin :: Parser Expr
 letrecin = do
-  reserved "let"
-  reserved "rec"
-  x <- identifier
-  reservedOp "="
-  e1 <- expr
-  reserved "in"
-  e2 <- expr
-  return (Let x e1 e2)
+    reserved "let"
+    reserved "rec"
+    x <- identifier
+    reservedOp "="
+    e1 <- expr
+    reserved "in"
+    e2 <- expr
+    return (Let x e1 e2)
 
 ifthen :: Parser Expr
 ifthen = do
-  reserved "if"
-  cond <- aexp
-  reservedOp "then"
-  tr <- aexp
-  reserved "else"
-  fl <- aexp
-  return (If cond tr fl)
+    reserved "if"
+    cond <- aexp
+    reservedOp "then"
+    tr <- aexp
+    reserved "else"
+    fl <- aexp
+    return (If cond tr fl)
 
 caseOf :: Parser Expr
 caseOf = do
@@ -170,7 +171,7 @@ aexp =
   <|> try binary <|> try octal <|> try hex <|> try double
   <|> number
   <|> ifthen
-  <|> list
+  <|> try listComp <|> list
   <|> try letrecin
   <|> letin
   <|> lambda
@@ -178,7 +179,7 @@ aexp =
   <|> variable
   <|> stringLit
   <|> charLit
-  <|> hd <|> tl <|> initial    -- list primitives
+  <|> hd <|> tl <|> initial 
 
 term :: Parser Expr
 term = Ex.buildExpressionParser table aexp
@@ -213,14 +214,36 @@ expr = do
 -- PRIMITIVES --
 ----------------
 
-hd :: ParsecT L.Text () Identity Expr
-hd = reserved "head" >> expr >>= \foldable -> return $ car foldable
+listComp = do
+    void $ string "["
+    func <- expr
+    void $ string "| " <|> string " | "
+    item <- expr
+    void $ string "<- " <|> string " <- "
+    set <- expr
+    void $ string "]"
+    return $ ListComp func item set
 
-tl :: ParsecT L.Text () Identity Expr
-tl = reserved "tail" >> expr >>= \foldable -> return $ cdr foldable
+hd = do
+    reserved "head"
+    foldable <- expr
+    case car foldable of
+      Left err -> return $ Language.Syntax.Error err
+      Right x -> return x
 
-initial :: ParsecT L.Text () Identity Expr
-initial = reserved "init" >> expr >>= \foldable -> return $ init' foldable
+tl = do
+    reserved "tail"
+    foldable <- expr
+    case cdr foldable of
+      Left err -> return $ Language.Syntax.Error err
+      Right x -> return x
+
+initial = do
+    reserved "init"
+    foldable <- expr
+    case init' foldable of
+      Left err -> return $ Language.Syntax.Error err
+      Right x -> return x
 
 compose = undefined
 
