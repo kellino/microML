@@ -65,7 +65,6 @@ data MLError
 instance Show MLError where
     show (Default msg) = show msg
 
-
 data Program = Program [Decl] Expr deriving Eq
 
 type Decl = (String, Expr)
