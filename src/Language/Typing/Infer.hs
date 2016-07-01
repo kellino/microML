@@ -2,11 +2,9 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 
 module Language.Typing.Infer (
-  Constraint,
-  TypeError(..),
-  Subst(..),
   inferTop,
-  constraintsExpr
+  constraintsExpr,
+  infer
 ) where
 
 import Language.Typing.Env
@@ -125,7 +123,18 @@ infer expr = case expr of
     Lit (LBoolean _) -> return typeBool
     Lit (LString _)  -> return typeString
     Lit (LChar _)    -> return typeChar
-    List _           -> return typeList     -- only a temporary measure for checking
+
+    List [] -> return typeEmptyList
+    List [x] -> do 
+        t1 <- infer x
+        tv <- fresh
+        uni t1 tv
+        return tv
+    List (x:y:_) -> do
+        t1 <- infer x
+        t2 <- infer y
+        uni t1 t2
+        return t2
 
     Var x -> lookupEnv x
 
@@ -173,7 +182,7 @@ infer expr = case expr of
 
 inferTop :: Env -> [(String, Expr)] -> Either TypeError Env
 inferTop env [] = Right env
-inferTop env ((name, ex):xs) = case (inferExpr env ex) of
+inferTop env ((name, ex):xs) = case inferExpr env ex of
   Left err -> Left err
   Right ty -> inferTop (extend env (name, ty)) xs
 
@@ -232,12 +241,12 @@ solver (su, cs) =
     [] -> return su
     ((t1, t2): cs0) -> do
       su1  <- unifies t1 t2
-      solver (su1 `compose` su, (apply su1 cs0))
+      solver (su1 `compose` su, apply su1 cs0)
 
 bind ::  TVar -> Type -> Solve Subst
 bind a t | t == TVar a     = return emptySubst
          | occursCheck a t = throwError $ InfiniteType a t
-         | otherwise       = return $ (Subst $ Map.singleton a t)
+         | otherwise       = return (Subst $ Map.singleton a t)
 
 occursCheck ::  Substitutable a => TVar -> a -> Bool
 occursCheck a t = a `Set.member` ftv t
