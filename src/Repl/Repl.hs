@@ -160,6 +160,8 @@ completer = Prefix (wordCompleter comp) defaultMatcher
 prompt :: String
 prompt = "\ESC[33mmicroML ⊦\ESC[0m "
 
+-- this looks a little weird and distorted due to the necessity of escaping the \ character. But it
+-- does work!
 banner :: String
 banner = "\ESC[1;31m" ++
         "            _               ___  ___ _       \n" ++
