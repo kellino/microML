@@ -10,7 +10,7 @@ import Repl.Pretty
 import Language.Syntax
 import Language.Parser
 import Language.Typing.Env as Env
--- import Language.Typing.Infer
+import Language.Typing.Infer
 
 import Data.Monoid
 import qualified Data.Map as Map
@@ -58,11 +58,11 @@ exec update source = do
   mod <- hoistError $ parseProgram "<stdin>" source
 
   -- Type Inference ( returns Typing Environment )
-  -- typeEnv' <- hoistError $ inferTop (typeEnv st) mod
+  typeEnv' <- hoistError $ inferTop (typeEnv st) mod
 
   -- Create the new environment
   let st' = st { termEnv = foldl' evalDef (termEnv st) mod
-      -- , typeEnv = typeEnv' <> typeEnv st
+      , typeEnv = typeEnv' <> typeEnv st
                }
 
   -- Update the interpreter state
@@ -73,14 +73,14 @@ exec update source = do
     Nothing -> return ()
     Just ex -> do
       let (val, _) = runEval (termEnv st') "it"  ex
-      liftIO $ print val
-    -- showOutput (show val) st'
+      --liftIO $ print val
+      showOutput (show val) st'
 
-{-showOutput :: String -> IState -> Repl ()-}
-{-showOutput arg st = -}
-  {-case Env.lookup "it" (typeEnv st)  of-}
-    {-Just val -> liftIO $ putStrLn $ ppsig (arg, val)-}
-    {-Nothing -> return ()-}
+showOutput :: String -> IState -> Repl ()
+showOutput arg st = 
+  case Env.lookup "it" (typeEnv st)  of
+    Just val -> liftIO $ putStrLn $ ppsig (arg, val)
+    Nothing -> return ()
 
 cmd :: String -> Repl ()
 cmd source = exec True (L.pack source)

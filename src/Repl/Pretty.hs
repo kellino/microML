@@ -35,19 +35,12 @@ instance Pretty TypeScheme where
   ppr p (Forall [] t) = ppr p t
   ppr p (Forall ts t) = text "for all" <+> hcat (punctuate space (map (ppr p) ts)) <> text "." <+> ppr p t
 
-instance Pretty Binop where
-  ppr _ OpAdd = text "\ESC[34m+\ESC[0m"
-  ppr _ OpSub = text "-"
-  ppr _ OpMul = text "*"
-  ppr _ OpEq = text "=="
-
 instance Pretty Expr where
   ppr p (Var a) = ppr p a
   ppr p (App a b) = parensIf (p > 0) $ ppr (p+1) a <+> ppr p b
   ppr p (Lam a b) = text "\\" <> ppr p a <+> text  "->" <+> ppr p b
   ppr p (Let a b c) = text "let" <> ppr p a <+> text  "=" <+> ppr p b <+> text "in" <+> ppr p c
   ppr p (Lit a) = ppr p a
-  ppr p (Op o a b) = parensIf (p>0) $ ppr p a <+> ppr p o <+> ppr p b
   ppr p (FixPoint a) = parensIf (p>0) $ text "fix" <> ppr p a
   ppr p (If a b c) =
     text "if" <> ppr p a <+>
@@ -61,7 +54,7 @@ instance Pretty Lit where
 
 instance Show TypeError where
   show (UnificationFail a b) =
-    concat ["Cannot \ESC[1munify\ESC[0m types: \n\t", pptype a, "\nwith \n\t", pptype b]
+    concat ["Cannot \ESC[1munify\ESC[0m types: ", pptype a, " with ", pptype b]
   show (InfiniteType (TV a) b) =
     concat ["Cannot construct the \ESC[0minfinite\ESC[0m type: ", a, " = ", pptype b]
   show (Ambigious cs) =
