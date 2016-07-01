@@ -14,15 +14,14 @@ parensIf ::  Bool -> Doc -> Doc
 parensIf True = parens
 parensIf False = id
 
-
 class Pretty p where
   ppr :: Int -> p -> Doc
 
 instance Pretty Name where
-  ppr _  = text 
+    ppr _  = text 
 
 instance Pretty TVar where
-  ppr _ (TV x) = text x
+    ppr _ (TV x) = text $ "\ESC[1m" ++ x ++ "\ESC[0m"
 
 instance Pretty Type where
   ppr p (TArr a b) = parensIf (isArrow a) (ppr p a) <+> text "->" <+> ppr p b
@@ -34,10 +33,10 @@ instance Pretty Type where
 
 instance Pretty TypeScheme where
   ppr p (Forall [] t) = ppr p t
-  ppr p (Forall ts t) = text "forall" <+> hcat (punctuate space (map (ppr p) ts)) <> text "." <+> ppr p t
+  ppr p (Forall ts t) = text "for all" <+> hcat (punctuate space (map (ppr p) ts)) <> text "." <+> ppr p t
 
 instance Pretty Binop where
-  ppr _ OpAdd = text "+"
+  ppr _ OpAdd = text "\ESC[34m+\ESC[0m"
   ppr _ OpSub = text "-"
   ppr _ OpMul = text "*"
   ppr _ OpEq = text "=="
@@ -62,9 +61,9 @@ instance Pretty Lit where
 
 instance Show TypeError where
   show (UnificationFail a b) =
-    concat ["Cannot unify types: \n\t", pptype a, "\nwith \n\t", pptype b]
+    concat ["Cannot \ESC[1munify\ESC[0m types: \n\t", pptype a, "\nwith \n\t", pptype b]
   show (InfiniteType (TV a) b) =
-    concat ["Cannot construct the infinite type: ", a, " = ", pptype b]
+    concat ["Cannot construct the \ESC[0minfinite\ESC[0m type: ", a, " = ", pptype b]
   show (Ambigious cs) =
     concat ["Cannot not match expected type: '" ++ pptype a ++ "' with actual type: '" ++ pptype b ++ "'\n" | (a,b) <- cs]
   show (UnboundVariable a) = "Not in scope: " ++ a
@@ -79,7 +78,7 @@ ppexpr :: Expr -> String
 ppexpr = render . ppr 0
 
 ppsig :: (String, TypeScheme) -> String
-ppsig (a, b) = a ++ " \ESC[32m::\ESC[0m " ++ ppscheme b
+ppsig (a, b) = a ++ " \ESC[35m::\ESC[0m " ++ ppscheme b
 
 ppdecl :: (String, Expr) -> String
 ppdecl (a, b) = "let " ++ a ++ " = " ++ ppexpr b
