@@ -1,6 +1,6 @@
 module Language.Syntax where
 
-import qualified Data.Text as T
+import qualified Data.Text.Lazy as L
 
 type Name = String
 type VarName = String
@@ -19,7 +19,8 @@ data Expr
   | FixPoint Expr
   | Op Binop Expr Expr
   | UnaryMinus Expr
-  | Pat Pat
+  | Error MLError
+  | ListComp Expr Expr Expr
   deriving (Show, Eq, Ord)
 
 data Lit
@@ -49,18 +50,9 @@ data Binop =
       | OpNotEq
       deriving (Eq, Ord, Show)      
 
-data Pat
-    = Wildcard
-  | PApp String [Expr]
-  | PVar VarName
-  | PCon ConName
-  | PInt Integer
-  | PDouble Double
-  | PBool Bool
-  deriving (Eq, Ord, Show)
-
 data MLError
-    = Default T.Text
+    = Default L.Text
+    deriving (Eq, Ord)
 
 instance Show MLError where
     show (Default msg) = show msg

@@ -214,6 +214,7 @@ expr = do
 -- PRIMITIVES --
 ----------------
 
+listComp :: ParsecT L.Text () Identity Expr
 listComp = do
     void $ string "["
     func <- expr
@@ -224,6 +225,7 @@ listComp = do
     void $ string "]"
     return $ ListComp func item set
 
+hd :: ParsecT L.Text () Identity Expr
 hd = do
     reserved "head"
     foldable <- expr
@@ -231,6 +233,7 @@ hd = do
       Left err -> return $ Language.Syntax.Error err
       Right x -> return x
 
+tl :: ParsecT L.Text () Identity Expr
 tl = do
     reserved "tail"
     foldable <- expr
@@ -238,6 +241,7 @@ tl = do
       Left err -> return $ Language.Syntax.Error err
       Right x -> return x
 
+initial :: ParsecT L.Text () Identity Expr
 initial = do
     reserved "init"
     foldable <- expr
@@ -246,34 +250,6 @@ initial = do
       Right x -> return x
 
 compose = undefined
-
---------------
--- PATTERNS --
---------------
-
-pat :: Parser Expr
-pat = Ex.buildExpressionParser table term <?> "pattern matching"
-    where table = [ [ Ex.Infix (reservedOp ":" >> return listcons ) Ex.AssocRight ] ]
-          term =  try (parens conPat)
-              <|> wildcard
-              <|> varPat
-              <|> try doublePat
-              <|> intPat
-              <|> boolPat
-              <|> parens pat
-          conPat =  do
-              con <- constructorName
-              pats <- many pat
-              return $ Pat $ PApp con pats
-          varPat = varName >>= \name -> return $ Pat $ PVar name
-          intPat  = Lx.integer >>= \n -> return $ Pat $ PInt n
-          doublePat = float >>= \d -> return $ Pat $ PDouble d
-          wildcard = do
-              void $ reservedOp "_"
-              return $ Pat Wildcard
-          listcons l r = Pat $ PApp "cons" [l, r]
-          boolPat = (reserved "true" >> return (Pat (PBool True)))
-                <|> (reserved "false" >> return (Pat (PBool False)))
 
 ------------------
 -- DECLARATIONS --
