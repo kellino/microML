@@ -21,15 +21,16 @@ import Control.Monad (void)
 import Language.Lexer
 import qualified Language.Lexer as Lx
 import Language.Syntax
+import Language.ListPrimitives
 
-varName :: ParsecT L.Text () Identity String
+varName :: Parser String
 varName = do
     name@(n:_) <- identifier
     if isLower n
        then return name
        else fail "a variable name must start with a lowercase letter"
 
-constructorName :: ParsecT L.Text () Identity String
+constructorName :: Parser String
 constructorName = do
     name@(n:_) <- identifier
     if isUpper n
@@ -79,6 +80,13 @@ hex = do
 baseToDec :: (t -> [(c, b)]) -> t -> c
 baseToDec f n = (fst . head) $ f n
 
+charLit :: Parser Expr
+charLit = do
+    void $ char '\''
+    c <- letter
+    void $ char '\''
+    return $ Lit (LChar c)
+
 stringLit :: ParsecT L.Text u Identity Expr
 stringLit = do
     void $ char '"'
@@ -101,11 +109,10 @@ bool :: Parser Expr
 bool = (reserved "true" >> return (Lit (LBoolean True)))
     <|> (reserved "false" >> return (Lit (LBoolean False)))
 
-
 list :: Parser Expr
 list = do
     void $ char '['
-    elems <- aexp `sepBy` char ','
+    elems <- expr `sepBy` (string "," <|> string ", ")
     void $ char ']'
     return $ List elems
 
@@ -119,13 +126,13 @@ lambda = do
 
 letin :: Parser Expr
 letin = do
-  reserved "let"
-  x <- varName
-  reservedOp "="
-  e1 <- expr
-  reserved "in"
-  e2 <- expr
-  return (Let x e1 e2)
+    reserved "let"
+    x <- varName
+    void $ reservedOp "="
+    e1 <- expr
+    reserved "in"
+    e2 <- expr
+    return $ Let x e1 e2
 
 letrecin :: Parser Expr
 letrecin = do
@@ -170,6 +177,8 @@ aexp =
   <|> caseOf
   <|> variable
   <|> stringLit
+  <|> charLit
+  <|> hd <|> tl <|> initial    -- list primitives
 
 term :: Parser Expr
 term = Ex.buildExpressionParser table aexp
@@ -177,6 +186,7 @@ term = Ex.buildExpressionParser table aexp
 infixOp :: String -> (a -> a -> a) -> Ex.Assoc -> Op a
 infixOp x f = Ex.Infix (reservedOp x >> return f)
 
+table :: [[Op Expr]]
 table = [ [ infixOp "^"   (Op OpExp) Ex.AssocLeft ]
         , [ infixOp "*"   (Op OpMul) Ex.AssocLeft
         ,   infixOp "/"   (Op OpDiv) Ex.AssocLeft
@@ -187,25 +197,66 @@ table = [ [ infixOp "^"   (Op OpExp) Ex.AssocLeft ]
         ,   infixOp ">="  (Op OpGe)  Ex.AssocLeft
         ,   infixOp "<"   (Op OpLt)  Ex.AssocLeft
         ,   infixOp ">"   (Op OpGt)  Ex.AssocLeft ]
-        , [ infixOp "=="  (Op OpEq)  Ex.AssocLeft ] 
+        , [ infixOp "=="  (Op OpEq)  Ex.AssocLeft 
+        ,   infixOp "/="  (Op OpNotEq) Ex.AssocLeft ] 
         , [ infixOp "and" (Op OpAnd) Ex.AssocLeft
-        ,   infixOp "or"  (Op OpOr)  Ex.AssocLeft ] ]
+        ,   infixOp "or"  (Op OpOr)  Ex.AssocLeft ] 
+        , [ infixOp ":" cons Ex.AssocRight] 
+        , [ infixOp "." compose Ex.AssocRight] ]
 
 expr :: Parser Expr
 expr = do
     es <- many1 term
     return (foldl1 App es)
 
-type Binding = (String, Expr)
+----------------
+-- PRIMITIVES --
+----------------
 
-{-letdecl :: Parser Binding-}
-{-letdecl = do-}
-    {-reserved "let"-}
-    {-name <- varName-}
-    {-args <- many varName-}
-    {-reservedOp "="-}
-    {-body <- expr-}
-    {-return (name, foldr Lam body args)-}
+hd :: ParsecT L.Text () Identity Expr
+hd = reserved "head" >> expr >>= \foldable -> return $ car foldable
+
+tl :: ParsecT L.Text () Identity Expr
+tl = reserved "tail" >> expr >>= \foldable -> return $ cdr foldable
+
+initial :: ParsecT L.Text () Identity Expr
+initial = reserved "init" >> expr >>= \foldable -> return $ init' foldable
+
+compose = undefined
+
+--------------
+-- PATTERNS --
+--------------
+
+pat :: Parser Expr
+pat = Ex.buildExpressionParser table term <?> "pattern matching"
+    where table = [ [ Ex.Infix (reservedOp ":" >> return listcons ) Ex.AssocRight ] ]
+          term =  try (parens conPat)
+              <|> wildcard
+              <|> varPat
+              <|> try doublePat
+              <|> intPat
+              <|> boolPat
+              <|> parens pat
+          conPat =  do
+              con <- constructorName
+              pats <- many pat
+              return $ Pat $ PApp con pats
+          varPat = varName >>= \name -> return $ Pat $ PVar name
+          intPat  = Lx.integer >>= \n -> return $ Pat $ PInt n
+          doublePat = float >>= \d -> return $ Pat $ PDouble d
+          wildcard = do
+              void $ reservedOp "_"
+              return $ Pat Wildcard
+          listcons l r = Pat $ PApp "cons" [l, r]
+          boolPat = (reserved "true" >> return (Pat (PBool True)))
+                <|> (reserved "false" >> return (Pat (PBool False)))
+
+------------------
+-- DECLARATIONS --
+------------------
+
+type Binding = (String, Expr)
 
 letDecl :: Parser Binding
 letDecl = do
@@ -219,16 +270,6 @@ letDecl = do
        else return (name, foldr Lam body args)
            where removeControlChar = filter (\x -> x `notElem` ['(', ')', '\"'])
 
-{-letrecdecl :: Parser (String, Expr)-}
-{-letrecdecl = do-}
-  {-reserved "let"-}
-  {-reserved "rec"-}
-  {-name <- varName-}
-  {-args <- many identifier-}
-  {-reservedOp "="-}
-  {-body <- expr-}
-  {-return (name, FixPoint $ foldr Lam body (name:args))-}
-
 val :: Parser Binding
 val = do
   ex <- expr
@@ -236,7 +277,6 @@ val = do
 
 decl :: Parser Binding
 decl = try letDecl <|> val
---decl = try letrecdecl <|> letdecl <|> val
 
 top :: Parser Binding
 top = do

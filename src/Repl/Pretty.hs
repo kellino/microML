@@ -1,25 +1,14 @@
 {-# Language FlexibleInstances #-}
 {-# Language TypeSynonymInstances #-}
 
-module Language.Pretty (
-  ppconstraint,
-  ppconstraints,
-  ppdecl,
-  ppenv,
-  ppexpr,
-  ppscheme,
-  ppsubst,
-  ppsignature,
-  pptype
-) where
+module Repl.Pretty  where
 
-import Language.Typing.Env
 import Language.Typing.Type
 import Language.Syntax
-import Language.Typing.Infer
+import Language.Typing.TypeError
 
 import Text.PrettyPrint
-import qualified Data.Map as Map
+--import qualified Data.Map as Map
 
 parensIf ::  Bool -> Doc -> Doc
 parensIf True = parens
@@ -30,7 +19,7 @@ class Pretty p where
   ppr :: Int -> p -> Doc
 
 instance Pretty Name where
-  ppr _ = text 
+  ppr _  = text 
 
 instance Pretty TVar where
   ppr _ (TV x) = text x
@@ -43,7 +32,7 @@ instance Pretty Type where
   ppr p (TVar a) = ppr p a
   ppr _ (TCon a) = text a
 
-instance Pretty Scheme where
+instance Pretty TypeScheme where
   ppr p (Forall [] t) = ppr p t
   ppr p (Forall ts t) = text "forall" <+> hcat (punctuate space (map (ppr p) ts)) <> text "." <+> ppr p t
 
@@ -51,7 +40,7 @@ instance Pretty Binop where
   ppr _ OpAdd = text "+"
   ppr _ OpSub = text "-"
   ppr _ OpMul = text "*"
-  ppr _ OpEq  = text "=="
+  ppr _ OpEq = text "=="
 
 instance Pretty Expr where
   ppr p (Var a) = ppr p a
@@ -67,22 +56,9 @@ instance Pretty Expr where
     text "else" <+> ppr p c
 
 instance Pretty Lit where
-  ppr _ (LInt i)         = integer i
-  ppr _ (LDouble d)      = double d
-  ppr _ (LBoolean True)  = text "True"
+  ppr _ (LInt i) = integer i
+  ppr _ (LBoolean True) = text "True"
   ppr _ (LBoolean False) = text "False"
-  ppr _ (LChar c)        = char c
-  ppr _ (LString str)    = text str
-
-instance Pretty Constraint where
-  ppr p (a, b) = ppr p a <+> text " ~ " <+> ppr p b
-
-instance Pretty [Constraint] where
-  ppr p cs = vcat (punctuate space (map (ppr p) cs))
-
-instance Pretty Subst where
-  ppr _ (Subst s) = vcat (punctuate space (map pprSub $ Map.toList s))
-    where pprSub (a, b) = ppr 0 a <+> text "~" <+> ppr 0 b
 
 instance Show TypeError where
   show (UnificationFail a b) =
@@ -93,7 +69,7 @@ instance Show TypeError where
     concat ["Cannot not match expected type: '" ++ pptype a ++ "' with actual type: '" ++ pptype b ++ "'\n" | (a,b) <- cs]
   show (UnboundVariable a) = "Not in scope: " ++ a
 
-ppscheme :: Scheme -> String
+ppscheme :: TypeScheme -> String
 ppscheme = render . ppr 0
 
 pptype :: Type -> String
@@ -102,20 +78,11 @@ pptype = render . ppr 0
 ppexpr :: Expr -> String
 ppexpr = render . ppr 0
 
-ppsignature :: (String, Scheme) -> String
-ppsignature (a, b) = a ++ " : " ++ ppscheme b
+ppsig :: (String, TypeScheme) -> String
+ppsig (a, b) = a ++ " \ESC[32m::\ESC[0m " ++ ppscheme b
 
 ppdecl :: (String, Expr) -> String
 ppdecl (a, b) = "let " ++ a ++ " = " ++ ppexpr b
 
-ppenv :: Env -> [String]
-ppenv (TypeEnv env) = map ppsignature $ Map.toList env
-
-ppconstraint :: Constraint -> String
-ppconstraint = render . ppr 0
-
-ppconstraints :: [Constraint] -> String
-ppconstraints = render . ppr 0
-
-ppsubst :: Subst -> String
-ppsubst = render . ppr 0
+ppTypeError :: TypeError -> String
+ppTypeError = render . ppError

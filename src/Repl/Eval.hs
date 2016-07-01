@@ -4,6 +4,7 @@ import Language.Syntax
 
 import Control.Monad.Identity
 import qualified Data.Map as Map
+import Data.List (intercalate)
 
 data Value 
     = VNum Integer
@@ -28,7 +29,8 @@ instance Show Value where
     show (VDouble d)      = show d
     show (VString str)    = show str
     show (VChar c)        = show c
-    show (VList xs)       = show xs
+    show (VList xs)       = "[" ++ intercalate "," (show' <$> xs) ++ "]"
+        where show' (Identity x) = show x
     show (VError str)     = show str
     show VClosure{}       = "\ESC[1m<<closure>>\ESC[0m"
 
@@ -77,6 +79,7 @@ eval env expr = case expr of
           OpLt  -> return $ VBool $ a' <  b'
           OpGe  -> return $ VBool $ a' >= b'
           OpGt  -> return $ VBool $ a' >  b'
+          OpNotEq -> return $ VBool $ a' /= b'
     UnaryMinus ex -> do
         ex' <- eval env ex
         case ex' of

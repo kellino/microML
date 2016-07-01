@@ -1,41 +1,52 @@
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE TypeSynonymInstances #-}
+
 module Language.Typing.Substitutable where
 
-import Language.Typing.Type
-import Language.Typing.Env
-
-import Control.Monad (replicateM)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
+import Control.Monad.Except
+import Control.Monad.Identity
 
-type Subst = Map.Map TVar Type
+import Language.Typing.Env
+import Language.Typing.Type
+import Language.Typing.TypeError
 
+type Unifier = (Subst, [Constraint])
+
+-- | Constraint solver monad
+type Solve a = ExceptT TypeError Identity a
+
+newtype Subst = Subst (Map.Map TVar Type)
+  deriving (Eq, Ord, Show, Monoid)
 
 class Substitutable a where
-    apply :: Subst -> a -> a
-    ftv :: a -> Set.Set TVar
+  apply :: Subst -> a -> a
+  ftv   :: a -> Set.Set TVar
 
 instance Substitutable Type where
-    apply _ (TCon a) = TCon a
-    apply s t@(TVar a) = Map.findWithDefault t a s
-    apply s (t1 `TArr` t2) = apply s t1 `TArr` apply s t2
+  apply _ (TCon a)       = TCon a
+  apply (Subst s) t@(TVar a) = Map.findWithDefault t a s
+  apply s (t1 `TArr` t2) = apply s t1 `TArr` apply s t2
 
-    ftv TCon{} = Set.empty              -- ftv(Primitive) = \0
-    ftv (TVar a) = Set.singleton a      -- ftv(a) = {a}
-    ftv (t1 `TArr` t2) = ftv t1 `Set.union` ftv t2  -- ftv(t1 -> t2) = ftv(t1) ∪ ftv(t2)
+  ftv TCon{}         = Set.empty
+  ftv (TVar a)       = Set.singleton a
+  ftv (t1 `TArr` t2) = ftv t1 `Set.union` ftv t2
 
 instance Substitutable TypeScheme where
-    apply s (Forall as t) = Forall as $ apply s' t
-        where s' = foldr Map.delete s as            
-    ftv (Forall as t) = ftv t `Set.difference` Set.fromList as -- ftv(∀x.t) = ftv(t) - {x}
+  apply (Subst s) (Forall as t)   = Forall as $ apply s' t
+                            where s' = Subst $ foldr Map.delete s as
+  ftv (Forall as t) = ftv t `Set.difference` Set.fromList as
+
+instance Substitutable Constraint where
+   apply s (t1, t2) = (apply s t1, apply s t2)
+   ftv (t1, t2) = ftv t1 `Set.union` ftv t2
 
 instance Substitutable a => Substitutable [a] where
-    apply = fmap . apply
-    ftv   = foldr (Set.union . ftv) Set.empty
+  apply = map . apply
+  ftv   = foldr (Set.union . ftv) Set.empty
 
 instance Substitutable Env where
-    apply s (TypeEnv env) = TypeEnv $ Map.map (apply s) env
-    ftv (TypeEnv env) = ftv $ Map.elems env
-
-letters :: [String]
-letters = [1..] >>= flip replicateM ['a'..'z']
-
+  apply s (TypeEnv env) = TypeEnv $ Map.map (apply s) env
+  ftv (TypeEnv env) = ftv $ Map.elems env

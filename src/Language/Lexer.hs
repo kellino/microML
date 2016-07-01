@@ -12,19 +12,20 @@ type Op a = Ex.Operator L.Text () Identity a
 type Operators a = Ex.OperatorTable L.Text () Identity a
 
 reservedNames :: [String]
-reservedNames = [ "let", "in", "fix", "rec", "if", "then", "else", "case", "of", "and", "or", "not", "xor"]
+reservedNames = [ "let", "in", "fix", "rec", "if", "then", "else", "case", "of", "and", 
+                  "or", "not", "xor", "head", "tail", "init" ]
 
 reservedOps :: [String]
-reservedOps = [ "->", "\\", "+", "*", "-", "=", "==", "%", "^", "/", "<=", ">=", ">", "<"]
+reservedOps = [ "->", "\\", "+", "*", "-", "=", "==", "%", "^", "/", "<=", ">=", ">", "<", ":", "_"]
 
 lexer :: Tok.GenTokenParser L.Text () Identity
 lexer = Tok.makeTokenParser Tok.LanguageDef
   { Tok.commentStart    = "(*"
   , Tok.commentEnd      = "*)"
-  , Tok.commentLine     = "**"
+  , Tok.commentLine     = "--"
   , Tok.nestedComments  = True
   , Tok.identStart      = letter
-  , Tok.identLetter     = alphaNum <|> oneOf "_'"
+  , Tok.identLetter     = alphaNum <|> oneOf "_'?"
   , Tok.opStart         = oneOf ":!$%&*+./<=>?@\\^|-~"
   , Tok.opLetter        = oneOf ":!$%&*+./<=>?@\\^|-~"
   , Tok.reservedNames   = reservedNames
