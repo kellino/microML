@@ -2,16 +2,16 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 
-module Language.Typing.Substitutable where
+module MicroML.Typing.Substitutable where
 
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 import Control.Monad.Except
 import Control.Monad.Identity
 
-import Language.Typing.Env
-import Language.Typing.Type
-import Language.Typing.TypeError
+import MicroML.Typing.Env
+import MicroML.Typing.Type
+import MicroML.Typing.TypeError
 
 type Unifier = (Subst, [Constraint])
 

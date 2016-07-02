@@ -1,4 +1,4 @@
-module Language.Typing.Type  where
+module MicroML.Typing.Type  where
 
 newtype TVar = TV String
     deriving (Show, Eq, Ord)

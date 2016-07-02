@@ -1,23 +1,23 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 
-module Language.Typing.Infer (
+module MicroML.Typing.Infer (
   inferTop,
   constraintsExpr,
-  infer
 ) where
 
-import Language.Typing.Env
-import Language.Typing.Substitutable
-import Language.Typing.TypeError
-import qualified Language.Typing.Env as Env
-import Language.Typing.Type
-import Language.Syntax
+import MicroML.Typing.Env
+import MicroML.Typing.Substitutable
+import MicroML.Typing.TypeError
+import qualified MicroML.Typing.Env as Env
+import MicroML.Typing.Type
+import MicroML.Syntax
 
 import Control.Monad.Except
 import Control.Monad.State
 import Control.Monad.RWS
 import Control.Monad.Identity
+import Control.Monad (filterM)
 
 import Data.List (nub)
 import qualified Data.Map as Map
@@ -116,6 +116,13 @@ ops = Map.fromList [
     , (OpNotEq, typeNum `TArr` (typeNum `TArr` typeBool))
   ]
 
+{-unifyList :: Infer [Type] -> Infer Type-}
+{-unifyList ys =  do-}
+    {-t1 <- head ys-}
+    {-t2 <- head . tail $ ys-}
+    {-uni t1 t2-}
+    {-return t1-}
+
 infer :: Expr -> Infer Type
 infer expr = case expr of
     Lit (LInt _)     -> return typeNum
@@ -124,17 +131,23 @@ infer expr = case expr of
     Lit (LString _)  -> return typeString
     Lit (LChar _)    -> return typeChar
 
-    List [] -> return typeEmptyList
-    List [x] -> do 
-        t1 <- infer x
-        tv <- fresh
-        uni t1 tv
-        return tv
-    List (x:y:_) -> do
-        t1 <- infer x
-        t2 <- infer y
-        uni t1 t2
-        return t2
+    {-List xs -> do-}
+        {-t1 <- infer $ head xs-}
+        {-t2 <- unifyList $ traverse infer (tail xs)-}
+        {-uni t1 t2-}
+        {-return t1-}
+
+    {-List [] -> return typeEmptyList-}
+    {-List [x] -> do -}
+        {-t1 <- infer x-}
+        {-tv <- fresh-}
+        {-uni t1 tv-}
+        {-return tv-}
+    {-List (x:y:_) -> do-}
+        {-t1 <- infer x-}
+        {-t2 <- infer y-}
+        {-uni t1 t2-}
+        {-return t2-}
 
     Var x -> lookupEnv x
 

@@ -1,8 +1,8 @@
-module Language.Typing.Env where
+module MicroML.Typing.Env where
 
 import Data.Monoid
-import Language.Syntax
-import Language.Typing.Type
+import MicroML.Syntax
+import MicroML.Typing.Type
 
 import qualified Data.Map as Map
 

@@ -1,7 +1,7 @@
-module Language.Typing.TypeError where
+module MicroML.Typing.TypeError where
 
 import Text.PrettyPrint
-import Language.Typing.Type
+import MicroML.Typing.Type
 
 type Constraint = (Type, Type)
 
