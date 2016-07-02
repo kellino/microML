@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Language.Parser (
+module MicroML.Parser (
     decl
   , parseProgram
 ) where
@@ -19,10 +19,10 @@ import qualified Data.Text.Lazy as L
 import Control.Monad.Identity (Identity)
 import Control.Monad (void)
 
-import Language.Lexer
-import qualified Language.Lexer as Lx
-import Language.Syntax
-import Language.ListPrimitives
+import MicroML.Lexer
+import qualified MicroML.Lexer as Lx
+import MicroML.Syntax
+import MicroML.ListPrimitives
 
 varName :: Parser String
 varName = do
@@ -156,13 +156,13 @@ ifthen = do
     fl <- aexp
     return (If cond tr fl)
 
-caseOf :: Parser Expr
-caseOf = do
-    reserved "case"
-    e1 <- expr
-    reserved "of"
-    pats <- many expr
-    return $ Case e1 pats
+{-caseOf :: Parser Expr-}
+{-caseOf = do-}
+    {-reserved "case"-}
+    {-e1 <- expr-}
+    {-reserved "of"-}
+    {-pats <- many expr-}
+    {-return $ Case e1 pats-}
 
 aexp :: Parser Expr
 aexp =
@@ -175,7 +175,7 @@ aexp =
   <|> try letrecin
   <|> letin
   <|> lambda
-  <|> caseOf
+  -- <|> caseOf
   <|> variable
   <|> stringLit
   <|> charLit
@@ -230,7 +230,7 @@ hd = do
     reserved "head"
     foldable <- expr
     case car foldable of
-      Left err -> return $ Language.Syntax.Error err
+      Left err -> return $ MicroML.Syntax.Error err
       Right x -> return x
 
 tl :: ParsecT L.Text () Identity Expr
@@ -238,7 +238,7 @@ tl = do
     reserved "tail"
     foldable <- expr
     case cdr foldable of
-      Left err -> return $ Language.Syntax.Error err
+      Left err -> return $ MicroML.Syntax.Error err
       Right x -> return x
 
 initial :: ParsecT L.Text () Identity Expr
@@ -246,7 +246,7 @@ initial = do
     reserved "init"
     foldable <- expr
     case init' foldable of
-      Left err -> return $ Language.Syntax.Error err
+      Left err -> return $ MicroML.Syntax.Error err
       Right x -> return x
 
 compose = undefined
@@ -257,17 +257,17 @@ compose = undefined
 
 type Binding = (String, Expr)
 
-letDecl :: Parser Binding
-letDecl = do
-    reserved "let"
-    name <- varName
-    args <- many varName
-    void $ reservedOp "="
-    body <- expr
-    if name `elem` (words . removeControlChar . show) body
-       then return (name, FixPoint $ foldr Lam body (name:args))
-       else return (name, foldr Lam body args)
-           where removeControlChar = filter (\x -> x `notElem` ['(', ')', '\"'])
+{-letDecl :: Parser Binding-}
+{-letDecl = do-}
+    {-reserved "let"-}
+    {-name <- varName-}
+    {-args <- many varName-}
+    {-void $ reservedOp "="-}
+    {-body <- expr-}
+    {-if name `elem` (words . removeControlChar . show) body-}
+       {-then return (name, FixPoint $ foldr Lam body (name:args))-}
+       {-else return (name, foldr Lam body args)-}
+           {-where removeControlChar = filter (\x -> x `notElem` ['(', ')', '\"'])-}
 
 val :: Parser Binding
 val = do
@@ -275,7 +275,8 @@ val = do
   return ("it", ex)
 
 decl :: Parser Binding
-decl = try letDecl <|> val
+-- decl = try letDecl <|> val
+decl = val
 
 top :: Parser Binding
 top = do

@@ -1,6 +1,9 @@
-module Language.Syntax where
+module MicroML.Syntax where
 
 import qualified Data.Text.Lazy as L
+import qualified Data.Map as Map
+
+type TermEnv = Map.Map String Expr
 
 type Name = String
 type VarName = String
@@ -9,7 +12,7 @@ type ConName = String
 data Expr
   = Var Name
   | Constructor Name
-  | Case Expr [Expr]
+-- | Case Expr [Expr]
   | App Expr Expr
   | Lam Name Expr
   | Let Name Expr Expr
@@ -21,7 +24,15 @@ data Expr
   | UnaryMinus Expr
   | Error MLError
   | ListComp Expr Expr Expr
-  deriving (Show, Eq, Ord)
+  | Closure Name Expr TermEnv
+  deriving (Eq, Ord)
+
+instance Show Expr where
+    show (Lit (LInt n)) = show n
+    show (Lit (LDouble d)) = show d
+    show (Lit (LBoolean b)) = show b
+    show (Lit (LString str)) = show str
+    show (Lit (LChar c)) = show c
 
 data Lit
   = LInt Integer
