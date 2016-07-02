@@ -4,10 +4,6 @@ import MicroML.Syntax
 
 import qualified Data.Map as Map
 import Data.Maybe (fromMaybe)
---import Data.List (intercalate)
-
-data Value =
-    VBool Bool
 
 emptyTmenv :: TermEnv
 emptyTmenv = Map.empty
@@ -21,13 +17,22 @@ eval env expr = case expr of
     bool@(Lit (LBoolean _)) -> bool
     FixPoint e              -> eval env (App e (FixPoint e))
     List xs                 -> List $ map (eval env) xs
-    Var x                   -> fromMaybe (error "not yet been set") (Map.lookup x env)
+    Var x                   -> fromMaybe (MLError "not yet been set") (Map.lookup x env)
     Lam x body              -> Closure x body env
-    {-App func arg            -> do-}
-        {-Closure s exp clo <- eval env func-}
-        {-args <- eval env arg-}
-        {-let new' = Map.insert s args clo-}
-        {-eval new' exp-}
+    App a b                 -> do
+        let Closure n expr' clo = eval env a
+        let arg = eval env b
+        let new' = Map.insert n arg clo
+        eval new' expr'
+    If cond tr fls          -> do
+        let cond' = eval env cond
+        if cond' == Lit (LBoolean True)
+           then eval env tr
+           else eval env fls
+    Let x e body            -> do
+        let e' = eval env e
+        let new' = Map.insert x e' env
+        eval new' body
     Op op a b -> do
         let a' = eval env a
         let b' = eval env b
@@ -41,35 +46,13 @@ add (Lit (LInt a)) (Lit (LDouble b)) = Lit $ LDouble $ realToFrac a + b
 add (Lit (LDouble a)) (Lit (LInt b)) = Lit $ LDouble $ a + realToFrac b
 add _ _ = error "weird"
 
-
 {-eval :: TermEnv -> Expr -> Interpreter Value-}
 {-eval env expr = case expr of-}
-    {-Lit (LInt k)      -> return $ VNum k-}
-    {-Lit (LDouble k)   -> return $ VDouble k-}
-    {-Lit (LString str) -> return $ VString str-}
-    {-Lit (LChar c)     -> return $ VChar c-}
-    {-Lit (LBoolean b)  -> return $ VBool b-}
-    {-Lam x body        -> return $ VClosure x body env-}
     {-List xs           -> return $ VList $ map (eval env) xs-}
     {-Let x e body      -> do-}
         {-e' <- eval env e-}
         {-let newEnv = Map.insert x e' env-}
         {-eval newEnv body-}
-    {-FixPoint e        -> eval env (App e (FixPoint e))-}
-    {-Var x             -> -}
-        {-case Map.lookup x env of-}
-          {-Just v -> return v-}
-          {-Nothing -> return $ VError "this name has not yet been set to a value"-}
-    {-App func arg     -> do-}
-        {-VClosure s exp closure <- eval env func-}
-        {-args <- eval env arg-}
-        {-let newEnv = Map.insert s args closure-}
-        {-eval newEnv exp-}
-    {-If cond tr fl    -> do-}
-        {-VBool br <- eval env cond-}
-        {-if br-}
-           {-then eval env tr-}
-           {-else eval env fl-}
     {-Op op a b  -> do-}
         {-a' <- eval env a-}
         {-b' <- eval env b-}
