@@ -3,12 +3,11 @@
 
 module Repl.Pretty  where
 
-import Language.Typing.Type
-import Language.Syntax
-import Language.Typing.TypeError
+import MicroML.Typing.Type
+import MicroML.Syntax
+import MicroML.Typing.TypeError
 
 import Text.PrettyPrint
---import qualified Data.Map as Map
 
 parensIf ::  Bool -> Doc -> Doc
 parensIf True = parens

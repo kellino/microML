@@ -7,10 +7,10 @@ module Repl.Repl where
 
 import Repl.Eval
 import Repl.Pretty
-import Language.Syntax
-import Language.Parser
-import Language.Typing.Env as Env
-import Language.Typing.Infer
+import MicroML.Syntax
+import MicroML.Parser
+import MicroML.Typing.Env as Env
+import MicroML.Typing.Infer
 
 import Data.Monoid
 import qualified Data.Map as Map
@@ -62,7 +62,7 @@ exec update source = do
 
   -- Create the new environment
   let st' = st { termEnv = foldl' evalDef (termEnv st) mod
-      , typeEnv = typeEnv' <> typeEnv st
+     , typeEnv = typeEnv' <> typeEnv st
                }
 
   -- Update the interpreter state
@@ -73,7 +73,7 @@ exec update source = do
     Nothing -> return ()
     Just ex -> do
       let (val, _) = runEval (termEnv st') "it"  ex
-      --liftIO $ print val
+          -- liftIO $ print val
       showOutput (show val) st'
 
 showOutput :: String -> IState -> Repl ()

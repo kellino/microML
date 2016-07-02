@@ -1,138 +1,152 @@
 module Repl.Eval where
 
-import Language.Syntax
+import MicroML.Syntax
 
-import Control.Monad.Identity
 import qualified Data.Map as Map
-import Data.List (intercalate)
+import Data.Maybe (fromMaybe)
+--import Data.List (intercalate)
 
-data Value 
-    = VNum Integer
-  | VBool Bool
-  | VDouble Double
-  | VClosure String Expr TermEnv
-  | VString String
-  | VChar Char
-  | VList [Interpreter Value]
-  | VError String
-  deriving (Eq, Ord)
-
-type TermEnv = Map.Map String Value
-type Interpreter t = Identity t
+data Value =
+    VBool Bool
 
 emptyTmenv :: TermEnv
 emptyTmenv = Map.empty
 
-instance Show Value where
-    show (VNum n)         = show n
-    show (VBool b)        = show b
-    show (VDouble d)      = show d
-    show (VString str)    = show str
-    show (VChar c)        = show c
-    show (VList xs)       = "[" ++ intercalate "," (show' <$> xs) ++ "]"
-        where show' (Identity x) = show x
-    show (VError str)     = show str
-    show VClosure{}       = "\ESC[1m<<closure>>\ESC[0m"
-
-eval :: TermEnv -> Expr -> Interpreter Value
+eval :: TermEnv -> Expr -> Expr
 eval env expr = case expr of
-    Lit (LInt k)      -> return $ VNum k
-    Lit (LDouble k)   -> return $ VDouble k
-    Lit (LString str) -> return $ VString str
-    Lit (LChar c)     -> return $ VChar c
-    Lit (LBoolean b)  -> return $ VBool b
-    Lam x body        -> return $ VClosure x body env
-    List xs           -> return $ VList $ map (eval env) xs
-    Let x e body      -> do
-        e' <- eval env e
-        let newEnv = Map.insert x e' env
-        eval newEnv body
-    FixPoint e        -> eval env (App e (FixPoint e))
-    Var x             -> 
-        case Map.lookup x env of
-          Just v -> return v
-          Nothing -> return $ VError "this name has not yet been set to a value"
-    App func arg     -> do
-        VClosure s exp closure <- eval env func
-        args <- eval env arg
-        let newEnv = Map.insert s args closure
-        eval newEnv exp
-    If cond tr fl    -> do
-        VBool br <- eval env cond
-        if br
-           then eval env tr
-           else eval env fl
-    Op op a b  -> do
-        a' <- eval env a
-        b' <- eval env b
+    num@(Lit (LInt _))      -> num
+    doub@(Lit (LDouble _))  -> doub
+    char@(Lit (LChar _))    -> char
+    str@(Lit (LString _))   -> str
+    bool@(Lit (LBoolean _)) -> bool
+    FixPoint e              -> eval env (App e (FixPoint e))
+    List xs                 -> List $ map (eval env) xs
+    Var x                   -> fromMaybe (error "not yet been set") (Map.lookup x env)
+    Lam x body              -> Closure x body env
+    {-App func arg            -> do-}
+        {-Closure s exp clo <- eval env func-}
+        {-args <- eval env arg-}
+        {-let new' = Map.insert s args clo-}
+        {-eval new' exp-}
+    Op op a b -> do
+        let a' = eval env a
+        let b' = eval env b
         case op of
-          OpAdd -> return $ a' `add` b'
-          OpSub -> return $ a' `sub`  b'
-          OpMul -> return $ a' `mul`  b'
-          OpDiv -> return $ a' `div'` b'
-          OpMod -> return $ a' `mod'` b'
-          OpExp -> return $ a' `exp'` b'
-          OpOr  -> return $ a' `or'`  b'
-          OpAnd -> return $ a' `and'` b'
-          OpEq  -> return $ VBool $ a' == b'
-          OpLe  -> return $ VBool $ a' <= b'
-          OpLt  -> return $ VBool $ a' <  b'
-          OpGe  -> return $ VBool $ a' >= b'
-          OpGt  -> return $ VBool $ a' >  b'
-          OpNotEq -> return $ VBool $ a' /= b'
-    UnaryMinus ex -> do
-        ex' <- eval env ex
-        case ex' of
-          VNum n    -> return $ VNum (negate n)
-          VDouble d -> return $ VDouble (negate d)
-    _     -> return $ VError "not yet supported"
+          OpAdd -> a' `add` b'
 
--- helper functions --
+add :: Expr -> Expr -> Expr
+add (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a + b
+add (Lit (LDouble a)) (Lit (LDouble b)) = Lit $ LDouble $ a + b
+add (Lit (LInt a)) (Lit (LDouble b)) = Lit $ LDouble $ realToFrac a + b
+add (Lit (LDouble a)) (Lit (LInt b)) = Lit $ LDouble $ a + realToFrac b
+add _ _ = error "weird"
 
-or' (VBool a) (VBool b) = VBool $ a || b
 
-and' (VBool a) (VBool b)  = VBool $ a && b
+{-eval :: TermEnv -> Expr -> Interpreter Value-}
+{-eval env expr = case expr of-}
+    {-Lit (LInt k)      -> return $ VNum k-}
+    {-Lit (LDouble k)   -> return $ VDouble k-}
+    {-Lit (LString str) -> return $ VString str-}
+    {-Lit (LChar c)     -> return $ VChar c-}
+    {-Lit (LBoolean b)  -> return $ VBool b-}
+    {-Lam x body        -> return $ VClosure x body env-}
+    {-List xs           -> return $ VList $ map (eval env) xs-}
+    {-Let x e body      -> do-}
+        {-e' <- eval env e-}
+        {-let newEnv = Map.insert x e' env-}
+        {-eval newEnv body-}
+    {-FixPoint e        -> eval env (App e (FixPoint e))-}
+    {-Var x             -> -}
+        {-case Map.lookup x env of-}
+          {-Just v -> return v-}
+          {-Nothing -> return $ VError "this name has not yet been set to a value"-}
+    {-App func arg     -> do-}
+        {-VClosure s exp closure <- eval env func-}
+        {-args <- eval env arg-}
+        {-let newEnv = Map.insert s args closure-}
+        {-eval newEnv exp-}
+    {-If cond tr fl    -> do-}
+        {-VBool br <- eval env cond-}
+        {-if br-}
+           {-then eval env tr-}
+           {-else eval env fl-}
+    {-Op op a b  -> do-}
+        {-a' <- eval env a-}
+        {-b' <- eval env b-}
+        {-case op of-}
+          {-OpAdd -> return $ a' `add` b'-}
+          {-OpSub -> return $ a' `sub`  b'-}
+          {-OpMul -> return $ a' `mul`  b'-}
+          {-OpDiv -> return $ a' `div'` b'-}
+          {-OpMod -> return $ a' `mod'` b'-}
+          {-OpExp -> return $ a' `exp'` b'-}
+          {-OpOr  -> return $ a' `or'`  b'-}
+          {-OpAnd -> return $ a' `and'` b'-}
+          {-OpEq  -> return $ VBool $ a' == b'-}
+          {-OpLe  -> return $ VBool $ a' <= b'-}
+          {-OpLt  -> return $ VBool $ a' <  b'-}
+          {-OpGe  -> return $ VBool $ a' >= b'-}
+          {-OpGt  -> return $ VBool $ a' >  b'-}
+          {-OpNotEq -> return $ VBool $ a' /= b'-}
+    {-UnaryMinus ex -> do-}
+        {-ex' <- eval env ex-}
+        {-case ex' of-}
+          {-VNum n    -> return $ VNum (negate n)-}
+          {-VDouble d -> return $ VDouble (negate d)-}
+    {-_     -> return $ VError "not yet supported"-}
 
-add :: Value -> Value -> Value
-add (VNum a) (VNum b) = VNum $ a + b
-add (VDouble a) (VDouble b) = VDouble $ a + b
-add (VNum a) (VDouble b) = VDouble $ realToFrac a + b
-add (VDouble a) (VNum b) = VDouble $ a + realToFrac b
-add _ _                  = VError "please check your calculation..."
+{--- helper functions ---}
 
-sub :: Value -> Value -> Value
-sub (VNum a) (VNum b) = VNum $ a - b
-sub (VDouble a) (VDouble b) = VDouble $ a - b
-sub (VNum a) (VDouble b) = VDouble $ realToFrac a - b
-sub (VDouble a) (VNum b) = VDouble $ a - realToFrac b
-sub _ _                  = VError "please check your calculation..."
+{-or' (VBool a) (VBool b) = VBool $ a || b-}
 
-mul :: Value -> Value -> Value
-mul (VNum a) (VNum b) = VNum $ a * b
-mul (VDouble a) (VDouble b) = VDouble $ a * b
-mul (VNum a) (VDouble b) = VDouble $ realToFrac a * b
-mul (VDouble a) (VNum b) = VDouble $ a * realToFrac b
-mul _ _                  = VError "please check your calculation..."
+{-and' (VBool a) (VBool b)  = VBool $ a && b-}
 
-div' :: Value -> Value -> Value
-div' (VNum a) (VNum b) = VDouble $ realToFrac a / realToFrac b
-div' (VDouble a) (VDouble b) = VDouble $ a / b
-div' (VNum a) (VDouble b) = VDouble $ realToFrac a / b
-div' (VDouble a) (VNum b) = VDouble $ a / realToFrac b
-div' _ _                  = VError "please check your calculation..."
+{-add :: Value -> Value -> Value-}
+{-add (VNum a) (VNum b) = VNum $ a + b-}
+{-add (VDouble a) (VDouble b) = VDouble $ a + b-}
+{-add (VNum a) (VDouble b) = VDouble $ realToFrac a + b-}
+{-add (VDouble a) (VNum b) = VDouble $ a + realToFrac b-}
+{-add _ _                  = VError "please check your calculation..."-}
 
-mod' :: Value -> Value -> Value
-mod' (VNum a) (VNum b) = VNum $ a `mod` b
-mod' _ _                  = VError "please check your calculation..."
+{-sub :: Value -> Value -> Value-}
+{-sub (VNum a) (VNum b) = VNum $ a - b-}
+{-sub (VDouble a) (VDouble b) = VDouble $ a - b-}
+{-sub (VNum a) (VDouble b) = VDouble $ realToFrac a - b-}
+{-sub (VDouble a) (VNum b) = VDouble $ a - realToFrac b-}
+{-sub _ _                  = VError "please check your calculation..."-}
 
-exp' :: Value -> Value -> Value
-exp' (VNum a) (VNum b) = VNum $ a^b
-exp' (VNum a) (VDouble b) = VDouble $ realToFrac a**b
-exp' (VDouble a) (VNum b) = VDouble $ a ^ b
-exp' (VDouble a) (VDouble b) = VDouble $ a**b
-exp' _ _                  = VError "please check your calculation..."
+{-mul :: Value -> Value -> Value-}
+{-mul (VNum a) (VNum b) = VNum $ a * b-}
+{-mul (VDouble a) (VDouble b) = VDouble $ a * b-}
+{-mul (VNum a) (VDouble b) = VDouble $ realToFrac a * b-}
+{-mul (VDouble a) (VNum b) = VDouble $ a * realToFrac b-}
+{-mul _ _                  = VError "please check your calculation..."-}
 
-runEval :: TermEnv -> String -> Expr -> (Value, TermEnv)
-runEval env x exp =
-    let res = runIdentity (eval env exp)
+{-div' :: Value -> Value -> Value-}
+{-div' (VNum a) (VNum b) = VDouble $ realToFrac a / realToFrac b-}
+{-div' (VDouble a) (VDouble b) = VDouble $ a / b-}
+{-div' (VNum a) (VDouble b) = VDouble $ realToFrac a / b-}
+{-div' (VDouble a) (VNum b) = VDouble $ a / realToFrac b-}
+{-div' _ _                  = VError "please check your calculation..."-}
+
+{-mod' :: Value -> Value -> Value-}
+{-mod' (VNum a) (VNum b) = VNum $ a `mod` b-}
+{-mod' _ _                  = VError "please check your calculation..."-}
+
+{-exp' :: Value -> Value -> Value-}
+{-exp' (VNum a) (VNum b) = VNum $ a^b-}
+{-exp' (VNum a) (VDouble b) = VDouble $ realToFrac a**b-}
+{-exp' (VDouble a) (VNum b) = VDouble $ a ^ b-}
+{-exp' (VDouble a) (VDouble b) = VDouble $ a**b-}
+{-exp' _ _                  = VError "please check your calculation..."-}
+
+
+runEval :: TermEnv -> String -> Expr -> (Expr, TermEnv)
+runEval env x exp = 
+    let res = eval env exp
      in (res, Map.insert x res env)
+
+{-runEval :: TermEnv -> String -> Expr -> (Value, TermEnv)-}
+{-runEval env x exp =-}
+    {-let res = runIdentity (eval env exp)-}
+     {-in (res, Map.insert x res env)-}
