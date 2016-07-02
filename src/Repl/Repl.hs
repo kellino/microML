@@ -12,7 +12,6 @@ import MicroML.Parser
 import MicroML.Typing.Env as Env
 import MicroML.Typing.Infer
 
-import Data.Monoid
 import qualified Data.Map as Map
 import qualified Data.Text.Lazy as L
 import qualified Data.Text.Lazy.IO as L
@@ -62,7 +61,7 @@ exec update source = do
 
   -- Create the new environment
   let st' = st { termEnv = foldl' evalDef (termEnv st) mod
-     , typeEnv = typeEnv' <> typeEnv st
+               , typeEnv = typeEnv' `mappend` typeEnv st
                }
 
   -- Update the interpreter state
@@ -73,14 +72,14 @@ exec update source = do
     Nothing -> return ()
     Just ex -> do
       let (val, _) = runEval (termEnv st') "it"  ex
-          -- liftIO $ print val
-      showOutput (show val) st'
+      liftIO $ print val
+      --showOutput (show val) st'
 
-showOutput :: String -> IState -> Repl ()
-showOutput arg st = 
-  case Env.lookup "it" (typeEnv st)  of
-    Just val -> liftIO $ putStrLn $ ppsig (arg, val)
-    Nothing -> return ()
+{-showOutput :: String -> IState -> Repl ()-}
+{-showOutput arg st = -}
+  {-case Env.lookup "it" (typeEnv st)  of-}
+    {-Just val -> liftIO $ putStrLn $ ppsig (arg, val)-}
+    {-Nothing -> return ()-}
 
 cmd :: String -> Repl ()
 cmd source = exec True (L.pack source)
