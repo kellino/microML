@@ -17,7 +17,7 @@ import Control.Monad.Except
 import Control.Monad.State
 import Control.Monad.RWS
 import Control.Monad.Identity
-import Control.Monad (filterM)
+-- import Control.Monad (filterM)
 
 import Data.List (nub)
 import qualified Data.Map as Map
@@ -92,7 +92,8 @@ fresh = do
 
 instantiate ::  TypeScheme -> Infer Type
 instantiate (Forall as t) = do
-    as' <- mapM (\_ -> fresh) as
+   -- as' <- mapM (\_ -> fresh) as
+    as' <- mapM (const fresh) as
     let s = Subst $ Map.fromList $ zip as as'
     return $ apply s t
 

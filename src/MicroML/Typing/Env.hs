@@ -1,6 +1,5 @@
 module MicroML.Typing.Env where
 
-import Data.Monoid
 import MicroML.Syntax
 import MicroML.Typing.Type
 
