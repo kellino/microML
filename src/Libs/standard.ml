@@ -2,7 +2,7 @@
 let id x = x;
 let const x y = x;
 let flip f = \x y -> f y x;
--- let map f xs = if (head xs == []) then [] else (f (head xs)) : (tail xs);
+let ap f x = f (f x);
 
 (* print functions *)
 let show x = x;     (* this is just a synonym for id *)
