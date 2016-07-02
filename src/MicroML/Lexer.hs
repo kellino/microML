@@ -1,4 +1,4 @@
-module Language.Lexer where
+module MicroML.Lexer where
 
 import Text.Parsec
 import Text.Parsec.Text.Lazy
