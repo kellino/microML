@@ -1,12 +1,13 @@
-module Language.ListPrimitives  where
+module MicroML.ListPrimitives  where
 
-import Language.Syntax
+import MicroML.Syntax
 import Control.Monad.Except
 import qualified Data.Text.Lazy as L
 
 type ThrowsError = Either MLError
 
 car :: Expr -> ThrowsError Expr
+car (List [x]) = return x
 car (List (x:_)) = return x
 car (List []) = throwError $ Default $ L.pack "empty list"
 
