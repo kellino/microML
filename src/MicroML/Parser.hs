@@ -1,9 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module MicroML.Parser (
-    decl
-  , parseProgram
-) where
+module MicroML.Parser where
 
 import Text.Parsec
 import Text.Parsec.Text.Lazy (Parser)
@@ -230,7 +227,7 @@ hd = do
     reserved "head"
     foldable <- expr
     case car foldable of
-      Left err -> return $ MicroML.Syntax.Error err
+      -- Left err -> MLError $ show err
       Right x -> return x
 
 tl :: ParsecT L.Text () Identity Expr
@@ -238,7 +235,7 @@ tl = do
     reserved "tail"
     foldable <- expr
     case cdr foldable of
-      Left err -> return $ MicroML.Syntax.Error err
+      -- Left err -> return $ MLError err
       Right x -> return x
 
 initial :: ParsecT L.Text () Identity Expr
@@ -246,7 +243,7 @@ initial = do
     reserved "init"
     foldable <- expr
     case init' foldable of
-      Left err -> return $ MicroML.Syntax.Error err
+      -- Left err -> return $ MLError err
       Right x -> return x
 
 compose = undefined
@@ -257,17 +254,17 @@ compose = undefined
 
 type Binding = (String, Expr)
 
-{-letDecl :: Parser Binding-}
-{-letDecl = do-}
-    {-reserved "let"-}
-    {-name <- varName-}
-    {-args <- many varName-}
-    {-void $ reservedOp "="-}
-    {-body <- expr-}
-    {-if name `elem` (words . removeControlChar . show) body-}
-       {-then return (name, FixPoint $ foldr Lam body (name:args))-}
-       {-else return (name, foldr Lam body args)-}
-           {-where removeControlChar = filter (\x -> x `notElem` ['(', ')', '\"'])-}
+letDecl :: Parser Binding
+letDecl = do
+    reserved "let"
+    name <- varName
+    args <- many varName
+    void $ reservedOp "="
+    body <- expr
+    if name `elem` (words . removeControlChar . show) body
+       then return (name, FixPoint $ foldr Lam body (name:args))
+       else return (name, foldr Lam body args)
+           where removeControlChar = filter (\x -> x `notElem` ['(', ')', '\"'])
 
 val :: Parser Binding
 val = do
@@ -275,8 +272,7 @@ val = do
   return ("it", ex)
 
 decl :: Parser Binding
--- decl = try letDecl <|> val
-decl = val
+decl = try letDecl <|> val
 
 top :: Parser Binding
 top = do

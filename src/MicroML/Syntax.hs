@@ -22,17 +22,20 @@ data Expr
   | FixPoint Expr
   | Op Binop Expr Expr
   | UnaryMinus Expr
-  | Error MLError
+  | MLError String
   | ListComp Expr Expr Expr
   | Closure Name Expr TermEnv
   deriving (Eq, Ord)
 
 instance Show Expr where
-    show (Lit (LInt n)) = show n
-    show (Lit (LDouble d)) = show d
-    show (Lit (LBoolean b)) = show b
+    show (Lit (LInt n))      = show n
+    show (Lit (LDouble d))   = show d
+    show (Lit (LBoolean b))  = show b
     show (Lit (LString str)) = show str
-    show (Lit (LChar c)) = show c
+    show (Lit (LChar c))     = show c
+    show (Var x)             = show x
+    show Closure{}           = "<<closure>>"
+    show (Lam n e)           = show n ++ show e
 
 data Lit
   = LInt Integer
