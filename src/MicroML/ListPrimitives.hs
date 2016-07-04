@@ -1,21 +1,21 @@
+{-# LANGUAGE FlexibleContexts #-}
+
 module MicroML.ListPrimitives  where
 
 import MicroML.Syntax
 import Control.Monad.Except
 import qualified Data.Text.Lazy as L
 
-type ThrowsError = Either MLError
+type ThrowsError = Except MLError
 
-car :: Expr -> ThrowsError Expr
-car (List [x]) = return x
-car (List (x:_)) = return x
-car (List []) = throwError $ Default $ L.pack "empty list"
+car :: Expr -> Expr
+car (List xs) = head xs
+car (List []) = error "head of empty list"
 
-cdr :: Expr -> ThrowsError Expr
-cdr (List []) = throwError $ Default $ L.pack "cannot take the tail of an empty list"
-cdr (List [_]) = return $ List []
-cdr (List (_:xs)) = return $ List xs
-cdr _ = throwError $ Default $ L.pack "bad arg"
+cdr :: Expr -> Expr
+cdr (List [])     = error "empty list"
+cdr (List [x])    = List []
+cdr (List (x:xs)) = List xs
 
 cons :: Expr -> Expr -> Expr
 cons x1 (List []) = List [x1]

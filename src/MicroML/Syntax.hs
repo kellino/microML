@@ -12,7 +12,6 @@ type ConName = String
 data Expr
   = Var Name
   | Constructor Name
--- | Case Expr [Expr]
   | App Expr Expr
   | Lam Name Expr
   | Let Name Expr Expr
@@ -21,21 +20,24 @@ data Expr
   | If Expr Expr Expr
   | FixPoint Expr
   | Op Binop Expr Expr
+  | ListOp UnaryOp Expr
   | UnaryMinus Expr
-  | MLError String
   | ListComp Expr Expr Expr
   | Closure Name Expr TermEnv
-  deriving (Eq, Ord)
+  deriving (Show, Eq, Ord)
 
-instance Show Expr where
-    show (Lit (LInt n))      = show n
-    show (Lit (LDouble d))   = show d
-    show (Lit (LBoolean b))  = show b
-    show (Lit (LString str)) = show str
-    show (Lit (LChar c))     = show c
-    show (Var x)             = show x
-    show Closure{}           = "<<closure>>"
-    show (Lam n e)           = show n ++ show e
+{-instance Show Expr where-}
+    {-show (Lit (LInt n))      = show n-}
+    {-show (Lit (LDouble d))   = show d-}
+    {-show (Lit (LBoolean b))  = show b-}
+    {-show (Lit (LString str)) = show str-}
+    {-show (Lit (LChar c))     = show c-}
+    {-show (Var x)             = show x-}
+    {-show Closure{}           = "<<closure>>"-}
+    {-show (Lam n e)           = show n ++ show e-}
+    {-show (App e1 e2)         = show e1 ++ show e2-}
+    {-show (FixPoint e1)       = show e1-}
+    {-show (If c t f)          = show c ++ show t ++ show f-}
 
 data Lit
   = LInt Integer
@@ -45,6 +47,12 @@ data Lit
   | LChar Char
 
   deriving (Show, Eq, Ord)
+
+data UnaryOp =
+        Car 
+      | Cdr
+      | Cons
+    deriving (Show, Eq, Ord)
 
 data Binop = 
         OpAdd

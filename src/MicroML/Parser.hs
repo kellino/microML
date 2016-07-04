@@ -107,12 +107,20 @@ bool :: Parser Expr
 bool = (reserved "true" >> return (Lit (LBoolean True)))
     <|> (reserved "false" >> return (Lit (LBoolean False)))
 
-list :: Parser Expr
 list = do
-    void $ char '['
-    elems <- expr `sepBy` (string "," <|> string ", ")
-    void $ char ']'
-    return $ List elems
+    void $ string "["
+    elems <- list'
+    void $ string "]"
+    return elems
+
+list' = List <$> expr `sepBy` choice [string ",", string ", "]
+
+{-list :: Parser Expr-}
+{-list = do-}
+    {-void $ char '['-}
+    {-elems <- expr `sepBy` choice [string ",", string ", "]-}
+    {-void $ char ']'-}
+    {-return $ List elems-}
 
 lambda :: Parser Expr
 lambda = do
@@ -172,11 +180,9 @@ aexp =
   <|> try letrecin
   <|> letin
   <|> lambda
-  -- <|> caseOf
   <|> variable
   <|> stringLit
   <|> charLit
-  <|> hd <|> tl <|> initial 
 
 term :: Parser Expr
 term = Ex.buildExpressionParser table aexp
@@ -184,6 +190,8 @@ term = Ex.buildExpressionParser table aexp
 infixOp :: String -> (a -> a -> a) -> Ex.Assoc -> Op a
 infixOp x f = Ex.Infix (reservedOp x >> return f)
 
+prefixOp name func = Ex.Prefix ( do {reservedOp name; return func } )
+    
 table :: [[Op Expr]]
 table = [ [ infixOp "^"   (Op OpExp) Ex.AssocLeft ]
         , [ infixOp "*"   (Op OpMul) Ex.AssocLeft
@@ -200,51 +208,26 @@ table = [ [ infixOp "^"   (Op OpExp) Ex.AssocLeft ]
         , [ infixOp "and" (Op OpAnd) Ex.AssocLeft
         ,   infixOp "or"  (Op OpOr)  Ex.AssocLeft ] 
         , [ infixOp ":" cons Ex.AssocRight] 
-        , [ infixOp "." compose Ex.AssocRight] ]
+        , [ infixOp "." compose Ex.AssocRight] 
+        , [ prefixOp "head" (ListOp Car) 
+        , prefixOp "tail" (ListOp Cdr) ] ]
+
 
 expr :: Parser Expr
 expr = do
     es <- many1 term
     return (foldl1 App es)
 
-----------------
--- PRIMITIVES --
-----------------
-
 listComp :: ParsecT L.Text () Identity Expr
 listComp = do
     void $ string "["
     func <- expr
-    void $ string "| " <|> string " | "
+    void $ choice [string "| ", string " | "]
     item <- expr
     void $ string "<- " <|> string " <- "
     set <- expr
     void $ string "]"
     return $ ListComp func item set
-
-hd :: ParsecT L.Text () Identity Expr
-hd = do
-    reserved "head"
-    foldable <- expr
-    case car foldable of
-      -- Left err -> MLError $ show err
-      Right x -> return x
-
-tl :: ParsecT L.Text () Identity Expr
-tl = do
-    reserved "tail"
-    foldable <- expr
-    case cdr foldable of
-      -- Left err -> return $ MLError err
-      Right x -> return x
-
-initial :: ParsecT L.Text () Identity Expr
-initial = do
-    reserved "init"
-    foldable <- expr
-    case init' foldable of
-      -- Left err -> return $ MLError err
-      Right x -> return x
 
 compose = undefined
 
