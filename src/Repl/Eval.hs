@@ -5,6 +5,7 @@ import MicroML.ListPrimitives
 
 import qualified Data.Map as Map
 import Data.Maybe (fromMaybe)
+import Data.Bits (xor)
 
 emptyTmenv :: TermEnv
 emptyTmenv = Map.empty
@@ -49,20 +50,20 @@ eval env expr = case expr of
           OpDiv -> a' `div'` b'
           OpMod -> a' `mod'` b'
           OpExp -> a' `exp'` b'
-          {-OpOr  -> a' `or'`  b'-}
-          {-OpAnd -> a' `and'` b'-}
+          OpOr  -> a' `or'`  b'
+          OpAnd -> a' `and'` b'
+          OpXor -> a' `xor'` b'
           OpEq  -> Lit $ LBoolean $ a' == b'
           OpLe  -> Lit $ LBoolean $ a' <= b'
           OpLt  -> Lit $ LBoolean $ a' <  b'
           OpGe  -> Lit $ LBoolean $ a' >= b'
           OpGt  -> Lit $ LBoolean $ a' >  b'
           OpNotEq -> Lit $ LBoolean $ a' /= b'
-    {-UnaryMinus ex -> do-}
-        {-ex' <- eval env ex-}
-        {-case ex' of-}
-          {-Lit (LInt n)  -> Lit (LInt (negate n))-}
-          {-VDouble d ->  (negate d)-}
-    -- _     -> Default $ L.pack "not yet supported"
+          OpCons ->  -- a' `cons` b'
+            case b' of
+              (List _) -> a' `cons` b'
+              (Var x) -> a' `cons` fromMaybe (error "not found") (Map.lookup x env)
+        
 
 add :: Expr -> Expr -> Expr
 add (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a + b
@@ -71,9 +72,9 @@ add (Lit (LInt a)) (Lit (LDouble b)) = Lit $ LDouble $ realToFrac a + b
 add (Lit (LDouble a)) (Lit (LInt b)) = Lit $ LDouble $ a + realToFrac b
 -- add _ _ = Default $ L.pack "weird"
 
-{-or' (VBool a) (VBool b) = VBool $ a || b-}
-
-{-and' (VBool a) (VBool b)  = VBool $ a && b-}
+or' (Lit (LBoolean a)) (Lit (LBoolean b)) = Lit $ LBoolean $ a || b
+and' (Lit (LBoolean a)) (Lit (LBoolean b)) = Lit $ LBoolean $ a && b
+xor' (Lit (LBoolean a)) (Lit (LBoolean b)) = Lit $ LBoolean $ a `xor` b
 
 sub :: Expr -> Expr -> Expr
 sub (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a - b
