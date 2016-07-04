@@ -22,4 +22,7 @@ cons :: Expr -> Expr -> Expr
 cons x1 (List []) = List [x1]
 cons x1 (List [x2]) = List [x1, x2]
 cons x1 (List xs) = List $ x1 : xs
+-- these are just here for testing
 cons _ (Var _) = Lit $ LString "still have problems with vars"
+cons (Var _) _ = Lit $ LString "var at the beginning" 
+cons _ _ = Lit $ LString "weird shit!"
