@@ -22,3 +22,4 @@ cons :: Expr -> Expr -> Expr
 cons x1 (List []) = List [x1]
 cons x1 (List [x2]) = List [x1, x2]
 cons x1 (List xs) = List $ x1 : xs
+cons _ (Var _) = Lit $ LString "still have problems with vars"

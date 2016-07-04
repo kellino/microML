@@ -191,7 +191,8 @@ table = [ [ infixOp "^"   (Op OpExp) Ex.AssocLeft ]
         , [ infixOp "=="  (Op OpEq)  Ex.AssocLeft 
         ,   infixOp "/="  (Op OpNotEq) Ex.AssocLeft ] 
         , [ infixOp "and" (Op OpAnd) Ex.AssocLeft
-        ,   infixOp "or"  (Op OpOr)  Ex.AssocLeft ] 
+        ,   infixOp "or"  (Op OpOr)  Ex.AssocLeft 
+        ,   infixOp "xor" (Op OpXor) Ex.AssocLeft]  
         , [ infixOp ":" cons Ex.AssocRight] 
         , [ infixOp "." compose Ex.AssocRight] 
         , [ prefixOp "head" (ListOp Car) 
@@ -228,11 +229,11 @@ letDecl = do
     args <- many varName
     void $ reservedOp "="
     body <- expr
-    return (name, foldr Lam body args)
-    {-if name `elem` (words . removeControlChar . show) body-}
-       {-then return (name, FixPoint $ foldr Lam body (name:args))-}
-       {-else return (name, foldr Lam body args)-}
-           {-where removeControlChar = filter (\x -> x `notElem` ['(', ')', '\"'])-}
+    -- return (name, foldr Lam body args)
+    if name `elem` (words . removeControlChar . show) body
+       then return (name, FixPoint $ foldr Lam body (name:args))
+       else return (name, foldr Lam body args)
+           where removeControlChar = filter (\x -> x `notElem` ['(', ')', '\"'])
 
 val :: Parser Binding
 val = do

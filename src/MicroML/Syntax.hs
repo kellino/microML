@@ -1,6 +1,5 @@
 module MicroML.Syntax where
 
-import qualified Data.Text.Lazy as L
 import qualified Data.Map as Map
 
 type TermEnv = Map.Map String Expr
@@ -21,24 +20,21 @@ data Expr
   | FixPoint Expr
   | Op Binop Expr Expr
   | ListOp ListOp Expr
-  | ListCons Expr Expr
   | UnaryMinus Expr
   | ListComp Expr Expr Expr
   | Closure Name Expr TermEnv
-  deriving (Eq, Ord)
+  deriving (Show, Eq, Ord)
 
-instance Show Expr where
-    show (Lit (LInt n))      = bold ++ show n ++ unbold
-    show (Lit (LDouble d))   = show d
-    show (Lit (LBoolean b))  = bold ++ show b ++ unbold
-    show (Lit (LString str)) = show str
-    show (Lit (LChar c))     = show c
-    show (List xs)           = show xs
+{-instance Show Expr where-}
+    {-show (Lit (LInt n))      = bold ++ show n ++ unbold-}
+    {-show (Lit (LDouble d))   = show d-}
+    {-show (Lit (LBoolean b))  = bold ++ show b ++ unbold-}
+    {-show (Lit (LString str)) = show str-}
+    {-show (Lit (LChar c))     = show c-}
+    {-show (List xs)           = show xs-}
 
 bold = "\ESC[37m"
 unbold = "\ESC[0m"
-
-
 
 data Lit
   = LInt Integer
@@ -55,29 +51,14 @@ data ListOp =
     deriving (Show, Eq, Ord)
 
 data Binop = 
-        OpAdd
-      | OpSub
-      | OpMul
-      | OpDiv
-      | OpMod
-      | OpExp
-      | OpOr
-      | OpAnd
-      | OpEq
-      | OpNe
-      | OpLe
-      | OpLt
-      | OpGe
-      | OpGt
-      | OpNotEq
+        OpAdd | OpSub | OpMul | OpDiv | OpMod | OpExp | OpOr | OpXor
+      | OpAnd | OpEq | OpNe | OpLe | OpLt | OpGe | OpGt | OpNotEq
+      | OpCons
       deriving (Eq, Ord, Show)      
 
 data MLError
-    = Default L.Text
-    deriving (Eq, Ord)
-
-instance Show MLError where
-    show (Default msg) = show msg
+    = Default String 
+    deriving (Show, Eq, Ord)
 
 data Program = Program [Decl] Expr deriving Eq
 
