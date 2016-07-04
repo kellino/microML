@@ -11,6 +11,17 @@ let ap f x = f (f x);
 -- cons is a builtin
 let length xs = if (xs == []) then 0 else (1 + (length (tail xs)));
 
+-- sums a list of type Number
+let sum xs = if 
+    (xs == []) 
+    then 0 
+    else ((head xs) + (sum (tail xs)));
+
+let product xs = if
+    (xs == [])
+    then 1
+    else ((head xs) * (product (tail xs)));
+
 (* print functions *)
 let show x = x;     (* this is just a synonym for id *)
 
