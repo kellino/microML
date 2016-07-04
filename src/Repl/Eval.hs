@@ -62,16 +62,17 @@ eval env expr = case expr of
           OpCons ->  -- a' `cons` b'
             case b' of
               (List _) -> a' `cons` b'
-              (Var x) -> a' `cons` fromMaybe (error "not found") (Map.lookup x env)
-        
+              (Var x) -> 
+                  case Map.lookup x env of
+                    Just res -> a' `cons` res
 
 add :: Expr -> Expr -> Expr
 add (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a + b
 add (Lit (LDouble a)) (Lit (LDouble b)) = Lit $ LDouble $ a + b
 add (Lit (LInt a)) (Lit (LDouble b)) = Lit $ LDouble $ realToFrac a + b
 add (Lit (LDouble a)) (Lit (LInt b)) = Lit $ LDouble $ a + realToFrac b
--- add _ _ = Default $ L.pack "weird"
 
+or', and', xor' :: Expr -> Expr -> Expr
 or' (Lit (LBoolean a)) (Lit (LBoolean b)) = Lit $ LBoolean $ a || b
 and' (Lit (LBoolean a)) (Lit (LBoolean b)) = Lit $ LBoolean $ a && b
 xor' (Lit (LBoolean a)) (Lit (LBoolean b)) = Lit $ LBoolean $ a `xor` b
@@ -81,32 +82,27 @@ sub (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a - b
 sub (Lit (LDouble a)) (Lit (LDouble b)) = Lit $ LDouble $ a - b
 sub (Lit (LInt a)) (Lit (LDouble b)) = Lit $ LDouble $ realToFrac a - b
 sub (Lit (LDouble a)) (Lit (LInt b)) = Lit $ LDouble $ a - realToFrac b
--- sub _ _                  = Default $ L.pack "please check your calculation..."
 
 mul :: Expr -> Expr -> Expr
 mul (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a * b
 mul (Lit (LDouble a)) (Lit (LDouble b)) = Lit $ LDouble $ a * b
 mul (Lit (LInt a)) (Lit (LDouble b)) = Lit $ LDouble $ realToFrac a * b
 mul (Lit (LDouble a)) (Lit (LInt b)) = Lit $ LDouble $ a * realToFrac b
--- mul _ _                  = Default $ L.pack "please check your calculation..."
 
 div' :: Expr -> Expr -> Expr
 div' (Lit (LInt a)) (Lit (LInt b)) = Lit $ LDouble $ realToFrac a / realToFrac b
 div' (Lit (LDouble a)) (Lit (LDouble b)) = Lit $ LDouble $ a / b
 div' (Lit (LInt a)) (Lit (LDouble b)) = Lit $ LDouble $ realToFrac a / b
 div' (Lit (LDouble a)) (Lit (LInt b)) = Lit $ LDouble $ a / realToFrac b
--- div' _ _                  = Default $ L.pack "please check your calculation..."
 
 mod' :: Expr -> Expr -> Expr
 mod' (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a `mod` b
--- mod' _ _                  = Default $ L.pack "please check your calculation..."
 
 exp' :: Expr -> Expr -> Expr
 exp' (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a^b
 exp' (Lit (LInt a)) (Lit (LDouble b)) = Lit $ LDouble $ realToFrac a**b
 exp' (Lit (LDouble a)) (Lit (LInt b)) = Lit $ LDouble $ a ^ b
 exp' (Lit (LDouble a)) (Lit (LDouble b)) = Lit $ LDouble $ a**b
--- exp' _ _                  = Default $ L.pack "please check your calculation..."
 
 runEval :: TermEnv -> String -> Expr -> (Expr, TermEnv)
 runEval env x exp = 

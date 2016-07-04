@@ -50,36 +50,26 @@ evalDef env (nm, ex) = termEnv'
 
 exec :: Bool -> L.Text -> Repl ()
 exec update source = do
-  -- Get the current interpreter state
   st <- get
-
-  -- Parser ( returns AST )
   mod <- hoistError $ parseProgram "<stdin>" source
-
-  -- Type Inference ( returns Typing Environment )
-  --typeEnv' <- hoistError $ inferTop (typeEnv st) mod
-
-  -- Create the new environment
+  typeEnv' <- hoistError $ inferTop (typeEnv st) mod
   let st' = st { termEnv = foldl' evalDef (termEnv st) mod
-               --, typeEnv = typeEnv' `mappend` typeEnv st
+               , typeEnv = typeEnv' `mappend` typeEnv st
                }
-
-  -- Update the interpreter state
   when update (put st')
 
-  -- If a value is entered, print it.
   case Prelude.lookup "it" mod of
     Nothing -> return ()
     Just ex -> do
       let (val, _) = runEval (termEnv st') "it"  ex
-      liftIO $ print val
-      --showOutput (show val) st'
+          -- liftIO $ print val
+      showOutput (show val) st'
 
-{-showOutput :: String -> IState -> Repl ()-}
-{-showOutput arg st = -}
-  {-case Env.lookup "it" (typeEnv st)  of-}
-    {-Just val -> liftIO $ putStrLn $ ppsig (arg, val)-}
-    {-Nothing -> return ()-}
+showOutput :: String -> IState -> Repl ()
+showOutput arg st = 
+  case Env.lookup "it" (typeEnv st)  of
+    Just val -> liftIO $ putStrLn $ ppsig (arg, val)
+    Nothing -> return ()
 
 cmd :: String -> Repl ()
 cmd source = exec True (L.pack source)
