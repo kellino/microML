@@ -4,6 +4,13 @@ let const x y = x;
 let flip f = \x y -> f y x;
 let ap f x = f (f x);
 
+
+(* standard list functions *)
+-- head is a builtin
+-- tail is a builtin
+-- cons is a builtin
+let length xs = if (xs == []) then 0 else (1 + (length (tail xs)));
+
 (* print functions *)
 let show x = x;     (* this is just a synonym for id *)
 
