@@ -173,4 +173,4 @@ banner = "\ESC[1;31m" ++
 
 ini = liftIO $ putStrLn $ banner ++ "\n\n" ++ "\ESC[1mWelcome to microML\ESC[0m\n\n" 
 
-shell = flip evalStateT initState $ evalRepl prompt cmd options completer ini 
+shell = flip evalStateT initState $ evalRepl prompt cmd options completer ini
