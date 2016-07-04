@@ -57,11 +57,11 @@ exec update source = do
   mod <- hoistError $ parseProgram "<stdin>" source
 
   -- Type Inference ( returns Typing Environment )
-  typeEnv' <- hoistError $ inferTop (typeEnv st) mod
+  --typeEnv' <- hoistError $ inferTop (typeEnv st) mod
 
   -- Create the new environment
   let st' = st { termEnv = foldl' evalDef (termEnv st) mod
-               , typeEnv = typeEnv' `mappend` typeEnv st
+               --, typeEnv = typeEnv' `mappend` typeEnv st
                }
 
   -- Update the interpreter state
