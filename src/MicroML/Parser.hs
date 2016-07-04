@@ -107,20 +107,12 @@ bool :: Parser Expr
 bool = (reserved "true" >> return (Lit (LBoolean True)))
     <|> (reserved "false" >> return (Lit (LBoolean False)))
 
+list :: Parser Expr
 list = do
     void $ string "["
-    elems <- list'
+    elems <- List <$> expr `sepBy` choice [string ",", string ", "]
     void $ string "]"
     return elems
-
-list' = List <$> expr `sepBy` choice [string ",", string ", "]
-
-{-list :: Parser Expr-}
-{-list = do-}
-    {-void $ char '['-}
-    {-elems <- expr `sepBy` choice [string ",", string ", "]-}
-    {-void $ char ']'-}
-    {-return $ List elems-}
 
 lambda :: Parser Expr
 lambda = do
@@ -161,14 +153,6 @@ ifthen = do
     fl <- aexp
     return (If cond tr fl)
 
-{-caseOf :: Parser Expr-}
-{-caseOf = do-}
-    {-reserved "case"-}
-    {-e1 <- expr-}
-    {-reserved "of"-}
-    {-pats <- many expr-}
-    {-return $ Case e1 pats-}
-
 aexp :: Parser Expr
 aexp =
       parens expr
@@ -190,6 +174,7 @@ term = Ex.buildExpressionParser table aexp
 infixOp :: String -> (a -> a -> a) -> Ex.Assoc -> Op a
 infixOp x f = Ex.Infix (reservedOp x >> return f)
 
+prefixOp :: String -> (a -> a) -> Ex.Operator L.Text () Identity a
 prefixOp name func = Ex.Prefix ( do {reservedOp name; return func } )
     
 table :: [[Op Expr]]
@@ -210,8 +195,7 @@ table = [ [ infixOp "^"   (Op OpExp) Ex.AssocLeft ]
         , [ infixOp ":" cons Ex.AssocRight] 
         , [ infixOp "." compose Ex.AssocRight] 
         , [ prefixOp "head" (ListOp Car) 
-        , prefixOp "tail" (ListOp Cdr) ] ]
-
+        ,   prefixOp "tail" (ListOp Cdr) ] ]
 
 expr :: Parser Expr
 expr = do
@@ -244,10 +228,11 @@ letDecl = do
     args <- many varName
     void $ reservedOp "="
     body <- expr
-    if name `elem` (words . removeControlChar . show) body
-       then return (name, FixPoint $ foldr Lam body (name:args))
-       else return (name, foldr Lam body args)
-           where removeControlChar = filter (\x -> x `notElem` ['(', ')', '\"'])
+    return (name, foldr Lam body args)
+    {-if name `elem` (words . removeControlChar . show) body-}
+       {-then return (name, FixPoint $ foldr Lam body (name:args))-}
+       {-else return (name, foldr Lam body args)-}
+           {-where removeControlChar = filter (\x -> x `notElem` ['(', ')', '\"'])-}
 
 val :: Parser Binding
 val = do

@@ -20,24 +20,25 @@ data Expr
   | If Expr Expr Expr
   | FixPoint Expr
   | Op Binop Expr Expr
-  | ListOp UnaryOp Expr
+  | ListOp ListOp Expr
+  | ListCons Expr Expr
   | UnaryMinus Expr
   | ListComp Expr Expr Expr
   | Closure Name Expr TermEnv
-  deriving (Show, Eq, Ord)
+  deriving (Eq, Ord)
 
-{-instance Show Expr where-}
-    {-show (Lit (LInt n))      = show n-}
-    {-show (Lit (LDouble d))   = show d-}
-    {-show (Lit (LBoolean b))  = show b-}
-    {-show (Lit (LString str)) = show str-}
-    {-show (Lit (LChar c))     = show c-}
-    {-show (Var x)             = show x-}
-    {-show Closure{}           = "<<closure>>"-}
-    {-show (Lam n e)           = show n ++ show e-}
-    {-show (App e1 e2)         = show e1 ++ show e2-}
-    {-show (FixPoint e1)       = show e1-}
-    {-show (If c t f)          = show c ++ show t ++ show f-}
+instance Show Expr where
+    show (Lit (LInt n))      = bold ++ show n ++ unbold
+    show (Lit (LDouble d))   = show d
+    show (Lit (LBoolean b))  = bold ++ show b ++ unbold
+    show (Lit (LString str)) = show str
+    show (Lit (LChar c))     = show c
+    show (List xs)           = show xs
+
+bold = "\ESC[37m"
+unbold = "\ESC[0m"
+
+
 
 data Lit
   = LInt Integer
@@ -48,10 +49,9 @@ data Lit
 
   deriving (Show, Eq, Ord)
 
-data UnaryOp =
+data ListOp =
         Car 
       | Cdr
-      | Cons
     deriving (Show, Eq, Ord)
 
 data Binop = 
