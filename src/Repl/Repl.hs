@@ -52,9 +52,9 @@ exec :: Bool -> L.Text -> Repl ()
 exec update source = do
   st <- get
   mod <- hoistError $ parseProgram "<stdin>" source
-  typeEnv' <- hoistError $ inferTop (typeEnv st) mod
+  -- typeEnv' <- hoistError $ inferTop (typeEnv st) mod
   let st' = st { termEnv = foldl' evalDef (termEnv st) mod
-               , typeEnv = typeEnv' `mappend` typeEnv st
+      -- , typeEnv = typeEnv' `mappend` typeEnv st
                }
   when update (put st')
 
@@ -62,14 +62,14 @@ exec update source = do
     Nothing -> return ()
     Just ex -> do
       let (val, _) = runEval (termEnv st') "it"  ex
-          -- liftIO $ print val
-      showOutput (show val) st'
+      liftIO $ print val
+      -- showOutput (show val) st'
 
-showOutput :: String -> IState -> Repl ()
-showOutput arg st = 
-  case Env.lookup "it" (typeEnv st)  of
-    Just val -> liftIO $ putStrLn $ ppsig (arg, val)
-    Nothing -> return ()
+{-showOutput :: String -> IState -> Repl ()-}
+{-showOutput arg st = -}
+  {-case Env.lookup "it" (typeEnv st)  of-}
+    {-Just val -> liftIO $ putStrLn $ ppsig (arg, val)-}
+    {-Nothing -> return ()-}
 
 cmd :: String -> Repl ()
 cmd source = exec True (L.pack source)

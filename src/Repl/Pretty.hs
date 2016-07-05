@@ -48,6 +48,9 @@ instance Pretty Expr where
 
 instance Pretty Lit where
   ppr _ (LInt i) = integer i
+  ppr _ (LDouble d) = double d
+  ppr _ (LString str) = text str
+  ppr _ (LChar c) = text [c]        -- convert char to a string
   ppr _ (LBoolean True) = text "True"
   ppr _ (LBoolean False) = text "False"
 
