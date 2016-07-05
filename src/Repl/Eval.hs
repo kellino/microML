@@ -59,12 +59,7 @@ eval env expr = case expr of
           OpGe  -> Lit $ LBoolean $ a' >= b'
           OpGt  -> Lit $ LBoolean $ a' >  b'
           OpNotEq -> Lit $ LBoolean $ a' /= b'
-          OpCons ->  -- a' `cons` b'
-            case b' of
-              (List _) -> a' `cons` b'
-              (Var x) -> 
-                  case Map.lookup x env of
-                    Just res -> a' `cons` res
+          OpCons -> a' `cons` b'
 
 add :: Expr -> Expr -> Expr
 add (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a + b
