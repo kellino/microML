@@ -10,12 +10,15 @@ let end? xs = if (xs == []) then true else false;
 let id x = x;
 let const x y = x;
 let flip f = \x y -> f y x;
-let ap f x = f (f x);
-let length xs = if (xs == []) then 0 else (1 + (length (tail xs)));
+let twice f x = f (f x);
+let cons a b = a : b;
+let length xs = if (end? xs) then 0 else (1 + (length (tail xs)));
 let drop n xs = if (zero? n) then xs else (drop (n-1) (tail xs));
--- let take n xs = if (zero? n) then [] else ((head xs) : (take (n-1) (tail xs)));
+let take n xs = if (zero? n) then ([]) else ((head xs) : (take (n-1) (tail xs)));
 let foldr f acc xs = if (end? xs) then acc else ((f (head xs)) (foldr f acc (tail xs)));
 let foldl f acc xs = if (end? xs) then acc else (foldl f (f acc (head xs)) (tail xs));
+let map f xs = foldr (\x xs' -> (f x) : xs') ([]) xs;
+let filter p xs = foldr (\x y -> if (p x) then (x:y) else y) ([]) xs;
 
 (* print functions *)
 let show x = x;     (* this is just a synonym for id *)
