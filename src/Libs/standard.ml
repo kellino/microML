@@ -19,6 +19,7 @@ let foldr f acc xs = if (end? xs) then acc else ((f (head xs)) (foldr f acc (tai
 let foldl f acc xs = if (end? xs) then acc else (foldl f (f acc (head xs)) (tail xs));
 let map f xs = foldr (\x xs' -> (f x) : xs') ([]) xs;
 let filter p xs = foldr (\x y -> if (p x) then (x:y) else y) ([]) xs;
+let until p f x = if (p x) then x else (until p f (f x));
 
 (* print functions *)
 let show x = x;     (* this is just a synonym for id *)
