@@ -1,5 +1,6 @@
 {-# Language FlexibleInstances #-}
 {-# Language TypeSynonymInstances #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Repl.Pretty  where
 
@@ -8,6 +9,8 @@ import MicroML.Syntax
 import MicroML.Typing.TypeError
 
 import Text.PrettyPrint
+import Data.List (isPrefixOf, isInfixOf)
+
 
 parensIf ::  Bool -> Doc -> Doc
 parensIf True = parens
@@ -20,7 +23,7 @@ instance Pretty Name where
     ppr _  = text 
 
 instance Pretty TVar where
-    ppr _ (TV x) = text $ "\ESC[1m" ++ x ++ "\ESC[0m"
+    ppr _ (TV x) = text x
 
 instance Pretty Type where
   ppr p (TArr a b) = parensIf (isArrow a) (ppr p a) <+> text "->" <+> ppr p b
@@ -73,10 +76,29 @@ ppexpr :: Expr -> String
 ppexpr = render . ppr 0
 
 ppsig :: (String, TypeScheme) -> String
-ppsig (a, b) = a ++ " \ESC[35m::\ESC[0m " ++ ppscheme b
+ppsig (a, b) = ppLit a ++ " \ESC[35m::\ESC[0m " ++ ppscheme b
+--ppsig (a, b) = a ++ " \ESC[35m::\ESC[0m " ++ ppscheme b
 
-ppdecl :: (String, Expr) -> String
-ppdecl (a, b) = "let " ++ a ++ " = " ++ ppexpr b
+{-ppdecl :: (String, Expr) -> String-}
+{-ppdecl (a, b) = "let " ++ a ++ " = " ++ ppexpr b-}
 
 ppTypeError :: TypeError -> String
 ppTypeError = render . ppError
+
+ppLit :: String -> String
+ppLit a 
+  | "Var" `isPrefixOf` a     = bold ++ ((!!1) . words) a ++ unbold
+  | "List" `isPrefixOf` a    = bold ++ pprList a ++ unbold
+  | "LInt" `isInfixOf` a     = bold ++ (init . (!!2). words) a ++ unbold
+  | "LDouble" `isInfixOf` a  = bold ++ (init . (!!2) . words) a ++ unbold
+  | "LBoolean" `isInfixOf` a = bold ++ (init . (!!2) . words) a ++ unbold
+  | "LChar" `isInfixOf` a    = bold ++ (init . (!!2) . words) a ++ unbold
+  | "LString" `isInfixOf` a  = bold ++ (init . (!!2) . words) a ++ unbold
+  | otherwise                = bold ++ a ++ unbold
+
+
+bold = "\ESC[37m"
+unbold = "\ESC[0m"
+
+pprList :: String -> String
+pprList a = filter (\x -> x `notElem` ['[', ']']) $ unwords . tail . words $ a
