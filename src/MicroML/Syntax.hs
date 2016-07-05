@@ -23,21 +23,25 @@ data Expr
   | UnaryMinus Expr
   | ListComp Expr Expr Expr
   | Closure Name Expr TermEnv
-  deriving (Show, Eq, Ord)
+  deriving (Eq, Ord)
 
-{-instance Show Expr where-}
-    {-show (Lit (LInt n))      = bold ++ show n ++ unbold-}
-    {-show (Lit (LDouble d))   = show d-}
-    {-show (Lit (LBoolean b))  = bold ++ show b ++ unbold-}
-    {-show (Lit (LString str)) = show str-}
-    {-show (Lit (LChar c))     = bold ++ show c ++ unbold-}
-    {-show (List xs)           = show xs-}
-    {-show (Var x)             = show x-}
-    {-show (Lam n ex)          = show n ++ " " ++ show ex-}
-    {-show (If cons tr fl)     = show cons ++ " " ++ show tr ++ " " ++ show fl-}
-    {-show (Op op x y)         = show op ++ " " ++ show x ++ show y-}
-    {-show (FixPoint x)        = show x-}
-    {-show (App a b)           = show a ++ " " ++ show b-}
+instance Show Expr where
+    show (Lit (LInt n))      = bold ++ show n ++ unbold
+    show (Lit (LDouble d))   = bold ++ show d ++ unbold
+    show (Lit (LBoolean b))  = bold ++ show b ++ unbold
+    show (Lit (LString str)) = "\ESC[32m\"\ESC[0m" ++ bold ++ str ++ unbold ++ "\ESC[32m\"\ESC[0m"
+    show (Lit (LChar c))     = bold ++ show c ++ unbold
+    show (List xs)           = show xs
+    show (Var x)             = show x
+    show lam@(Lam _ _)       = show lam
+    show Let{}               = show Let{}
+    show If{}                = show If{}
+    show Op{}                = show Op{}
+    show fix@(FixPoint _)    = show fix
+    show app@(App _ _)       = show app
+    show ListComp{}          = show ListComp{}
+    show neg@(UnaryMinus _)  = show neg
+    show Closure{}           = show Closure{}
 
 
 bold = "\ESC[37m"
@@ -60,7 +64,7 @@ data ListOp =
 data Binop = 
         OpAdd | OpSub | OpMul | OpDiv | OpMod | OpExp | OpOr | OpXor
       | OpAnd | OpEq | OpNe | OpLe | OpLt | OpGe | OpGt | OpNotEq
-      | OpCons
+      | OpCons | OpComp | OpAppend
       deriving (Eq, Ord, Show)      
 
 data MLError

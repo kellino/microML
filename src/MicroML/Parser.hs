@@ -178,7 +178,11 @@ prefixOp :: String -> (a -> a) -> Ex.Operator L.Text () Identity a
 prefixOp name func = Ex.Prefix ( do {reservedOp name; return func } )
     
 table :: [[Op Expr]]
-table = [ [ infixOp "^"   (Op OpExp) Ex.AssocLeft ]
+table = [ [ prefixOp "head" (ListOp Car)                -- list operators
+        ,   prefixOp "tail" (ListOp Cdr) 
+        ,   prefixOp "init" init'
+        ,   infixOp "++" (Op OpAppend) Ex.AssocLeft ]        
+        , [ infixOp "^"   (Op OpExp) Ex.AssocLeft ]
         , [ infixOp "*"   (Op OpMul) Ex.AssocLeft
         ,   infixOp "/"   (Op OpDiv) Ex.AssocLeft
         ,   infixOp "%"   (Op OpMod) Ex.AssocLeft ]
@@ -192,12 +196,9 @@ table = [ [ infixOp "^"   (Op OpExp) Ex.AssocLeft ]
         ,   infixOp "/="  (Op OpNotEq) Ex.AssocLeft ] 
         , [ infixOp "and" (Op OpAnd) Ex.AssocLeft   -- boolean operators
         ,   infixOp "or"  (Op OpOr)  Ex.AssocLeft 
-        ,   infixOp "xor" (Op OpXor) Ex.AssocLeft]  
-        , [ infixOp ":" (Op OpCons) Ex.AssocRight] -- cons operator
-        , [ infixOp "." compose Ex.AssocRight] 
-  , [ prefixOp "head" (ListOp Car)                -- list operators
-        ,   prefixOp "tail" (ListOp Cdr) 
-        ,   prefixOp "init" init'] ]
+        ,   infixOp "xor" (Op OpXor) Ex.AssocLeft ]  
+        , [ infixOp ":" (Op OpCons) Ex.AssocRight ] -- cons operator
+        , [ infixOp "." (Op OpComp) Ex.AssocRight ] ]
 
 expr :: Parser Expr
 expr = do
@@ -214,8 +215,6 @@ listComp = do
     set <- expr
     void $ string "]"
     return $ ListComp func item set
-
-compose = undefined
 
 ------------------
 -- DECLARATIONS --
