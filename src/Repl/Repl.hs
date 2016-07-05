@@ -50,20 +50,24 @@ evalDef env (nm, ex) = termEnv'
 
 exec :: Bool -> L.Text -> Repl ()
 exec update source = do
-  st <- get
-  mod <- hoistError $ parseProgram "<stdin>" source
-  typeEnv' <- hoistError $ inferTop (typeEnv st) mod
-  let st' = st { termEnv = foldl' evalDef (termEnv st) mod
-       , typeEnv = typeEnv' `mappend` typeEnv st
-               }
-  when update (put st')
+    st <- get
 
-  case Prelude.lookup "it" mod of
-    Nothing -> return ()
-    Just ex -> do
-      let (val, _) = runEval (termEnv st') "it"  ex
-      --liftIO $ print val
-      showOutput (show val) st'
+    mod <- hoistError $ parseProgram "<stdin>" source
+
+    --typeEnv' <- hoistError $ inferTop (typeEnv st) mod
+
+    let st' = st { termEnv = foldl' evalDef (termEnv st) mod
+                 --, typeEnv = typeEnv' `mappend` typeEnv st 
+       }
+
+    when update (put st')
+
+    case Prelude.lookup "it" mod of
+      Nothing -> return ()
+      Just ex -> do
+        let (val, _) = runEval (termEnv st') "it"  ex
+        liftIO $ print val
+        --showOutput (show val) st'
 
 showOutput :: String -> IState -> Repl ()
 showOutput arg st = 
