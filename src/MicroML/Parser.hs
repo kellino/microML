@@ -197,7 +197,8 @@ table = [ [ prefixOp "head" (ListOp Car)                -- list operators
         , [ infixOp "and" (Op OpAnd) Ex.AssocLeft   -- boolean operators
         ,   infixOp "or"  (Op OpOr)  Ex.AssocLeft 
         ,   infixOp "xor" (Op OpXor) Ex.AssocLeft ]  
-        , [ infixOp ":" (Op OpCons) Ex.AssocRight ] -- cons operator
+        , [ infixOp ":" (Op OpCons) Ex.AssocRight ]
+        -- ,  prefixOp "(:)" cons' ] 
         , [ infixOp "." (Op OpComp) Ex.AssocRight ] ]
 
 expr :: Parser Expr
@@ -229,7 +230,6 @@ letDecl = do
     args <- many varName
     void $ reservedOp "="
     body <- expr
-    -- return (name, foldr Lam body args)
     if name `elem` (words . removeControlChar . show) body
        then return (name, FixPoint $ foldr Lam body (name:args))
        else return (name, foldr Lam body args)
