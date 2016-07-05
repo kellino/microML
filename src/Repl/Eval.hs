@@ -60,6 +60,8 @@ eval env expr = case expr of
           OpGt  -> Lit $ LBoolean $ a' >  b'
           OpNotEq -> Lit $ LBoolean $ a' /= b'
           OpCons -> a' `cons` b'
+          OpAppend -> a' `append'` b'
+          -- OpComp -> eval env $ a `compose` b'
 
 add :: Expr -> Expr -> Expr
 add (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a + b
