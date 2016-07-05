@@ -190,13 +190,14 @@ table = [ [ infixOp "^"   (Op OpExp) Ex.AssocLeft ]
         ,   infixOp ">"   (Op OpGt)  Ex.AssocLeft ]
         , [ infixOp "=="  (Op OpEq)  Ex.AssocLeft 
         ,   infixOp "/="  (Op OpNotEq) Ex.AssocLeft ] 
-        , [ infixOp "and" (Op OpAnd) Ex.AssocLeft
+        , [ infixOp "and" (Op OpAnd) Ex.AssocLeft   -- boolean operators
         ,   infixOp "or"  (Op OpOr)  Ex.AssocLeft 
         ,   infixOp "xor" (Op OpXor) Ex.AssocLeft]  
-        , [ infixOp ":" cons Ex.AssocRight] 
+        , [ infixOp ":" (Op OpCons) Ex.AssocRight] -- cons operator
         , [ infixOp "." compose Ex.AssocRight] 
-        , [ prefixOp "head" (ListOp Car) 
-        ,   prefixOp "tail" (ListOp Cdr) ] ]
+  , [ prefixOp "head" (ListOp Car)                -- list operators
+        ,   prefixOp "tail" (ListOp Cdr) 
+        ,   prefixOp "init" init'] ]
 
 expr :: Parser Expr
 expr = do
