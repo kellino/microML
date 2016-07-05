@@ -17,7 +17,6 @@ import Control.Monad.Except
 import Control.Monad.State
 import Control.Monad.RWS
 import Control.Monad.Identity
--- import Control.Monad (filterM)
 
 import Data.List (nub)
 import qualified Data.Map as Map
@@ -103,26 +102,18 @@ generalize env t  = Forall as t
 
 ops :: Map.Map Binop Type
 ops = Map.fromList [
-      (OpAdd, typeNum `TArr` (typeNum `TArr` typeNum))
-    , (OpMul, typeNum `TArr` (typeNum `TArr` typeNum))
-    , (OpSub, typeNum `TArr` (typeNum `TArr` typeNum))
-    , (OpMod, typeNum `TArr` (typeNum `TArr` typeNum))
-    , (OpExp, typeNum `TArr` (typeNum `TArr` typeNum))
-    , (OpLe, typeNum `TArr` (typeNum `TArr` typeBool))
-    , (OpGe, typeNum `TArr` (typeNum `TArr` typeBool))
-    , (OpLe, typeNum `TArr` (typeNum `TArr` typeBool))
-    , (OpGt, typeNum `TArr` (typeNum `TArr` typeBool))
-    , (OpLt, typeNum `TArr` (typeNum `TArr` typeBool))
-    , (OpEq, typeNum `TArr` (typeNum `TArr` typeBool))
-    , (OpNotEq, typeNum `TArr` (typeNum `TArr` typeBool))
+       ( OpAdd, typeNum `TArr`   ( typeNum `TArr` typeNum))
+    ,  ( OpMul, typeNum `TArr`   ( typeNum `TArr` typeNum))
+    ,  ( OpSub, typeNum `TArr`   ( typeNum `TArr` typeNum))
+    ,  ( OpMod, typeNum `TArr`   ( typeNum `TArr` typeNum))
+    ,  ( OpExp, typeNum `TArr`   ( typeNum `TArr` typeNum))
+    ,  ( OpGe, typeNum `TArr`    ( typeNum `TArr` typeBool))
+    ,  ( OpLe, typeNum `TArr`    ( typeNum `TArr` typeBool))
+    ,  ( OpGt, typeNum `TArr`    ( typeNum `TArr` typeBool))
+    ,  ( OpLt, typeNum `TArr`    ( typeNum `TArr` typeBool))
+    ,  ( OpEq, typeNum `TArr`    ( typeNum `TArr` typeBool))
+    ,  ( OpNotEq, typeNum `TArr` ( typeNum `TArr` typeBool))
   ]
-
-{-unifyList :: Infer [Type] -> Infer Type-}
-{-unifyList ys =  do-}
-    {-t1 <- head ys-}
-    {-t2 <- head . tail $ ys-}
-    {-uni t1 t2-}
-    {-return t1-}
 
 infer :: Expr -> Infer Type
 infer expr = case expr of
@@ -132,23 +123,11 @@ infer expr = case expr of
     Lit (LString _)  -> return typeString
     Lit (LChar _)    -> return typeChar
 
-    {-List xs -> do-}
-        {-t1 <- infer $ head xs-}
-        {-t2 <- unifyList $ traverse infer (tail xs)-}
-        {-uni t1 t2-}
-        {-return t1-}
-
-    {-List [] -> return typeEmptyList-}
-    {-List [x] -> do -}
-        {-t1 <- infer x-}
-        {-tv <- fresh-}
-        {-uni t1 tv-}
-        {-return tv-}
-    {-List (x:y:_) -> do-}
-        {-t1 <- infer x-}
-        {-t2 <- infer y-}
-        {-uni t1 t2-}
-        {-return t2-}
+    List xs -> do
+        t1 <- infer $ head xs
+        t2 <- infer (head . tail $ xs)
+        uni t1 t2
+        return t1
 
     Var x -> lookupEnv x
 
@@ -177,14 +156,20 @@ infer expr = case expr of
         uni (tv `TArr` tv) t1
         return tv
 
-    Op op e1 e2 -> do
-        t1 <- infer e1
-        t2 <- infer e2
-        tv <- fresh
-        let u1 = t1 `TArr` (t2 `TArr` tv)
-            u2 = ops Map.! op
-        uni u1 u2
-        return tv
+    Op op e1 e2 -> 
+        case op of
+          OpAdd   -> mathsOp OpAdd e1 e2
+          OpSub   -> mathsOp OpSub e1 e2
+          OpMul   -> mathsOp OpMul e1 e2
+          OpDiv   -> mathsOp OpDiv e1 e2
+          OpExp   -> mathsOp OpExp e1 e2
+          OpMod   -> mathsOp OpMul e1 e2
+          OpLe    -> mathsOp OpMul e1 e2
+          OpGe    -> mathsOp OpMul e1 e2
+          OpGt    -> mathsOp OpMul e1 e2
+          OpLt    -> mathsOp OpMul e1 e2
+          OpEq    -> mathsOp OpMul e1 e2
+          OpNotEq -> mathsOp OpMul e1 e2
 
     If cond tr fl -> do
         t1 <- infer cond
@@ -193,6 +178,16 @@ infer expr = case expr of
         uni t1 typeBool
         uni t2 t3
         return t2
+
+mathsOp :: Binop -> Expr -> Expr -> Infer Type
+mathsOp op e1 e2 = do
+    t1 <- infer e1
+    t2 <- infer e2
+    tv <- fresh
+    let u1 = t1 `TArr` (t2 `TArr` tv)
+        u2 = ops Map.! op
+    uni u1 u2
+    return tv
 
 inferTop :: Env -> [(String, Expr)] -> Either TypeError Env
 inferTop env [] = Right env
