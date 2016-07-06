@@ -129,7 +129,7 @@ infer expr = case expr of
         t1 <- infer x
         tv <- fresh
         uni t1 tv
-        return t1
+        return t1 
     List (x:y:xs) -> do
         t1 <- infer x
         t2 <- infer y
@@ -163,6 +163,12 @@ infer expr = case expr of
         uni (tv `TArr` tv) t1
         return tv
 
+    ListOp _ e1 -> do
+        t1 <- infer e1
+        tv <- fresh
+        uni t1 tv
+        return t1
+
     Op op e1 e2 -> do
         t1 <- infer e1
         t2 <- infer e2
@@ -177,14 +183,6 @@ infer expr = case expr of
         uni t1 typeBool
         uni t2 t3
         return t2
-
-getOp :: (Ord k) => Map.Map k Type -> k -> Type -> Type -> Infer Type
-getOp dict op t1 t2 = do
-    tv <- fresh
-    let u1 = t1 `TArr` (t2 `TArr` tv)
-        u2 = dict Map.! op
-    uni u1 u2
-    return tv
 
 doOp :: Binop -> Type -> Type -> Infer Type
 doOp op t1 t2= 
@@ -201,6 +199,15 @@ doOp op t1 t2=
       OpGe    -> getOp mathsOps OpGe t1 t2
       OpGt    -> getOp mathsOps OpGt t1 t2
       OpNotEq -> getOp mathsOps OpNotEq t1 t2
+
+getOp :: (Ord k) => Map.Map k Type -> k -> Type -> Type -> Infer Type
+getOp dict op t1 t2 = do
+    tv <- fresh
+    let u1 = t1 `TArr` (t2 `TArr` tv)
+        u2 = dict Map.! op
+    uni u1 u2
+    return tv
+
 
 inferTop :: Env -> [(String, Expr)] -> Either TypeError Env
 inferTop env [] = Right env
