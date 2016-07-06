@@ -9,7 +9,8 @@ import MicroML.Syntax
 import MicroML.Typing.TypeError
 
 import Text.PrettyPrint
-import Data.List (isPrefixOf, isInfixOf)
+import Data.List (isPrefixOf, isInfixOf, intercalate)
+import qualified Data.Text.Lazy as L
 
 
 parensIf ::  Bool -> Doc -> Doc
@@ -88,7 +89,7 @@ ppTypeError = render . ppError
 ppLit :: String -> String
 ppLit a 
   | "Var" `isPrefixOf` a     = bold ++ ((!!1) . words) a ++ unbold
-  | "List" `isPrefixOf` a    = bold ++ pprList a ++ unbold
+  | "List" `isPrefixOf` a    = "[" ++ bold ++ intercalate ", " (map ppLit (pprList a)) ++ unbold ++ "]"
   | "LInt" `isInfixOf` a     = bold ++ (init . (!!2). words) a ++ unbold
   | "LDouble" `isInfixOf` a  = bold ++ (init . (!!2) . words) a ++ unbold
   | "LBoolean" `isInfixOf` a = bold ++ (init . (!!2) . words) a ++ unbold
@@ -100,5 +101,7 @@ ppLit a
 bold = "\ESC[37m"
 unbold = "\ESC[0m"
 
-pprList :: String -> String
-pprList a = filter (\x -> x `notElem` ['[', ']']) $ unwords . tail . words $ a
+pprList :: String -> [String]
+pprList a = map L.unpack $ L.splitOn (L.pack ",") $ 
+    L.pack $ filter (\x -> x `notElem` ['[', ']']) $ 
+        unwords . tail . words $ a
