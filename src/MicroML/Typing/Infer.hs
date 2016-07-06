@@ -136,12 +136,6 @@ infer expr = case expr of
         uni t1 t2
         infer $ List (y:xs)
 
-    {-List xs -> do-}
-        {-t1 <- infer $ head xs-}
-        {-t2 <- infer (head . tail $ xs)-}
-        {-uni t1 t2-}
-        {-return t1-}
-
     Var x -> lookupEnv x
 
     Lam x e -> do
@@ -174,7 +168,7 @@ infer expr = case expr of
         t2 <- infer e2
         if (t1 == typeNum) && (t2 == typeNum)
            then doOp op t1 t2
-           else error "?"
+           else return t1
 
     If cond tr fl -> do
         t1 <- infer cond
