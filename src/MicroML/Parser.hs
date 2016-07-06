@@ -160,7 +160,7 @@ aexp =
   <|> try binary <|> try octal <|> try hex <|> try double
   <|> number
   <|> ifthen
-  <|> try listComp <|> list
+  <|> try parseRange <|> try listComp <|> list
   <|> try letrecin
   <|> letin
   <|> lambda
@@ -198,13 +198,21 @@ table = [ [ prefixOp "head" (ListOp Car)                -- list operators
         ,   infixOp "or"  (Op OpOr)  Ex.AssocLeft 
         ,   infixOp "xor" (Op OpXor) Ex.AssocLeft ]  
         , [ infixOp ":" (Op OpCons) Ex.AssocRight ]
-        -- ,  prefixOp "(:)" cons' ] 
         , [ infixOp "." (Op OpComp) Ex.AssocRight ] ]
 
 expr :: Parser Expr
 expr = do
     es <- many1 term
     return (foldl1 App es)
+
+parseRange :: Parser Expr
+parseRange = do
+    void $ string "["
+    start <- expr
+    void $ reserved "to"
+    end <- expr
+    void $ string "]"
+    return $ enumFromTo_ start end
 
 listComp :: ParsecT L.Text () Identity Expr
 listComp = do

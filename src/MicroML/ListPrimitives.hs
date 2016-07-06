@@ -1,15 +1,14 @@
-module MicroML.ListPrimitives 
-    (car
-   , cdr
-   , cons
-   , init'
-   , compose
-   , append') where
+module MicroML.ListPrimitives where
 
 import MicroML.Syntax
 
-
 -- TODO add proper exception handling
+
+enumFromTo_ :: Expr -> Expr -> Expr
+enumFromTo_ (Lit (LInt a)) (Lit (LInt b))         = List $ (Lit . LInt) <$> [a .. b]
+enumFromTo_ (Lit (LDouble a)) (Lit (LDouble b)) = List $ (Lit . LDouble) <$> [a..b]
+enumFromTo_ (Lit (LChar a)) (Lit (LChar b))     = List $ (Lit . LChar) <$> [a..b]
+enumFromTo_ _ _                                 = error "doesn't make any sense"         -- temp error message here
 
 car :: Expr -> Expr
 car (List (x:_))  = x
