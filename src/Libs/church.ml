@@ -1,0 +1,18 @@
+(* Church encoding and Peano numeral *)
+
+tr x y = x;
+fls x y = y;
+
+let zero f x = x;
+let one f x = f x;
+let two f x = f (f x);
+let three f x = f (f (f x));
+let four f x = f (f (f (f x)));
+let five f x = f (f (f (f (f x))));
+let six f x = f (f (f (f (f (f x)))));
+let seven f x = f (f (f (f (f (f (f x))))));
+let eight f x = f (f (f (f (f (f (f (f x)))))));
+let nine f x = f (f (f (f (f (f (f (f (f x))))))));
+let ten f x = f (f (f (f (f (f (f (f (f (f x)))))))));
+
+let isZero n = n (\x -> fls) tr;
