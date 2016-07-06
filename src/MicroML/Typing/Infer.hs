@@ -107,6 +107,7 @@ mathsOps = Map.fromList [
     ,  ( OpMul, typeNum `TArr`   ( typeNum `TArr` typeNum))
     ,  ( OpSub, typeNum `TArr`   ( typeNum `TArr` typeNum))
     ,  ( OpMod, typeNum `TArr`   ( typeNum `TArr` typeNum))
+    ,  (OpDiv, typeNum `TArr`    ( typeNum `TArr` typeNum))
     ,  ( OpExp, typeNum `TArr`   ( typeNum `TArr` typeNum))
     ,  ( OpGe, typeNum `TArr`    ( typeNum `TArr` typeBool))
     ,  ( OpLe, typeNum `TArr`    ( typeNum `TArr` typeBool))
@@ -184,6 +185,11 @@ infer expr = case expr of
         uni t2 t3
         return t2
 
+    UnaryMinus e1 -> do
+        t1 <- infer e1
+        uni t1 typeNum
+        return t1
+
 doOp :: Binop -> Type -> Type -> Infer Type
 doOp op t1 t2= 
     case op of 
@@ -207,7 +213,6 @@ getOp dict op t1 t2 = do
         u2 = dict Map.! op
     uni u1 u2
     return tv
-
 
 inferTop :: Env -> [(String, Expr)] -> Either TypeError Env
 inferTop env [] = Right env
