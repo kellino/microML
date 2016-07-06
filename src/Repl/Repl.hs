@@ -54,10 +54,10 @@ exec update source = do
 
     mod <- hoistError $ parseProgram "<stdin>" source
 
-    --typeEnv' <- hoistError $ inferTop (typeEnv st) mod
+    typeEnv' <- hoistError $ inferTop (typeEnv st) mod
 
     let st' = st { termEnv = foldl' evalDef (termEnv st) mod
-                 --, typeEnv = typeEnv' `mappend` typeEnv st 
+                 , typeEnv = typeEnv' `mappend` typeEnv st 
        }
 
     when update (put st')
@@ -66,8 +66,8 @@ exec update source = do
       Nothing -> return ()
       Just ex -> do
         let (val, _) = runEval (termEnv st') "it"  ex
-        liftIO $ print val
-        --showOutput (show val) st'
+        --liftIO $ print val
+        showOutput (show val) st'
 
 showOutput :: String -> IState -> Repl ()
 showOutput arg st = 
@@ -92,11 +92,12 @@ cmd source = exec True (L.pack source)
 help :: [String] -> HaskelineT (Control.Monad.State.Strict.StateT IState IO) ()
 help = return $ liftIO $ putStrLn "can't help you on that one"
 
--- :load command
+-- :using command
 using :: [String] -> Repl ()
 using args = do
-  contents <- liftIO $ L.readFile (unwords args)
-  exec True contents
+    contents <- liftIO $ L.readFile $ unwords args
+    --contents <- liftIO $ L.readFile $ "/home/david/.microML/" ++ unwords args ++ ".ml"
+    exec True contents
 
 -- :type command
 typeof :: [String] -> Repl ()
@@ -164,7 +165,13 @@ banner = "\ESC[1;31m" ++
         " | | | | | | | (__| | | (_) | |  | || |____  \n" ++
         " |_| |_| |_|_|\\___|_|  \\___/\\_|  |_/\\_____/  \ESC[0m"
 
-
+ini :: Repl ()
 ini = liftIO $ putStrLn $ banner ++ "\n\n" ++ "\ESC[1mWelcome to microML\ESC[0m\n\n" 
 
+{-ini :: Repl ()-}
+{-ini = do-}
+    {-using ["standard"]-}
+    {-liftIO $ putStrLn $ banner ++ "\n\n" ++ "\ESC[1mWelcome to microML\ESC[0m\n\n" -}
+
+shell :: IO ()
 shell = flip evalStateT initState $ evalRepl prompt cmd options completer ini
