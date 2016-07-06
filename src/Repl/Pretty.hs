@@ -89,9 +89,10 @@ ppTypeError = render . ppError
 ppLit :: String -> String
 ppLit a 
   | "Var" `isPrefixOf` a     = bold ++ ((!!1) . words) a ++ unbold
+  | "Closure" `isPrefixOf` a = bold ++ "<<closure>>" ++ unbold
   | "List" `isPrefixOf` a    = "[" ++ bold ++ intercalate ", " (map ppLit (pprList a)) ++ unbold ++ "]"
-  | "LInt" `isInfixOf` a     = bold ++ (init . (!!2). words) a ++ unbold
-  | "LDouble" `isInfixOf` a  = bold ++ (init . (!!2) . words) a ++ unbold
+  | "LInt" `isInfixOf` a     = bold ++ noParens ((init . (!!2). words) a) ++ unbold
+  | "LDouble" `isInfixOf` a  = bold ++ noParens ((init . (!!2) . words) a) ++ unbold
   | "LBoolean" `isInfixOf` a = bold ++ (init . (!!2) . words) a ++ unbold
   | "LChar" `isInfixOf` a    = bold ++ (init . (!!2) . words) a ++ unbold
   | "LString" `isInfixOf` a  = bold ++ (init . (!!2) . words) a ++ unbold
@@ -105,3 +106,6 @@ pprList :: String -> [String]
 pprList a = map L.unpack $ L.splitOn (L.pack ",") $ 
     L.pack $ filter (\x -> x `notElem` ['[', ']']) $ 
         unwords . tail . words $ a
+
+noParens :: String -> String
+noParens = filter (\x -> x `notElem` ['(', ')'])
