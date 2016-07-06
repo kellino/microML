@@ -24,15 +24,12 @@ let until p f x = if (p x) then x else (until p f (f x));
 (* print functions *)
 let show x = x;     (* this is just a synonym for id *)
 
-(* maths function *)
---let sum xs = if (xs == []) then 0 else ((head xs) + (sum (tail xs)));
+(* maths functions *)
 let sum xs = foldl (\x y -> x + y) 0 xs;
--- let product xs = if (xs == []) then 1 else ((head xs) * (product (tail xs)));
 let product xs = foldl (\x y -> x * y) 1 xs;
 let abs x = if (negative? x) then (x * -1) else x;
 let max a b = if (a < b) then b else a;
 let min a b = if (a < b) then a else b;
-let square a = a * a;
 let negate x = if (negative? x) then (abs x) else (x * -1);
 
 -- we need to have lets and where to hide definitions
