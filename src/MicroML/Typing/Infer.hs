@@ -189,17 +189,17 @@ getOp dict op t1 t2 = do
 doOp :: Binop -> Type -> Type -> Infer Type
 doOp op t1 t2= 
     case op of 
-      OpAdd -> getOp mathsOps OpAdd t1 t2
-      OpSub -> getOp mathsOps OpSub t1 t2
-      OpMul -> getOp mathsOps OpMul t1 t2
-      OpDiv -> getOp mathsOps OpDiv t1 t2
-      OpMod -> getOp mathsOps OpMod t1 t2
-      OpExp -> getOp mathsOps OpExp t1 t2
-      OpEq -> getOp mathsOps OpEq t1 t2
-      OpLe -> getOp mathsOps OpLe t1 t2
-      OpLt -> getOp mathsOps OpLt t1 t2
-      OpGe -> getOp mathsOps OpGe t1 t2
-      OpGt -> getOp mathsOps OpGt t1 t2
+      OpAdd   -> getOp mathsOps OpAdd t1 t2
+      OpSub   -> getOp mathsOps OpSub t1 t2
+      OpMul   -> getOp mathsOps OpMul t1 t2
+      OpDiv   -> getOp mathsOps OpDiv t1 t2
+      OpMod   -> getOp mathsOps OpMod t1 t2
+      OpExp   -> getOp mathsOps OpExp t1 t2
+      OpEq    -> getOp mathsOps OpEq t1 t2
+      OpLe    -> getOp mathsOps OpLe t1 t2
+      OpLt    -> getOp mathsOps OpLt t1 t2
+      OpGe    -> getOp mathsOps OpGe t1 t2
+      OpGt    -> getOp mathsOps OpGt t1 t2
       OpNotEq -> getOp mathsOps OpNotEq t1 t2
 
 inferTop :: Env -> [(String, Expr)] -> Either TypeError Env
