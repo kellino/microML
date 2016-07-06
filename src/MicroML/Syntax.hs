@@ -41,7 +41,7 @@ data ListOp =
 
 data Binop = 
         OpAdd | OpSub | OpMul | OpDiv | OpMod | OpExp | OpOr | OpXor
-      | OpAnd | OpEq | OpNe | OpLe | OpLt | OpGe | OpGt | OpNotEq
+      | OpAnd | OpEq | OpLe | OpLt | OpGe | OpGt | OpNotEq
       | OpCons | OpComp | OpAppend
       deriving (Eq, Ord, Show)      
 
