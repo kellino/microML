@@ -19,6 +19,7 @@ import Control.Monad.RWS
 import Control.Monad.Identity
 
 import Data.List (nub)
+-- import Data.Char (ord)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 
@@ -100,8 +101,8 @@ generalize :: Env -> Type -> TypeScheme
 generalize env t  = Forall as t
     where as = Set.toList $ ftv t `Set.difference` ftv env
 
-ops :: Map.Map Binop Type
-ops = Map.fromList [
+mathsOps :: Map.Map Binop Type
+mathsOps = Map.fromList [
        ( OpAdd, typeNum `TArr`   ( typeNum `TArr` typeNum))
     ,  ( OpMul, typeNum `TArr`   ( typeNum `TArr` typeNum))
     ,  ( OpSub, typeNum `TArr`   ( typeNum `TArr` typeNum))
@@ -123,11 +124,23 @@ infer expr = case expr of
     Lit (LString _)  -> return typeString
     Lit (LChar _)    -> return typeChar
 
-    List xs -> do
-        t1 <- infer $ head xs
-        t2 <- infer (head . tail $ xs)
-        uni t1 t2
+    List []   -> return typeList
+    List [x]  -> do
+        t1 <- infer x
+        tv <- fresh
+        uni t1 tv
         return t1
+    List (x:y:xs) -> do
+        t1 <- infer x
+        t2 <- infer y
+        uni t1 t2
+        infer $ List (y:xs)
+
+    {-List xs -> do-}
+        {-t1 <- infer $ head xs-}
+        {-t2 <- infer (head . tail $ xs)-}
+        {-uni t1 t2-}
+        {-return t1-}
 
     Var x -> lookupEnv x
 
@@ -156,20 +169,12 @@ infer expr = case expr of
         uni (tv `TArr` tv) t1
         return tv
 
-    Op op e1 e2 -> 
-        case op of
-          OpAdd   -> mathsOp OpAdd e1 e2
-          OpSub   -> mathsOp OpSub e1 e2
-          OpMul   -> mathsOp OpMul e1 e2
-          OpDiv   -> mathsOp OpDiv e1 e2
-          OpExp   -> mathsOp OpExp e1 e2
-          OpMod   -> mathsOp OpMul e1 e2
-          OpLe    -> mathsOp OpMul e1 e2
-          OpGe    -> mathsOp OpMul e1 e2
-          OpGt    -> mathsOp OpMul e1 e2
-          OpLt    -> mathsOp OpMul e1 e2
-          OpEq    -> mathsOp OpMul e1 e2
-          OpNotEq -> mathsOp OpMul e1 e2
+    Op op e1 e2 -> do
+        t1 <- infer e1
+        t2 <- infer e2
+        if (t1 == typeNum) && (t2 == typeNum)
+           then doOp op t1 t2
+           else error "?"
 
     If cond tr fl -> do
         t1 <- infer cond
@@ -179,15 +184,29 @@ infer expr = case expr of
         uni t2 t3
         return t2
 
-mathsOp :: Binop -> Expr -> Expr -> Infer Type
-mathsOp op e1 e2 = do
-    t1 <- infer e1
-    t2 <- infer e2
+getOp :: (Ord k) => Map.Map k Type -> k -> Type -> Type -> Infer Type
+getOp dict op t1 t2 = do
     tv <- fresh
     let u1 = t1 `TArr` (t2 `TArr` tv)
-        u2 = ops Map.! op
+        u2 = dict Map.! op
     uni u1 u2
     return tv
+
+doOp :: Binop -> Type -> Type -> Infer Type
+doOp op t1 t2= 
+    case op of 
+      OpAdd -> getOp mathsOps OpAdd t1 t2
+      OpSub -> getOp mathsOps OpSub t1 t2
+      OpMul -> getOp mathsOps OpMul t1 t2
+      OpDiv -> getOp mathsOps OpDiv t1 t2
+      OpMod -> getOp mathsOps OpMod t1 t2
+      OpExp -> getOp mathsOps OpExp t1 t2
+      OpEq -> getOp mathsOps OpEq t1 t2
+      OpLe -> getOp mathsOps OpLe t1 t2
+      OpLt -> getOp mathsOps OpLt t1 t2
+      OpGe -> getOp mathsOps OpGe t1 t2
+      OpGt -> getOp mathsOps OpGt t1 t2
+      OpNotEq -> getOp mathsOps OpNotEq t1 t2
 
 inferTop :: Env -> [(String, Expr)] -> Either TypeError Env
 inferTop env [] = Right env
