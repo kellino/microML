@@ -6,12 +6,13 @@ module Repl.Pretty  where
 
 import MicroML.Typing.Type
 import MicroML.Syntax
+import MicroML.Typing.Env
 import MicroML.Typing.TypeError
 
+import qualified Data.Map as Map
 import Text.PrettyPrint
 import Data.List (isPrefixOf, isInfixOf, intercalate)
 import qualified Data.Text.Lazy as L
-
 
 parensIf ::  Bool -> Doc -> Doc
 parensIf True = parens
@@ -27,12 +28,12 @@ instance Pretty TVar where
     ppr _ (TV x) = text x
 
 instance Pretty Type where
-  ppr p (TArr a b) = parensIf (isArrow a) (ppr p a) <+> text "->" <+> ppr p b
-    where
-      isArrow TArr{} = True
-      isArrow _ = False
-  ppr p (TVar a) = ppr p a
-  ppr _ (TCon a) = text a
+    ppr p (TArr a b) = parensIf (isArrow a) (ppr p a) <+> text "\ESC[37m→\ESC[0m" <+> ppr p b  
+        where
+          isArrow TArr{} = True
+          isArrow _ = False
+    ppr p (TVar a) = ppr p a
+    ppr _ (TCon a) = text a
 
 instance Pretty TypeScheme where
   ppr p (Forall [] t) = ppr p t
@@ -82,6 +83,9 @@ ppsig (a, b) = ppLit a ++ " \ESC[35m::\ESC[0m " ++ ppscheme b
 
 {-ppdecl :: (String, Expr) -> String-}
 {-ppdecl (a, b) = "let " ++ a ++ " = " ++ ppexpr b-}
+
+ppenv :: Env -> [String]
+ppenv (TypeEnv env) = map ppsig $ Map.toList env
 
 ppTypeError :: TypeError -> String
 ppTypeError = render . ppError
