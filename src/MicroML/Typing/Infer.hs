@@ -19,7 +19,6 @@ import Control.Monad.RWS
 import Control.Monad.Identity
 
 import Data.List (nub)
--- import Data.Char (ord)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 
@@ -107,7 +106,7 @@ mathsOps = Map.fromList [
     ,  ( OpMul, typeNum `TArr`   ( typeNum `TArr` typeNum))
     ,  ( OpSub, typeNum `TArr`   ( typeNum `TArr` typeNum))
     ,  ( OpMod, typeNum `TArr`   ( typeNum `TArr` typeNum))
-    ,  (OpDiv, typeNum `TArr`    ( typeNum `TArr` typeNum))
+    ,  ( OpDiv, typeNum `TArr`    ( typeNum `TArr` typeNum))
     ,  ( OpExp, typeNum `TArr`   ( typeNum `TArr` typeNum))
     ,  ( OpGe, typeNum `TArr`    ( typeNum `TArr` typeBool))
     ,  ( OpLe, typeNum `TArr`    ( typeNum `TArr` typeBool))
@@ -115,6 +114,30 @@ mathsOps = Map.fromList [
     ,  ( OpLt, typeNum `TArr`    ( typeNum `TArr` typeBool))
     ,  ( OpEq, typeNum `TArr`    ( typeNum `TArr` typeBool))
     ,  ( OpNotEq, typeNum `TArr` ( typeNum `TArr` typeBool))
+  ]
+
+charOps :: Map.Map Binop Type
+charOps = Map.fromList [
+    ( OpEq, typeChar `TArr` (typeChar `TArr` typeBool))                       
+  , ( OpLe, typeChar `TArr` (typeChar `TArr` typeBool))
+  , ( OpLt, typeChar `TArr` (typeChar `TArr` typeBool))
+  , ( OpGe, typeChar `TArr` (typeChar `TArr` typeBool))
+  , ( OpGt, typeChar `TArr` (typeChar `TArr` typeBool))
+  , ( OpNotEq, typeChar `TArr` (typeChar `TArr` typeBool))
+  ]
+
+listOps = Map.fromList [
+    ( OpEq, typeList `TArr` (typeList `TArr` typeBool))                       
+  ]
+
+boolOps :: Map.Map Binop Type
+boolOps = Map.fromList [
+    ( OpEq, typeBool `TArr` (typeBool `TArr` typeBool))                       
+  , ( OpLe, typeBool `TArr` (typeBool `TArr` typeBool))
+  , ( OpLt, typeBool `TArr` (typeBool `TArr` typeBool))
+  , ( OpGe, typeBool `TArr` (typeBool `TArr` typeBool))
+  , ( OpGt, typeBool `TArr` (typeBool `TArr` typeBool))
+  , ( OpNotEq, typeBool `TArr` (typeBool `TArr` typeBool))
   ]
 
 infer :: Expr -> Infer Type
@@ -173,9 +196,13 @@ infer expr = case expr of
     Op op e1 e2 -> do
         t1 <- infer e1
         t2 <- infer e2
-        if (t1 == typeNum) && (t2 == typeNum)
-           then doOp op t1 t2
-           else return t1
+        case e1 of
+          (Lit (LInt _))     -> doMathsOp op t1 t2
+          (Lit (LDouble _))  -> doMathsOp op t1 t2
+          (Lit (LBoolean _)) -> doBoolOp op t1 t2
+          (Lit (LChar _))    -> doCharOp op t1 t2
+          (List _)           -> doListOp op t1 t2
+          _                  -> doMathsOp op t2 t2
 
     If cond tr fl -> do
         t1 <- infer cond
@@ -190,8 +217,8 @@ infer expr = case expr of
         uni t1 typeNum
         return t1
 
-doOp :: Binop -> Type -> Type -> Infer Type
-doOp op t1 t2= 
+doMathsOp :: Binop -> Type -> Type -> Infer Type
+doMathsOp op t1 t2 = 
     case op of 
       OpAdd   -> getOp mathsOps OpAdd t1 t2
       OpSub   -> getOp mathsOps OpSub t1 t2
@@ -205,6 +232,30 @@ doOp op t1 t2=
       OpGe    -> getOp mathsOps OpGe t1 t2
       OpGt    -> getOp mathsOps OpGt t1 t2
       OpNotEq -> getOp mathsOps OpNotEq t1 t2
+
+doListOp op t1 t2 =
+    case op of
+      OpEq -> getOp listOps OpEq t1 t2
+
+doCharOp :: Binop -> Type -> Type -> Infer Type
+doCharOp op t1 t2 =
+    case op of
+      OpEq -> getOp charOps OpEq t1 t2
+      OpLe -> getOp charOps OpLe t1 t2
+      OpLt -> getOp charOps OpLt t1 t2
+      OpGe -> getOp charOps OpGe t1 t2
+      OpGt -> getOp charOps OpGt t1 t2
+      OpNotEq -> getOp charOps OpNotEq t1 t2
+
+doBoolOp :: Binop -> Type -> Type -> Infer Type
+doBoolOp op t1 t2 =
+    case op of
+      OpEq -> getOp boolOps OpEq t1 t2
+      OpLe -> getOp boolOps OpLe t1 t2
+      OpLt -> getOp boolOps OpLt t1 t2
+      OpGe -> getOp boolOps OpGe t1 t2
+      OpGt -> getOp boolOps OpGt t1 t2
+      OpNotEq -> getOp boolOps OpNotEq t1 t2
 
 getOp :: (Ord k) => Map.Map k Type -> k -> Type -> Type -> Infer Type
 getOp dict op t1 t2 = do
