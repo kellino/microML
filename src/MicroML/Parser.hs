@@ -56,21 +56,27 @@ double = float >>= \d -> return (Lit (LDouble d))
 {- base formats use erlang style syntax, ie. 2#, 8# ad 16# -}
 binary :: Parser Expr
 binary = do
+    void spaces
     _ <- string "2#"
     b <- many1 $ oneOf "10"
+    void spaces
     return $ Lit (LInt $ readBin b)
         where readBin = foldl' (\x y -> x*2 + y) 0 . map (fromIntegral . digitToInt)
 
 octal :: Parser Expr
 octal = do
+    void spaces
     _ <- string "8#"
     o <- many1 octDigit 
+    void spaces
     return $ Lit (LInt $ baseToDec readOct o)
 
 hex :: Parser Expr
 hex = do
+    void spaces
     _ <- string "16#"
     h <- many1 hexDigit
+    void spaces
     return $ Lit (LInt $ baseToDec readHex h)
 
 -- readHex and readOct return lists of tuples, so this function simply lifts out the
@@ -80,16 +86,20 @@ baseToDec f n = (fst . head) $ f n
 
 charLit :: Parser Expr
 charLit = do
+    void spaces
     void $ char '\''
     c <- letter
     void $ char '\''
+    void spaces
     return $ Lit (LChar c)
 
 stringLit :: ParsecT L.Text u Identity Expr
 stringLit = do
+    void spaces
     void $ char '"'
     s <- many $ escaped <|> noneOf "\"\\"
     void $ char '"'
+    void spaces
     return $ Lit (LString s)
 
 escaped :: ParsecT L.Text u Identity Char
@@ -109,18 +119,20 @@ bool = (reserved "true" >> return (Lit (LBoolean True)))
 
 list :: Parser Expr
 list = do
+    void spaces
     void $ string "["
-    elems <- List <$> expr `sepBy` choice [string ",", string ", "]
+    elems <- List <$> expr `sepBy` string "," <* spaces -- choice [string ", ", string ","]
     void $ string "]"
+    void spaces
     return elems
 
 lambda :: Parser Expr
 lambda = do
-  reservedOp "\\"
-  args <- many varName
-  reservedOp "->"
-  body <- expr
-  return $ foldr Lam body args
+    reservedOp "\\"
+    args <- many varName
+    reservedOp "->"
+    body <- expr
+    return $ foldr Lam body args
 
 letin :: Parser Expr
 letin = do
@@ -146,11 +158,17 @@ letrecin = do
 ifthen :: Parser Expr
 ifthen = do
     reserved "if"
-    cond <- aexp
+    void spaces
+    cond <- expr
+    void spaces
     reservedOp "then"
-    tr <- aexp
+    void spaces
+    tr <- expr
+    void spaces
     reserved "else"
-    fl <- aexp
+    void spaces
+    fl <- expr
+    void spaces
     return (If cond tr fl)
 
 aexp :: Parser Expr
@@ -202,7 +220,7 @@ table = [ [ prefixOp "head" (ListOp Car)                -- list operators
 
 expr :: Parser Expr
 expr = do
-    es <- many1 term
+    es <- many1 term 
     return (foldl1 App es)
 
 parseRange :: Parser Expr
