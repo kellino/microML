@@ -53,9 +53,9 @@ eval env expr = case expr of
           OpOr  -> a' `or'`  b'
           OpAnd -> a' `and'` b'
           OpXor -> a' `xor'` b'
-          OpEq  -> Lit $ LBoolean $ a' == b'
-          OpLe  -> Lit $ LBoolean $ a' <= b'
-          OpLt  -> Lit $ LBoolean $ a' <  b'
+          OpEq  -> a' `opEq` b'
+          OpLe  -> a' `opLe` b'
+          OpLt  -> a' `opLt` b'
           OpGe  -> Lit $ LBoolean $ a' >= b'
           OpGt  -> Lit $ LBoolean $ a' >  b'
           OpNotEq -> Lit $ LBoolean $ a' /= b'
@@ -100,6 +100,36 @@ exp' (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a^b
 exp' (Lit (LInt a)) (Lit (LDouble b)) = Lit $ LDouble $ realToFrac a**b
 exp' (Lit (LDouble a)) (Lit (LInt b)) = Lit $ LDouble $ a ^ b
 exp' (Lit (LDouble a)) (Lit (LDouble b)) = Lit $ LDouble $ a**b
+
+opEq :: Expr -> Expr -> Expr
+opEq (Lit (LInt a)) (Lit (LDouble b)) = Lit . LBoolean $ realToFrac a == b
+opEq (Lit (LDouble a)) (Lit (LInt b)) = Lit . LBoolean $ a == realToFrac b
+opEq a b = Lit . LBoolean $ a == b
+
+opLe :: Expr -> Expr -> Expr
+opLe (Lit (LInt a)) (Lit (LDouble b)) = Lit . LBoolean $ realToFrac a <= b
+opLe (Lit (LDouble a)) (Lit (LInt b)) = Lit . LBoolean $ a <= realToFrac b
+opLe a b = Lit . LBoolean $ a <= b
+
+opLt :: Expr -> Expr -> Expr
+opLt (Lit (LInt a)) (Lit (LDouble b)) = Lit . LBoolean $ realToFrac a < b
+opLt (Lit (LDouble a)) (Lit (LInt b)) = Lit . LBoolean $ a < realToFrac b
+opLt a b = Lit . LBoolean $ a < b
+
+opGt :: Expr -> Expr -> Expr
+opGt (Lit (LInt a)) (Lit (LDouble b)) = Lit . LBoolean $ realToFrac a > b
+opGt (Lit (LDouble a)) (Lit (LInt b)) = Lit . LBoolean $ a > realToFrac b
+opGt a b = Lit . LBoolean $ a > b
+
+opGe :: Expr -> Expr -> Expr
+opGe (Lit (LInt a)) (Lit (LDouble b)) = Lit . LBoolean $ realToFrac a >= b
+opGe (Lit (LDouble a)) (Lit (LInt b)) = Lit . LBoolean $ a >= realToFrac b
+opGe a b = Lit . LBoolean $ a >= b
+
+opNotEq :: Expr -> Expr -> Expr
+opNotEq (Lit (LInt a)) (Lit (LDouble b)) = Lit . LBoolean $ realToFrac a /= b
+opNotEq (Lit (LDouble a)) (Lit (LInt b)) = Lit . LBoolean $ a /= realToFrac b
+opNotEq a b = Lit . LBoolean $ a /= b
 
 runEval :: TermEnv -> String -> Expr -> (Expr, TermEnv)
 runEval env x exp = 
