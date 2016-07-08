@@ -114,6 +114,7 @@ mathsOps = Map.fromList [
     ,  ( OpLt, typeNum `TArr`    ( typeNum `TArr` typeBool))
     ,  ( OpEq, typeNum `TArr`    ( typeNum `TArr` typeBool))
     ,  ( OpNotEq, typeNum `TArr` ( typeNum `TArr` typeBool))
+    ,  ( OpCons, typeNum `TArr` (typeNum `TArr` typeList))
   ]
 
 charOps :: Map.Map Binop Type
@@ -124,10 +125,13 @@ charOps = Map.fromList [
   , ( OpGe, typeChar `TArr` (typeChar `TArr` typeBool))
   , ( OpGt, typeChar `TArr` (typeChar `TArr` typeBool))
   , ( OpNotEq, typeChar `TArr` (typeChar `TArr` typeBool))
+  , ( OpAppend, typeChar `TArr` (typeChar `TArr` typeChar))
   ]
 
+listOps :: Map.Map Binop Type
 listOps = Map.fromList [
     ( OpEq, typeList `TArr` (typeList `TArr` typeBool))                       
+  , ( OpAppend, typeChar `TArr` (typeList `TArr` typeBool))                       
   ]
 
 boolOps :: Map.Map Binop Type
@@ -232,10 +236,12 @@ doMathsOp op t1 t2 =
       OpGe    -> getOp mathsOps OpGe t1 t2
       OpGt    -> getOp mathsOps OpGt t1 t2
       OpNotEq -> getOp mathsOps OpNotEq t1 t2
+      OpCons  -> getOp mathsOps OpCons t2 t2
 
 doListOp op t1 t2 =
     case op of
       OpEq -> getOp listOps OpEq t1 t2
+      OpAppend -> getOp listOps OpAppend t1 t2
 
 doCharOp :: Binop -> Type -> Type -> Infer Type
 doCharOp op t1 t2 =
