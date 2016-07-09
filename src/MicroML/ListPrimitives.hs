@@ -2,8 +2,11 @@ module MicroML.ListPrimitives where
 
 import MicroML.Syntax
 
+import qualified Data.Char as DC
+
 -- TODO add proper exception handling
 
+-- used for implementing [? to ?] ranges. Not as flexible as the real implementation in haskell
 enumFromTo_ :: Expr -> Expr -> Expr
 enumFromTo_ (Lit (LInt a)) (Lit (LInt b))         = List $ (Lit . LInt) <$> [a .. b]
 enumFromTo_ (Lit (LDouble a)) (Lit (LDouble b)) = List $ (Lit . LDouble) <$> [a..b]
@@ -39,3 +42,16 @@ cons _ _ = error ""
 
 compose :: Expr -> Expr -> Expr
 compose a b = Lit $ LString $ show a ++ " " ++ show b
+
+
+------------------------------------
+-- STRING MANIPULATION PRIMITIVES --
+------------------------------------
+
+toLower :: Expr -> Expr
+toLower (Lit (LChar x)) = Lit . LChar $ DC.toLower x
+toLower _ = error "type mismatch"
+
+toUpper :: Expr -> Expr
+toUpper (Lit (LChar x)) = Lit . LChar $ DC.toUpper x
+toUpper _ = error "type mismatch"
