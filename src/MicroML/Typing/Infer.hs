@@ -128,10 +128,10 @@ charOps = Map.fromList [
   , ( OpAppend, typeChar `TArr` (typeChar `TArr` typeChar))
   ]
 
-listOps :: Map.Map Binop Type
+--listOps :: Map.Map Binop Type
 listOps = Map.fromList [
-    ( OpEq, typeList `TArr` (typeList `TArr` typeBool))                       
-  , ( OpAppend, typeChar `TArr` (typeList `TArr` typeBool))                       
+    ( "opEq", typeList `TArr` (typeList `TArr` typeBool))                       
+  , ( "appendInts", typeListofNumber `TArr` (typeListofNumber `TArr` typeListofNumber))
   ]
 
 boolOps :: Map.Map Binop Type
@@ -152,12 +152,27 @@ infer expr = case expr of
     Lit (LString _)  -> return typeString
     Lit (LChar _)    -> return typeChar
 
+    -- work in progress. This is just a placeholder
+    Lit (LTup (x:xs)) -> do
+        t1 <- infer x
+        tv <- fresh
+        uni t1 tv
+        infer $ Lit . LTup $ xs
+
     List []   -> return typeList
     List [x]  -> do
         t1 <- infer x
         tv <- fresh
         uni t1 tv
-        return t1 
+        return $
+            case x of
+              (Lit (LInt _))     -> typeListofNumber
+              (Lit (LDouble _))  -> typeListofNumber
+              (Lit (LBoolean _)) -> typeListofBool
+              (Lit (LString _))  -> typeListofString
+              (Lit (LChar _))    -> typeListofChar
+              (Lit (LTup _))     -> typeListofTup  -- placeholder
+              _ -> t1
     List (x:y:xs) -> do
         t1 <- infer x
         t2 <- infer y
@@ -197,6 +212,7 @@ infer expr = case expr of
         uni t1 tv
         return t1
 
+
     Op op e1 e2 -> do
         t1 <- infer e1
         t2 <- infer e2
@@ -205,7 +221,7 @@ infer expr = case expr of
           (Lit (LDouble _))  -> doMathsOp op t1 t2
           (Lit (LBoolean _)) -> doBoolOp op t1 t2
           (Lit (LChar _))    -> doCharOp op t1 t2
-          (List _)           -> doListOp op t1 t2
+          (List _)           -> doListOp op e1 e2
           _                  -> doMathsOp op t2 t2
 
     If cond tr fl -> do
@@ -238,11 +254,16 @@ doMathsOp op t1 t2 =
       OpNotEq -> getOp mathsOps OpNotEq t1 t2
       OpCons  -> getOp mathsOps OpCons t2 t2
 
-doListOp op t1 t2 =
+doListOp :: Binop -> Expr -> Expr -> Infer Type
+doListOp op e1 e2 = do
+    t1 <- infer e1
+    t2 <- infer e2
     case op of
-      OpEq -> getOp listOps OpEq t1 t2
-      OpAppend -> getOp listOps OpAppend t1 t2
-
+      OpAppend -> 
+        case e1 of 
+          List (Lit (LInt _):_)    -> getOp listOps "appendInts" t1 t2
+          List (Lit (LDouble _):_) -> getOp listOps "appendInts" t1 t2
+        
 doCharOp :: Binop -> Type -> Type -> Infer Type
 doCharOp op t1 t2 =
     case op of
