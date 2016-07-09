@@ -17,6 +17,7 @@ eval env expr = case expr of
     char@(Lit (LChar _))    -> char
     str@(Lit (LString _))   -> str
     bool@(Lit (LBoolean _)) -> bool
+    tup@(Lit (LTup _))      -> tup
     Var x                   -> fromMaybe (error "not yet been set") (Map.lookup x env)
     ls@(List _)             -> ls
     FixPoint e              -> eval env (App e (FixPoint e))
