@@ -31,6 +31,7 @@ data Lit
   | LBoolean Bool
   | LString String
   | LChar Char
+  | LTup [Expr]
 
   deriving (Show, Eq, Ord)
 
