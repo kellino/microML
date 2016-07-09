@@ -1,5 +1,5 @@
 (* tests *)
-let zero? x = if (x == 0) then true else false;
+let zero? x = if x == 0 then true else false;
 let odd? x = if (x % 2 == 1) then true else false;
 let even? x = if (x % 2 == 0) then true else false;
 let positive? x = if (x > 0) then true else false;
@@ -25,6 +25,7 @@ let foldrl1 f xs = foldl f (head xs) xs;
 
 let map f xs = foldr (\x xs' -> (f x) : xs') ([]) xs;
 let filter p xs = foldr (\x y -> if (p x) then (x:y) else y) ([]) xs;
+let reverse xs = if xs == [] then [] else (reverse ((tail xs):(head xs)));
 --let length xs = foldr (\x -> x + 1) 0 xs;
 let until p f x = if (p x) then x else (until p f (f x));
 
