@@ -132,6 +132,15 @@ charOps = Map.fromList [
 listOps = Map.fromList [
     ( "opEq", typeList `TArr` (typeList `TArr` typeBool))                       
   , ( "appendInts", typeListofNumber `TArr` (typeListofNumber `TArr` typeListofNumber))
+  , ( "appendBools", typeListofBool `TArr` (typeListofBool `TArr` typeListofBool))
+  , ( "appendStrings", typeListofString `TArr` (typeListofString `TArr` typeListofString))
+  , ( "appendChars", typeListofChar `TArr` (typeListofChar `TArr` typeListofChar))
+  , ( "appendTups", typeListofTup `TArr` (typeListofTup `TArr` typeListofTup)) 
+  , ( "consInts", typeListofNumber `TArr` (typeListofNumber `TArr` typeListofNumber))
+  , ( "consBools", typeListofBool `TArr` (typeListofBool `TArr` typeListofBool))
+  , ( "consStrings", typeListofString `TArr` (typeListofString `TArr` typeListofString))
+  , ( "consChars", typeListofChar `TArr` (typeListofChar `TArr` typeListofChar))
+  , ( "consTups", typeListofTup `TArr` (typeListofTup `TArr` typeListofTup)) 
   ]
 
 boolOps :: Map.Map Binop Type
@@ -212,7 +221,6 @@ infer expr = case expr of
         uni t1 tv
         return t1
 
-
     Op op e1 e2 -> do
         t1 <- infer e1
         t2 <- infer e2
@@ -261,8 +269,20 @@ doListOp op e1 e2 = do
     case op of
       OpAppend -> 
         case e1 of 
-          List (Lit (LInt _):_)    -> getOp listOps "appendInts" t1 t2
-          List (Lit (LDouble _):_) -> getOp listOps "appendInts" t1 t2
+              List (Lit (LInt _):_)     -> getOp listOps "appendInts" t1 t2
+              List (Lit (LDouble _):_)  -> getOp listOps "appendInts" t1 t2
+              List (Lit (LBoolean _):_) -> getOp listOps "appendBools" t1 t2
+              List (Lit (LString _):_)  -> getOp listOps "appendStrings" t1 t2
+              List (Lit (LChar _):_)    -> getOp listOps "appendChars" t1 t2
+              List (Lit (LTup _):_)     -> getOp listOps "appendTups" t1 t2
+      OpCons -> 
+        case e1 of 
+              List (Lit (LInt _):_)     -> getOp listOps "consInts" t1 t2
+              List (Lit (LDouble _):_)  -> getOp listOps "consInts" t1 t2
+              List (Lit (LBoolean _):_) -> getOp listOps "consBools" t1 t2
+              List (Lit (LString _):_)  -> getOp listOps "consStrings" t1 t2
+              List (Lit (LChar _):_)    -> getOp listOps "consChars" t1 t2
+              List (Lit (LTup _):_)     -> getOp listOps "consTups" t1 t2
         
 doCharOp :: Binop -> Type -> Type -> Infer Type
 doCharOp op t1 t2 =
