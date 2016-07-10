@@ -165,13 +165,13 @@ banner = "\ESC[1;31m" ++
         " | | | | | | | (__| | | (_) | |  | || |____  \n" ++
         " |_| |_| |_|_|\\___|_|  \\___/\\_|  |_/\\_____/  \ESC[0m"
 
-ini :: Repl ()
-ini = liftIO $ putStrLn $ banner ++ "\n\n" ++ "\ESC[1mWelcome to microML\ESC[0m\n\n" 
+ini' :: Repl ()
+ini' = liftIO $ putStrLn $ banner ++ "\n\n" ++ "\ESC[1mWelcome to microML\ESC[0m\n\n" 
 
-{-ini :: Repl ()-}
-{-ini = do-}
-    {-using ["standard"]-}
-    {-liftIO $ putStrLn $ banner ++ "\n\n" ++ "\ESC[1mWelcome to microML\ESC[0m\n\n" -}
+ini :: Repl ()
+ini = do
+    using ["standard"]
+    liftIO $ putStrLn $ banner ++ "\n\n" ++ "\ESC[1mWelcome to microML\ESC[0m\n\n" 
 
 shell :: IO ()
-shell = flip evalStateT initState $ evalRepl prompt cmd options completer ini
+shell = flip evalStateT initState $ evalRepl prompt cmd options completer ini'
