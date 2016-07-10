@@ -5,7 +5,8 @@
 \usepackage{palatino}
 \usepackage{amsmath}
 \usepackage{geometry}
-\geometry{a4paper, left=15mm, right=15mm, top=1cm, bottom=2cm}
+\usepackage[hidelinks]{hyperref}
+\geometry{a4paper, left=25mm, right=25mm, top=1cm, bottom=2cm}
 
 \begin{document}
 \title{Interim Progress Report on microML for the BBC micro:bit}
@@ -25,26 +26,26 @@ microMl uses an enriched lambda calculus as its base
 
 \begin{minipage}[t]{0.5\textwidth}
     \begin{grammar}
-        <Expr> ::= Var 
-        \alt Constructor 
-        \alt Application <Expr> <Expr>
-        \alt Let Name <Expr> <Expr>
-        \alt Literal 
-        \alt List <Expr*>
-        \alt If <Expr> then <Expr> else <Expr>
-        \alt FixPoint <Expr>
-        \alt UnaryOp <Expr>
-        \alt BinOp <Expr> <Expr>
+        <Expr> \::= Var
+        \alt{} Constructor 
+        \alt{} Application <Expr> <Expr>
+        \alt{} Let Name <Expr> <Expr>
+        \alt{} Literal 
+        \alt{} List <Expr*>
+        \alt{} If <Expr> then <Expr> else <Expr>
+        \alt{} FixPoint <Expr>
+        \alt{} UnaryOp <Expr>
+        \alt{} BinOp <Expr> <Expr>
     \end{grammar}
 \end{minipage}
 \begin{minipage}[t]{0.5\textwidth}
     \begin{grammar}
-        <Literal> ::= Integer
-        \alt Double
-        \alt Boolean
-        \alt String
-        \alt Char
-        \alt Tuple of <Literal>
+        <Literal> \::= Integer
+        \alt{} Double
+        \alt{} Boolean
+        \alt{} String
+        \alt{} Char
+        \alt{} Tuple of <Literal>
     \end{grammar}
 \end{minipage}
 \vspace{5mm}
@@ -53,9 +54,9 @@ In addition to these basic primitives and control structures, microML also makes
 primitives inherited from languages in the Lisp family:
 
 \begin{grammar}
-    <ListOp> ::= Car
-    \alt Cdr
-    \alt Cons
+    <ListOp> \::= Car
+    \alt{} Cdr
+    \alt{} Cons
 \end{grammar}
 
 These primitives are accessed through the \textit{head} and \textit{tail} builtin functions and are
@@ -67,9 +68,11 @@ The FixPoint primitive allows for the creation of recursive functions by satisfy
     y f = f (y f), \forall f
 \end{displaymath}
 
-The most famous fixpoint combinator without a doubt is Curry's \textit{Y-combinator}
+The most famous fixpoint combinator without a doubt is Curry's \textit{Y-combinator}:
 
-\(Y = (\lambda f. (\lambda x.\ f (x x)) (\lambda x.\ f (x x))) \)
+\begin{displaymath}
+    Y = (\lambda f. (\lambda x.\ f (x x)) (\lambda x.\ f (x x))) 
+\end{displaymath}
 
 To see how this can be used to simulate recursion\footnote{there are many excellent texts which
     give detailed explanations of the \textit{Y-combinator}, such as \dots } it is necessary simply
@@ -83,8 +86,9 @@ to supply an argument in the form of a lambda abstraction.
 \end{eqnarray*}
 
 \section{Type Inference}
-
-microML uses an implementation of \textit{algorithmW} for ML-style type inference. At present it is
+microML uses an implementation of
+\textit{algorithmW}\footnote{based on the following tutorial implementation
+    \url{https://github.com/wh5a/Algorithm-W-Step-By-Step/blob/master/AlgorithmW.lhs}} for ML-style type inference. At present it is
 not possible to declare the types of functions, they can only be inferred. As this is primarily a
 teaching language with a very simple type system, this is not the drawback that it might otherwise
 be. 
