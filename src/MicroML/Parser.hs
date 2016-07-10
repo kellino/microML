@@ -141,30 +141,23 @@ lambda = do
     body <- expr
     return $ foldr Lam body args
 
-letin :: Parser Expr
-letin = do
-    reserved "let"
-    x <- varName
-    void $ reservedOp "="
-    void spaces
-    e1 <- expr
-    void spaces
-    reserved "in"
-    void spaces
-    e2 <- expr
-    void spaces
-    return $ Let x e1 e2
-
 letrecin :: Parser Expr
 letrecin = do
     reserved "let"
-    reserved "rec"
     x <- identifier
     reservedOp "="
     e1 <- expr
     reserved "in"
     e2 <- expr
     return (Let x e1 e2)
+
+whereDecl :: Parser Expr
+whereDecl = do
+    reserved "where"
+    args <- many varName
+    void $ reservedOp "="
+    body <- expr
+    return $ foldr Lam body args
 
 ifthen :: Parser Expr
 ifthen = do
@@ -191,8 +184,8 @@ aexp =
   <|> number
   <|> ifthen
   <|> try parseRange <|> try listComp <|> list
-  <|> try letrecin
-  <|> letin
+  <|> try letrecin 
+  <|> whereDecl
   <|> lambda
   <|> variable
   <|> stringLit
@@ -281,7 +274,7 @@ val = do
   return ("it", ex)
 
 decl :: Parser Binding
-decl = try letDecl <|> val
+decl = try val <|> letDecl
 
 top :: Parser Binding
 top = do
