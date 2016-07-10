@@ -1,0 +1,94 @@
+\documentclass[11pt, a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{syntax}
+\usepackage{palatino}
+\usepackage{amsmath}
+\usepackage{geometry}
+\geometry{a4paper, left=15mm, right=15mm, top=1cm, bottom=2cm}
+
+\begin{document}
+\title{Interim Progress Report on microML for the BBC micro:bit}
+\date{10 July 2016}
+\author{David Kelly}
+
+\maketitle
+
+\section{microMl for the micro:bit}
+
+microMl is a simple functional language which works in a repl environment, runs on the bbc micro:bit
+microprocessor, and has Hindley-Milner type inference.
+
+\section{Enriched Lambda Calculus}
+
+microMl uses an enriched lambda calculus as its base
+
+\begin{minipage}[t]{0.5\textwidth}
+    \begin{grammar}
+        <Expr> ::= Var 
+        \alt Constructor 
+        \alt Application <Expr> <Expr>
+        \alt Let Name <Expr> <Expr>
+        \alt Literal 
+        \alt List <Expr*>
+        \alt If <Expr> then <Expr> else <Expr>
+        \alt FixPoint <Expr>
+        \alt UnaryOp <Expr>
+        \alt BinOp <Expr> <Expr>
+    \end{grammar}
+\end{minipage}
+\begin{minipage}[t]{0.5\textwidth}
+    \begin{grammar}
+        <Literal> ::= Integer
+        \alt Double
+        \alt Boolean
+        \alt String
+        \alt Char
+        \alt Tuple of <Literal>
+    \end{grammar}
+\end{minipage}
+\vspace{5mm}
+
+In addition to these basic primitives and control structures, microML also makes use of three
+primitives inherited from languages in the Lisp family:
+
+\begin{grammar}
+    <ListOp> ::= Car
+    \alt Cdr
+    \alt Cons
+\end{grammar}
+
+These primitives are accessed through the \textit{head} and \textit{tail} builtin functions and are
+essential for recursing over lists.
+
+The FixPoint primitive allows for the creation of recursive functions by satisfying the equation
+
+\begin{displaymath}
+    y f = f (y f), \forall f
+\end{displaymath}
+
+The most famous fixpoint combinator without a doubt is Curry's \textit{Y-combinator}
+
+\(Y = (\lambda f. (\lambda x.\ f (x x)) (\lambda x.\ f (x x))) \)
+
+To see how this can be used to simulate recursion\footnote{there are many excellent texts which
+    give detailed explanations of the \textit{Y-combinator}, such as \dots } it is necessary simply
+to supply an argument in the form of a lambda abstraction.
+
+\begin{eqnarray*}
+    && Y g = (\lambda f. (\lambda x.\ f (x x)) (\lambda x.\ f (x x))) g \\
+    & \to_\beta & (\lambda x.\ g (x x)) (\lambda x.\ g (x x)) \\
+    & \to_\beta & g ((\lambda x.\ g (x x)) (\lambda x.\ g (x x))) \\
+    & \equiv & g (Y g)
+\end{eqnarray*}
+
+\section{Type Inference}
+
+microML uses an implementation of \textit{algorithmW} for ML-style type inference. At present it is
+not possible to declare the types of functions, they can only be inferred. As this is primarily a
+teaching language with a very simple type system, this is not the drawback that it might otherwise
+be. 
+
+A full description of Hindley-Milner type inference is beyond the scope of this report, however a
+brief overview of the concept will be discussed.
+\end{document}
