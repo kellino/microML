@@ -36,6 +36,8 @@ executable microML
                      scientific,
                      containers,
                      transformers,
-                     c-dsl >= 0.3.1
+                     llvm-general,
+                     llvm-general-pure
+                     -- c-dsl >= 0.3.1
 
   ghc-options:   -Wall -O2 -fwarn-tabs -fno-warn-name-shadowing -fno-warn-missing-signatures -fno-warn-incomplete-patterns -fno-warn-unused-binds
