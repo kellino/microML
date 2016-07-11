@@ -121,10 +121,10 @@ list :: Parser Expr
 list = do
     void spaces
     void $ string "["
-    elems <- List <$> expr `sepBy` string "," <* spaces -- choice [string ", ", string ","]
+    elems <- expr `sepBy` string ","
     void $ string "]"
     void spaces
-    return elems
+    return $ List elems
 
 tuple :: Parser Expr
 tuple = do
@@ -146,18 +146,19 @@ letrecin = do
     reserved "let"
     x <- identifier
     reservedOp "="
+    void spaces
     e1 <- expr
+    void spaces
     reserved "in"
+    void spaces
     e2 <- expr
+    void spaces
     return (Let x e1 e2)
 
-whereDecl :: Parser Expr
+whereDecl :: Parser Binding
 whereDecl = do
     reserved "where"
-    args <- many varName
-    void $ reservedOp "="
-    body <- expr
-    return $ foldr Lam body args
+    letDecl
 
 ifthen :: Parser Expr
 ifthen = do
@@ -185,7 +186,7 @@ aexp =
   <|> ifthen
   <|> try parseRange <|> try listComp <|> list
   <|> try letrecin 
-  <|> whereDecl
+ -- <|> whereDecl
   <|> lambda
   <|> variable
   <|> stringLit
