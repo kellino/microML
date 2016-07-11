@@ -208,22 +208,23 @@ infer expr = case expr of
         uni (tv `TArr` tv) t1
         return tv
 
-    UnaryOp _ e1 -> do
+    UnaryOp op e1 -> do
         t1 <- infer e1
         tv <- fresh
-        uni t1 tv
-        return t1
+        case e1 of 
+          (List _) -> doUniList op t1 tv
+          (Lit (LString _)) -> doUniList op t1 tv
+          (Lit (LInt _))    -> doUniMaths op t1 tv
+          (Lit (LDouble _)) -> doUniMaths op t1 tv
 
-    Op op e1 e2 -> do
-        t1 <- infer e1
-        t2 <- infer e2
+    Op op e1 e2 -> 
         case e1 of
-          (Lit (LInt _))     -> doMathsOp op t1 t2
-          (Lit (LDouble _))  -> doMathsOp op t1 t2
-          (Lit (LBoolean _)) -> doBoolOp op t1 t2
-          (Lit (LChar _))    -> doCharOp op t1 t2
+          (Lit (LInt _))     -> doMathsOp op e1 e2
+          (Lit (LDouble _))  -> doMathsOp op e1 e2
+          (Lit (LBoolean _)) -> doBoolOp op e1 e2
+          (Lit (LChar _))    -> doCharOp op e1 e2
           (List _)           -> doListOp op e1 e2
-          _                  -> doMathsOp op t2 t2
+          _                  -> doMathsOp op e1 e2 -- placeholder
 
     If cond tr fl -> do
         t1 <- infer cond
@@ -236,14 +237,47 @@ infer expr = case expr of
     -- should never actually reach this, but discretion is the better part of valour
     _ -> throwError $ UnsupportedOperatation "cannot infer the type of this expression"
 
-doMathsOp :: Binop -> Type -> Type -> Infer Type
-doMathsOp op t1 t2 = 
+doUniMaths op t1 tv =
+    case op of
+      Minus -> do
+          uni t1 tv
+          return t1
+      _ -> throwError $ UnsupportedOperatation "you cannot do this to numbers"
+
+doUniList :: UnaryOp -> Type -> Type -> Infer Type
+doUniList op t1 tv = 
+    case op of
+      Car -> do
+          uni t1 tv
+          return t1
+      Cdr -> do
+          uni t1 tv
+          return t1
+      _ -> throwError $ UnsupportedOperatation "you cannot do this to lists"
+
+doMathsOp :: Binop -> Expr -> Expr -> Infer Type
+doMathsOp op e1 e2 = do
+    t1 <- infer e1
+    t2 <- infer e2
     case op of 
       OpAdd   -> getOp mathsOps OpAdd t1 t2
       OpSub   -> getOp mathsOps OpSub t1 t2
       OpMul   -> getOp mathsOps OpMul t1 t2
-      OpDiv   -> getOp mathsOps OpDiv t1 t2
-      OpMod   -> getOp mathsOps OpMod t1 t2
+      -- very ugly, there's surely a better way, but because type inference returns a generic
+      -- typeNumber, rather than typeInt or typeDouble, this is the easiest way to check the modulo 
+      -- only passes typechecking on ints
+      OpMod   ->
+          case e1 of
+            (Lit (LInt _)) -> case e2 of
+                                (Lit (LInt _)) -> getOp mathsOps OpMod t1 t2
+                                _   -> throwError $ UnsupportedOperatation "both numbers must be integers"
+            _ -> throwError $ UnsupportedOperatation "both numbers must be integers"
+      -- check for division by 0 error
+      OpDiv   -> 
+          case e2 of
+            (Lit (LInt 0)) -> throwError $ UnsupportedOperatation "cannot divide by 0"
+            (Lit (LDouble 0.0)) -> throwError $ UnsupportedOperatation "cannot divide by 0"
+            _              -> getOp mathsOps OpDiv t1 t2
       OpExp   -> getOp mathsOps OpExp t1 t2
       OpEq    -> getOp mathsOps OpEq t1 t2
       OpLe    -> getOp mathsOps OpLe t1 t2
@@ -269,8 +303,10 @@ doListOp op e1 e2 = do
               List (Lit (LTup _):_)     -> getOp listOps "appendTups" t1 t2
       _   -> throwError $ UnsupportedOperatation "you can't do this with lists"
         
-doCharOp :: Binop -> Type -> Type -> Infer Type
-doCharOp op t1 t2 =
+doCharOp :: Binop -> Expr -> Expr -> Infer Type
+doCharOp op e1 e2 = do
+    t1 <- infer e1
+    t2 <- infer e2
     case op of
       OpEq    -> getOp charOps OpEq t1 t2
       OpLe    -> getOp charOps OpLe t1 t2
@@ -280,8 +316,10 @@ doCharOp op t1 t2 =
       OpNotEq -> getOp charOps OpNotEq t1 t2
       _       -> throwError $ UnsupportedOperatation "you can't do this with chars"
 
-doBoolOp :: Binop -> Type -> Type -> Infer Type
-doBoolOp op t1 t2 =
+doBoolOp :: Binop -> Expr -> Expr -> Infer Type
+doBoolOp op e1 e2 = do
+    t1 <- infer e1
+    t2 <- infer e2
     case op of
       OpEq    -> getOp boolOps OpEq t1 t2
       OpNotEq -> getOp boolOps OpNotEq t1 t2
