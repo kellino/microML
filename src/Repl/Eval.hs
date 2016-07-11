@@ -18,8 +18,8 @@ eval env expr = case expr of
     str@(Lit (LString _))   -> str
     bool@(Lit (LBoolean _)) -> bool
     tup@(Lit (LTup _))      -> tup
-    Var x                   -> fromMaybe (error "not yet been set") (Map.lookup x env)
     ls@(List _)             -> ls
+    Var x                   -> fromMaybe (error "not yet been set") (Map.lookup x env)
     FixPoint e              -> eval env (App e (FixPoint e))
     Lam x body              -> Closure x body env
     App a b                 -> do
@@ -100,7 +100,6 @@ div' (Lit (LDouble a)) (Lit (LInt b)) = Lit $ LDouble $ a / realToFrac b
 
 mod' :: Expr -> Expr -> Expr
 mod' (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a `mod` b
-mod' _ _ = error "both numbers must be integers"
 
 exp' :: Expr -> Expr -> Expr
 exp' (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a^b
