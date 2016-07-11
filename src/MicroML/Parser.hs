@@ -202,8 +202,8 @@ prefixOp :: String -> (a -> a) -> Ex.Operator L.Text () Identity a
 prefixOp name func = Ex.Prefix ( do {reservedOp name; return func } )
     
 primitives :: [[Op Expr]]
-primitives = [ [ prefixOp "head" (ListOp Car)                -- list operators
-        ,   prefixOp "tail" (ListOp Cdr) 
+primitives = [ [ prefixOp "head" (UnaryOp Car)                -- list operators
+        ,   prefixOp "tail" (UnaryOp Cdr) 
         ,   prefixOp "init" init'
         ,   prefixOp "toLower" toLower
         ,   prefixOp "toUpper" toUpper
@@ -223,7 +223,8 @@ primitives = [ [ prefixOp "head" (ListOp Car)                -- list operators
         ,   infixOp "/="  (Op OpNotEq) Ex.AssocLeft ] 
         , [ infixOp "and" (Op OpAnd) Ex.AssocLeft  
         ,   infixOp "or"  (Op OpOr)  Ex.AssocLeft 
-        ,   infixOp "xor" (Op OpXor) Ex.AssocLeft ]  
+        ,   infixOp "xor" (Op OpXor) Ex.AssocLeft
+        ,   prefixOp "not" (UnaryOp Not)]  
         , [ infixOp "." (Op OpComp) Ex.AssocRight ] ]
 
 expr :: Parser Expr
