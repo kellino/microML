@@ -1,6 +1,5 @@
 module MicroML.Typing.TypeError where
 
-import Text.PrettyPrint
 import MicroML.Typing.Type
 
 type Constraint = (Type, Type)
@@ -11,7 +10,4 @@ data TypeError
   | UnboundVariable String
   | Ambigious [Constraint]
   | UnificationMismatch [Type] [Type]
-
-ppError :: TypeError -> Doc
-ppError (UnboundVariable s) = text s
-ppError (InfiniteType t t') = text "Occurs check failed for infinite type" <+> text (show t) <+> text (show t')
+  | UnsupportedOperatation String

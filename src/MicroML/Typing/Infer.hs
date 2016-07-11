@@ -19,7 +19,6 @@ import Control.Monad.RWS
 import Control.Monad.Identity
 
 import Data.List (nub)
--- import Data.Char (ord)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 
@@ -103,17 +102,48 @@ generalize env t  = Forall as t
 
 mathsOps :: Map.Map Binop Type
 mathsOps = Map.fromList [
-       ( OpAdd, typeNum `TArr`   ( typeNum `TArr` typeNum))
-    ,  ( OpMul, typeNum `TArr`   ( typeNum `TArr` typeNum))
-    ,  ( OpSub, typeNum `TArr`   ( typeNum `TArr` typeNum))
-    ,  ( OpMod, typeNum `TArr`   ( typeNum `TArr` typeNum))
-    ,  ( OpExp, typeNum `TArr`   ( typeNum `TArr` typeNum))
-    ,  ( OpGe, typeNum `TArr`    ( typeNum `TArr` typeBool))
-    ,  ( OpLe, typeNum `TArr`    ( typeNum `TArr` typeBool))
-    ,  ( OpGt, typeNum `TArr`    ( typeNum `TArr` typeBool))
-    ,  ( OpLt, typeNum `TArr`    ( typeNum `TArr` typeBool))
-    ,  ( OpEq, typeNum `TArr`    ( typeNum `TArr` typeBool))
-    ,  ( OpNotEq, typeNum `TArr` ( typeNum `TArr` typeBool))
+       ( OpAdd,   typeNum `TArr`  ( typeNum `TArr`  typeNum))
+    ,  ( OpMul,   typeNum `TArr`  ( typeNum `TArr`  typeNum))
+    ,  ( OpSub,   typeNum `TArr`  ( typeNum `TArr`  typeNum))
+    ,  ( OpMod,   typeNum `TArr`  ( typeNum `TArr`  typeNum))
+    ,  ( OpDiv,   typeNum `TArr`  ( typeNum `TArr`  typeNum))
+    ,  ( OpExp,   typeNum `TArr`  ( typeNum `TArr`  typeNum))
+    ,  ( OpGe,    typeNum `TArr`  ( typeNum `TArr`  typeBool))
+    ,  ( OpLe,    typeNum `TArr`  ( typeNum `TArr`  typeBool))
+    ,  ( OpGt,    typeNum `TArr`  ( typeNum `TArr`  typeBool))
+    ,  ( OpLt,    typeNum `TArr`  ( typeNum `TArr`  typeBool))
+    ,  ( OpEq,    typeNum `TArr`  ( typeNum `TArr`  typeBool))
+    ,  ( OpNotEq, typeNum `TArr`  ( typeNum `TArr`  typeBool))
+    ,  ( OpCons,  typeNum `TArr`  ( typeList `TArr` typeListofNumber))
+  ]
+
+charOps :: Map.Map Binop Type
+charOps = Map.fromList [
+    ( OpEq, typeChar `TArr` (typeChar `TArr` typeBool))                       
+  , ( OpLe, typeChar `TArr` (typeChar `TArr` typeBool))
+  , ( OpLt, typeChar `TArr` (typeChar `TArr` typeBool))
+  , ( OpGe, typeChar `TArr` (typeChar `TArr` typeBool))
+  , ( OpGt, typeChar `TArr` (typeChar `TArr` typeBool))
+  , ( OpNotEq, typeChar `TArr` (typeChar `TArr` typeBool))
+  ]
+
+--listOps :: Map.Map Binop Type
+listOps = Map.fromList [
+    ( "opEq", typeList `TArr` (typeList `TArr` typeBool))                       
+  , ( "appendInts", typeListofNumber `TArr` (typeListofNumber `TArr` typeListofNumber))
+  , ( "appendBools", typeListofBool `TArr` (typeListofBool `TArr` typeListofBool))
+  , ( "appendStrings", typeListofString `TArr` (typeListofString `TArr` typeListofString))
+  , ( "appendChars", typeListofChar `TArr` (typeListofChar `TArr` typeListofChar))
+  , ( "appendTups", typeListofTup `TArr` (typeListofTup `TArr` typeListofTup)) 
+  ]
+
+boolOps :: Map.Map Binop Type
+boolOps = Map.fromList [
+    ( OpEq,    typeBool `TArr` ( typeBool `TArr` typeBool ))
+  , ( OpNotEq, typeBool `TArr` ( typeBool `TArr` typeBool ))
+  , ( OpOr, typeBool `TArr` ( typeBool `TArr` typeBool ))
+  , ( OpAnd, typeBool `TArr` ( typeBool `TArr` typeBool ))
+  , ( OpXor,   typeBool `TArr` ( typeBool `TArr` typeBool ))
   ]
 
 infer :: Expr -> Infer Type
@@ -124,12 +154,27 @@ infer expr = case expr of
     Lit (LString _)  -> return typeString
     Lit (LChar _)    -> return typeChar
 
+    -- work in progress. This is just a placeholder
+    Lit (LTup (x:xs)) -> do
+        t1 <- infer x
+        tv <- fresh
+        uni t1 tv
+        infer $ Lit . LTup $ xs
+
     List []   -> return typeList
     List [x]  -> do
         t1 <- infer x
         tv <- fresh
         uni t1 tv
-        return t1
+        return $
+            case x of
+              (Lit (LInt _))     -> typeListofNumber
+              (Lit (LDouble _))  -> typeListofNumber
+              (Lit (LBoolean _)) -> typeListofBool
+              (Lit (LString _))  -> typeListofString
+              (Lit (LChar _))    -> typeListofChar
+              (Lit (LTup _))     -> typeListofTup  -- placeholder
+              (List _)           -> typeList
     List (x:y:xs) -> do
         t1 <- infer x
         t2 <- infer y
@@ -163,12 +208,22 @@ infer expr = case expr of
         uni (tv `TArr` tv) t1
         return tv
 
+    UnaryOp _ e1 -> do
+        t1 <- infer e1
+        tv <- fresh
+        uni t1 tv
+        return t1
+
     Op op e1 e2 -> do
         t1 <- infer e1
         t2 <- infer e2
-        if (t1 == typeNum) && (t2 == typeNum)
-           then doOp op t1 t2
-           else return t1
+        case e1 of
+          (Lit (LInt _))     -> doMathsOp op t1 t2
+          (Lit (LDouble _))  -> doMathsOp op t1 t2
+          (Lit (LBoolean _)) -> doBoolOp op t1 t2
+          (Lit (LChar _))    -> doCharOp op t1 t2
+          (List _)           -> doListOp op e1 e2
+          _                  -> doMathsOp op t2 t2
 
     If cond tr fl -> do
         t1 <- infer cond
@@ -178,6 +233,63 @@ infer expr = case expr of
         uni t2 t3
         return t2
 
+    -- should never actually reach this, but discretion is the better part of valour
+    _ -> throwError $ UnsupportedOperatation "cannot infer the type of this expression"
+
+doMathsOp :: Binop -> Type -> Type -> Infer Type
+doMathsOp op t1 t2 = 
+    case op of 
+      OpAdd   -> getOp mathsOps OpAdd t1 t2
+      OpSub   -> getOp mathsOps OpSub t1 t2
+      OpMul   -> getOp mathsOps OpMul t1 t2
+      OpDiv   -> getOp mathsOps OpDiv t1 t2
+      OpMod   -> getOp mathsOps OpMod t1 t2
+      OpExp   -> getOp mathsOps OpExp t1 t2
+      OpEq    -> getOp mathsOps OpEq t1 t2
+      OpLe    -> getOp mathsOps OpLe t1 t2
+      OpLt    -> getOp mathsOps OpLt t1 t2
+      OpGe    -> getOp mathsOps OpGe t1 t2
+      OpGt    -> getOp mathsOps OpGt t1 t2
+      OpNotEq -> getOp mathsOps OpNotEq t1 t2
+      OpCons  -> getOp mathsOps OpCons t1 t2
+      _       -> throwError $ UnsupportedOperatation "you can't do this with numbers"
+
+doListOp :: Binop -> Expr -> Expr -> Infer Type
+doListOp op e1 e2 = do
+    t1 <- infer e1
+    t2 <- infer e2
+    case op of
+      OpAppend -> 
+        case e1 of 
+              List (Lit (LInt _):_)     -> getOp listOps "appendInts" t1 t2
+              List (Lit (LDouble _):_)  -> getOp listOps "appendInts" t1 t2
+              List (Lit (LBoolean _):_) -> getOp listOps "appendBools" t1 t2
+              List (Lit (LString _):_)  -> getOp listOps "appendStrings" t1 t2
+              List (Lit (LChar _):_)    -> getOp listOps "appendChars" t1 t2
+              List (Lit (LTup _):_)     -> getOp listOps "appendTups" t1 t2
+      _   -> throwError $ UnsupportedOperatation "you can't do this with lists"
+        
+doCharOp :: Binop -> Type -> Type -> Infer Type
+doCharOp op t1 t2 =
+    case op of
+      OpEq    -> getOp charOps OpEq t1 t2
+      OpLe    -> getOp charOps OpLe t1 t2
+      OpLt    -> getOp charOps OpLt t1 t2
+      OpGe    -> getOp charOps OpGe t1 t2
+      OpGt    -> getOp charOps OpGt t1 t2
+      OpNotEq -> getOp charOps OpNotEq t1 t2
+      _       -> throwError $ UnsupportedOperatation "you can't do this with chars"
+
+doBoolOp :: Binop -> Type -> Type -> Infer Type
+doBoolOp op t1 t2 =
+    case op of
+      OpEq    -> getOp boolOps OpEq t1 t2
+      OpNotEq -> getOp boolOps OpNotEq t1 t2
+      OpAnd   -> getOp boolOps OpAnd t1 t2
+      OpOr    -> getOp boolOps OpOr t1 t2
+      OpXor   -> getOp boolOps OpXor t1 t2
+      _       -> throwError $ UnsupportedOperatation "you can't do this with booleans"
+
 getOp :: (Ord k) => Map.Map k Type -> k -> Type -> Type -> Infer Type
 getOp dict op t1 t2 = do
     tv <- fresh
@@ -185,22 +297,6 @@ getOp dict op t1 t2 = do
         u2 = dict Map.! op
     uni u1 u2
     return tv
-
-doOp :: Binop -> Type -> Type -> Infer Type
-doOp op t1 t2= 
-    case op of 
-      OpAdd -> getOp mathsOps OpAdd t1 t2
-      OpSub -> getOp mathsOps OpSub t1 t2
-      OpMul -> getOp mathsOps OpMul t1 t2
-      OpDiv -> getOp mathsOps OpDiv t1 t2
-      OpMod -> getOp mathsOps OpMod t1 t2
-      OpExp -> getOp mathsOps OpExp t1 t2
-      OpEq -> getOp mathsOps OpEq t1 t2
-      OpLe -> getOp mathsOps OpLe t1 t2
-      OpLt -> getOp mathsOps OpLt t1 t2
-      OpGe -> getOp mathsOps OpGe t1 t2
-      OpGt -> getOp mathsOps OpGt t1 t2
-      OpNotEq -> getOp mathsOps OpNotEq t1 t2
 
 inferTop :: Env -> [(String, Expr)] -> Either TypeError Env
 inferTop env [] = Right env

@@ -19,8 +19,7 @@ data Expr
   | If Expr Expr Expr
   | FixPoint Expr
   | Op Binop Expr Expr
-  | ListOp ListOp Expr
-  | UnaryMinus Expr
+  | UnaryOp UnaryOp Expr
   | ListComp Expr Expr Expr
   | Closure Name Expr TermEnv
   deriving (Show, Eq, Ord)
@@ -31,12 +30,15 @@ data Lit
   | LBoolean Bool
   | LString String
   | LChar Char
+  | LTup [Expr]
 
   deriving (Show, Eq, Ord)
 
-data ListOp =
+data UnaryOp =
         Car 
       | Cdr
+      | Minus
+      | Not
     deriving (Show, Eq, Ord)
 
 data Binop = 

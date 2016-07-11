@@ -9,6 +9,7 @@ import Repl.Eval
 import Repl.Pretty
 import MicroML.Syntax
 import MicroML.Parser
+import MicroML.Lexer
 import MicroML.Typing.Env as Env
 import MicroML.Typing.Infer
 
@@ -83,10 +84,10 @@ cmd source = exec True (L.pack source)
 -------------------------------------------------------------------------------
 
 -- :browse command
-{-browse :: [String] -> Repl ()-}
-{-browse _ = do-}
-  {-st <- get-}
-  {-liftIO $ mapM_ putStrLn $ ppenv (typeEnv st)-}
+browse :: [String] -> Repl ()
+browse _ = do
+  st <- get
+  liftIO $ mapM_ putStrLn $ ppenv (typeEnv st)
 
 -- :?
 help :: [String] -> HaskelineT (Control.Monad.State.Strict.StateT IState IO) ()
@@ -95,8 +96,8 @@ help = return $ liftIO $ putStrLn "can't help you on that one"
 -- :using command
 using :: [String] -> Repl ()
 using args = do
-    contents <- liftIO $ L.readFile $ unwords args
-    --contents <- liftIO $ L.readFile $ "/home/david/.microML/" ++ unwords args ++ ".ml"
+    --contents <- liftIO $ L.readFile $ unwords args
+    contents <- liftIO $ L.readFile $ "/home/david/.microML/" ++ unwords args ++ ".ml"
     exec True contents
 
 -- :type command
@@ -132,12 +133,13 @@ comp n = do
     let cmds = [":using", ":type", ":browse", ":quit", ":"]
     Env.TypeEnv ctx <- gets typeEnv
     let defs = Map.keys ctx
-    return $ filter (isPrefixOf n) (cmds ++ defs)
+    let builtins = reservedNames
+    return $ filter (isPrefixOf n) (cmds ++ defs ++ builtins)
 
 options :: [(String, [String] -> Repl ())]
 options = [
     ("using", using)
-  -- , ("browse" , browse)
+  , ("browse" , browse)
   , ("quit" ,  quit)
   , ("type" , typeof)
   , ("!"    , sh)
@@ -165,13 +167,13 @@ banner = "\ESC[1;31m" ++
         " | | | | | | | (__| | | (_) | |  | || |____  \n" ++
         " |_| |_| |_|_|\\___|_|  \\___/\\_|  |_/\\_____/  \ESC[0m"
 
-ini :: Repl ()
-ini = liftIO $ putStrLn $ banner ++ "\n\n" ++ "\ESC[1mWelcome to microML\ESC[0m\n\n" 
+ini' :: Repl ()
+ini' = liftIO $ putStrLn $ banner ++ "\n\n" ++ "\ESC[1mWelcome to microML\ESC[0m\n\n" 
 
-{-ini :: Repl ()-}
-{-ini = do-}
-    {-using ["standard"]-}
-    {-liftIO $ putStrLn $ banner ++ "\n\n" ++ "\ESC[1mWelcome to microML\ESC[0m\n\n" -}
+ini :: Repl ()
+ini = do
+    using ["standard"]
+    liftIO $ putStrLn $ banner ++ "\n\n" ++ "\ESC[1mWelcome to microML\ESC[0m\n\n" 
 
 shell :: IO ()
-shell = flip evalStateT initState $ evalRepl prompt cmd options completer ini
+shell = flip evalStateT initState $ evalRepl prompt cmd options completer ini'
