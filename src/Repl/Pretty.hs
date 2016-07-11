@@ -56,6 +56,7 @@ instance Show TypeError where
   show (Ambigious cs) =
     concat ["Cannot not match expected type: '" ++ pptype a ++ "' with actual type: '" ++ pptype b ++ "'\n" | (a,b) <- cs]
   show (UnboundVariable a) = "Not in scope: " ++ a
+  show (UnsupportedOperatation a) = "\ESC[1m" ++ a ++ "\ESC[0m"
 
 ppscheme :: TypeScheme -> String
 ppscheme = render . ppr 0
@@ -64,11 +65,12 @@ pptype :: Type -> String
 pptype = render . ppr 0
 
 ppsig :: (String, TypeScheme) -> String
-ppsig (a, b) = ppLit a ++ " \ESC[35m::\ESC[0m " ++ ppscheme b
+ppsig (a, b) = ppLit a ++ "\ESC[35m:\ESC[0m " ++ ppscheme b
 
 ppenv :: Env -> [String]
 ppenv (TypeEnv env) = map ppsig $ Map.toList env
 
+-- fairly nasty and hackish this function, but it works
 ppLit :: String -> String
 ppLit a 
   | "Var" `isPrefixOf` a     = bold ++ ((!!1) . words) a ++ unbold
