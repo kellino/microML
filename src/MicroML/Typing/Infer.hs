@@ -139,8 +139,11 @@ listOps = Map.fromList [
 
 boolOps :: Map.Map Binop Type
 boolOps = Map.fromList [
-    ( OpEq, typeBool `TArr` (typeBool `TArr` typeBool))                       
-  , ( OpNotEq, typeBool `TArr` (typeBool `TArr` typeBool))
+    ( OpEq,    typeBool `TArr` ( typeBool `TArr` typeBool ))
+  , ( OpNotEq, typeBool `TArr` ( typeBool `TArr` typeBool ))
+  , ( OpOr, typeBool `TArr` ( typeBool `TArr` typeBool ))
+  , ( OpAnd, typeBool `TArr` ( typeBool `TArr` typeBool ))
+  , ( OpXor,   typeBool `TArr` ( typeBool `TArr` typeBool ))
   ]
 
 infer :: Expr -> Infer Type
@@ -171,6 +174,7 @@ infer expr = case expr of
               (Lit (LString _))  -> typeListofString
               (Lit (LChar _))    -> typeListofChar
               (Lit (LTup _))     -> typeListofTup  -- placeholder
+              (List _)           -> typeList
     List (x:y:xs) -> do
         t1 <- infer x
         t2 <- infer y
@@ -204,7 +208,7 @@ infer expr = case expr of
         uni (tv `TArr` tv) t1
         return tv
 
-    ListOp _ e1 -> do
+    UnaryOp _ e1 -> do
         t1 <- infer e1
         tv <- fresh
         uni t1 tv
@@ -228,11 +232,6 @@ infer expr = case expr of
         uni t1 typeBool
         uni t2 t3
         return t2
-
-    UnaryMinus e1 -> do
-        t1 <- infer e1
-        uni t1 typeNum
-        return t1
 
     -- should never actually reach this, but discretion is the better part of valour
     _ -> throwError $ UnsupportedOperatation "cannot infer the type of this expression"
@@ -286,6 +285,9 @@ doBoolOp op t1 t2 =
     case op of
       OpEq    -> getOp boolOps OpEq t1 t2
       OpNotEq -> getOp boolOps OpNotEq t1 t2
+      OpAnd   -> getOp boolOps OpAnd t1 t2
+      OpOr    -> getOp boolOps OpOr t1 t2
+      OpXor   -> getOp boolOps OpXor t1 t2
       _       -> throwError $ UnsupportedOperatation "you can't do this with booleans"
 
 getOp :: (Ord k) => Map.Map k Type -> k -> Type -> Type -> Infer Type
