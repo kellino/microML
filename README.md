@@ -15,6 +15,8 @@ Declarations (simple and recursive) are introduced with a _let_
 ```ml
 microML ⊦ let x = 5
 microML ⊦ let incBy1 x = x + 1
+microML ⊦ :type inc
+microML ⊦ inc :: for all a. a -> Number
 ```
 
 or 
@@ -22,7 +24,7 @@ or
 ```ml
 microML ⊦ let incBy1 = \x -> x + 1
 microML ⊦ incBy1 2
-microML ⊦ 3
+microML ⊦ 3 :: NUmber
 ```
 
 More complex things can be entered at the repl as well (at the moment everything must be on one line)
@@ -30,11 +32,11 @@ More complex things can be entered at the repl as well (at the moment everything
 ```ml
 microML ⊦ let compose x y = \z -> x (y z)
 microML ⊦ compose inc inc 2
-microML ⊦ 4
+microML ⊦ 4 :: Number
 
-microML ⊦ let fact n = if (n == 0) then 1 else n * (fact (n-1))
+microML ⊦ let fact n = if n == 0 then 1 else n * (fact (n-1))
 microML ⊦ fact 5
-microML ⊦ 120
+microML ⊦ 120 :: Number
 ```
 
 TODO
