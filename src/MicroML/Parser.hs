@@ -90,7 +90,6 @@ charLit = do
     void $ char '\''
     c <- letter
     void $ char '\''
-    void spaces
     return $ Lit (LChar c)
 
 stringLit :: ParsecT L.Text u Identity Expr
@@ -121,9 +120,8 @@ list :: Parser Expr
 list = do
     void spaces
     void $ string "["
-    elems <- expr `sepBy` string ","
+    elems <- expr `sepBy` char ',' <* spaces
     void $ string "]"
-    void spaces
     return $ List elems
 
 tuple :: Parser Expr
