@@ -36,11 +36,17 @@ eval env expr = case expr of
         let e' = eval env e
         let new' = Map.insert x e' env
         eval new' body
-    ListOp op a -> do
+    UnaryOp op a -> do
         let a' = eval env a
         case op of
           Car -> car a'
           Cdr -> cdr a'
+          Minus ->  case a' of
+                      (Lit (LInt x))    -> Lit . LInt $ negate x
+                      (Lit (LDouble x)) -> Lit . LDouble $ negate x
+          Not -> case a' of
+                   (Lit (LBoolean True)) -> Lit . LBoolean $ False
+                   (Lit (LBoolean False)) -> Lit . LBoolean $ True
     Op op a b -> do
         let a' = eval env a
         let b' = eval env b
@@ -62,7 +68,6 @@ eval env expr = case expr of
           OpNotEq -> a' `opNotEq` b'
           OpCons -> a' `cons` b'
           OpAppend -> a' `append'` b'
-          -- OpComp -> eval env $ a `compose` b'
 
 add :: Expr -> Expr -> Expr
 add (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a + b
