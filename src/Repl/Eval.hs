@@ -95,6 +95,7 @@ div' (Lit (LDouble a)) (Lit (LInt b)) = Lit $ LDouble $ a / realToFrac b
 
 mod' :: Expr -> Expr -> Expr
 mod' (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a `mod` b
+mod' _ _ = error "both numbers must be integers"
 
 exp' :: Expr -> Expr -> Expr
 exp' (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a^b
