@@ -9,6 +9,7 @@ import Repl.Eval
 import Repl.Pretty
 import MicroML.Syntax
 import MicroML.Parser
+import MicroML.Lexer
 import MicroML.Typing.Env as Env
 import MicroML.Typing.Infer
 
@@ -132,7 +133,8 @@ comp n = do
     let cmds = [":using", ":type", ":browse", ":quit", ":"]
     Env.TypeEnv ctx <- gets typeEnv
     let defs = Map.keys ctx
-    return $ filter (isPrefixOf n) (cmds ++ defs)
+    let builtins = reservedNames
+    return $ filter (isPrefixOf n) (cmds ++ defs ++ builtins)
 
 options :: [(String, [String] -> Repl ())]
 options = [
