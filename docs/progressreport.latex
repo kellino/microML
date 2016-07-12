@@ -6,23 +6,34 @@
 \usepackage{amsmath}
 \usepackage{geometry}
 \usepackage[hidelinks]{hyperref}
+\usepackage{minted}
+\usepackage{color, colortbl}
+\definecolor{Seagreen}{rgb}{0.18, 0.54, 0.34}
+\definecolor{Lawngreen}{rgb}{0.48, 0.99, 0}
+\definecolor{LRed}{rgb}{1, 0.8, 0.8}
+\definecolor{GoldenRod}{rgb}{0.93, 0.65, 0.12}
 \geometry{a4paper, left=25mm, right=25mm, top=1cm, bottom=2cm}
 
 \begin{document}
 \title{Interim Progress Report on microML for the BBC micro:bit}
-\date{10 July 2016}
-\author{David Kelly}
+\date{12 July 2016}
+\large\author{David Kelly}
 
 \maketitle
 
 \section{microMl for the micro:bit}
 
-microMl is a simple functional language which works in a repl environment, runs on the bbc micro:bit
-microprocessor, and has Hindley-Milner type inference.
+\textit{microML} is a simple functional programming language, inspired by Scheme and Miranda, which
+compiles to C++ for the BBC micro:bit microprocessor, and has a repl environment for interactive
+code development. There is also a highly experimental JIT compiler using LLVM as a back-end.
 
-\section{Enriched Lambda Calculus}
+The code can be found at \url{https://github.com/kellino/microML}. The master branch is usually the
+most stable, but is not guaranteed to be a working implementation at this stage of development.
 
-microMl uses an enriched lambda calculus as its base
+\section{Underpinnings: Enriched Lambda Calculus}
+
+microML uses an enriched lambda calculus as its base
+\vspace{5mm}
 
 \begin{minipage}[t]{0.5\textwidth}
     \begin{grammar}
@@ -31,11 +42,12 @@ microMl uses an enriched lambda calculus as its base
         \alt{} Application <Expr> <Expr>
         \alt{} Let Name <Expr> <Expr>
         \alt{} Literal 
-        \alt{} List <Expr*>
+        \alt{} List [<Expr>]
         \alt{} If <Expr> then <Expr> else <Expr>
         \alt{} FixPoint <Expr>
         \alt{} UnaryOp <Expr>
         \alt{} BinOp <Expr> <Expr>
+        \alt{} PrimitiveErr 
     \end{grammar}
 \end{minipage}
 \begin{minipage}[t]{0.5\textwidth}
@@ -59,20 +71,23 @@ primitives inherited from languages in the Lisp family:
     \alt{} Cons
 \end{grammar}
 
-These primitives are accessed through the \textit{head} and \textit{tail} builtin functions and are
+These primitives are accessed through the \textit{head}, \textit{tail} and (:) built-in functions and are
 essential for recursing over lists.
 
-The FixPoint primitive allows for the creation of recursive functions by satisfying the equation
+microML, in addition to floats and ints, also supports binary, octal and hex numbers\footnote{The
+    syntax for these is inspired by erlang, one simply writes the number in the form eg 2\#110 for a
+    binary 5. Likewise octal is 8\# and hex 16\#}. These are not
+treated as primitives however, and are automatically converted to an appropriate representation.
 
-\begin{displaymath}
-    y f = f (y f), \forall f
-\end{displaymath}
+The \textit{FixPoint} primitive allows for the creation of recursive functions by satisfying the equation
+\begin{flalign*}
+    &y\ f\ = f (y\ f) &
+\end{flalign*}
 
-The most famous fixpoint combinator without a doubt is Curry's \textit{Y-combinator}:
-
-\begin{displaymath}
-    Y = (\lambda f. (\lambda x.\ f (x x)) (\lambda x.\ f (x x))) 
-\end{displaymath}
+The most famous fix-point combinator without a doubt is Curry's \textit{Y-combinator}:
+\begin{flalign*}
+    &Y = (\lambda f. (\lambda x.\ f (x x)) (\lambda x.\ f (x x))) &
+\end{flalign*}
 
 To see how this can be used to simulate recursion\footnote{there are many excellent texts which
     give detailed explanations of the \textit{Y-combinator}, such as \dots } it is necessary simply
@@ -85,6 +100,50 @@ to supply an argument in the form of a lambda abstraction.
     & \equiv & g (Y g)
 \end{eqnarray*}
 
+While two different number types are supported by the parser, the type checker only recognizes the
+type \textit{Number}. The compiler will benefit from knowledge of the number type, ie int or double,
+whereas the user (a school-aged student) will not.
+
+\section{Parsing}
+A number of different libraries were examined before settling on the `standard'
+\textit{Parsec} library of parser combinators\footnote{A combinator is a lambda expression which
+    contains no occurrences of a free variable, ie all of its arguments are
+    explicitly supplied to it, and it does not rely on any global state or globally defined
+    variables}. \textit{Parsec} is a highly
+flexible tool, perhaps more similar to \textit{ANTRL}\footnote{\url{http://www.antlr.org/}} than to
+\textit{Yacc} or \textit{Bison}. Explicit regular expressions are not required, as the parser /
+lexer is a composite of a great number of small, specialized parser functions, which are linked
+together. If one parser fails, the next is tried until either parsing succeeds or a fatal error
+occurs. 
+
+Other libraries, such as \textit{MegaParsec} and \textit{Trifecta}, both respected and
+powerful, were examined. Trifecta especially seems like a very interesting parsing library,
+with excellent support for detailed, custom error messages. This would have been ideal for a
+teaching language of the nature of microML: unfortunately there is an almost total absence of
+documentation on the use of Trifecta, and internet tutorials of any size beyond the trivial 
+do not seem to exist. The programming
+language \textbf{Idris} uses Trifecta for its parser, so future iterations of microML might be able
+to migrate to Trifecta after careful examination of the Idris source. 
+
+MegaParsec has excellent
+support for indentation sensitive grammars, which Parsec does not. Again, this would be a useful
+feature to add to microML at a later stage of development. It seems to be however, at the present time, misplaced
+energy to focus on what is essentially syntactic sugar when other, more vital, elements of the
+project are still not functioning as they should or have not even been started. Moreover, MegaParsec
+is a relatively new, and non-standard, library whereas most installations of Haskell ship with
+Parsec as a component of the standard library. Of course, eschewing the new in favour of that which
+is ubiquitous (often in the name of backwards compatibility) is a bad habit which retards the
+development of better software. In this case however, the added power of MegaParsec is not yet
+required.
+
+Formally, parsec belongs to the family of LL(1) parsers. Obviously this does slightly reduce the
+flexibility of the language design\footnote{LL(1) parsers can only recognize a subset of the
+    context-free languages.}. Haskell itself does not use an LL(1) parser, but rather an LALR(1)
+built using \textit{Happy} and \textit{Alex}, much in the manner of a parser constructed using
+\textit{Yacc}, but such power is not required for the much more limited range of expression
+available in microML. If the language were ever to be expanded or made more robust, it would perhaps
+be reasonable to rewrite the parser to make use of this model.
+
 \section{Type Inference}
 microML uses an implementation of
 \textit{algorithmW}\footnote{based on the following tutorial implementation
@@ -94,5 +153,127 @@ teaching language with a very simple type system, this is not the drawback that 
 be. 
 
 A full description of Hindley-Milner type inference is beyond the scope of this report, however a
-brief overview of the concept will be discussed.
+brief overview of the concept is appropriate.
+
+At a trivial level, primitives have a predetermined type, so \textbf{(Lit (LInt 4))} has type
+\textbf{Number},
+likewise \textbf{(Lit (LBoolean true))} has type \textbf{Bool}.
+
+At a slightly higher level, many operators only work on certain types, so the presence of these
+operators can help the inference system to resolve the constraints. For example
+
+(+) is defined to work only on objects of type Number.
+
+An expression of the type \textit{true + false} will fail with a \textit{unification error} as (+)
+is not a supported operator for this data type.
+
+Hindley-Milner is guaranteed to give the most general type signature possible. MicroML supports
+\textit{polymorphic} types. For example, the \textit{higher order} function 
+`twice'\footnote{called `ap' in Haskell} has the form
+
+\begin{minted}{haskell}
+    twice f x = f (f x)
+\end{minted}
+
+which has the type
+\begin{flalign*}
+    & for\ all\ a. (a \rightarrow a) \rightarrow a \rightarrow a &
+\end{flalign*}
+
+The opening parentheses indicate that the first argument to \textit{twice} must be a function that
+takes one input of type `a' and maps it to something of the same type. The next `a' refers to x, and
+must be of a type accepted by the function f. The final result of the function must also be of the
+same type. It is not important what type `a' actually is, as long as these contraints hold. Herein
+lies the true power of type inference.
+
+At present, type inference in microML works for nearly all expression types in the grammar. Inference over
+lists is not yet working as it should: a request of
+
+\begin{minted}{haskell}
+    head [1 to 10]
+\end{minted}
+
+returns a type of
+
+\begin{minted}{haskell}
+    1: [Number]
+\end{minted}
+
+which is incorrect.  This is the only major area of type inference which is not working as expected.
+This problem is the next to be resolved.
+
+\section{REPL and JIT}
+It might reasonably be asked why a repl has been designed when it would seem extraneous to the goals
+of the project. The reasons for doing so are numerous:
+
+\begin{itemize}
+    \item Easy parser testing: unfortunately Parsec does not have a testing framework to allow for
+        the easy creation of a comprehensive test-suite\footnote{MegaParsec however does have this,
+            which is a definite point its favour.} An interactive environment makes for a more
+        `immediate' testing area.
+    \item Type Inference testing: again, while no substitute for a formal test-suite, the repl has
+        revealed, quickly and cheaply\footnote{The entire code numbers little more than 200 lines},
+        those parts which are working and those which are not.
+    \item Applicability to C++ Compiler: the evaluation function\footnote{Eval.hs} might be regarded
+        as the complement of the compiler. The evaluator takes the AST as produced by the parser and
+        checked by the inference module and reduces it to a primitive form before pretty printing. 
+        The compiler takes the output from parsing and inference and translates it to another 
+        AST ready for pretty printing. Apart from the `eval' function itself, the process is
+        remarkably similar. This has provided much needed practice with Haskell which otherwise would have
+        been won more slowly with a labourious compilation cycle.
+    \item Usability: a modern language ought to provide as many tools as possible for the programmer
+        to make the task of programming as painless as it can be. A repl is a natural part of this.
+        For students especially, an interactive environment is an excellent tool for learning about
+        code without having the expense of compiling, flashing to the micro:bit and waiting for a
+        possible error.
+\end{itemize}
+
+The JIT compiler is the result of an experiment with automatically producing C++ code for the
+micro:bit. LLVM\footnote{\url{llvm.org}} is able to produce C++ code from its \textit{ir}. Following an online
+tutorial\footnote{\url{https://github.com/sdiehl/kaleidoscope}} an attempt was made to output
+appropriate C++ for use with mBed. This was not ultimately successful\footnote{The
+    resultant code is too reliant of using \textit{Clang} as its compiler, whereas the micro:bit
+    needs a gcc extension. It would require heavy, intelligent, editing to make the code work.} but,
+time permitting, it might be a useful to integrate a working version of the jit into the repl environment, 
+bringing microML slightly closer to the status of a real language.
+
+\section{Standard Library}
+Every language which aspires to be useful must have a standard library. As of the time of writing,
+microML has a number of small libraries which make the task of programming slightly simpler. These
+are general purpose libraries (written in microML) and are not micro:bit specific. The file
+`standard'\footnote{The standard library files can be found at \url{https://github.com/kellino/microML/tree/master/src/Libs}} 
+features a number of higher-order functions which make manipulating lists easier. There
+is also a `combinators' library, for those interested in learning more about lambda-calculus, and
+the beginnings of a maths library.  Obviously, once the compilation part of the project has been 
+written, a number of micro:bit libraries will also have to be created, making the API available 
+to the programmer. This ought to be a simple task of text substitution, where every occurrence of 
+a particular function is linked to a version already `written out' in C++, with the only difficulty
+being the substitution of variables.
+
+\section{TODO}
+This progress report falls a little over a third into the allocted time for the project. Much has
+already been done, including a parser and type inference module which, while not perfect, perform
+their tasks efficiently and adequately. The only outstanding issue which has not yet been started is
+the compiler to C++. This is the next task, along with fixing the known errors in the type inference
+module, and a few minor irritations in the parser. The repl environment can be considered to be
+finished, as any changes to the parser will not effect the evaluation module. The jit is not a
+priority of any sort, but the code will be left in the github repository as a form of documentation.
+Time permitting, it can be returned to either later in the project or after submission.
+
+The standard libraries are, at present, embryonic. These will need to be extended. String
+manipulation is painful due to the treating of strings as immutable `literals'. To make working with
+strings a little more edifying, there also needs to be a string standard library.
+
+microML does not support forward declarations. Adding these would greatly enhance the usability of
+the language, as would nested `where'\footnote{A form of expression which allows forward declaration
+    in a local scope.} 
+expressions. Both of these would fail to pass type checking as it presently exists. However, again,
+these are not a priority. 
+
+The language as currently constituted is Turing complete, and therefore can be used, albeit with
+difficulty, for any programming task. The remainder of project time will be given to constructing the
+compiler and improving the user experience with the language. Moreover a comprehensive test-suite
+needs to be written for those areas amenable to automatic testing, and manual tests for those which
+are not.
+
 \end{document}
