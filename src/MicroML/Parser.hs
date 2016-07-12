@@ -208,7 +208,7 @@ primitives = [ [ prefixOp "head" (UnaryOp Car)                -- list operators
         ,   prefixOp "toUpper" toUpper
         ,   infixOp ":" (Op OpCons) Ex.AssocRight 
         ,   infixOp "++" (Op OpAppend) Ex.AssocLeft ]        
-        , [ prefixOp "sqrt" sqRoot ]
+        , [ prefixOp "sqrt" sqrt' ]
         , [ infixOp "^"   (Op OpExp) Ex.AssocLeft ]     -- maths operators
         , [ infixOp "*"   (Op OpMul) Ex.AssocLeft
         ,   infixOp "/"   (Op OpDiv) Ex.AssocLeft
