@@ -22,6 +22,7 @@ data Expr
   | UnaryOp UnaryOp Expr
   | ListComp Expr Expr Expr
   | Closure Name Expr TermEnv
+  | PrimitiveErr MLError
   deriving (Show, Eq, Ord)
 
 data Lit
@@ -48,8 +49,13 @@ data Binop =
       deriving (Eq, Ord, Show)      
 
 data MLError
-    = Default String 
-    deriving (Show, Eq, Ord)
+    = MathsPrim String 
+    | ListPrim String
+    deriving (Eq, Ord)
+
+instance Show MLError where
+    show (MathsPrim str) = show str
+    show (ListPrim str)  = show str
 
 data Program = Program [Decl] Expr deriving Eq
 
