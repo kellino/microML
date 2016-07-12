@@ -43,7 +43,6 @@ cons _ _ = error ""
 compose :: Expr -> Expr -> Expr
 compose a b = Lit $ LString $ show a ++ " " ++ show b
 
-
 ------------------------------------
 -- STRING MANIPULATION PRIMITIVES --
 ------------------------------------
