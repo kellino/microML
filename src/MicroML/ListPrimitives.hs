@@ -3,6 +3,7 @@ module MicroML.ListPrimitives where
 import MicroML.Syntax
 
 import qualified Data.Char as DC
+import Data.Maybe (fromMaybe)
 
 -- TODO add proper exception handling
 
@@ -14,9 +15,15 @@ enumFromTo_ (Lit (LChar a)) (Lit (LChar b))     = List $ (Lit . LChar) <$> [a..b
 enumFromTo_ _ _                                 = error "doesn't make any sense"         -- temp error message here
 
 car :: Expr -> Expr
-car (List (x:_))  = x
-car (Lit (LString xs)) = Lit. LChar $ head xs
-car (List [])     = error "head of empty list"
+car xs = do
+    let res = car' xs
+    fromMaybe (PrimitiveErr . ListPrim $ "head of an emtpy list") res
+
+
+car' :: Expr -> Maybe Expr
+car' (List (x:_))  = Just x
+car' (Lit (LString xs)) = Just $ Lit. LChar $ head xs
+car' (List [])     = Nothing
 
 cdr :: Expr -> Expr
 cdr (List [])          = error "empty list"
