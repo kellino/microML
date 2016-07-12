@@ -202,30 +202,30 @@ prefixOp name func = Ex.Prefix ( do {reservedOp name; return func } )
     
 primitives :: [[Op Expr]]
 primitives = [ [ prefixOp "head" (UnaryOp Car)                -- list operators
-        ,   prefixOp "tail" (UnaryOp Cdr) 
-        ,   prefixOp "init" init'
-        ,   prefixOp "toLower" toLower
-        ,   prefixOp "toUpper" toUpper
-        ,   infixOp ":" (Op OpCons) Ex.AssocRight 
-        ,   infixOp "++" (Op OpAppend) Ex.AssocLeft ]        
-        , [ prefixOp "sqrt" sqrt' ]
-        , [ infixOp "^"   (Op OpExp) Ex.AssocLeft ]     -- maths operators
-        , [ infixOp "*"   (Op OpMul) Ex.AssocLeft
-        ,   infixOp "/"   (Op OpDiv) Ex.AssocLeft
-        ,   infixOp "%"   (Op OpMod) Ex.AssocLeft ]
-        , [ infixOp "+"   (Op OpAdd) Ex.AssocLeft
-        ,   infixOp "-"   (Op OpSub) Ex.AssocLeft ]
-        , [ infixOp "<="  (Op OpLe)  Ex.AssocLeft       -- boolean operators
-        ,   infixOp ">="  (Op OpGe)  Ex.AssocLeft
-        ,   infixOp "<"   (Op OpLt)  Ex.AssocLeft
-        ,   infixOp ">"   (Op OpGt)  Ex.AssocLeft ]
-        , [ infixOp "=="  (Op OpEq)  Ex.AssocLeft 
-        ,   infixOp "/="  (Op OpNotEq) Ex.AssocLeft ] 
-        , [ infixOp "and" (Op OpAnd) Ex.AssocLeft  
-        ,   infixOp "or"  (Op OpOr)  Ex.AssocLeft 
-        ,   infixOp "xor" (Op OpXor) Ex.AssocLeft
-        ,   prefixOp "not" (UnaryOp Not)]  
-        , [ infixOp "." (Op OpComp) Ex.AssocRight ] ]
+            ,   prefixOp "tail" (UnaryOp Cdr) 
+            ,   prefixOp "init" init'
+            ,   prefixOp "toLower" toLower
+            ,   prefixOp "toUpper" toUpper
+            ,   infixOp ":" (Op OpCons) Ex.AssocRight 
+            ,   infixOp "++" (Op OpAppend) Ex.AssocLeft ]        
+            , [ prefixOp "sqrt" sqrt' ]
+            , [ infixOp "^"   (Op OpExp) Ex.AssocLeft ]     -- maths operators
+            , [ infixOp "*"   (Op OpMul) Ex.AssocLeft
+            ,   infixOp "/"   (Op OpDiv) Ex.AssocLeft
+            ,   infixOp "%"   (Op OpMod) Ex.AssocLeft ]
+            , [ infixOp "+"   (Op OpAdd) Ex.AssocLeft
+            ,   infixOp "-"   (Op OpSub) Ex.AssocLeft ]
+            , [ infixOp "<="  (Op OpLe)  Ex.AssocLeft       -- boolean operators
+            ,   infixOp ">="  (Op OpGe)  Ex.AssocLeft
+            ,   infixOp "<"   (Op OpLt)  Ex.AssocLeft
+            ,   infixOp ">"   (Op OpGt)  Ex.AssocLeft ]
+            , [ infixOp "=="  (Op OpEq)  Ex.AssocLeft 
+            ,   infixOp "/="  (Op OpNotEq) Ex.AssocLeft ] 
+            , [ infixOp "and" (Op OpAnd) Ex.AssocLeft  
+            ,   infixOp "or"  (Op OpOr)  Ex.AssocLeft 
+            ,   infixOp "xor" (Op OpXor) Ex.AssocLeft
+            ,   prefixOp "not" (UnaryOp Not)]  
+            , [ infixOp "." (Op OpComp) Ex.AssocRight ] ]
 
 expr :: Parser Expr
 expr = do
