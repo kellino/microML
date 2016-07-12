@@ -161,7 +161,7 @@ infer expr = case expr of
         uni t1 tv
         infer $ Lit . LTup $ xs
 
-    List []   -> return typeList
+    -- List []   -> return typeList
     List [x]  -> do
         t1 <- infer x
         tv <- fresh
@@ -235,7 +235,7 @@ infer expr = case expr of
         return t2
 
     -- should never actually reach this, but discretion is the better part of valour
-    _ -> throwError $ UnsupportedOperatation "cannot infer the type of this expression"
+    x -> throwError $ UnsupportedOperatation $ show x
 
 doUniMaths op t1 tv =
     case op of
