@@ -161,20 +161,21 @@ infer expr = case expr of
         uni t1 tv
         infer $ Lit . LTup $ xs
 
-    -- List []   -> return typeList
+    List []   -> return typeList
     List [x]  -> do
         t1 <- infer x
         tv <- fresh
         uni t1 tv
-        return $
-            case x of
-              (Lit (LInt _))     -> typeListofNumber
-              (Lit (LDouble _))  -> typeListofNumber
-              (Lit (LBoolean _)) -> typeListofBool
-              (Lit (LString _))  -> typeListofString
-              (Lit (LChar _))    -> typeListofChar
-              (Lit (LTup _))     -> typeListofTup  -- placeholder
-              (List _)           -> typeList
+        return t1
+        {-return $-}
+            {-case x of-}
+              {-(Lit (LInt _))     -> typeListofNumber-}
+              {-(Lit (LDouble _))  -> typeListofNumber-}
+              {-(Lit (LBoolean _)) -> typeListofBool-}
+              {-(Lit (LString _))  -> typeListofString-}
+              {-(Lit (LChar _))    -> typeListofChar-}
+              {-(Lit (LTup _))     -> typeListofTup  -- placeholder-}
+              {-(List _)           -> typeList-}
     List (x:y:xs) -> do
         t1 <- infer x
         t2 <- infer y
