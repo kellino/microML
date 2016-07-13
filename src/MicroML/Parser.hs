@@ -20,7 +20,6 @@ import MicroML.Lexer
 import qualified MicroML.Lexer as Lx
 import MicroML.Syntax
 import MicroML.ListPrimitives
-import MicroML.MathsPrimitives
 
 varName :: Parser String
 varName = do
@@ -203,14 +202,13 @@ prefixOp name func = Ex.Prefix ( do {reservedOp name; return func } )
 primitives :: [[Op Expr]]
 primitives = [ [ prefixOp "head" (UnaryOp Car)                -- list operators
             ,   prefixOp "tail" (UnaryOp Cdr) 
-            ,   prefixOp "init" init'
             ,   prefixOp "toLower" toLower
             ,   prefixOp "toUpper" toUpper
             ,   infixOp ":" (Op OpCons) Ex.AssocRight 
             ,   infixOp "++" (Op OpAppend) Ex.AssocLeft ]        
-            , [ prefixOp "sqrt" sqrt' ]
             , [ infixOp "^"   (Op OpExp) Ex.AssocLeft ]     -- maths operators
             , [ infixOp "*"   (Op OpMul) Ex.AssocLeft
+            ,   infixOp "//" (Op OpIntDiv) Ex.AssocLeft
             ,   infixOp "/"   (Op OpDiv) Ex.AssocLeft
             ,   infixOp "%"   (Op OpMod) Ex.AssocLeft ]
             , [ infixOp "+"   (Op OpAdd) Ex.AssocLeft
