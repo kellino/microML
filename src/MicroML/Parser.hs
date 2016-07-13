@@ -120,7 +120,7 @@ list :: Parser Expr
 list = do
     void spaces
     void $ string "["
-    elems <- expr `sepBy` char ',' <* spaces
+    elems <- aexp `sepBy` char ',' <* spaces
     void $ string "]"
     return $ List elems
 
@@ -182,9 +182,8 @@ aexp =
   <|> try binary <|> try octal <|> try hex <|> try double
   <|> number
   <|> ifthen
-  <|> try parseRange <|> try listComp <|> list
+  <|> try parseRange <|> list
   <|> try letrecin 
- -- <|> whereDecl
   <|> lambda
   <|> variable
   <|> stringLit
@@ -206,7 +205,8 @@ primitives = [ [ prefixOp "head" (UnaryOp Car)                -- list operators
             ,   prefixOp "toUpper" toUpper
             ,   infixOp ":" (Op OpCons) Ex.AssocRight 
             ,   infixOp "++" (Op OpAppend) Ex.AssocLeft ]        
-            , [ infixOp "^"   (Op OpExp) Ex.AssocLeft ]     -- maths operators
+            , [ prefixOp "_log" (UnaryOp OpLog)
+            ,   infixOp "^"   (Op OpExp) Ex.AssocLeft ]     -- maths operators
             , [ infixOp "*"   (Op OpMul) Ex.AssocLeft
             ,   infixOp "//" (Op OpIntDiv) Ex.AssocLeft
             ,   infixOp "/"   (Op OpDiv) Ex.AssocLeft
@@ -238,17 +238,6 @@ parseRange = do
     end <- expr
     void $ string "]"
     return $ enumFromTo_ start end
-
-listComp :: ParsecT L.Text () Identity Expr
-listComp = do
-    void $ string "["
-    func <- expr
-    void $ choice [string "| ", string " | "]
-    item <- expr
-    void $ string "<- " <|> string " <- "
-    set <- expr
-    void $ string "]"
-    return $ ListComp func item set
 
 ------------------
 -- DECLARATIONS --
