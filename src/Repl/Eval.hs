@@ -19,7 +19,7 @@ eval env expr = case expr of
     bool@(Lit (LBoolean _)) -> bool
     tup@(Lit (LTup _))      -> tup
     ls@(List _)             -> ls
-    Var x                   -> fromMaybe (error "not yet been set") (Map.lookup x env)
+    Var x                   -> fromMaybe (error "") (Map.lookup x env) -- the type checker ensures we never get this far
     FixPoint e              -> eval env (App e (FixPoint e))
     Lam x body              -> Closure x body env
     App a b                 -> do
@@ -39,6 +39,7 @@ eval env expr = case expr of
     UnaryOp op a -> do
         let a' = eval env a
         case op of
+          OpLog -> log' a'
           Car -> car a'
           Cdr -> cdr a'
           Minus ->  case a' of
@@ -113,6 +114,10 @@ exp' (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a^b
 exp' (Lit (LInt a)) (Lit (LDouble b)) = Lit $ LDouble $ realToFrac a**b
 exp' (Lit (LDouble a)) (Lit (LInt b)) = Lit $ LDouble $ a ^ b
 exp' (Lit (LDouble a)) (Lit (LDouble b)) = Lit $ LDouble $ a**b
+
+log' :: Expr -> Expr 
+log' (Lit (LInt a))    = Lit . LDouble $ log $ realToFrac a
+log' (Lit (LDouble a)) = Lit . LDouble $ log a
 
 opEq :: Expr -> Expr -> Expr
 opEq (Lit (LInt a)) (Lit (LDouble b)) = Lit . LBoolean $ realToFrac a == b
