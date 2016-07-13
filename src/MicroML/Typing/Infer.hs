@@ -107,6 +107,7 @@ mathsOps = Map.fromList [
     ,  ( OpSub,   typeNum `TArr`  ( typeNum `TArr`  typeNum))
     ,  ( OpMod,   typeNum `TArr`  ( typeNum `TArr`  typeNum))
     ,  ( OpDiv,   typeNum `TArr`  ( typeNum `TArr`  typeNum))
+    ,  ( OpIntDiv,   typeNum `TArr`  ( typeNum `TArr`  typeNum))
     ,  ( OpExp,   typeNum `TArr`  ( typeNum `TArr`  typeNum))
     ,  ( OpGe,    typeNum `TArr`  ( typeNum `TArr`  typeBool))
     ,  ( OpLe,    typeNum `TArr`  ( typeNum `TArr`  typeBool))
@@ -114,7 +115,7 @@ mathsOps = Map.fromList [
     ,  ( OpLt,    typeNum `TArr`  ( typeNum `TArr`  typeBool))
     ,  ( OpEq,    typeNum `TArr`  ( typeNum `TArr`  typeBool))
     ,  ( OpNotEq, typeNum `TArr`  ( typeNum `TArr`  typeBool))
-    ,  ( OpCons,  typeNum `TArr`  ( typeList `TArr` typeListofNumber))
+ --   ,  ( OpCons,  typeNum `TArr`  ( typeList `TArr` typeListofNumber))
   ]
 
 charOps :: Map.Map Binop Type
@@ -273,12 +274,12 @@ doMathsOp op e1 e2 = do
                                 (Lit (LInt _)) -> getOp mathsOps OpMod t1 t2
                                 _   -> throwError $ UnsupportedOperatation "both numbers must be integers"
             _ -> throwError $ UnsupportedOperatation "both numbers must be integers"
-      -- check for division by 0 error
       OpDiv   -> 
           case e2 of
             (Lit (LInt 0)) -> throwError $ UnsupportedOperatation "cannot divide by 0"
             (Lit (LDouble 0.0)) -> throwError $ UnsupportedOperatation "cannot divide by 0"
             _              -> getOp mathsOps OpDiv t1 t2
+      OpIntDiv -> getOp mathsOps OpIntDiv t1 t2
       OpExp   -> getOp mathsOps OpExp t1 t2
       OpEq    -> getOp mathsOps OpEq t1 t2
       OpLe    -> getOp mathsOps OpLe t1 t2
