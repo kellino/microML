@@ -25,9 +25,9 @@ import System.Exit
 import System.Console.Repline
 import qualified System.Process as S
 
--------------------------------------------------------------------------------
--- Types
--------------------------------------------------------------------------------
+-----------
+-- Types -- 
+-----------
 
 data IState = IState
   { typeEnv :: Env  -- Type environment

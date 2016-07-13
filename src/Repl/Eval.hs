@@ -55,6 +55,7 @@ eval env expr = case expr of
           OpSub -> a' `sub`  b'
           OpMul -> a' `mul`  b'
           OpDiv -> a' `div'` b'
+          OpIntDiv -> a' `intDiv` b'
           OpMod -> a' `mod'` b'
           OpExp -> a' `exp'` b'
           OpOr  -> a' `or'`  b'
@@ -97,6 +98,12 @@ div' (Lit (LInt a)) (Lit (LInt b)) = Lit $ LDouble $ realToFrac a / realToFrac b
 div' (Lit (LDouble a)) (Lit (LDouble b)) = Lit $ LDouble $ a / b
 div' (Lit (LInt a)) (Lit (LDouble b)) = Lit $ LDouble $ realToFrac a / b
 div' (Lit (LDouble a)) (Lit (LInt b)) = Lit $ LDouble $ a / realToFrac b
+
+intDiv :: Expr -> Expr -> Expr
+intDiv (Lit (LInt a)) (Lit (LInt b)) = Lit . LInt $ a `div` b
+intDiv (Lit (LDouble a)) (Lit (LDouble b)) = Lit $ LInt $ floor a `div` floor b
+intDiv (Lit (LInt a)) (Lit (LDouble b)) = Lit $ LInt $ a `div` floor b
+intDiv (Lit (LDouble a)) (Lit (LInt b)) = Lit $ LInt $ floor a `div` b
 
 mod' :: Expr -> Expr -> Expr
 mod' (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a `mod` b
