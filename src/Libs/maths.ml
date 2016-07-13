@@ -4,12 +4,12 @@
 let pi = 3.14159265359;
 let e  = 2.718281828459;
 
-let abs x = if x > 0 then x else x * (-1);
-let negate x = if x < 0 then abs x else x * -1;
---let sum xs = foldl (\x y -> x + y) 0 xs;
+let abs x     = if x > 0 then x else x * (-1);
+let negate x  = if x < 0 then abs x else x * -1;
+--let sum xs  = foldl (\x y -> x + y) 0 xs;
 --let product xs = foldl (\x y -> x * y) 1 xs;
-let max a b = if a < b then b else a;
-let min a b = if a < b then a else b;
+let max a b    = if a < b then b else a;
+let min a b    = if a < b then a else b;
 
 (* conversions *)
 let intToFloat x = x + 0.0;
@@ -19,9 +19,13 @@ let square a = a * a;
 let sqrt x = x^0.5;
 let floor x = x // 1;
 let ceiling x = 1 + (floor x);
--- let logBase x y = log y / log x;
 
--- let factorial n = product [1 to n]
+(* log functions *)
+let ln x        = _log x;
+let log2 x      = _log x / _log x;
+let log10 x     = _log x / _log 10;
+let logBase x y = _log y / _log x;
+
 -- naive fibonacci
 let fib n = if n == 0
     then 1 
