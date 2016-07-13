@@ -43,9 +43,10 @@ data UnaryOp =
     deriving (Show, Eq, Ord)
 
 data Binop = 
-        OpAdd | OpSub | OpMul | OpDiv | OpMod | OpExp | OpOr | OpXor
-      | OpAnd | OpEq | OpLe | OpLt | OpGe | OpGt | OpNotEq
-      | OpCons | OpComp | OpAppend
+        OpAdd | OpSub | OpMul | OpDiv | OpIntDiv | OpExp 
+      | OpMod | OpLog   -- maths primitives
+      | OpOr | OpXor | OpAnd | OpEq | OpLe | OpLt | OpGe 
+      | OpGt | OpNotEq | OpCons | OpComp | OpAppend
       deriving (Eq, Ord, Show)      
 
 data MLError
