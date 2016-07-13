@@ -36,15 +36,12 @@ data Lit
   deriving (Show, Eq, Ord)
 
 data UnaryOp =
-        Car 
-      | Cdr
-      | Minus
-      | Not
+        Car | Cdr | Not
+     | Minus | OpLog -- unary maths ops
     deriving (Show, Eq, Ord)
 
 data Binop = 
-        OpAdd | OpSub | OpMul | OpDiv | OpIntDiv | OpExp 
-      | OpMod | OpLog   -- maths primitives
+        OpAdd | OpSub | OpMul | OpDiv | OpIntDiv | OpExp | OpMod 
       | OpOr | OpXor | OpAnd | OpEq | OpLe | OpLt | OpGe 
       | OpGt | OpNotEq | OpCons | OpComp | OpAppend
       deriving (Eq, Ord, Show)      
