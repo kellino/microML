@@ -19,7 +19,6 @@ car xs = do
     let res = car' xs
     fromMaybe (PrimitiveErr . ListPrim $ "head of an emtpy list") res
 
-
 car' :: Expr -> Maybe Expr
 car' (List (x:_))  = Just x
 car' (Lit (LString xs)) = Just $ Lit. LChar $ head xs
@@ -34,12 +33,6 @@ cdr (Lit (LString xs)) = Lit . LString $ tail xs
 append' :: Expr -> Expr -> Expr
 append' (List xs) (List ys)                   = List $ xs ++ ys
 append' (Lit (LString xs)) (Lit (LString ys)) = Lit $ LString $ xs ++ ys
-
-init' :: Expr -> Expr
-init' (List [])          = error "emtpy list"
-init' (List [_])         = List []
-init' (List xs)          = List $ init xs
-init' (Lit (LString xs)) = Lit $ LString $ init xs
 
 cons :: Expr -> Expr -> Expr
 cons x1 (List []) = List [x1]
