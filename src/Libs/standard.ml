@@ -25,21 +25,9 @@ let foldrl1 f xs = foldl f (head xs) xs;
 
 let map f xs = foldr (\x xs' -> (f x) : xs') ([]) xs;
 let filter p xs = foldr (\x y -> if (p x) then (x:y) else y) ([]) xs;
-let reverse xs = if xs == [] then [] else (reverse ((tail xs):(head xs)));
---let length xs = foldr (\x -> x + 1) 0 xs;
+--let reverse xs = ;
+let init xs = take ((length xs) - 1) xs;
 let until p f x = if (p x) then x else (until p f (f x));
 
 (* print functions *)
 let show x = x;     (* this is just a synonym for id *)
-
-(* maths functions *)
-let sum xs = foldl (\x y -> x + y) 0 xs;
-let product xs = foldl (\x y -> x * y) 1 xs;
-let abs x = if (negative? x) then (x * -1) else x;
-let max a b = if (a < b) then b else a;
-let min a b = if (a < b) then a else b;
-let negate x = if (negative? x) then (abs x) else (x * -1);
-
--- we need to have lets and where to hide definitions
-let gcd' a b = if (b == 0) then a else (gcd' b (a % b));
-let gcd a b = gcd' (abs a) (abs b);
