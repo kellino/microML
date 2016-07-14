@@ -40,12 +40,14 @@ eval env expr = case expr of
         let a' = eval env a
         case op of
           OpLog -> log' a'
-          Car -> car a'
-          Cdr -> cdr a'
+          Chr   -> chr' a'
+          Ord   -> ord' a'
+          Car   -> car a'
+          Cdr   -> cdr a'
           Minus ->  case a' of
                       (Lit (LInt x))    -> Lit . LInt $ negate x
                       (Lit (LDouble x)) -> Lit . LDouble $ negate x
-          Not -> case a' of
+          Not   -> case a' of
                    (Lit (LBoolean True)) -> Lit . LBoolean $ False
                    (Lit (LBoolean False)) -> Lit . LBoolean $ True
     Op op a b -> do
