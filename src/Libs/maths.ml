@@ -21,7 +21,7 @@ let floor x = x // 1;
 let ceiling x = 1 + (floor x);
 
 (* log functions *)
-let ln x        = _log x;
+let ln x        = _log x + 0; -- a bug this, but (+0) is needed to force inference of Number type
 let log2 x      = _log x / _log x;
 let log10 x     = _log x / _log 10;
 let logBase x y = _log y / _log x;
