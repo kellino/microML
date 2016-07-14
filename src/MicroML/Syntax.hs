@@ -38,7 +38,16 @@ data Lit
 data UnaryOp =
         Car | Cdr | Not
      | Minus | OpLog -- unary maths ops
-    deriving (Show, Eq, Ord)
+     | Ord | Chr     -- char primitives
+    deriving (Eq, Ord)
+
+instance Show UnaryOp where
+    show Car   = red ++ "head" ++ unred
+    show Cdr   = red ++ "tail" ++ unred
+    show Minus = red ++ "negative" ++ unred
+    show OpLog = red ++ "log" ++ unred
+    show Ord   = red ++ "ascii value" ++ unred
+    show Chr   = red ++ "ascii character" ++ unred
 
 data Binop = 
         OpAdd | OpSub | OpMul | OpDiv | OpIntDiv | OpExp | OpMod 
