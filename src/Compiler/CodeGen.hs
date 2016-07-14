@@ -4,22 +4,15 @@ module Compiler.CodeGen where
 
 import Language.C.DSL
 
-plus =
-  fun [intTy] "myPlus"[int "a", int "b"] $ hBlock [
-    creturn ("a" + "b")
-  ]
-minus =
-  fun [intTy] "myMinus"[int "a", int "b"] $ hBlock [
-    creturn ("a" - "b")
-  ]
+includes :: String
+includes = "#include <stdio.h>\n\n"
 
-notNull =
-  fun [voidTy] "isNULL"[intPtr "a"] $ hBlock [
-    cif ("a" ==: 0) $ hBlock [
-       liftE $ "printf"#[str"Is NULL\n"],
-       cvoidReturn
-    ],
-    liftE $ "printf"#[str"Isn't NULL\n"]
-  ]
+makeMain = 
+    fun [intTy] "main" [] $ hBlock [
+        "printf" # [str "hello microML"]                               
+    ]
 
-toplevel = transUnit [export plus, export minus, export notNull]
+compile :: IO ()
+compile = do
+    let cFile = "out.c"
+    writeFile cFile $ includes ++ (show . pretty $ makeMain)
