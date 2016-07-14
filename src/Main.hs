@@ -2,6 +2,7 @@ module Main  where
 
 --import MicroML.Parser
 import Repl.Repl
+import Compiler.CodeGen
 --import Jit.Codegen
 --import Jit.Emit
 
@@ -26,8 +27,8 @@ import System.Environment (getArgs)
 --processFile fn = L.readFile fn >>= process initModule
 
 main :: IO ()
-main = do
+main = do   -- shell
     args <- getArgs
     case args of
-      []    -> shell
-      --[fname] -> void $ processFile fname 
+      [] -> shell
+      _  -> compile
