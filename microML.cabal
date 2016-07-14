@@ -34,7 +34,7 @@ executable microML
                      mtl,
                      text,
                      pretty,
-                     --scientific,
+                     scientific,
                      containers,
                      transformers,
                      llvm-general,
