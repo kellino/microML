@@ -47,10 +47,10 @@ compose a b = Lit $ LString $ show a ++ " " ++ show b
 -- STRING MANIPULATION PRIMITIVES --
 ------------------------------------
 
-toLower :: Expr -> Expr
-toLower (Lit (LChar x)) = Lit . LChar $ DC.toLower x
-toLower _ = error "type mismatch"
+ord' :: Expr -> Expr
+ord' (Lit (LChar a)) = Lit . LInt . toInteger . DC.ord $ a
+ord' _               = error ""
 
-toUpper :: Expr -> Expr
-toUpper (Lit (LChar x)) = Lit . LChar $ DC.toUpper x
-toUpper _ = error "type mismatch"
+chr' :: Expr -> Expr
+chr' (Lit (LInt n)) = Lit . LChar $ DC.chr $ fromIntegral n
+chr' _              = error ""
