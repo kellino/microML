@@ -81,7 +81,7 @@ ppLit a
   | "LBoolean" `isInfixOf` a = bold ++ (init . (!!2) . words) a ++ unbold
   | "LChar" `isInfixOf` a    = bold ++ (init . (!!2) . words) a ++ unbold
   | "LString" `isInfixOf` a  = bold ++ (init . (!!2) . words) a ++ unbold
-  | otherwise                = bold ++ a ++ unbold
+  | otherwise                = a
 
 bold, unbold :: String
 bold = "\ESC[37m"
