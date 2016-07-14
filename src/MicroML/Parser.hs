@@ -86,10 +86,9 @@ baseToDec f n = (fst . head) $ f n
 
 charLit :: Parser Expr
 charLit = do
-    void spaces
-    void $ char '\''
+    void $ spaces *> char '\''
     c <- letter
-    void $ char '\''
+    void $ char '\'' <* spaces
     return $ Lit (LChar c)
 
 stringLit :: ParsecT L.Text u Identity Expr
