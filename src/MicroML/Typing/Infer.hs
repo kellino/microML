@@ -126,8 +126,8 @@ mathsOps = Map.fromList [
 mathsList :: Map.Map String Type
 mathsList = 
     Map.fromList [
-       ( "OpCons", typeNum `TArr` (typeNil `TArr` typeListofNumber))  
-     , ( "opcons", typeNum `TArr` (typeListofNumber `TArr` typeListofNumber))
+       ( "emptyCons", typeNum `TArr` (typeNil `TArr` typeListofNumber))  
+     , ( "listCons", typeNum `TArr` (typeListofNumber `TArr` typeListofNumber))
     ]
 
 charOps :: Map.Map Binop Type
@@ -140,9 +140,9 @@ charOps = Map.fromList [
       , ( OpNotEq, typeChar `TArr` (typeChar `TArr` typeBool))
   ]
 
---listOps :: Map.Map Binop Type
+listOps :: Map.Map String Type
 listOps = Map.fromList [
-        ( "opEq",          typeNil `TArr` (typeNil `TArr` typeBool))
+        ( "eqLists",          typeNil `TArr` (typeNil `TArr` typeBool))
       , ( "appendInts",    typeListofNumber `TArr` (typeListofNumber `TArr` typeListofNumber))
       , ( "appendBools",   typeListofBool `TArr` (typeListofBool `TArr`   typeListofBool))
       , ( "appendStrings", typeString `TArr` (typeString `TArr` typeString))
@@ -253,6 +253,7 @@ infer expr = case expr of
         case e1 of 
           (List _)           -> doUnaryListOp op e1 tv 
           (Lit (LString _))  -> doUnaryListOp op e1 tv
+          (Lit (LChar _))    -> doUnaryChar op t1 tv
           (Lit (LInt _))     -> doUnaryMaths op t1 tv
           (Lit (LDouble _))  -> doUnaryMaths op t1 tv
           (Lit (LBoolean _)) -> doUnaryBool op t1 tv
@@ -283,13 +284,23 @@ infer expr = case expr of
 -- UNARY & BINARY OPERATIONS --
 -------------------------------
 
+doUnaryChar op t1 tv = 
+    case op of
+      Ord -> do
+          uni t1 tv
+          return t1
+      Chr -> do
+          uni t1 tv
+          return t1
+      _   -> throwError $ UnsupportedOperatation $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with characters" ++ "\ESC[0m"
+
 doUnaryBool :: UnaryOp -> Type -> Type -> Infer Type
 doUnaryBool op t1 tv =
     case op of
       Not -> do
           uni t1 tv
           return t1
-      _   -> throwError $ UnsupportedOperatation $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with booleans" ++ "[0m"
+      _   -> throwError $ UnsupportedOperatation $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with booleans" ++ "\ESC[0m"
 
 doUnaryMaths :: UnaryOp -> Type -> Type -> Infer Type
 doUnaryMaths op t1 tv =
@@ -301,7 +312,6 @@ doUnaryMaths op t1 tv =
           uni t1 tv
           return t1
       _ -> throwError $ UnsupportedOperatation $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with numbers" ++ "\ESC[0m"
-
 
 doUnaryListOp :: UnaryOp -> Expr -> Type -> Infer Type
 doUnaryListOp op e1 tv = 
@@ -316,7 +326,6 @@ doUnaryListOp op e1 tv =
           return t1
       _ -> throwError $ UnsupportedOperatation  $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with lists" ++ "\ESC[0m"
 
-
 doBinaryMathsOp :: Binop -> Expr -> Expr -> Infer Type
 doBinaryMathsOp op e1 e2 = do
     t1 <- infer e1
@@ -326,7 +335,7 @@ doBinaryMathsOp op e1 e2 = do
       OpSub   -> getOp mathsOps OpSub t1 t2
       OpMul   -> getOp mathsOps OpMul t1 t2
       -- very ugly, there's surely a better way, but because type inference returns a generic
-      -- typeNumber, rather than typeInt or typeDouble, this is the easiest way to check the modulo 
+      -- typeNumber, rather than typeInt or typeDouble, this is the easiest way to check that modulo 
       -- only passes typechecking on ints
       OpMod   ->
           case e1 of
@@ -349,8 +358,8 @@ doBinaryMathsOp op e1 e2 = do
       OpNotEq -> getOp mathsOps OpNotEq t1 t2
       OpCons  -> 
           case e2 of
-            (List []) -> getOp mathsList "OpCons" t1 t2
-            _         -> getOp mathsList "opcons" t1 t2
+            (List []) -> getOp mathsList "emptyCons" t1 t2
+            _         -> getOp mathsList "listCons" t1 t2
       _               -> throwError $ UnsupportedOperatation $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with numbers" ++ "\ESC[0m"
 
 doListOp :: Binop -> Expr -> Expr -> Infer Type
@@ -358,6 +367,7 @@ doListOp op e1 e2 = do
     t1 <- infer e1
     t2 <- infer e2
     case op of
+      OpEq     -> getOp listOps "eqLists" t1 t2
       OpAppend -> 
         case e1 of 
               List (Lit (LInt _):_)     -> getOp listOps "appendInts" t1 t2
