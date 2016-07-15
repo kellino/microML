@@ -11,11 +11,11 @@ microBitIncludes = "#include \"MicroBit.h\"\n\nMicroBit uBit;\n"
 
 microBitAPI :: Map.Map String CExpr
 microBitAPI = Map.fromList [
-    ("scroll", scroll)                       
+    ("scroll", _scroll)                       
     ]
 
-scroll :: CExpr
-scroll = "uBit.display.scroll" 
+_scroll :: CExpr
+_scroll = "uBit.display.scroll" 
 
 releaseFiber :: CExpr
 releaseFiber = "release_fiber()"
