@@ -72,11 +72,11 @@ primitives inherited from languages in the Lisp family:
 \end{grammar}
 
 These primitives are accessed through the \textit{head}, \textit{tail} and (:) built-in functions and are
-essential for recursing over lists.
+essential for recursing over lists.\
 
 microML, in addition to floats and ints, also supports binary, octal and hex numbers\footnote{The
     syntax for these is inspired by erlang, one simply writes the number in the form eg 2\#110 for a
-    binary 5. Likewise octal is 8\# and hex 16\#}. These are not
+    binary 6. Likewise octal is 8\# and hex 16\#}. These are not
 treated as primitives however, and are automatically converted to an appropriate representation.
 
 The \textit{FixPoint} primitive allows for the creation of recursive functions by satisfying the equation
@@ -110,7 +110,7 @@ A number of different libraries were examined before settling on the `standard'
     contains no occurrences of a free variable, ie all of its arguments are
     explicitly supplied to it, and it does not rely on any global state or globally defined
     variables}. \textit{Parsec} is a highly
-flexible tool, perhaps more similar to \textit{ANTRL}\footnote{\url{http://www.antlr.org/}} than to
+flexible tool, perhaps more similar to \textit{ANTLR}\footnote{\url{http://www.antlr.org/}} than to
 \textit{Yacc} or \textit{Bison}. Explicit regular expressions are not required, as the parser /
 lexer is a composite of a great number of small, specialized parser functions, which are linked
 together. If one parser fails, the next is tried until either parsing succeeds or a fatal error
@@ -262,7 +262,7 @@ Time permitting, it can be returned to either later in the project or after subm
 
 The standard libraries are, at present, embryonic. These will need to be extended. String
 manipulation is painful due to the treating of strings as immutable `literals'. To make working with
-strings a little more edifying, there also needs to be a string standard library.
+strings a little more edifying, there also needs to be a string standard library.\
 
 microML does not support forward declarations. Adding these would greatly enhance the usability of
 the language, as would nested `where'\footnote{A form of expression which allows forward declaration
