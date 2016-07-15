@@ -10,6 +10,7 @@ import System.Console.CmdArgs.GetOpt
 import System.Environment (getArgs)
 
 import qualified Data.Text.Lazy.IO as LIO
+import qualified Data.Text.Lazy as L
 import Data.List (nub)
 
 type File = String
@@ -49,14 +50,14 @@ parseCmds argv =
           exitWith (ExitFailure 1)
       where header = "Usage: microML [-jcio] [file ...]"
 
-microML :: Flag -> FilePath -> IO ()
+microML :: Flag -> [FilePath] -> IO ()
 microML arg fs =
     case arg of
       Interpreter -> shell
       ObjectFile  -> undefined
       Compiler    -> do
-          contents <- LIO.readFile fs
-          compile contents
+          contents <- LIO.readFile (head fs)
+          compile contents $ L.pack (head $ tail fs)
       Jit         -> do
           putStrLn "the jit is not yet operative"
           exitWith $ ExitFailure 1
@@ -64,4 +65,4 @@ microML arg fs =
 main :: IO ()
 main = do
     (args, files) <- getArgs >>= parseCmds
-    microML (head args) (head files)
+    microML (head args) files
