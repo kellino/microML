@@ -1,34 +1,63 @@
 module Main  where
 
---import MicroML.Parser
-import Repl.Repl
+
 import Compiler.CodeGen
---import Jit.Codegen
---import Jit.Emit
+import Repl.Repl
 
---import Control.Monad (void)
+import System.IO (hPutStrLn, stderr)
+import System.Exit
+import System.Console.CmdArgs.GetOpt
 import System.Environment (getArgs)
---import qualified Data.Text.Lazy as L
 
---import qualified LLVM.General.AST as AST
+import qualified Data.Text.Lazy.IO as LIO
+import Data.List (nub)
 
-{-initModule :: AST.Module-}
-{-initModule = emptyModule "microMLJit"-}
+type File = String
 
-{-process :: AST.Module -> String -> IO (Maybe AST.Module)-}
-{-process modo source = do-}
-    {-let res = parseProgram source-}
-    {-case res of-}
-      {-Left err -> void $ print err-}
-      {-Right ex -> do-}
-          {-ast <- codegen-}
-          {-return $ Just ast-}
+data Flag = 
+      Interpreter
+    | Jit
+    | Compiler
+    | Help
+    deriving (Eq, Ord, Enum, Show, Bounded)
 
---processFile fn = L.readFile fn >>= process initModule
+flags :: [OptDescr Flag]
+flags = 
+    [ Option ['j'] [] (NoArg Jit)
+    "Runs the specified file(s) in the JIT compiler"
+    , Option ['c'] [] (NoArg Compiler)
+    "Compiles the specified file(s) to C++ for the bbc:microbit"
+    , Option ['i'] [] (NoArg Interpreter)
+    "Starts the microML interactive environment" 
+    , Option [] ["help"] (NoArg Help)
+    "Prints this help message"
+    ]
+
+parseCmds argv = 
+    case getOpt Permute flags argv of
+      (args, fs, []) -> do
+          let files = if null fs then ["-"] else fs
+          if Help `elem` args
+             then do hPutStrLn stderr (usageInfo header flags)
+                     exitWith ExitSuccess
+             else return (nub args, files)
+      (_,_,errs) -> do
+          hPutStrLn stderr (concat errs ++ usageInfo header flags)
+          exitWith (ExitFailure 1)
+      where header = "Usage: microML [-jci] [file ...]"
+
+microML :: Flag -> FilePath -> IO ()
+microML arg fs =
+    case arg of
+      Interpreter -> shell
+      Compiler    -> do
+          contents <- LIO.readFile fs
+          compile contents
+      Jit         -> do
+          putStrLn "the jit is not yet operative"
+          exitWith $ ExitFailure 1
 
 main :: IO ()
-main = do   -- shell
-    args <- getArgs
-    case args of
-      [] -> shell
-      _  -> compile
+main = do
+    (args, files) <- getArgs >>= parseCmds
+    microML (head args) (head files)
