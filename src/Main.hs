@@ -18,6 +18,7 @@ data Flag =
       Interpreter
     | Jit
     | Compiler
+    | ObjectFile
     | Help
     deriving (Eq, Ord, Enum, Show, Bounded)
 
@@ -29,6 +30,8 @@ flags =
     "Compiles the specified file(s) to C++ for the bbc:microbit"
     , Option ['i'] [] (NoArg Interpreter)
     "Starts the microML interactive environment" 
+    , Option ['o'] [] (NoArg ObjectFile)
+    "The name of the new file you want to save"
     , Option [] ["help"] (NoArg Help)
     "Prints this help message"
     ]
@@ -44,12 +47,13 @@ parseCmds argv =
       (_,_,errs) -> do
           hPutStrLn stderr (concat errs ++ usageInfo header flags)
           exitWith (ExitFailure 1)
-      where header = "Usage: microML [-jci] [file ...]"
+      where header = "Usage: microML [-jcio] [file ...]"
 
 microML :: Flag -> FilePath -> IO ()
 microML arg fs =
     case arg of
       Interpreter -> shell
+      ObjectFile  -> undefined
       Compiler    -> do
           contents <- LIO.readFile fs
           compile contents
