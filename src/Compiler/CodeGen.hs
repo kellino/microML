@@ -16,7 +16,7 @@ hoistError :: Show a => Either a t -> t
 hoistError (Right val) = val
 hoistError (Left err) = error $ show err
 
-eval :: (t, Expr) -> CExpr
+eval :: (String, Expr) -> CExpr
 eval (_, res) = 
     case res of
       (Lit (LString st)) -> str st
@@ -35,7 +35,7 @@ mainFunc func  =
         "uBit.init()", func, releaseFiber
     ]
 
-compile :: L.Text -> IO ()
-compile file = do
-    let cFile = "out.cpp"
+compile :: L.Text -> L.Text -> IO ()
+compile file newFile = do
+    let cFile = L.unpack newFile ++ ".cpp"
     writeFile cFile $ microBitIncludes ++ (show . pretty $ mainFunc (eval (head $ fromFile file)))
