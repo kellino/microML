@@ -2,29 +2,40 @@
 
 module Compiler.CodeGen where
 
-import Language.C.DSL
-import qualified Data.Text.Lazy as L
+import Compiler.MicroBitHeader
+import MicroML.Syntax
 import MicroML.Parser
 
-hoistError :: (Monad m, Show a1) => Either a1 a -> m a
-hoistError (Right val) = return val
+import Language.C.DSL
+import qualified Data.Text.Lazy as L
+import qualified Data.Map as Map
+import Data.Maybe (fromMaybe)
+
+
+hoistError :: Show a => Either a t -> t
+hoistError (Right val) = val
 hoistError (Left err) = error $ show err
 
-exec :: L.Text -> String
-exec source = do
-    res <- hoistError $ parseProgram "<from_file>" source
-    show res
+eval :: (t, Expr) -> CExpr
+eval (_, res) = 
+    case res of
+      (Lit (LString st)) -> str st
+      Var x -> fromMaybe (error "") $ Map.lookup x microBitAPI
+      App a b -> do
+          let func = eval ("", a)
+          let arg = eval ("", b)
+          func # [arg]
 
-includes :: String
-includes = "#include <stdio.h>\n\n"
+fromFile :: L.Text -> [(String, Expr)]
+fromFile source = hoistError $ parseProgram "<from file>" source
 
-makeMain :: CFunDef
-makeMain = 
+mainFunc :: CExpr -> CFunDef
+mainFunc func  = 
     fun [intTy] "main" [] $ hBlock [
-        "printf" # [str "hello microML"]                               
+        "uBit.init()", func, releaseFiber
     ]
 
 compile :: L.Text -> IO ()
 compile file = do
-    let cFile = "out.c"
-    writeFile cFile $ includes ++ (show . pretty $ makeMain) ++ exec file
+    let cFile = "out.cpp"
+    writeFile cFile $ microBitIncludes ++ (show . pretty $ mainFunc (eval (head $ fromFile file)))
