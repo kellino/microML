@@ -10,6 +10,7 @@ let end? xs = if (xs == []) then true else false;
 let id x = x;
 let const x y = x;
 let flip f = \x y -> f y x;
+let succ x = x + 1;
 let twice f x = f (f x);
 let cons a b = a : b;
 let length xs = if (end? xs) then 0 else (1 + (length (tail xs)));
@@ -25,7 +26,6 @@ let foldrl1 f xs = foldl f (head xs) xs;
 
 let map f xs = foldr (\x xs' -> (f x) : xs') ([]) xs;
 let filter p xs = foldr (\x y -> if (p x) then (x:y) else y) ([]) xs;
---let reverse xs = ;
 let init xs = take ((length xs) - 1) xs;
 let until p f x = if (p x) then x else (until p f (f x));
 
