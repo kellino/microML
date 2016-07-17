@@ -95,8 +95,7 @@ stringLit :: Parser Expr
 stringLit = do
     void spaces
     void $ char '"'
-    s <- many $ alphaNum <|> space
-    --s <- many $ escaped <|> noneOf "\"\\"
+    s <- many $ escaped <|> noneOf "\"\\"
     void $ char '"'
     void spaces
     return $ Lit (LString s)
