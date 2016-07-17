@@ -80,7 +80,7 @@ ppLit a
   | "LDouble" `isInfixOf` a  = bold ++ noParens ((init . (!!2) . words) a) ++ unbold
   | "LBoolean" `isInfixOf` a = bold ++ (init . (!!2) . words) a ++ unbold
   | "LChar" `isInfixOf` a    = bold ++ (init . (!!2) . words) a ++ unbold
-  | "LString" `isInfixOf` a  = bold ++ (noParens . unwords . drop 2 $ words a) ++ unbold
+  | "LString" `isInfixOf` a  = bold ++ (init . unwords . drop 2 $ words a) ++ unbold
   | otherwise                = a
 
 bold, unbold :: String
