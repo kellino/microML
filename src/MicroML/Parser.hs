@@ -91,11 +91,12 @@ charLit = do
     void $ char '\'' <* spaces
     return $ Lit (LChar c)
 
-stringLit :: ParsecT L.Text u Identity Expr
+stringLit :: Parser Expr
 stringLit = do
     void spaces
     void $ char '"'
-    s <- many $ escaped <|> noneOf "\"\\"
+    s <- many $ alphaNum <|> space
+    --s <- many $ escaped <|> noneOf "\"\\"
     void $ char '"'
     void spaces
     return $ Lit (LString s)
@@ -105,6 +106,7 @@ escaped = do
     void $ char '\\'
     x <- oneOf "\\\"nrt"
     return $ case x of
+               ' '  -> x
                '\\' -> x
                '"'  -> x
                'n'  -> '\n'
@@ -221,7 +223,7 @@ primitives = [ [ prefixOp "head" (UnaryOp Car)                -- list operators
             ,   infixOp   "or" ( Op OpOr)  Ex.AssocLeft
             ,   infixOp   "xor" ( Op OpXor) Ex.AssocLeft
             ,   prefixOp  "not" ( UnaryOp Not)]
-            , [ infixOp   "." ( Op OpComp) Ex.AssocRight ] ]
+            , [ infixOp   "|>" ( Op OpComp) Ex.AssocLeft ] ]
 
 expr :: Parser Expr
 expr = do
