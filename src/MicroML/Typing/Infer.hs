@@ -284,6 +284,7 @@ infer expr = case expr of
 -- UNARY & BINARY OPERATIONS --
 -------------------------------
 
+doUnaryChar :: UnaryOp -> Type -> Type -> Infer Type
 doUnaryChar op t1 tv = 
     case op of
       Ord -> do
@@ -337,12 +338,7 @@ doBinaryMathsOp op e1 e2 = do
       -- very ugly, there's surely a better way, but because type inference returns a generic
       -- typeNumber, rather than typeInt or typeDouble, this is the easiest way to check that modulo 
       -- only passes typechecking on ints
-      OpMod   ->
-          case e1 of
-            (Lit (LInt _)) -> case e2 of
-                                (Lit (LInt _)) -> getOp mathsOps OpMod t1 t2
-                                _   -> throwError $ UnsupportedOperatation "both numbers must be integers"
-            _ -> throwError $ UnsupportedOperatation "both numbers must be integers"
+      OpMod   -> getOp mathsOps OpMod t1 t2
       OpDiv   -> 
           case e2 of
             (Lit (LInt 0)) -> throwError $ UnsupportedOperatation "you cannot divide by 0"
