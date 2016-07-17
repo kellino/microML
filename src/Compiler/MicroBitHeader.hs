@@ -17,5 +17,8 @@ microBitAPI = Map.fromList [
 _scroll :: CExpr
 _scroll = "uBit.display.scroll" 
 
+microBitInit :: CExpr
+microBitInit = "uBit.init()"
+
 releaseFiber :: CExpr
 releaseFiber = "release_fiber()"
