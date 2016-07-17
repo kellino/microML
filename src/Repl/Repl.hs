@@ -96,7 +96,6 @@ help = return $ liftIO $ putStrLn "can't help you on that one"
 -- :using command
 using :: [String] -> Repl ()
 using args = do
-    --contents <- liftIO $ L.readFile $ unwords args
     contents <- liftIO $ L.readFile $ "/home/david/.microML/" ++ unwords args ++ ".ml"
     exec True contents
 

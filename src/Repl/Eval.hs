@@ -39,9 +39,9 @@ eval env expr = case expr of
     UnaryOp op a -> do
         let a' = eval env a
         case op of
-          OpLog -> log' a'
           Chr   -> chr' a'
           Ord   -> ord' a'
+          OpLog -> log' a'
           Car   -> car a'
           Cdr   -> cdr a'
           Minus ->  case a' of
@@ -54,23 +54,23 @@ eval env expr = case expr of
         let a' = eval env a
         let b' = eval env b
         case op of
-          OpAdd -> a' `add` b'
-          OpSub -> a' `sub`  b'
-          OpMul -> a' `mul`  b'
-          OpDiv -> a' `div'` b'
+          OpAdd    -> a' `add` b'
+          OpSub    -> a' `sub`  b'
+          OpMul    -> a' `mul`  b'
+          OpDiv    -> a' `div'` b'
           OpIntDiv -> a' `intDiv` b'
-          OpMod -> a' `mod'` b'
-          OpExp -> a' `exp'` b'
-          OpOr  -> a' `or'`  b'
-          OpAnd -> a' `and'` b'
-          OpXor -> a' `xor'` b'
-          OpEq  -> a' `opEq` b'
-          OpLe  -> a' `opLe` b'
-          OpLt  -> a' `opLt` b'
-          OpGe  -> a' `opGe` b'
-          OpGt  -> a' `opGt` b'
-          OpNotEq -> a' `opNotEq` b'
-          OpCons -> a' `cons` b'
+          OpMod    -> a' `mod'` b'
+          OpExp    -> a' `exp'` b'
+          OpOr     -> a' `or'`  b'
+          OpAnd    -> a' `and'` b'
+          OpXor    -> a' `xor'` b'
+          OpEq     -> a' `opEq` b'
+          OpLe     -> a' `opLe` b'
+          OpLt     -> a' `opLt` b'
+          OpGe     -> a' `opGe` b'
+          OpGt     -> a' `opGt` b'
+          OpNotEq  -> a' `opNotEq` b'
+          OpCons   -> a' `cons` b'
           OpAppend -> a' `append'` b'
 
 add :: Expr -> Expr -> Expr
@@ -110,6 +110,7 @@ intDiv (Lit (LDouble a)) (Lit (LInt b)) = Lit $ LInt $ floor a `div` b
 
 mod' :: Expr -> Expr -> Expr
 mod' (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a `mod` b
+mod' _ _ = error "only works on integers" -- improve this 
 
 exp' :: Expr -> Expr -> Expr
 exp' (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a^b
