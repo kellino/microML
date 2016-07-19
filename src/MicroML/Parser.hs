@@ -222,7 +222,7 @@ primitives = [ [ prefixOp "head" (UnaryOp Car)                -- list operators
             ,   infixOp   "or" ( Op OpOr)  Ex.AssocLeft
             ,   infixOp   "xor" ( Op OpXor) Ex.AssocLeft
             ,   prefixOp  "not" ( UnaryOp Not)]
-            , [ infixOp   "|>" ( Op OpComp) Ex.AssocLeft ] ]
+            , [ infixOp   "." ( Op OpComp) Ex.AssocRight ] ]
 
 expr :: Parser Expr
 expr = do
