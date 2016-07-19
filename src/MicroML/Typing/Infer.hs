@@ -121,6 +121,7 @@ mathsOps = Map.fromList [
       ,  ( OpEq,     typeNum `TArr`  ( typeNum `TArr`  typeBool))
       ,  ( OpNotEq,  typeNum `TArr`  ( typeNum `TArr`  typeBool))
       ,  ( OpCons,   typeNum `TArr`  ( typeListofNumber `TArr` typeListofNumber))
+      ,  ( OpComp,   typeNum `TArr`  ( typeNum `TArr` typeNum))
   ]
 
 mathsList :: Map.Map String Type
@@ -332,6 +333,7 @@ doBinaryMathsOp op e1 e2 = do
     t1 <- infer e1
     t2 <- infer e2
     case op of 
+      OpComp  -> getOp mathsOps OpComp t1 t2
       OpAdd   -> getOp mathsOps OpAdd t1 t2
       OpSub   -> getOp mathsOps OpSub t1 t2
       OpMul   -> getOp mathsOps OpMul t1 t2
