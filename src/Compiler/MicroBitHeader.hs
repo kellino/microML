@@ -17,6 +17,9 @@ microBitAPI = Map.fromList [
 _scroll :: CExpr
 _scroll = "uBit.display.scroll" 
 
+blank :: CExpr
+blank = ""
+
 microBitInit :: CExpr
 microBitInit = "uBit.init()"
 
