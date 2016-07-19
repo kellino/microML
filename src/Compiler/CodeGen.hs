@@ -10,7 +10,8 @@ import MicroML.Parser
 import Language.C.DSL 
 import qualified Data.Text.Lazy as L
 import qualified Data.Map as Map
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromMaybe, mapMaybe)
+import Data.String (fromString)
 
 hoistError :: Show a => Either a t -> t
 hoistError (Right val) = val
@@ -26,48 +27,33 @@ eval (name, res) =
           let (CPPExp func) = eval (name, a)
           let (CPPExp arg) = eval (name, b)
           CPPExp $ func # [arg]
-      Lam _ _ -> CppFunc makeFunction
 
-makeFunction :: CFunDef
-makeFunction =
-    fun [intTy] "inc" [int "a"] $ hBlock [
-        creturn ("a" + 1)                                     
-    ]
 
-fromFile :: L.Text -> [(String, Expr)]
-fromFile source = hoistError $ parseProgram "<from file>" source
+makeMain :: [CExtDecl] -> [(CDecl, Maybe String, CExpr)] -> [CExtDecl]
+makeMain decls inits =
+    mapMaybe makeFunProtos decls
+    ++ map makeProts inits
+    ++ [export $ fun [intTy] "main" [] (makeBlock inits)]
+        where makeBlock = hBlock . concatMap buildExp
+              buildExp (_, v, expr) = maybe [expr] ((:[]) . (<-- expr) . fromString) v
+              makeProts = export . (\(a, _, _) -> a)
 
-mainFunc :: CPP -> CFunDef
-mainFunc body =
-    fun [intTy] "main" [] $ block [
-      intoB $ fromMaybe "" $ declarations body
-    , intoB microBitInit                               
-    , intoB $ fromMaybe blank $ expressions body
-    , intoB releaseFiber
-    ]
+makeFunProtos :: CExtDecl -> Maybe CExtDecl
+makeFunProtos (CFDefExt (CFunDef specs declr _ _ a)) =
+    Just . export $ CDecl specs [(Just declr, Nothing, Nothing)] a
+makeFunProtos _ = Nothing
 
-declarations :: CPP -> Maybe CDecl
-declarations dec = 
-    case dec of
-      (Decl xs) -> Just xs
-      _         -> Nothing
-    
-expressions :: CPP -> Maybe CExpr
-expressions ex = 
-    case ex of
-      (CPPExp ys) -> Just ys
-      _           -> Nothing
+renderC :: [CExtDecl] -> String
+renderC = concatMap $ show . pretty
 
--- another hack right here!
-removeBlanks :: String -> String
-removeBlanks = unlines . filter (\x -> L.strip (L.pack x) /= ";") . lines
+compileC :: L.Text -> [CExtDecl] -> IO ()
+compileC nf code = do
+    let cFile = L.unpack nf ++ ".cpp"
+    writeFile cFile $ microBitIncludes ++ renderC code
 
-renderC :: CFunDef -> String
-renderC = show . pretty
-
-compile :: L.Text -> L.Text -> IO ()
-compile file newFile = do
-    let cFile = L.unpack newFile ++ ".cpp"
-    --writeFile cFile $ show . fromFile $ file
-    writeFile cFile $ microBitIncludes ++ removeBlanks (renderC makeFunction ++ filecontents file)
-        where filecontents f = renderC $ mainFunc (eval (head $ fromFile f))
+compiler :: L.Text -> L.Text -> IO ()
+compiler source newFile = do
+    let res = parseProgram "from source" source
+    case res of
+      Right res -> compileC newFile res
+      Left _    -> error "something's gone very wrong"
