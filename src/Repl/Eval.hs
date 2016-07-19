@@ -72,6 +72,7 @@ eval env expr = case expr of
           OpNotEq  -> a' `opNotEq` b'
           OpCons   -> a' `cons` b'
           OpAppend -> a' `append'` b'
+          OpComp   -> eval env (App a b')
 
 add :: Expr -> Expr -> Expr
 add (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a + b
