@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -fno-warn-missing-signatures #-}
+
 module MicroML.Lexer where
 
 import Text.Parsec
