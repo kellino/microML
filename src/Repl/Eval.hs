@@ -4,7 +4,7 @@ import MicroML.Syntax
 import MicroML.ListPrimitives
 
 import qualified Data.Map as Map
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromJust)
 import Data.Bits (xor)
 
 emptyTmenv :: TermEnv
@@ -19,7 +19,7 @@ eval env expr = case expr of
     bool@(Lit (LBoolean _)) -> bool
     tup@(Lit (LTup _))      -> tup
     ls@(List _)             -> ls
-    Var x                   -> fromMaybe (error "") (Map.lookup x env) -- the type checker ensures we never get this far
+    Var x                   -> fromJust (Map.lookup x env) -- the type checker ensures we never get this far
     FixPoint e              -> eval env (App e (FixPoint e))
     Lam x body              -> Closure x body env
     App a b                 -> do
