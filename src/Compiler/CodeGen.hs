@@ -9,6 +9,7 @@ import MicroML.Parser
 import Language.C.DSL 
 import Control.Monad.Identity
 import Control.Monad.Except
+
 import qualified Data.Text.Lazy as L
 import Data.Either (rights)
 {-import qualified Data.Map as Map-}
@@ -39,11 +40,24 @@ compileMicroML (nm, expr) = do
     let newNm = fromString nm
     case expr of
       -- if there's only a name and a literal, these must be variable declarations
-      Lit (LInt n) -> return $ export $ int newNm .= fromInteger n
-      Lit (LDouble d) -> return $ export $ double newNm .= realToFrac d
-      Lit (LChar c) ->  return $ export $ char newNm .= chr c
+      Lit (LInt n)     -> return $ export $ int newNm .= fromInteger n
+      Lit (LDouble d)  -> return $ export $ double newNm .= realToFrac d
+      Lit (LChar c)    -> return $ export $ char newNm .= chr c
       Lit (LString st) -> return $ export $ charPtr newNm .= str st
+      Lam e n          -> do
+          undefined
+      Op op a b -> 
+          case op of
+            OpAdd -> return $ export $ makeAddFunc nm a b
       _ -> throwError "something strange has happened"
+
+makeAddFunc :: String -> Expr -> Expr -> CFunDef
+makeAddFunc name e1 e2 = 
+    case (e1, e2) of
+      (Lit (LInt _), Lit (LInt _)) -> 
+          fun [intTy] name [int "a", int "b"] $ hBlock [
+            creturn ("a" + "b")
+          ]
       
 chr :: Char -> CExpr
 chr = CConst . flip CCharConst undefNode . cChar
@@ -63,7 +77,10 @@ makeFunProtos (CFDefExt (CFunDef specs declr _ _ a)) =
 makeFunProtos _ = Nothing
 
 renderC :: [CExtDecl] -> String
-renderC = concatMap (show . pretty)
+renderC = newlines . concatMap (show . pretty)
+
+newlines :: String -> String
+newlines xs = [c | v <- xs, c <- if v == ';' || v == '}' then v:"\n" else [v]]
 
 writeCFile :: L.Text -> [CExtDecl] -> IO ()
 writeCFile nf code = do
@@ -73,8 +90,9 @@ writeCFile nf code = do
 compile :: L.Text -> FileName -> IO ()
 compile source fn = do
     let res = parseProgram "from source" source
-    case res of
-      Right prog -> do
-          let code = map (runCompiler . compileMicroML) prog
-          writeCFile fn $ rights code
-      Left err  -> print err
+    print res -- for debugging purposes only
+    {-case res of-}
+      {-Right prog -> do-}
+          {-let code = map (runCompiler . compileMicroML) prog-}
+          {-writeCFile fn $ rights code-}
+      {-Left err  -> putStr $ show err-}
