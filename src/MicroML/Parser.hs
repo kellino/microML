@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module MicroML.Parser where
+module MicroML.Parser (parseProgram) where
 
 import Text.Parsec
 import Text.Parsec.Text.Lazy (Parser)
