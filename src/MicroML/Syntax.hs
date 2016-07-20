@@ -2,11 +2,21 @@ module MicroML.Syntax where
 
 import qualified Data.Map as Map
 
-type TermEnv = Map.Map String Expr
+--------------------
+-- TYPES SYNONYMS --
+--------------------
 
+type TermEnv = Map.Map String Expr
 type Name = String
 type VarName = String
 type ConName = String
+type Decl = (String, Expr)
+
+----------
+-- ADTs --
+----------
+
+data Program = Program [Decl] Expr deriving Eq
 
 data Expr
   = Var Name
@@ -76,10 +86,6 @@ instance Show Binop where
     show OpComp   = red ++ "composition" ++ unred
     show OpAppend = red ++ "concatenation" ++ unred
 
-red, unred :: String
-red = "\ESC[31m"
-unred = "\ESC[0m"
-
 data MLError
     = MathsPrim String 
     | ListPrim String
@@ -89,6 +95,10 @@ instance Show MLError where
     show (MathsPrim str) = show str
     show (ListPrim str)  = show str
 
-data Program = Program [Decl] Expr deriving Eq
+-----------------
+-- HELPER DEFS --
+-----------------
 
-type Decl = (String, Expr)
+red, unred :: String
+red = "\ESC[31m"
+unred = "\ESC[0m"
