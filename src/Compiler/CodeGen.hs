@@ -8,11 +8,12 @@ import MicroML.Parser
 
 import Language.C.DSL 
 import Control.Monad.Identity
+import Control.Monad.Reader
 import Control.Monad.Except
 
 import qualified Data.Text.Lazy as L
 import Data.Either (rights)
-{-import qualified Data.Map as Map-}
+import qualified Data.Map as Map
 import Data.Maybe (mapMaybe)
 import Data.String (fromString)
 
@@ -20,16 +21,18 @@ import Data.String (fromString)
 -- COMPILER TYPES --
 --------------------
 
+type FuncName = String
 type ErrorMsg = String
 type FileName = L.Text
-type Compiler a = ExceptT ErrorMsg Identity a
+type Env = Map.Map String Expr
+type Compiler a = ReaderT Env (ExceptT ErrorMsg Identity) a
 
 --------------
 -- COMPILER --
 --------------
 
-runCompiler :: ExceptT e Identity a -> Either e a
-runCompiler ev = runIdentity (runExceptT ev)
+runCompiler :: Env -> Compiler a -> Either ErrorMsg a
+runCompiler env ev = runIdentity (runExceptT (runReaderT ev env))
 
 hoistError :: Show a => Either a t -> t
 hoistError (Right vl) = vl
@@ -44,12 +47,14 @@ compileMicroML (nm, expr) = do
       Lit (LDouble d)  -> return $ export $ double newNm .= realToFrac d
       Lit (LChar c)    -> return $ export $ char newNm .= chr c
       Lit (LString st) -> return $ export $ charPtr newNm .= str st
-      Lam e n          -> do
-          undefined
+      Lam n e -> return $ generateLam n e
       Op op a b -> 
           case op of
             OpAdd -> return $ export $ makeAddFunc nm a b
       _ -> throwError "something strange has happened"
+
+generateLam :: String -> Expr -> CExtDecl
+generateLam n exp = undefined
 
 makeAddFunc :: String -> Expr -> Expr -> CFunDef
 makeAddFunc name e1 e2 = 
@@ -58,7 +63,7 @@ makeAddFunc name e1 e2 =
           fun [intTy] name [int "a", int "b"] $ hBlock [
             creturn ("a" + "b")
           ]
-      
+
 chr :: Char -> CExpr
 chr = CConst . flip CCharConst undefNode . cChar
 
@@ -90,9 +95,8 @@ writeCFile nf code = do
 compile :: L.Text -> FileName -> IO ()
 compile source fn = do
     let res = parseProgram "from source" source
-    print res -- for debugging purposes only
-    {-case res of-}
-      {-Right prog -> do-}
-          {-let code = map (runCompiler . compileMicroML) prog-}
-          {-writeCFile fn $ rights code-}
-      {-Left err  -> putStr $ show err-}
+    case res of
+      Right prog -> do
+          let code = map (runCompiler Map.empty . compileMicroML) prog
+          writeCFile fn $ rights code
+      Left err  -> putStr $ show err
