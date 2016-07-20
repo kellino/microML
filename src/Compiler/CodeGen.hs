@@ -3,35 +3,50 @@
 module Compiler.CodeGen where
 
 import Compiler.MicroBitHeader
---import Compiler.Syntax
 import MicroML.Syntax
 import MicroML.Parser 
 
 import Language.C.DSL 
+import Control.Monad.Identity
+import Control.Monad.Except
 import qualified Data.Text.Lazy as L
+import Data.Either (rights)
 {-import qualified Data.Map as Map-}
 import Data.Maybe (mapMaybe)
 import Data.String (fromString)
+
+--------------------
+-- COMPILER TYPES --
+--------------------
+
+type ErrorMsg = String
+type FileName = L.Text
+type Compiler a = ExceptT ErrorMsg Identity a
+
+--------------
+-- COMPILER --
+--------------
+
+runCompiler :: ExceptT e Identity a -> Either e a
+runCompiler ev = runIdentity (runExceptT ev)
 
 hoistError :: Show a => Either a t -> t
 hoistError (Right vl) = vl
 hoistError (Left err) = error $ show err
 
-compileMicroML :: (String, Expr) -> CExtDecl
-compileMicroML (nm, expr) = 
+compileMicroML :: (String, Expr) -> Compiler CExtDecl
+compileMicroML (nm, expr) = do
+    let newNm = fromString nm
     case expr of
-      Lit (LInt n) -> export $ int (fromString nm) .= fromInteger n
-
-{-eval :: (String, Expr) -> CPP-}
-{-eval (name, res) = -}
-    {-case res of-}
-      {-(Lit (LInt _))     -> Decl $ int "x" .= 1-}
-      {-(Lit (LString st)) -> CPPExp $ str st-}
-      {-Var x -> CPPExp $ fromMaybe (error "Unbound variable error") $ Map.lookup x microBitAPI-}
-      {-App a b -> do-}
-          {-let (CPPExp func) = eval (name, a)-}
-          {-let (CPPExp arg) = eval (name, b)-}
-          {-CPPExp $ func # [arg]-}
+      -- if there's only a name and a literal, these must be variable declarations
+      Lit (LInt n) -> return $ export $ int newNm .= fromInteger n
+      Lit (LDouble d) -> return $ export $ double newNm .= realToFrac d
+      Lit (LChar c) ->  return $ export $ char newNm .= chr c
+      Lit (LString st) -> return $ export $ charPtr newNm .= str st
+      _ -> throwError "something strange has happened"
+      
+chr :: Char -> CExpr
+chr = CConst . flip CCharConst undefNode . cChar
 
 makeMain :: [CExtDecl] -> [(CDecl, Maybe String, CExpr)] -> [CExtDecl]
 makeMain decls inits =
@@ -48,16 +63,18 @@ makeFunProtos (CFDefExt (CFunDef specs declr _ _ a)) =
 makeFunProtos _ = Nothing
 
 renderC :: [CExtDecl] -> String
-renderC = concatMap $ show . pretty
+renderC = concatMap (show . pretty)
 
 writeCFile :: L.Text -> [CExtDecl] -> IO ()
 writeCFile nf code = do
     let cFile = L.unpack nf ++ ".cpp"
     writeFile cFile $ microBitIncludes ++ renderC code
 
-compile :: L.Text -> L.Text -> IO ()
-compile source newFile = do
+compile :: L.Text -> FileName -> IO ()
+compile source fn = do
     let res = parseProgram "from source" source
     case res of
-      Right prog -> writeCFile newFile $ map compileMicroML prog
-      Left err  -> error $ show err
+      Right prog -> do
+          let code = map (runCompiler . compileMicroML) prog
+          writeCFile fn $ rights code
+      Left err  -> print err
