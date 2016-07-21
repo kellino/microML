@@ -57,6 +57,7 @@ instance Show TypeError where
     concat ["Cannot not match expected type: '" ++ pptype a ++ "' with actual type: '" ++ pptype b ++ "'\n" | (a,b) <- cs]
   show (UnboundVariable a) = "Not in scope: " ++ a
   show (UnsupportedOperatation a) = "\ESC[1m" ++ a ++ "\ESC[0m"
+  show (UnificationMismatch a b) = show a ++ show b
 
 ppscheme :: TypeScheme -> String
 ppscheme = render . ppr 0
