@@ -30,7 +30,7 @@ data Expr
   | FixPoint Expr
   | Op Binop Expr Expr
   | UnaryOp UnaryOp Expr
-  | ListComp Expr Expr Expr
+--  | ListComp Expr Expr Expr
   | Closure Name Expr TermEnv
   | PrimitiveErr MLError
   deriving (Show, Eq, Ord)
