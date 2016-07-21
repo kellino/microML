@@ -12,7 +12,7 @@ import MicroML.Typing.TypeError
 
 import qualified Data.Map as Map
 import Text.PrettyPrint
-import Data.List (isPrefixOf, isInfixOf, intercalate)
+import Data.List (isPrefixOf, isInfixOf) -- , intercalate)
 import qualified Data.Text.Lazy as L
 
 parensIf ::  Bool -> Doc -> Doc
