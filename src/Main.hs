@@ -1,7 +1,7 @@
 module Main  where
 
-
 import Compiler.CodeGen
+import MicroML.Syntax (red, unred)
 import Repl.Repl
 
 import System.IO (hPutStrLn, stderr)
@@ -57,16 +57,22 @@ microML arg fs =
     case arg of
       Interpreter -> shell
       ObjectFile  -> undefined
-      Compiler    -> do
-          fl <- doesFileExist $ head fs
-          if fl 
-             then do
-               contents <- LIO.readFile $ head fs
-               compile contents $ L.pack (head $ tail fs)
-             else die "Exit Failure: the given file doesn't exist in that location, so it can't be compiled!"
-      Jit         -> do
-          putStrLn "the jit is not yet operative"
-          exitWith $ ExitFailure 1
+      Compiler    -> 
+          if length fs /= 2 
+             then die $ red ++ "Exit Failure: " ++ unred ++ "you must provide a source file and a destination file"
+             else do
+                  fl <- doesFileExist $ head fs
+                  if fl 
+                     then do
+                       contents <- LIO.readFile $ head fs
+                       compile contents $ L.pack (head $ tail fs)
+                       else die $ red ++ "Exit Failure: " ++ unred ++ "the given file doesn't exist in that location, so it can't be compiled!"
+      Jit         -> do -- die "The jit is not yet operable"
+          exists <- findExecutable "llc"
+          if null exists
+             then die $ "Unable to find" ++ red  ++ " LLVM " ++ unred ++ " on your computer."
+                        ++ " Are you sure it is installed?"
+             else die "This jit is not yet operable"
 
 main :: IO ()
 main = do
