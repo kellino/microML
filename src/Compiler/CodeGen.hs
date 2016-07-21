@@ -18,6 +18,8 @@ import qualified Data.Map as Map
 import Data.Maybe (fromJust)
 import Data.String (fromString)
 
+import System.Exit
+
 --------------------
 -- COMPILER TYPES --
 --------------------
@@ -104,17 +106,15 @@ writeCFile nf code = do
     let cFile = L.unpack nf ++ ".cpp"
     writeFile cFile $ microBitIncludes ++ renderC code
 
-
 ----------------------------
 -- MAIN COMPILER FUNCTION --
 ----------------------------
 
-compile :: L.Text -> FileName -> IO ()
+compile :: L.Text -> L.Text -> IO ()
 compile source fn = do
-    let res = parseProgram "from source" source
-    print res
-    case res of
-      Right prog -> do
-          let code = map (runCompiler Map.empty . compileMicroML) prog
-          writeCFile fn $ rights code
-      Left err  -> putStr $ show err
+    let res = hoistError $ parseProgram "from source" source
+    if null res
+       then die $ red ++ "Exit Failure: " ++ unred ++ "the given file was empty, so there's nothing to compile!"
+       else do 
+           let code = map (runCompiler Map.empty . compileMicroML) res
+           writeCFile fn $ rights code
