@@ -6,8 +6,12 @@ import Compiler.MicroBitHeader
 import Compiler.CHelper
 import MicroML.Syntax
 import MicroML.Parser 
+import MicroML.Typing.Env
+import MicroML.Typing.Infer
+import Repl.Pretty()
 
 import Language.C.DSL 
+import Control.Monad.State.Strict
 import Control.Monad.Identity
 import Control.Monad.Reader
 import Control.Monad.Except
@@ -29,6 +33,10 @@ type ErrorMsg = String
 type FileName = L.Text
 type CompEnv = Map.Map String Expr
 type Compiler a = ReaderT CompEnv (ExceptT ErrorMsg Identity) a
+-- typing environment
+data TypeState = TypeState { typeState :: Env }
+
+type CState a = (StateT TypeState IO) a
 
 --------------
 -- COMPILER --
@@ -63,7 +71,7 @@ generateLam :: String -> Expr -> CExtDecl
 generateLam _ _ = undefined
 
 getRetType :: RetTy -> CDeclSpec
-getRetType rt = fromJust $ lookup rt table
+getRetType rt = fromJust $ Prelude.lookup rt table
     where table = 
             [ ("void"   , voidTy)
             , ("int"    , intTy)
@@ -91,6 +99,13 @@ resolve e =
       Lit (LChar c)    -> [chr c]
       Lit (LString st) -> [str st]
 
+checkTypes :: [(String, Expr)] -> CState ()
+checkTypes prog = do
+    st <- get
+    let typeState' = hoistError $ inferTop (typeState st) prog
+    let st' = st { typeState = typeState' `mappend` typeState st }
+    put st'
+
 ---------------------
 -- PRETTY PRINTING --
 ---------------------
@@ -117,5 +132,6 @@ compile source fn = do
     if null res
        then die $ red ++ "Exit Failure: " ++ unred ++ "the given file was empty, so there's nothing to compile!"
        else do 
+           -- checkTypes res
            let code = map (runCompiler Map.empty . compileMicroML) res
            writeCFile fn $ rights code
