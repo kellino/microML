@@ -67,7 +67,6 @@ exec update source = do
       Nothing -> return ()
       Just ex -> do
         let (val, _) = runEval (termEnv st') "it"  ex
-        --liftIO $ print val
         showOutput (show val) st'
 
 showOutput :: String -> IState -> Repl ()
