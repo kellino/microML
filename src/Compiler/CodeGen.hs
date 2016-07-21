@@ -113,6 +113,7 @@ writeCFile nf code = do
 compile :: L.Text -> L.Text -> IO ()
 compile source fn = do
     let res = hoistError $ parseProgram "from source" source
+    print res
     if null res
        then die $ red ++ "Exit Failure: " ++ unred ++ "the given file was empty, so there's nothing to compile!"
        else do 
