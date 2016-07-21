@@ -8,6 +8,7 @@ import System.IO (hPutStrLn, stderr)
 import System.Exit
 import System.Console.CmdArgs.GetOpt
 import System.Environment (getArgs)
+import System.Directory
 
 import qualified Data.Text.Lazy.IO as LIO
 import qualified Data.Text.Lazy as L
@@ -37,13 +38,14 @@ flags =
     "Prints this help message"
     ]
 
+parseCmds :: [String] -> IO ([Flag], [String])
 parseCmds argv = 
     case getOpt Permute flags argv of
       (args, fs, []) -> do
           let files = if null fs then ["-"] else fs
           if Help `elem` args
              then do hPutStrLn stderr (usageInfo header flags)
-                     exitWith ExitSuccess
+                     exitSuccess
              else return (nub args, files)
       (_,_,errs) -> do
           hPutStrLn stderr (concat errs ++ usageInfo header flags)
@@ -56,8 +58,12 @@ microML arg fs =
       Interpreter -> shell
       ObjectFile  -> undefined
       Compiler    -> do
-          contents <- LIO.readFile (head fs)
-          compile contents $ L.pack (head $ tail fs)
+          fl <- doesFileExist $ head fs
+          if fl 
+             then do
+               contents <- LIO.readFile $ head fs
+               compile contents $ L.pack (head $ tail fs)
+             else die "Exit Failure: the given file doesn't exist in that location, so it can't be compiled!"
       Jit         -> do
           putStrLn "the jit is not yet operative"
           exitWith $ ExitFailure 1
