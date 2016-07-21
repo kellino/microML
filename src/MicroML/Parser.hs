@@ -35,8 +35,8 @@ constructorName = do
        then return name
        else fail "a \ESC[1mconstructor\ESC[0m must start with a capital letter"
 
-integer :: Parser Integer
-integer = Tok.integer lexer
+{-integer :: Parser Integer-}
+{-integer = Tok.integer lexer-}
 
 float :: Parser Double
 float = Tok.float lexer
