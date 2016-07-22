@@ -40,9 +40,9 @@ compose a b = Lit $ LString $ show a ++ " " ++ show b
 ------------------------------------
 
 ord' :: Expr -> Expr
-ord' (Lit (LChar a)) = Lit . LInt . toInteger . DC.ord $ a
+ord' (Lit (LChar a)) = Lit . LInt $ (toInteger . DC.ord) a
 ord' _               = PrimitiveErr $ ListPrim "this function only works on type Char"
 
 chr' :: Expr -> Expr
-chr' (Lit (LInt n)) = Lit . LChar $ DC.chr $ fromIntegral n
+chr' (Lit (LInt n)) = Lit . LChar $ (DC.chr . fromIntegral) n
 chr' _               = PrimitiveErr $ ListPrim "this function only works on type Char"
