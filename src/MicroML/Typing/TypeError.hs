@@ -10,4 +10,4 @@ data TypeError
   | UnboundVariable String
   | Ambigious [Constraint]
   | UnificationMismatch [Type] [Type]
-  | UnsupportedOperatation String
+  | UnsupportedOperation String
