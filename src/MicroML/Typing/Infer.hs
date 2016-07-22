@@ -281,7 +281,7 @@ infer expr = case expr of
         return t2
 
     -- should never actually reach this, but discretion is the better part of valour
-    x -> throwError $ UnsupportedOperatation $ show x
+    x -> throwError $ UnsupportedOperation $ show x
 
 -------------------------------
 -- UNARY & BINARY OPERATIONS --
@@ -296,7 +296,7 @@ doUnaryChar op t1 tv =
       Chr -> do
           uni t1 tv
           return t1
-      _   -> throwError $ UnsupportedOperatation $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with characters" ++ "\ESC[0m"
+      _   -> throwError $ UnsupportedOperation $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with characters" ++ "\ESC[0m"
 
 doUnaryBool :: UnaryOp -> Type -> Type -> Infer Type
 doUnaryBool op t1 tv =
@@ -304,7 +304,7 @@ doUnaryBool op t1 tv =
       Not -> do
           uni t1 tv
           return t1
-      _   -> throwError $ UnsupportedOperatation $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with booleans" ++ "\ESC[0m"
+      _   -> throwError $ UnsupportedOperation $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with booleans" ++ "\ESC[0m"
 
 doUnaryMaths :: UnaryOp -> Type -> Type -> Infer Type
 doUnaryMaths op t1 tv =
@@ -315,7 +315,7 @@ doUnaryMaths op t1 tv =
       Minus -> do
           uni t1 tv
           return t1
-      _ -> throwError $ UnsupportedOperatation $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with numbers" ++ "\ESC[0m"
+      _ -> throwError $ UnsupportedOperation $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with numbers" ++ "\ESC[0m"
 
 doUnaryListOp :: UnaryOp -> Expr -> Type -> Infer Type
 doUnaryListOp op e1 tv = 
@@ -328,7 +328,7 @@ doUnaryListOp op e1 tv =
           t1 <- infer (cdr e1)
           uni t1 tv
           return t1
-      _ -> throwError $ UnsupportedOperatation  $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with lists" ++ "\ESC[0m"
+      _ -> throwError $ UnsupportedOperation  $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with lists" ++ "\ESC[0m"
 
 doBinaryMathsOp :: Binop -> Expr -> Expr -> Infer Type
 doBinaryMathsOp op e1 e2 = do
@@ -339,14 +339,14 @@ doBinaryMathsOp op e1 e2 = do
       OpAdd   -> getOp mathsOps OpAdd t1 t2
       OpSub   -> getOp mathsOps OpSub t1 t2
       OpMul   -> getOp mathsOps OpMul t1 t2
-      -- very ugly, there's surely a better way, but because type inference returns a generic
-      -- typeNumber, rather than typeInt or typeDouble, this is the easiest way to check that modulo 
-      -- only passes typechecking on ints
-      OpMod   -> getOp mathsOps OpMod t1 t2
+      OpMod   -> 
+          case (e1, e2) of 
+            (Lit (LInt _), Lit (LInt _)) -> getOp mathsOps OpMod t1 t2
+            _ -> throwError $ UnsupportedOperation "mod only works on whole numbers"
       OpDiv   -> 
           case e2 of
-            (Lit (LInt 0)) -> throwError $ UnsupportedOperatation "you cannot divide by 0"
-            (Lit (LDouble 0.0)) -> throwError $ UnsupportedOperatation "you cannot divide by 0"
+            (Lit (LInt 0)) -> throwError $ UnsupportedOperation "you cannot divide by 0"
+            (Lit (LDouble 0.0)) -> throwError $ UnsupportedOperation "you cannot divide by 0"
             _              -> getOp mathsOps OpDiv t1 t2
       OpIntDiv -> getOp mathsOps OpIntDiv t1 t2
       OpExp   -> getOp mathsOps OpExp t1 t2
@@ -360,7 +360,7 @@ doBinaryMathsOp op e1 e2 = do
           case e2 of
             (List []) -> getOp mathsList "emptyCons" t1 t2
             _         -> getOp mathsList "listCons" t1 t2
-      _               -> throwError $ UnsupportedOperatation $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with numbers" ++ "\ESC[0m"
+      _               -> throwError $ UnsupportedOperation $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with numbers" ++ "\ESC[0m"
 
 doListOp :: Binop -> Expr -> Expr -> Infer Type
 doListOp op e1 e2 = do
@@ -376,7 +376,7 @@ doListOp op e1 e2 = do
               Lit (LString _)           -> getOp listOps "appendStrings" t1 t2
               List (Lit (LChar _):_)    -> getOp listOps "appendChars" t1 t2
               List (Lit (LTup _):_)     -> getOp listOps "appendTups" t1 t2
-      _   -> throwError $ UnsupportedOperatation $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with lists" ++ "\ESC[0m"
+      _   -> throwError $ UnsupportedOperation $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with lists" ++ "\ESC[0m"
         
 doCharOp :: Binop -> Expr -> Expr -> Infer Type
 doCharOp op e1 e2 = do
@@ -389,7 +389,7 @@ doCharOp op e1 e2 = do
       OpGe    -> getOp charOps OpGe t1 t2
       OpGt    -> getOp charOps OpGt t1 t2
       OpNotEq -> getOp charOps OpNotEq t1 t2
-      _       -> throwError $ UnsupportedOperatation $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with chars" ++ "\ESC[0m"
+      _       -> throwError $ UnsupportedOperation $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with chars" ++ "\ESC[0m"
 
 doBoolOp :: Binop -> Expr -> Expr -> Infer Type
 doBoolOp op e1 e2 = do
@@ -401,7 +401,7 @@ doBoolOp op e1 e2 = do
       OpAnd   -> getOp boolOps OpAnd t1 t2
       OpOr    -> getOp boolOps OpOr t1 t2
       OpXor   -> getOp boolOps OpXor t1 t2
-      _       -> throwError $ UnsupportedOperatation $ "you can't do " ++ show op ++ " \ESC[1m" ++ "with booleans" ++ "\ESC[0m"
+      _       -> throwError $ UnsupportedOperation $ "you can't do " ++ show op ++ " \ESC[1m" ++ "with booleans" ++ "\ESC[0m"
 
 getOp :: (Ord k) => Map.Map k Type -> k -> Type -> Type -> Infer Type
 getOp dict op t1 t2 = do
