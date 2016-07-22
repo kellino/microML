@@ -139,6 +139,7 @@ charOps = Map.fromList [
       , ( OpGe, typeChar `TArr` (typeChar `TArr` typeBool))
       , ( OpGt, typeChar `TArr` (typeChar `TArr` typeBool))
       , ( OpNotEq, typeChar `TArr` (typeChar `TArr` typeBool))
+      , ( OpCons, typeChar `TArr` (typeChar `TArr` typeListofChar))
   ]
 
 listOps :: Map.Map String Type
@@ -158,6 +159,7 @@ boolOps = Map.fromList [
       , ( OpOr, typeBool `TArr` ( typeBool `TArr` typeBool ))
       , ( OpAnd, typeBool `TArr` ( typeBool `TArr` typeBool ))
       , ( OpXor,   typeBool `TArr` ( typeBool `TArr` typeBool ))
+      , ( OpCons, typeBool `TArr` ( typeBool `TArr` typeBool))
   ]
 
 ---------------
@@ -323,7 +325,7 @@ doUnaryListOp op e1 tv =
           uni t1' tv
           return t1'
       Cdr -> do
-          t1 <- infer e1
+          t1 <- infer (cdr e1)
           uni t1 tv
           return t1
       _ -> throwError $ UnsupportedOperatation  $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with lists" ++ "\ESC[0m"
