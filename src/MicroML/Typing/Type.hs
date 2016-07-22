@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -fno-warn-missing-signatures #-}
+
 module MicroML.Typing.Type  where
 
 newtype TVar = TV String
