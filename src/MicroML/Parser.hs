@@ -35,9 +35,6 @@ constructorName = do
        then return name
        else fail "a \ESC[1mconstructor\ESC[0m must start with a capital letter"
 
-{-integer :: Parser Integer-}
-{-integer = Tok.integer lexer-}
-
 float :: Parser Double
 float = Tok.float lexer
 
@@ -118,15 +115,15 @@ bool = (reserved "true" >> return (Lit (LBoolean True)))
 
 list :: Parser Expr
 list = do
-    void $ spaces *> string "["
+    void $ spaces *> char '['
     elems <- aexp `sepBy` char ',' <* spaces
-    void $ string "]" <* spaces
+    void $ char ']' <* spaces
     return $ List elems
 
 tuple :: Parser Expr
 tuple = do
     void $ string "{"
-    elems <- expr `sepBy` string ", "
+    elems <- expr `sepBy` char ',' <* spaces
     void $ string "}"
     return $ Lit $ LTup elems
 
@@ -151,11 +148,6 @@ letrecin = do
     e2 <- expr
     void spaces
     return (Let x e1 e2)
-
-whereDecl :: Parser Binding
-whereDecl = do
-    reserved "where"
-    letDecl
 
 ifthen :: Parser Expr
 ifthen = do
@@ -198,7 +190,7 @@ prefixOp :: String -> (a -> a) -> Ex.Operator L.Text () Identity a
 prefixOp name func = Ex.Prefix ( do {reservedOp name; return func } )
     
 primitives :: [[Op Expr]]
-primitives = [ [ prefixOp "head" (UnaryOp Car)                -- list operators
+primitives = [[ prefixOp "head" (UnaryOp Car)                -- list operators
             ,   prefixOp  "tail" (UnaryOp Cdr)
             ,   prefixOp  "_ord" (UnaryOp Ord)
             ,   prefixOp  "_chr" (UnaryOp Chr)
@@ -211,18 +203,18 @@ primitives = [ [ prefixOp "head" (UnaryOp Car)                -- list operators
             ,   infixOp   "/"    (Op OpDiv) Ex.AssocLeft
             ,   infixOp   "%"    (Op OpMod) Ex.AssocLeft ]
             , [ infixOp   "+"    (Op OpAdd) Ex.AssocLeft
-            ,   infixOp   "-" (Op OpSub) Ex.AssocLeft ]
-            , [ infixOp   "<=" ( Op OpLe)  Ex.AssocLeft       -- boolean operators
-            ,   infixOp   ">=" ( Op OpGe)  Ex.AssocLeft
-            ,   infixOp   "<" ( Op OpLt)  Ex.AssocLeft
-            ,   infixOp   ">" ( Op OpGt)  Ex.AssocLeft ]
-            , [ infixOp   "==" ( Op OpEq)  Ex.AssocLeft
-            ,   infixOp   "/=" ( Op OpNotEq) Ex.AssocLeft ]
-            , [ infixOp   "and" ( Op OpAnd) Ex.AssocLeft
-            ,   infixOp   "or" ( Op OpOr)  Ex.AssocLeft
-            ,   infixOp   "xor" ( Op OpXor) Ex.AssocLeft
-            ,   prefixOp  "not" ( UnaryOp Not)]
-            , [ infixOp   "." ( Op OpComp) Ex.AssocRight ] ]
+            ,   infixOp   "-"    (Op OpSub) Ex.AssocLeft ]
+            , [ infixOp   "<="   (Op OpLe)  Ex.AssocLeft       -- boolean operators
+            ,   infixOp   ">="   (Op OpGe)  Ex.AssocLeft
+            ,   infixOp   "<"    (Op OpLt)  Ex.AssocLeft
+            ,   infixOp   ">"    (Op OpGt)  Ex.AssocLeft ]
+            , [ infixOp   "=="   (Op OpEq)  Ex.AssocLeft
+            ,   infixOp   "/="   (Op OpNotEq) Ex.AssocLeft ]
+            , [ infixOp   "and"  (Op OpAnd) Ex.AssocLeft
+            ,   infixOp   "or"   (Op OpOr)  Ex.AssocLeft
+            ,   infixOp   "xor"  (Op OpXor) Ex.AssocLeft
+            ,   prefixOp  "not"  (UnaryOp Not) ]
+            , [ infixOp   "."    (Op OpComp) Ex.AssocRight ]]
 
 expr :: Parser Expr
 expr = do
