@@ -11,6 +11,7 @@ type Name = String
 type VarName = String
 type ConName = String
 type Decl = (String, Expr)
+type ErrorMsg = String
 
 ----------
 -- ADTs --
@@ -30,7 +31,6 @@ data Expr
   | FixPoint Expr
   | Op Binop Expr Expr
   | UnaryOp UnaryOp Expr
---  | ListComp Expr Expr Expr
   | Closure Name Expr TermEnv
   | PrimitiveErr MLError
   deriving (Show, Eq, Ord)
@@ -46,7 +46,7 @@ data Lit
   deriving (Show, Eq, Ord)
 
 data UnaryOp =
-        Car | Cdr | Not
+       Car | Cdr | Not 
      | Minus | OpLog -- unary maths ops
      | Ord | Chr     -- char primitives
     deriving (Eq, Ord)
@@ -89,11 +89,13 @@ instance Show Binop where
 data MLError
     = MathsPrim String 
     | ListPrim String
+    | CharPrim String
     deriving (Eq, Ord)
 
 instance Show MLError where
     show (MathsPrim str) = show str
     show (ListPrim str)  = show str
+    show (CharPrim str)  = show str
 
 -----------------
 -- HELPER DEFS --
