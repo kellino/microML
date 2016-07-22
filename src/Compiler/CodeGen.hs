@@ -29,10 +29,10 @@ import System.Exit
 --------------------
 
 type FuncName = String
-type ErrorMsg = String
+type CErrorMsg = String
 type FileName = L.Text
 type CompEnv = Map.Map String Expr
-type Compiler a = ReaderT CompEnv (ExceptT ErrorMsg Identity) a
+type Compiler a = ReaderT CompEnv (ExceptT CErrorMsg Identity) a
 -- typing environment
 data TypeState = TypeState { typeState :: Env }
 
@@ -42,7 +42,7 @@ type CState a = (StateT TypeState IO) a
 -- COMPILER --
 --------------
 
-runCompiler :: CompEnv -> Compiler a -> Either ErrorMsg a
+runCompiler :: CompEnv -> Compiler a -> Either CErrorMsg a
 runCompiler env ev = runIdentity (runExceptT (runReaderT ev env))
 
 hoistError :: Show a => Either a t -> t
