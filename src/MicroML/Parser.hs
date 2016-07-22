@@ -24,7 +24,7 @@ import MicroML.ListPrimitives
 varName :: Parser String
 varName = do
     name@(n:_) <- identifier
-    if isLower n
+    if isLower n 
        then return name
        else fail "a variable name must start with a lowercase letter"
 
@@ -192,8 +192,8 @@ prefixOp name func = Ex.Prefix ( do {reservedOp name; return func } )
 primitives :: [[Op Expr]]
 primitives = [[ prefixOp "head" (UnaryOp Car)                -- list operators
             ,   prefixOp  "tail" (UnaryOp Cdr)
-            ,   prefixOp  "_ord" (UnaryOp Ord)
-            ,   prefixOp  "_chr" (UnaryOp Chr)
+            ,   prefixOp  "ord" (UnaryOp Ord)
+            ,   prefixOp  "chr" (UnaryOp Chr)
             ,   infixOp   ":"    (Op OpCons) Ex.AssocRight
             ,   infixOp   "++"   (Op OpAppend) Ex.AssocRight ]
             , [ prefixOp  "_log" (UnaryOp OpLog)
