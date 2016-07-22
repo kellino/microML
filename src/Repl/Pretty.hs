@@ -71,13 +71,12 @@ ppsig (a, b) = ppLit a ++ "\ESC[35m:\ESC[0m " ++ ppscheme b
 ppenv :: Env -> [String]
 ppenv (TypeEnv env) = map ppsig $ Map.toList env
 
--- fairly nasty and hackish this function, but it works
+{--- fairly nasty and hackish this function, but it works-}
 ppLit :: String -> String
 ppLit a 
   | "Var" `isPrefixOf` a     = bold ++ ((!!1) . words) a ++ unbold
   | "Closure" `isPrefixOf` a = bold ++ "<<closure>>" ++ unbold
   | "List" `isPrefixOf` a    = a
---  | "List" `isPrefixOf` a    = "[" ++ bold ++ intercalate ", " (map ppLit (pprList a)) ++ unbold ++ "]"
   | "LInt" `isInfixOf` a     = bold ++ noParens ((init . (!!2). words) a) ++ unbold
   | "LDouble" `isInfixOf` a  = bold ++ noParens ((init . (!!2) . words) a) ++ unbold
   | "LBoolean" `isInfixOf` a = bold ++ (init . (!!2) . words) a ++ unbold
