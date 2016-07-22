@@ -240,9 +240,8 @@ infer expr = case expr of
     Let x e1 e2 -> do
         env <- ask
         t1 <- infer e1
-        let sc = generalize env t1
-        t2 <- inEnv (x, sc) (infer e2)
-        return t2
+        let sc = generalize env t1 
+        inEnv (x, sc) (infer e2)
 
     FixPoint e1 -> do
         t1 <- infer e1
@@ -256,11 +255,12 @@ infer expr = case expr of
         case e1 of 
           (List _)           -> doUnaryListOp op e1 tv 
           (Lit (LString _))  -> doUnaryListOp op e1 tv
-          (Lit (LChar _))    -> doUnaryChar op t1 tv
-          (Lit (LInt _))     -> doUnaryMaths op t1 tv
-          (Lit (LDouble _))  -> doUnaryMaths op t1 tv
+          (Lit (LChar _))    -> doUnaryChar op e1 tv
+          (Lit (LInt _))     -> doUnaryMaths op e1 tv
+          (Lit (LDouble _))  -> doUnaryMaths op e1 tv
           (Lit (LBoolean _)) -> doUnaryBool op t1 tv
           var@(Var _)        -> infer var
+          x                  -> throwError $ UnsupportedOperation $ show x
 
     Op op e1 e2 -> 
         case e1 of
@@ -270,7 +270,9 @@ infer expr = case expr of
           (Lit (LChar _))    -> doCharOp op e1 e2
           (Lit (LString _))  -> doListOp op e1 e2
           (List _)           -> doListOp op e1 e2
-          _                  -> doBinaryMathsOp op e1 e2 -- placeholder
+          var@(Var _)        -> infer var
+          x                  -> throwError $ UnsupportedOperation $ show x
+          -- _                  -> doBinaryMathsOp op e1 e2 -- placeholder
 
     If cond tr fl -> do
         t1 <- infer cond
@@ -287,16 +289,14 @@ infer expr = case expr of
 -- UNARY & BINARY OPERATIONS --
 -------------------------------
 
-doUnaryChar :: UnaryOp -> Type -> Type -> Infer Type
-doUnaryChar op t1 tv = 
+doUnaryChar :: UnaryOp -> Expr -> Type -> Infer Type
+doUnaryChar op e1 tv = 
     case op of
       Ord -> do
+          t1 <- infer (ord' e1)
           uni t1 tv
           return t1
-      Chr -> do
-          uni t1 tv
-          return t1
-      _   -> throwError $ UnsupportedOperation $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with characters" ++ "\ESC[0m"
+      _  -> throwError $ UnsupportedOperation "you cannot perform this operation on characters"
 
 doUnaryBool :: UnaryOp -> Type -> Type -> Infer Type
 doUnaryBool op t1 tv =
@@ -306,13 +306,19 @@ doUnaryBool op t1 tv =
           return t1
       _   -> throwError $ UnsupportedOperation $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with booleans" ++ "\ESC[0m"
 
-doUnaryMaths :: UnaryOp -> Type -> Type -> Infer Type
-doUnaryMaths op t1 tv =
+doUnaryMaths :: UnaryOp -> Expr -> Type -> Infer Type
+doUnaryMaths op e1 tv =
     case op of
       OpLog -> do
+          t1 <- infer e1
           uni t1 tv
           return t1
       Minus -> do
+          t1 <- infer e1
+          uni t1 tv
+          return t1
+      Chr  -> do
+          t1 <- infer (chr' e1)
           uni t1 tv
           return t1
       _ -> throwError $ UnsupportedOperation $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with numbers" ++ "\ESC[0m"
