@@ -7,7 +7,6 @@ import qualified Data.Map as Map
 
 type RetTy = String
 
-
 microBitIncludes :: String
 microBitIncludes = "#include \"MicroBit.h\"\n\nMicroBit uBit;\n"
 
