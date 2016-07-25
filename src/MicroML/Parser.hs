@@ -115,10 +115,10 @@ bool = (reserved "true" >> return (Lit (LBoolean True)))
 
 list :: Parser Expr
 list = do
-    void $ spaces *> char '['
-    elems <- aexp `sepBy` char ',' <* spaces
-    void $ char ']' <* spaces
-    return $ List elems
+    void $ char '['
+    elems <- expr `sepBy` char ',' <* spaces
+    void $ char ']'
+    return $ foldr (Op OpCons) Nil elems
 
 tuple :: Parser Expr
 tuple = do
@@ -190,11 +190,7 @@ prefixOp :: String -> (a -> a) -> Ex.Operator L.Text () Identity a
 prefixOp name func = Ex.Prefix ( do {reservedOp name; return func } )
     
 primitives :: [[Op Expr]]
-primitives = [[ prefixOp "head" (UnaryOp Car)                -- list operators
-            ,   prefixOp  "tail" (UnaryOp Cdr)
-            ,   prefixOp  "ord" (UnaryOp Ord)
-            ,   prefixOp  "chr" (UnaryOp Chr)
-            ,   infixOp   ":"    (Op OpCons) Ex.AssocRight
+primitives = [[ infixOp   ":"    (Op OpCons) Ex.AssocRight
             ,   infixOp   "++"   (Op OpAppend) Ex.AssocRight ]
             , [ prefixOp  "_log" (UnaryOp OpLog)
             ,   infixOp   "^"    (Op OpExp) Ex.AssocLeft ]     -- maths operators

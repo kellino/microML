@@ -26,13 +26,13 @@ data Expr
   | Lam Name Expr
   | Let Name Expr Expr
   | Lit Lit
-  | List [Expr]
   | If Expr Expr Expr
   | FixPoint Expr
   | Op Binop Expr Expr
   | UnaryOp UnaryOp Expr
   | Closure Name Expr TermEnv
   | PrimitiveErr MLError
+  | Nil
   deriving (Show, Eq, Ord)
 
 data Lit
@@ -46,18 +46,13 @@ data Lit
   deriving (Show, Eq, Ord)
 
 data UnaryOp =
-       Car | Cdr | Not 
-     | Minus | OpLog -- unary maths ops
-     | Ord | Chr     -- char primitives
+     Chr | Ord |
+     Not | Minus | OpLog -- unary maths ops
     deriving (Eq, Ord)
 
 instance Show UnaryOp where
-    show Car   = red ++ "head" ++ unred
-    show Cdr   = red ++ "tail" ++ unred
     show Minus = red ++ "negative" ++ unred
     show OpLog = red ++ "log" ++ unred
-    show Ord   = red ++ "ascii value" ++ unred
-    show Chr   = red ++ "ascii character" ++ unred
 
 data Binop = 
         OpAdd | OpSub | OpMul | OpDiv | OpIntDiv | OpExp | OpMod 
