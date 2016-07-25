@@ -215,10 +215,12 @@ infer expr = case expr of
         tv <- fresh
         case e1 of 
           --(Lit (LString _))  -> doUnaryListOp op e1 tv
+          Nil                -> throwError $ UnsupportedOperation "can't be done"
           (Lit (LChar _))    -> doUnaryChar op t1 tv
           (Lit (LInt _))     -> doUnaryMaths op t1 tv
           (Lit (LDouble _))  -> doUnaryMaths op t1 tv
           (Lit (LBoolean _)) -> doUnaryBool op t1 tv
+          (Op OpCons x _)    -> infer x
           var@(Var _)        -> infer var
 
     Op op e1 e2 -> 
@@ -284,6 +286,12 @@ doUnaryBool op t1 tv =
 doUnaryMaths :: UnaryOp -> Type -> Type -> Infer Type
 doUnaryMaths op t1 tv =
     case op of
+      Car   -> do
+          uni t1 tv
+          return t1
+      Cdr   -> do
+          uni t1 tv
+          return t1
       OpLog -> do
           uni t1 tv
           return t1
