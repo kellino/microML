@@ -7,10 +7,10 @@ module Repl.Pretty  where
 
 import MicroML.Typing.Type
 import MicroML.Syntax
-import MicroML.Typing.Env
+--import MicroML.Typing.Env
 import MicroML.Typing.TypeError
 
-import qualified Data.Map as Map
+--import qualified Data.Map as Map
 import Text.PrettyPrint
 
 parensIf ::  Bool -> Doc -> Doc

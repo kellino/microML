@@ -10,6 +10,12 @@ import Data.Bits (xor)
 emptyTmenv :: TermEnv
 emptyTmenv = Map.empty
 
+hoistPrimError :: Show a => Either a Expr -> Expr
+hoistPrimError e = 
+    case e of
+      Right val -> val
+      Left err  -> PrimitiveErr $ ListPrim $ show err
+
 eval :: TermEnv -> Expr -> Expr
 eval env expr = case expr of
     num@(Lit (LInt _))      -> num
@@ -39,9 +45,8 @@ eval env expr = case expr of
     UnaryOp op a -> do
         let a' = eval env a
         case op of
-          Car   -> car a'
+          Car   -> hoistPrimError . runPrimError $ car a'
           Cdr   -> cdr a'
-
           OpLog -> log' a'
           Minus ->  case a' of
                       (Lit (LInt x))    -> Lit . LInt $ negate x

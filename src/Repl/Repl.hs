@@ -47,28 +47,28 @@ hoistError (Left err) = do
 
 evalDef :: TermEnv -> (String, Expr) -> TermEnv
 evalDef env (nm, ex) = termEnv'
-  where (val, termEnv') = runEval env nm ex
+  where (_, termEnv') = runEval env nm ex
 
 exec :: Bool -> L.Text -> Repl ()
 exec update source = do
     st <- get
 
-    mod' <- hoistError $ parseProgram "<stdin>" source
+    mod_ <- hoistError $ parseProgram "<stdin>" source
 
-    --typeEnv' <- hoistError $ inferTop (typeEnv st) mod'
+    typeEnv' <- hoistError $ inferTop (typeEnv st) mod_
 
-    let st' = st { termEnv = foldl' evalDef (termEnv st) mod'
-     --            , typeEnv = typeEnv' `mappend` typeEnv st 
+    let st' = st { termEnv = foldl' evalDef (termEnv st) mod_
+                 , typeEnv = typeEnv' `mappend` typeEnv st 
        }
 
     when update (put st')
 
-    case Prelude.lookup "it" mod' of
+    case Prelude.lookup "it" mod_ of
       Nothing -> return ()
       Just ex -> do
         let (val, _) = runEval (termEnv st') "it"  ex
-        liftIO $ print val 
-        --showOutput val st'
+        --liftIO $ print val 
+        showOutput val st'
 
 showOutput :: Expr -> IState -> Repl ()
 showOutput arg st = 
