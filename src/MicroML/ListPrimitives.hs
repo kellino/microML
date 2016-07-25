@@ -1,19 +1,26 @@
 module MicroML.ListPrimitives where
 
 import MicroML.Syntax
+import Control.Monad.Except
+import Control.Monad.Identity
 
 import qualified Data.Char as DC
 
+type PrimError a = ExceptT ErrorMsg Identity a
+
+runPrimError :: ExceptT e Identity a -> Either e a
+runPrimError ev = runIdentity $ runExceptT ev
+
 enumFromTo_ :: Expr -> Expr -> Expr
 enumFromTo_ (Lit (LInt a)) (Lit (LInt b)) = foldr (Op OpCons) Nil $ (Lit . LInt ) <$> [a .. b]
-{-enumFromTo_ (Lit (LInt a)) (Lit (LInt b))         = (Lit . LInt) <$> [a .. b]-}
-{-enumFromTo_ (Lit (LDouble a)) (Lit (LDouble b)) = List $ (Lit . LDouble) <$> [a..b]-}
-{-enumFromTo_ (Lit (LChar a)) (Lit (LChar b))     = List $ (Lit . LChar) <$> [a..b]-}
-enumFromTo_ _ _                                 = error "doesn't make any sense"         -- temp error message here
+enumFromTo_ (Lit (LDouble a)) (Lit (LDouble b)) = foldr (Op OpCons) Nil $ (Lit . LDouble ) <$> [a .. b]
+enumFromTo_ (Lit (LChar a)) (Lit (LChar b))     = foldr (Op OpCons) Nil $ (Lit . LChar) <$> [a .. b]
+enumFromTo_ _ _                                 = PrimitiveErr $ ListPrim ""
 
-car :: Expr -> Expr 
-car Nil = PrimitiveErr $ ListPrim "there is no head of an empty list!"
-car (Op OpCons x _) =  x
+car :: Expr -> PrimError Expr 
+car Nil = throwError "you're trying to perform Car on an empty list!"
+--car Nil = PrimitiveErr $ ListPrim "there is no head of an empty list!"
+car (Op OpCons x _) =  return x
 
 cdr :: Expr -> Expr
 cdr Nil = PrimitiveErr $ ListPrim "there is no head of an empty list!"
