@@ -49,8 +49,8 @@ hoistError :: Show a => Either a t -> t
 hoistError (Right vl) = vl
 hoistError (Left err) = error $ show err
 
-compileMicroML :: (String, Expr) -> Compiler CExtDecl
-compileMicroML (nm, expr) = do
+compileTopLevel :: (String, Expr) -> Compiler CExtDecl
+compileTopLevel (nm, expr) = do
     let newNm = fromString nm
     case expr of
       -- if there's only a name and a Lit expression, then it must be a variable declaration
@@ -58,6 +58,7 @@ compileMicroML (nm, expr) = do
       Lit (LDouble d)  -> return $ export $ double newNm .= realToFrac d
       Lit (LChar c)    -> return $ export $ char newNm .= chr c
       Lit (LString st) -> return $ export $ charPtr newNm .= str st
+      Nil              -> undefined
       App (Var n) body -> return $ export $ do
           let (func, retty) = fromJust $ Map.lookup n microBitAPI
           if nm == "main" 
@@ -128,10 +129,10 @@ writeCFile nf code = do
 compile :: L.Text -> L.Text -> IO ()
 compile source fn = do
     let res = hoistError $ parseProgram "from source" source
-    print res
+    mapM_ print res
     if null res
        then die $ red ++ "Exit Failure: " ++ unred ++ "the given file was empty, so there's nothing to compile!"
        else do 
            -- checkTypes res
-           let code = map (runCompiler Map.empty . compileMicroML) res
+           let code = map (runCompiler Map.empty . compileTopLevel) res
            writeCFile fn $ rights code
