@@ -1,7 +1,6 @@
 module Repl.Eval where
 
 import MicroML.Syntax
-import MicroML.ListPrimitives
 
 import qualified Data.Map as Map
 import Data.Maybe (fromJust)
@@ -18,7 +17,7 @@ eval env expr = case expr of
     str@(Lit (LString _))   -> str
     bool@(Lit (LBoolean _)) -> bool
     tup@(Lit (LTup _))      -> tup
-    ls@(List _)             -> ls
+    Nil                     -> Nil
     Var x                   -> fromJust (Map.lookup x env) -- the type checker ensures we never get this far
     FixPoint e              -> eval env (App e (FixPoint e))
     Lam x body              -> Closure x body env
@@ -39,11 +38,7 @@ eval env expr = case expr of
     UnaryOp op a -> do
         let a' = eval env a
         case op of
-          Chr   -> chr' a'
-          Ord   -> ord' a'
           OpLog -> log' a'
-          Car   -> car a'
-          Cdr   -> cdr a'
           Minus ->  case a' of
                       (Lit (LInt x))    -> Lit . LInt $ negate x
                       (Lit (LDouble x)) -> Lit . LDouble $ negate x
@@ -71,8 +66,11 @@ eval env expr = case expr of
           OpGt     -> a' `opGt` b'
           OpNotEq  -> a' `opNotEq` b'
           OpCons   -> a' `cons` b'
-          OpAppend -> a' `append'` b'
-          OpComp   -> eval env (App a b')
+
+cons :: Expr -> Expr -> Expr
+cons a Nil = Op OpCons a Nil
+cons a (Op OpCons x Nil) = Op OpCons a (Op OpCons x Nil)
+cons a ls@(Op OpCons _ _) = Op OpCons a ls
 
 add :: Expr -> Expr -> Expr
 add (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a + b

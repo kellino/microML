@@ -67,13 +67,20 @@ exec update source = do
       Nothing -> return ()
       Just ex -> do
         let (val, _) = runEval (termEnv st') "it"  ex
-        showOutput (show val) st'
+        showOutput val st'
+        --showOutput (show val) st'
 
-showOutput :: String -> IState -> Repl ()
+showOutput :: Expr -> IState -> Repl ()
 showOutput arg st = 
-  case Env.lookup "it" (typeEnv st)  of
-    Just val -> liftIO $ putStrLn $ ppsig (arg, val)
-    Nothing -> return ()
+    case Env.lookup "it" (typeEnv st) of
+      Just val -> liftIO $ putStrLn $ ppsig (arg, val)
+      Nothing -> return ()
+
+{-showOutput :: String -> IState -> Repl ()-}
+{-showOutput arg st = -}
+  {-case Env.lookup "it" (typeEnv st)  of-}
+    {-Just val -> liftIO $ putStrLn $ ppsig (arg, val)-}
+    {-Nothing -> return ()-}
 
 cmd :: String -> Repl ()
 cmd source = exec True (L.pack source)
@@ -82,11 +89,11 @@ cmd source = exec True (L.pack source)
 -- Commands
 -------------------------------------------------------------------------------
 
--- :browse command
-browse :: [String] -> Repl ()
-browse _ = do
-  st <- get
-  liftIO $ mapM_ putStrLn $ ppenv (typeEnv st)
+ {-:browse command-}
+{-browse :: [String] -> Repl ()-}
+{-browse _ = do-}
+  {-st <- get-}
+  {-liftIO $ mapM_ putStrLn $ ppenv (typeEnv st)-}
 
 -- :?
 help :: [String] -> HaskelineT (Control.Monad.State.Strict.StateT IState IO) ()
@@ -95,23 +102,24 @@ help = return $ liftIO $ putStrLn "can't help you on that one"
 -- :using command
 using :: [String] -> Repl ()
 using args = do
+    --contents <- liftIO $ L.readFile $ unwords args
     contents <- liftIO $ L.readFile $ "/home/david/.microML/" ++ unwords args ++ ".ml"
     exec True contents
 
--- :type command
-typeof :: [String] -> Repl ()
-typeof args = do
-  st <- get
-  let arg = unwords args
-  case Env.lookup arg (typeEnv st) of
-    Just val -> liftIO $ putStrLn $ ppsig (arg, val)
-    Nothing -> exec False $ L.pack arg
+{--- :type command-}
+{-typeof :: [String] -> Repl ()-}
+{-typeof args = do-}
+  {-st <- get-}
+  {-let arg = unwords args-}
+  {-case Env.lookup arg (typeEnv st) of-}
+    {-Just val -> liftIO $ putStrLn $ ppsig (arg, val)-}
+    {-Nothing -> exec False $ L.pack arg-}
 
 -- :quit command
 quit :: a -> Repl ()
 quit _ = liftIO exitSuccess
 
--- access the shell
+-- access the shell -- needs error checking
 sh :: [String] -> Repl ()
 sh arg = liftIO $ S.callCommand (unwords arg)
 
@@ -137,9 +145,9 @@ comp n = do
 options :: [(String, [String] -> Repl ())]
 options = [
     ("using", using)
-  , ("browse" , browse)
+  -- , ("browse" , browse)
   , ("quit" ,  quit)
-  , ("type" , typeof)
+  --, ("type" , typeof)
   , ("!"    , sh)
   , ("?"    , help)
   ]
