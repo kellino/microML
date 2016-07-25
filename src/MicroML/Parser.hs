@@ -170,10 +170,14 @@ aexp =
       parens expr
   <|> try tuple
   <|> bool
-  <|> try binary <|> try octal <|> try hex <|> try double
+  <|> try binary 
+  <|>  try octal 
+  <|> try hex 
+  <|> try double
   <|> number
   <|> ifthen
-  <|> try parseRange <|> list
+  <|> try parseRange
+  <|> list
   <|> try letrecin 
   <|> lambda
   <|> variable
@@ -190,7 +194,9 @@ prefixOp :: String -> (a -> a) -> Ex.Operator L.Text () Identity a
 prefixOp name func = Ex.Prefix ( do {reservedOp name; return func } )
     
 primitives :: [[Op Expr]]
-primitives = [[ infixOp   ":"    (Op OpCons) Ex.AssocRight
+primitives = [[ prefixOp "head"  (UnaryOp Car)
+            ,   prefixOp "tail"  (UnaryOp Cdr)
+            ,   infixOp   ":"    (Op OpCons) Ex.AssocRight
             ,   infixOp   "++"   (Op OpAppend) Ex.AssocRight ]
             , [ prefixOp  "_log" (UnaryOp OpLog)
             ,   infixOp   "^"    (Op OpExp) Ex.AssocLeft ]     -- maths operators

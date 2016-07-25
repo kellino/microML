@@ -46,8 +46,9 @@ data Lit
   deriving (Show, Eq, Ord)
 
 data UnaryOp =
-     Chr | Ord |
-     Not | Minus | OpLog -- unary maths ops
+     Chr | Ord 
+   | Car | Cdr 
+   | Not | Minus | OpLog -- unary maths ops
     deriving (Eq, Ord)
 
 instance Show UnaryOp where
