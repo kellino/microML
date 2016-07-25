@@ -55,10 +55,10 @@ exec update source = do
 
     mod <- hoistError $ parseProgram "<stdin>" source
 
-    typeEnv' <- hoistError $ inferTop (typeEnv st) mod
+    --typeEnv' <- hoistError $ inferTop (typeEnv st) mod
 
     let st' = st { termEnv = foldl' evalDef (termEnv st) mod
-                 , typeEnv = typeEnv' `mappend` typeEnv st 
+                 --, typeEnv = typeEnv' `mappend` typeEnv st 
        }
 
     when update (put st')
@@ -67,7 +67,8 @@ exec update source = do
       Nothing -> return ()
       Just ex -> do
         let (val, _) = runEval (termEnv st') "it"  ex
-        showOutput val st'
+        liftIO $ print val
+        --showOutput val st'
         --showOutput (show val) st'
 
 showOutput :: Expr -> IState -> Repl ()

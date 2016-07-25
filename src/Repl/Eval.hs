@@ -1,6 +1,7 @@
 module Repl.Eval where
 
 import MicroML.Syntax
+import MicroML.ListPrimitives
 
 import qualified Data.Map as Map
 import Data.Maybe (fromJust)
@@ -38,6 +39,9 @@ eval env expr = case expr of
     UnaryOp op a -> do
         let a' = eval env a
         case op of
+          Car   -> car a'
+          Cdr   -> cdr a'
+
           OpLog -> log' a'
           Minus ->  case a' of
                       (Lit (LInt x))    -> Lit . LInt $ negate x
