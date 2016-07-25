@@ -225,14 +225,16 @@ infer expr = case expr of
         if op == OpCons 
            then doConsOp e1 e2
            else 
-            case e1 of
-              Nil              -> throwError $ UnsupportedOperation "there's a problem here"
-              Lit (LInt _)     -> doBinaryMathsOp op e1 e2
-              Lit (LDouble _)  -> doBinaryMathsOp op e1 e2
-              Lit (LBoolean _) -> doBoolOp op e1 e2
-              Lit (LChar _)    -> doCharOp op e1 e2
-              var@(Var _)      -> infer var
-              xs               -> throwError $ UnsupportedOperation $ show xs
+            case (e1, e2) of
+              var@(Var x,_)      -> do
+                  t1 <- infer $ Var x
+                  throwError $ UnsupportedOperation $ show var ++ show t1
+              nil@(_, Nil)         -> throwError $ UnsupportedOperation $ show nil
+              (Lit (LInt _),_)     -> doBinaryMathsOp op e1 e2
+              (Lit (LDouble _),_)  -> doBinaryMathsOp op e1 e2
+              (Lit (LBoolean _),_) -> doBoolOp op e1 e2
+              (Lit (LChar _),_)    -> doCharOp op e1 e2
+              xs                   -> throwError $ UnsupportedOperation $ show xs
               --(Lit (LString _))  -> doListOp op e1 e2
 
     If cond tr fl -> do
@@ -312,11 +314,10 @@ doBinaryMathsOp op e1 e2 = do
       -- typeNumber, rather than typeInt or typeDouble, this is the easiest way to check that modulo 
       -- only passes typechecking on ints
       OpMod   ->
-          case e1 of
-            (Lit (LInt _)) -> case e2 of
-                                (Lit (LInt _)) -> getOp mathsOps OpMod t1 t2
-                                _   -> throwError $ UnsupportedOperation "both numbers must be integers"
-            _ -> throwError $ UnsupportedOperation "both numbers must be integers"
+          case (e1, e2) of
+            (Lit (LInt _), Lit (LInt _)) -> getOp mathsOps OpMod t1 t2
+            (Lit (LDouble d), _)  -> throwError $ UnsupportedOperation $ "both numbers must be integers, whereas " ++ show d ++ " is a floating point number"
+            (_, Lit (LDouble d))  -> throwError $ UnsupportedOperation $ "both numbers must be integers, whereas " ++ show d ++ " is a floating point number"
       OpDiv   -> 
           case e2 of
             (Lit (LInt 0)) -> throwError $ UnsupportedOperation "you cannot divide by 0"
