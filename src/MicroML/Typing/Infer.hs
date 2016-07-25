@@ -201,8 +201,7 @@ infer expr = case expr of
         env <- ask
         t1 <- infer e1
         let sc = generalize env t1
-        t2 <- inEnv (x, sc) (infer e2)
-        return t2
+        inEnv (x, sc) (infer e2)
 
     FixPoint e1 -> do
         t1 <- infer e1
@@ -215,25 +214,26 @@ infer expr = case expr of
         tv <- fresh
         case e1 of 
           --(Lit (LString _))  -> doUnaryListOp op e1 tv
-          Nil                -> throwError $ UnsupportedOperation "can't be done"
+          Nil                -> throwError $ UnsupportedOperation $ "you're trying to perform " ++ show op ++ " on nothing"
           (Lit (LChar _))    -> doUnaryChar op t1 tv
           (Lit (LInt _))     -> doUnaryMaths op t1 tv
           (Lit (LDouble _))  -> doUnaryMaths op t1 tv
           (Lit (LBoolean _)) -> doUnaryBool op t1 tv
-          (Op OpCons x _)    -> infer x
           var@(Var _)        -> infer var
 
     Op op e1 e2 -> 
         if op == OpCons 
            then doConsOp e1 e2
            else 
-                case e1 of
-                  (Lit (LInt _))     -> doBinaryMathsOp op e1 e2
-                  (Lit (LDouble _))  -> doBinaryMathsOp op e1 e2
-                  (Lit (LBoolean _)) -> doBoolOp op e1 e2
-                  (Lit (LChar _))    -> doCharOp op e1 e2
-                  --(Lit (LString _))  -> doListOp op e1 e2
-                  _                  -> doBinaryMathsOp op e1 e2 -- placeholder
+            case e1 of
+              Nil              -> throwError $ UnsupportedOperation "there's a problem here"
+              Lit (LInt _)     -> doBinaryMathsOp op e1 e2
+              Lit (LDouble _)  -> doBinaryMathsOp op e1 e2
+              Lit (LBoolean _) -> doBoolOp op e1 e2
+              Lit (LChar _)    -> doCharOp op e1 e2
+              var@(Var _)      -> infer var
+              xs               -> throwError $ UnsupportedOperation $ show xs
+              --(Lit (LString _))  -> doListOp op e1 e2
 
     If cond tr fl -> do
         t1 <- infer cond
@@ -241,7 +241,7 @@ infer expr = case expr of
         t3 <- infer fl
         uni t1 typeBool
         uni t2 t3
-        return t2
+        return t3
 
     -- should never actually reach this, but discretion is the better part of valour
     x -> throwError $ UnsupportedOperation $ show x
