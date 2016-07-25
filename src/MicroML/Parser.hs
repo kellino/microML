@@ -83,9 +83,11 @@ baseToDec f n = (fst . head) $ f n
 
 charLit :: Parser Expr
 charLit = do
-    void $ spaces *> char '\''
+    spaces
+    void $ char '\''
     c <- letter
-    void $ char '\'' <* spaces
+    void $ char '\'' 
+    spaces
     return $ Lit (LChar c)
 
 stringLit :: Parser Expr
@@ -115,9 +117,9 @@ bool = (reserved "true" >> return (Lit (LBoolean True)))
 
 list :: Parser Expr
 list = do
-    void $ char '['
+    void $ spaces *> char '['
     elems <- expr `sepBy` char ',' <* spaces
-    void $ char ']'
+    void $ char ']' <* spaces
     return $ foldr (Op OpCons) Nil elems
 
 tuple :: Parser Expr
@@ -171,7 +173,7 @@ aexp =
   <|> try tuple
   <|> bool
   <|> try binary 
-  <|>  try octal 
+  <|> try octal 
   <|> try hex 
   <|> try double
   <|> number

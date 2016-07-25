@@ -52,6 +52,8 @@ data UnaryOp =
     deriving (Eq, Ord)
 
 instance Show UnaryOp where
+    show Car   = red ++ "Car" ++ unred
+    show Cdr   = red ++ "Cdr" ++ unred
     show Minus = red ++ "negative" ++ unred
     show OpLog = red ++ "log" ++ unred
 
@@ -78,7 +80,7 @@ instance Show Binop where
     show OpGe     = red ++ "greater than or equal to" ++ unred
     show OpGt     = red ++ "greater than" ++ unred
     show OpNotEq  = red ++ "not equal to" ++ unred
-    show OpCons   = red ++ "cons" ++ unred
+    show OpCons   = red ++ "Cons" ++ unred
     show OpComp   = red ++ "composition" ++ unred
     show OpAppend = red ++ "concatenation" ++ unred
 
