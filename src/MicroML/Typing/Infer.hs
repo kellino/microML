@@ -78,7 +78,7 @@ lookupEnv :: Name -> Infer Type
 lookupEnv x = do
   (TypeEnv env) <- ask
   case Map.lookup x env of
-      Nothing   ->  throwError $ UnboundVariable x
+      Nothing   ->  throwError $ UnboundVariable $ show x
       Just s    ->  instantiate s
 
 letters :: [String]
@@ -145,7 +145,7 @@ boolOps = Map.fromList [
 -- INFERENCE --
 ---------------
 
-inferTop :: Env -> [(String, Expr)] -> Either TypeError Env
+inferTop :: Env -> [(Name, Expr)] -> Either TypeError Env
 inferTop env [] = Right env
 inferTop env ((name, ex):xs) = case inferExpr env ex of
   Left err -> Left err
@@ -255,12 +255,12 @@ doConsOp e1 e2 =
               t1 <- infer e1
               return $ 
                   case t1 of
-                    (TCon x) -> TCon $ "[" ++ x ++ "]"
+                    (TCon ty) -> TCon $ "[" ++ ty ++ "]"
           (_, Op OpCons x xs) -> do
               t1 <- infer e1
               t2 <- infer x
               uni t1 t2
-              infer xs
+              doConsOp x xs
 
 doUnaryChar :: UnaryOp -> Type -> Type -> Infer Type
 doUnaryChar op t1 tv = 
