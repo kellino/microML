@@ -75,6 +75,7 @@ eval env expr = case expr of
           OpGt     -> a' `opGt` b'
           OpNotEq  -> a' `opNotEq` b'
           OpCons   -> a' `cons` b'
+          OpAppend -> a' `append` b'
 
 cons :: Expr -> Expr -> Expr
 cons a Nil = Op OpCons a Nil
