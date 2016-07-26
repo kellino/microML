@@ -46,7 +46,9 @@ instance Pretty Expr where
     ppr _ (Lit (LBoolean True))  = text "true"
     ppr _ (Lit (LBoolean False)) = text "false"
     ppr _ Nil                    = text "empty list"
+    ppr _ ls@(Op OpCons _ _)     = text $ matchParens (ppList ls)
     ppr _ xs                     = text $ show xs
+
 
 instance Show TypeError where
       show (UnificationFail a b) =
@@ -64,6 +66,24 @@ ppscheme = render . ppr 0
 
 pptype :: Type -> String
 pptype = render . ppr 0
+
+-- WIP --
+ppList :: Expr -> String
+ppList (Op OpCons x Nil) = ppList x ++ "]"
+ppList (Op OpCons x xs)  = ppList x ++ ", " ++ ppList xs
+ppList l@Lit{}           = 
+    case l of
+      Lit (LInt n)         -> show n
+      Lit (LDouble n)      -> show n
+      Lit (LString n)      -> show n
+      Lit (LChar n)        -> show n
+      Lit (LBoolean True)  -> "true"
+      Lit (LBoolean False) -> "false"
+ppList x                 = show x
+
+matchParens :: String -> String
+matchParens st = let len = length . takeWhile (== ']') . reverse $ st
+                  in replicate len '[' ++ st
 
 ppexpr :: Expr -> String
 ppexpr = render . ppr 0
