@@ -27,9 +27,9 @@ instance Pretty TVar where
     ppr _ (TV x) = text x
 
 instance Pretty Type where
-    ppr p (TArr a b) = parensIf (isArrow a) (ppr p a) <+> text "\ESC[37m→\ESC[0m" <+> ppr p b  
+    ppr p (TArrow a b) = parensIf (isArrow a) (ppr p a) <+> text "\ESC[37m→\ESC[0m" <+> ppr p b  
         where
-          isArrow TArr{} = True
+          isArrow TArrow{} = True
           isArrow _ = False
     ppr p (TVar a) = ppr p a
     ppr _ (TCon a) = text a
