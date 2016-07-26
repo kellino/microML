@@ -92,7 +92,6 @@ fresh = do
 
 instantiate ::  TypeScheme -> Infer Type
 instantiate (Forall as t) = do
-   -- as' <- mapM (\_ -> fresh) as
     as' <- mapM (const fresh) as
     let s = Subst $ Map.fromList $ zip as as'
     return $ apply s t
@@ -220,7 +219,7 @@ infer expr = case expr of
           (Lit (LDouble _))  -> doUnaryMaths op t1 tv
           (Lit (LBoolean _)) -> doUnaryBool op t1 tv
           var@(Var _)        -> infer var
-          Op OpCons x _      -> infer x
+          Op _ x _           -> infer x
           _                  -> throwError $ UnsupportedOperation $ "UnaryOp error: " ++ show op ++ show e1
 
     Op op e1 e2 -> 
@@ -245,7 +244,10 @@ infer expr = case expr of
                   (Lit (LChar _),_)    -> doBinaryCharOp op e1 e2
                   (Lit (LString _),_)  -> throwError $ UnsupportedOperation "not written yet"
                   (var@(Var _), _)     -> infer var
-                  _                   -> throwError $ UnsupportedOperation $ "the " ++ show op ++ " operation is not supported on " ++ show e1 ++ show e2
+                  (op'@UnaryOp{}, _)   -> infer op'
+                  (op'@Op{}, _)        -> infer op'
+                  (app@App{},_)        -> infer app
+                  _                    -> throwError $ UnsupportedOperation $ "the " ++ show op ++ " operation is not supported on " ++ show e1 ++ show e2
 
     If cond tr fl -> do
         t1 <- infer cond
@@ -286,6 +288,7 @@ doConsOp e1 e2 =
               uni t1 t2
               return t1
           (UnaryOp Car x, _) -> infer x
+          (UnaryOp Cdr x, _) -> infer x
           _     -> throwError $ UnsupportedOperation $ "unmatched cons: " ++ show e1 ++ show e2 -- debugging
 
 doUnaryChar :: UnaryOp -> Type -> Type -> Infer Type
@@ -329,10 +332,18 @@ doBinaryMathsOp op e1 e2 = do
     t1 <- infer e1
     t2 <- infer e2
     case op of 
-      OpAdd   -> getOp mathsOps OpAdd t1 t2
-      OpSub   -> getOp mathsOps OpSub t1 t2
-      OpMul   -> getOp mathsOps OpMul t1 t2
-      OpMod   ->
+      OpAdd    -> getOp mathsOps op t1 t2
+      OpSub    -> getOp mathsOps op t1 t2
+      OpMul    -> getOp mathsOps op t1 t2
+      OpIntDiv -> getOp mathsOps op t1 t2
+      OpExp    -> getOp mathsOps op t1 t2
+      OpEq     -> getOp mathsOps op t1 t2
+      OpLe     -> getOp mathsOps op t1 t2
+      OpLt     -> getOp mathsOps op t1 t2
+      OpGe     -> getOp mathsOps op t1 t2
+      OpGt     -> getOp mathsOps op t1 t2
+      OpNotEq  -> getOp mathsOps op t1 t2
+      OpMod    ->
           case (e1, e2) of
             (Lit (LInt _), Lit (LInt _)) -> getOp mathsOps OpMod t1 t2
             (Lit (LDouble d), _)  -> throwError $ UnsupportedOperation $ "both numbers must be integers, whereas " ++ show d ++ " is a floating point number"
@@ -342,14 +353,6 @@ doBinaryMathsOp op e1 e2 = do
             (Lit (LInt 0)) -> throwError $ UnsupportedOperation "you cannot divide by 0"
             (Lit (LDouble 0.0)) -> throwError $ UnsupportedOperation "you cannot divide by 0"
             _              -> getOp mathsOps OpDiv t1 t2
-      OpIntDiv -> getOp mathsOps OpIntDiv t1 t2
-      OpExp   -> getOp mathsOps OpExp t1 t2
-      OpEq    -> getOp mathsOps OpEq t1 t2
-      OpLe    -> getOp mathsOps OpLe t1 t2
-      OpLt    -> getOp mathsOps OpLt t1 t2
-      OpGe    -> getOp mathsOps OpGe t1 t2
-      OpGt    -> getOp mathsOps OpGt t1 t2
-      OpNotEq -> getOp mathsOps OpNotEq t1 t2
       _       -> throwError $ UnsupportedOperation $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with numbers" ++ "\ESC[0m"
 
 doBinaryCharOp :: Binop -> Expr -> Expr -> Infer Type
