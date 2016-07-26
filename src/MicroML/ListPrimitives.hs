@@ -27,8 +27,10 @@ cdr (Op OpCons _ xs) = xs
 cdr _   = error "you can only take the tail of a list"
 
 append :: Expr -> Expr -> Expr
+append xs Nil                               = xs
 append (Op OpCons x Nil) xs@(Op OpCons _ _) = Op OpCons x xs
-append (Op OpCons x xs) ys = Op OpCons x (append xs ys)
+append (Op OpCons x xs) ys                  = Op OpCons x (append xs ys)
+append _ _                                  = PrimitiveErr $ ListPrim "one of your two objects isn't a list"
 
 ------------------------------------
 -- STRING MANIPULATION PRIMITIVES --
