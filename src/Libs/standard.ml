@@ -1,10 +1,10 @@
 (* tests *)
 let zero? x = if x == 0 then true else false;
-let odd? x = if (x % 2 == 1) then true else false;
-let even? x = if (x % 2 == 0) then true else false;
+let odd? x = if x % 2 == 1 then true else false;
+let even? x = if x % 2 == 0 then true else false;
 let positive? x = if x > 0 then true else false; 
 let negative? x = if x < 0 then true else false;
-let end? xs = if (xs == []) then true else false;
+let end? xs = if xs == [] then true else false;
 
 (* HOF *)
 let id x = x;
@@ -27,8 +27,8 @@ let foldr1 f xs = foldr f (head xs) xs;
 let foldrl1 f xs = foldl f (head xs) xs;
 
 let map f xs = foldr (\x xs' -> (f x) : xs') ([]) xs;
-let filter p xs = foldr (\x y -> if (p x) then (x:y) else y) ([]) xs;
--- let init xs = take ((length xs) - 1) xs;
+let filter p xs = foldr (\x y -> if (p x) then (x:y) else y) [] xs;
+(*let init xs = take ((length xs) - 1) xs;*)
 let until p f x = if (p x) then x else (until p f (f x));
 
 (* print functions *)
