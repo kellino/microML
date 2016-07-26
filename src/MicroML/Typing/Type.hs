@@ -8,7 +8,7 @@ newtype TVar = TV String
 data Type 
     = TVar TVar
     | TCon String
-    | TArr Type Type
+    | TArrow Type Type
     deriving (Show, Eq, Ord)
 
 data TypeScheme = Forall [TVar] Type
