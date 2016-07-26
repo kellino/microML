@@ -19,13 +19,16 @@ enumFromTo_ _ _                                 = PrimitiveErr $ ListPrim ""
 
 car :: Expr -> PrimError Expr 
 car Nil = throwError "you're trying to perform Car on an empty list!"
---car Nil = PrimitiveErr $ ListPrim "there is no head of an empty list!"
 car (Op OpCons x _) =  return x
 
 cdr :: Expr -> Expr
 cdr Nil = PrimitiveErr $ ListPrim "there is no head of an empty list!"
 cdr (Op OpCons _ xs) = xs
 cdr _   = error "you can only take the tail of a list"
+
+append :: Expr -> Expr -> Expr
+append (Op OpCons x Nil) xs@(Op OpCons _ _) = Op OpCons x xs
+append (Op OpCons x xs) ys = Op OpCons x (append xs ys)
 
 ------------------------------------
 -- STRING MANIPULATION PRIMITIVES --
