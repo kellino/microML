@@ -67,7 +67,6 @@ exec update source = do
       Nothing -> return ()
       Just ex -> do
         let (val, _) = runEval (termEnv st') "it"  ex
-        --liftIO $ print val 
         showOutput val st'
 
 showOutput :: Expr -> IState -> Repl ()
@@ -83,11 +82,11 @@ cmd source = exec True (L.pack source)
 -- Commands
 -------------------------------------------------------------------------------
 
- {-:browse command-}
-{-browse :: [String] -> Repl ()-}
-{-browse _ = do-}
-  {-st <- get-}
-  {-liftIO $ mapM_ putStrLn $ ppenv (typeEnv st)-}
+-- :browse command
+browse :: [String] -> Repl ()
+browse _ = do
+  st <- get
+  liftIO $ mapM_ putStrLn $ ppenv (typeEnv st)
 
 -- :?
 help :: [String] -> HaskelineT (Control.Monad.State.Strict.StateT IState IO) ()
@@ -100,14 +99,14 @@ using args = do
     contents <- liftIO $ L.readFile $ "/home/david/.microML/" ++ unwords args ++ ".ml"
     exec True contents
 
-{--- :type command-}
-{-typeof :: [String] -> Repl ()-}
-{-typeof args = do-}
-  {-st <- get-}
-  {-let arg = unwords args-}
-  {-case Env.lookup arg (typeEnv st) of-}
-    {-Just val -> liftIO $ putStrLn $ ppsig (arg, val)-}
-    {-Nothing -> exec False $ L.pack arg-}
+-- :type command
+typeof :: [String] -> Repl ()
+typeof args = do
+  st <- get
+  let arg = unwords args
+  case Env.lookup arg (typeEnv st) of
+    Just val -> liftIO $ putStrLn $ ppsig' (arg, val)
+    Nothing -> exec False $ L.pack arg
 
 -- :quit command
 quit :: a -> Repl ()
@@ -139,9 +138,9 @@ comp n = do
 options :: [(String, [String] -> Repl ())]
 options = [
     ("using", using)
-  -- , ("browse" , browse)
+  , ("browse" , browse)
   , ("quit" ,  quit)
-  --, ("type" , typeof)
+  , ("type" , typeof)
   , ("!"    , sh)
   , ("?"    , help)
   ]
