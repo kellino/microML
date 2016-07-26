@@ -1,8 +1,7 @@
-head [1 to 10];
-if xs == [] then [] else []
 let x = []
 let xs = [1,2,3]
 let t xs = if xs == [] then 0 else 1
+let id x = x
 
 let map f xs =
     if xs == []
@@ -15,3 +14,5 @@ let foldr f z xs =
 
 (* lambda *)
 let doubled xs = map (\x -> x * 2) xs
+
+let id'd = map id [1,2,3]
