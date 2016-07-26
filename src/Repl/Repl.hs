@@ -23,6 +23,7 @@ import Data.List (isPrefixOf, foldl')
 
 import System.Exit
 import System.Console.Repline
+import System.Console.Haskeline.Completion
 import qualified System.Process as S
 
 -----------
@@ -89,13 +90,12 @@ browse _ = do
   liftIO $ mapM_ putStrLn $ ppenv (typeEnv st)
 
 -- :?
-help :: [String] -> HaskelineT (Control.Monad.State.Strict.StateT IState IO) ()
+help :: [String] -> Repl ()
 help = return $ liftIO $ putStrLn "can't help you on that one"
 
 -- :using command
 using :: [String] -> Repl ()
 using args = do
-    --contents <- liftIO $ L.readFile $ unwords args
     contents <- liftIO $ L.readFile $ "/home/david/.microML/" ++ unwords args ++ ".ml"
     exec True contents
 
@@ -165,9 +165,6 @@ banner = "\ESC[1;31m" ++
         " | '_ ` _ \\| |/ __| '__/ _ \\| |\\/| || |           \ESC[33;1mfor help type :?\ESC[1;31m\n" ++
         " | | | | | | | (__| | | (_) | |  | || |____  \n" ++
         " |_| |_| |_|_|\\___|_|  \\___/\\_|  |_/\\_____/  \ESC[0m"
-
-ini' :: Repl ()
-ini' = liftIO $ putStrLn $ banner ++ "\n\n" ++ "\ESC[1mWelcome to microML\ESC[0m\n\n" 
 
 ini :: Repl ()
 ini = do
