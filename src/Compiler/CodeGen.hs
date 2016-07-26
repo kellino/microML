@@ -130,9 +130,8 @@ compile :: L.Text -> L.Text -> IO ()
 compile source fn = do
     let res = hoistError $ parseProgram "from source" source
     mapM_ print res
-    {-if null res-}
-       {-then die $ red ++ "Exit Failure: " ++ unred ++ "the given file was empty, so there's nothing to compile!"-}
-       {-else do -}
-           {--- checkTypes res-}
-           {-let code = map (runCompiler Map.empty . compileTopLevel) res-}
-           {-writeCFile fn $ rights code-}
+    if null res
+       then die $ red ++ "Exit Failure: " ++ unred ++ "the given file was empty, so there's nothing to compile!"
+       else do 
+           let code = map (runCompiler Map.empty . compileTopLevel) res
+           writeCFile fn $ rights code
