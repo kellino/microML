@@ -227,14 +227,15 @@ infer expr = case expr of
         case op of
           OpCons -> doConsOp e1 e2
           OpEq   -> 
-              case e1 of
-                Lit (LChar _)    -> doBinaryCharOp op e1 e2
-                Lit (LBoolean _) -> doBinaryBoolOp op e1 e2
-                Lit (LInt _)     -> doBinaryMathsOp op e1 e2
-                Lit (LDouble _)  -> doBinaryMathsOp op e1 e2
-                Lit (LString _)  -> throwError $ UnsupportedOperation "not written yet"
-                Var _            -> return typeBool
-                xs               -> throwError $ UnsupportedOperation $ "the cons operation on " ++ show xs ++ " is undefined"
+              case (e1, e2) of
+                (Lit (LChar _),_)    -> doBinaryCharOp op e1 e2
+                (Lit (LBoolean _),_) -> doBinaryBoolOp op e1 e2
+                (Lit (LInt _),_)     -> doBinaryMathsOp op e1 e2
+                (Lit (LDouble _),_)  -> doBinaryMathsOp op e1 e2
+                (Lit (LString _),_)  -> throwError $ UnsupportedOperation "not written yet"
+                (Var _,_)            -> return typeBool
+                (Op{}, _)            -> return typeBool
+                _                    -> throwError $ UnsupportedOperation $ "the equals operation on " ++ show e1 ++ show e2 ++ " is undefined"
           _      -> 
               case (e1, e2) of
                   nil@(_, Nil)         -> throwError $ UnsupportedOperation $ "[] error " ++ show nil -- debugging
@@ -244,7 +245,7 @@ infer expr = case expr of
                   (Lit (LChar _),_)    -> doBinaryCharOp op e1 e2
                   (Lit (LString _),_)  -> throwError $ UnsupportedOperation "not written yet"
                   (var@(Var _), _)     -> infer var
-                  xs                   -> throwError $ UnsupportedOperation $ "unexpected error: " ++ show xs
+                  _                   -> throwError $ UnsupportedOperation $ "the " ++ show op ++ " operation is not supported on " ++ show e1 ++ show e2
 
     If cond tr fl -> do
         t1 <- infer cond
@@ -279,6 +280,12 @@ doConsOp e1 e2 =
               t2 <- infer x
               uni t1 t2
               doConsOp x xs
+          (Var x, Var y) -> do
+              t1 <- infer (Var x)
+              t2 <- infer (Var y)
+              uni t1 t2
+              return t1
+          (UnaryOp Car x, _) -> infer x
           _     -> throwError $ UnsupportedOperation $ "unmatched cons: " ++ show e1 ++ show e2 -- debugging
 
 doUnaryChar :: UnaryOp -> Type -> Type -> Infer Type
