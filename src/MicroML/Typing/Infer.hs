@@ -107,38 +107,38 @@ generalize env t  = Forall as t
 
 mathsOps :: Map.Map Binop Type
 mathsOps = Map.fromList [
-         ( OpAdd,    typeNum `TArr`  ( typeNum `TArr`  typeNum))
-      ,  ( OpMul,    typeNum `TArr`  ( typeNum `TArr`  typeNum))
-      ,  ( OpSub,    typeNum `TArr`  ( typeNum `TArr`  typeNum))
-      ,  ( OpMod,    typeNum `TArr`  ( typeNum `TArr`  typeNum))
-      ,  ( OpDiv,    typeNum `TArr`  ( typeNum `TArr`  typeNum))
-      ,  ( OpIntDiv, typeNum `TArr`  ( typeNum `TArr`  typeNum))
-      ,  ( OpExp,    typeNum `TArr`  ( typeNum `TArr`  typeNum))
-      ,  ( OpGe,     typeNum `TArr`  ( typeNum `TArr`  typeBool))
-      ,  ( OpLe,     typeNum `TArr`  ( typeNum `TArr`  typeBool))
-      ,  ( OpGt,     typeNum `TArr`  ( typeNum `TArr`  typeBool))
-      ,  ( OpLt,     typeNum `TArr`  ( typeNum `TArr`  typeBool))
-      ,  ( OpEq,     typeNum `TArr`  ( typeNum `TArr`  typeBool))
-      ,  ( OpNotEq,  typeNum `TArr`  ( typeNum `TArr`  typeBool))
+         ( OpAdd,    typeNum `TArrow`  ( typeNum `TArrow`  typeNum))
+      ,  ( OpMul,    typeNum `TArrow`  ( typeNum `TArrow`  typeNum))
+      ,  ( OpSub,    typeNum `TArrow`  ( typeNum `TArrow`  typeNum))
+      ,  ( OpMod,    typeNum `TArrow`  ( typeNum `TArrow`  typeNum))
+      ,  ( OpDiv,    typeNum `TArrow`  ( typeNum `TArrow`  typeNum))
+      ,  ( OpIntDiv, typeNum `TArrow`  ( typeNum `TArrow`  typeNum))
+      ,  ( OpExp,    typeNum `TArrow`  ( typeNum `TArrow`  typeNum))
+      ,  ( OpGe,     typeNum `TArrow`  ( typeNum `TArrow`  typeBool))
+      ,  ( OpLe,     typeNum `TArrow`  ( typeNum `TArrow`  typeBool))
+      ,  ( OpGt,     typeNum `TArrow`  ( typeNum `TArrow`  typeBool))
+      ,  ( OpLt,     typeNum `TArrow`  ( typeNum `TArrow`  typeBool))
+      ,  ( OpEq,     typeNum `TArrow`  ( typeNum `TArrow`  typeBool))
+      ,  ( OpNotEq,  typeNum `TArrow`  ( typeNum `TArrow`  typeBool))
   ]
 
 charOps :: Map.Map Binop Type
 charOps = Map.fromList [
-        ( OpEq, typeChar `TArr` (typeChar `TArr` typeBool))                       
-      , ( OpLe, typeChar `TArr` (typeChar `TArr` typeBool))
-      , ( OpLt, typeChar `TArr` (typeChar `TArr` typeBool))
-      , ( OpGe, typeChar `TArr` (typeChar `TArr` typeBool))
-      , ( OpGt, typeChar `TArr` (typeChar `TArr` typeBool))
-      , ( OpNotEq, typeChar `TArr` (typeChar `TArr` typeBool))
+        ( OpEq, typeChar `TArrow` (typeChar `TArrow` typeBool))                       
+      , ( OpLe, typeChar `TArrow` (typeChar `TArrow` typeBool))
+      , ( OpLt, typeChar `TArrow` (typeChar `TArrow` typeBool))
+      , ( OpGe, typeChar `TArrow` (typeChar `TArrow` typeBool))
+      , ( OpGt, typeChar `TArrow` (typeChar `TArrow` typeBool))
+      , ( OpNotEq, typeChar `TArrow` (typeChar `TArrow` typeBool))
   ]
 
 boolOps :: Map.Map Binop Type
 boolOps = Map.fromList [
-        ( OpEq,    typeBool `TArr` ( typeBool `TArr` typeBool ))
-      , ( OpNotEq, typeBool `TArr` ( typeBool `TArr` typeBool ))
-      , ( OpOr, typeBool `TArr` ( typeBool `TArr` typeBool ))
-      , ( OpAnd, typeBool `TArr` ( typeBool `TArr` typeBool ))
-      , ( OpXor,   typeBool `TArr` ( typeBool `TArr` typeBool ))
+        ( OpEq,    typeBool `TArrow` ( typeBool `TArrow` typeBool ))
+      , ( OpNotEq, typeBool `TArrow` ( typeBool `TArrow` typeBool ))
+      , ( OpOr, typeBool `TArrow` ( typeBool `TArrow` typeBool ))
+      , ( OpAnd, typeBool `TArrow` ( typeBool `TArrow` typeBool ))
+      , ( OpXor,   typeBool `TArrow` ( typeBool `TArrow` typeBool ))
   ]
 
 ---------------
@@ -157,10 +157,10 @@ normalize (Forall _ body) = Forall (map snd ord) (normtype body)
     ord = zip (nub $ fv body) (map TV letters)
 
     fv (TVar a)   = [a]
-    fv (TArr a b) = fv a ++ fv b
+    fv (TArrow a b) = fv a ++ fv b
     fv (TCon _)    = []
 
-    normtype (TArr a b) = TArr (normtype a) (normtype b)
+    normtype (TArrow a b) = TArrow (normtype a) (normtype b)
     normtype (TCon a)   = TCon a
     normtype (TVar a)   =
       case Prelude.lookup a ord of
@@ -188,13 +188,13 @@ infer expr = case expr of
     Lam x e -> do
         tv <- fresh
         t <- inEnv (x, Forall [] tv) (infer e)
-        return (tv `TArr` t)
+        return (tv `TArrow` t)
 
     App e1 e2 -> do
         t1 <- infer e1
         t2 <- infer e2
         tv <- fresh
-        uni t1 (t2 `TArr` tv)
+        uni t1 (t2 `TArrow` tv)
         return tv
 
     Let x e1 e2 -> do
@@ -206,7 +206,7 @@ infer expr = case expr of
     FixPoint e1 -> do
         t1 <- infer e1
         tv <- fresh
-        uni (tv `TArr` tv) t1
+        uni (tv `TArrow` tv) t1
         return tv
 
     UnaryOp op e1 -> do
@@ -220,22 +220,31 @@ infer expr = case expr of
           (Lit (LDouble _))  -> doUnaryMaths op t1 tv
           (Lit (LBoolean _)) -> doUnaryBool op t1 tv
           var@(Var _)        -> infer var
+          Op OpCons x _      -> infer x
+          _                  -> throwError $ UnsupportedOperation $ "UnaryOp error: " ++ show op ++ show e1
 
     Op op e1 e2 -> 
-        if op == OpCons 
-           then doConsOp e1 e2
-           else 
-            case (e1, e2) of
-              var@(Var x,_)      -> do
-                  t1 <- infer $ Var x
-                  throwError $ UnsupportedOperation $ show var ++ show t1
-              nil@(_, Nil)         -> throwError $ UnsupportedOperation $ show nil
-              (Lit (LInt _),_)     -> doBinaryMathsOp op e1 e2
-              (Lit (LDouble _),_)  -> doBinaryMathsOp op e1 e2
-              (Lit (LBoolean _),_) -> doBoolOp op e1 e2
-              (Lit (LChar _),_)    -> doCharOp op e1 e2
-              xs                   -> throwError $ UnsupportedOperation $ show xs
-              --(Lit (LString _))  -> doListOp op e1 e2
+        case op of
+          OpCons -> doConsOp e1 e2
+          OpEq   -> 
+              case e1 of
+                Lit (LChar _)    -> doBinaryCharOp op e1 e2
+                Lit (LBoolean _) -> doBinaryBoolOp op e1 e2
+                Lit (LInt _)     -> doBinaryMathsOp op e1 e2
+                Lit (LDouble _)  -> doBinaryMathsOp op e1 e2
+                Lit (LString _)  -> throwError $ UnsupportedOperation "not written yet"
+                Var _            -> return typeBool
+                xs               -> throwError $ UnsupportedOperation $ "the cons operation on " ++ show xs ++ " is undefined"
+          _      -> 
+              case (e1, e2) of
+                  nil@(_, Nil)         -> throwError $ UnsupportedOperation $ "[] error " ++ show nil -- debugging
+                  (Lit (LInt _),_)     -> doBinaryMathsOp op e1 e2
+                  (Lit (LDouble _),_)  -> doBinaryMathsOp op e1 e2
+                  (Lit (LBoolean _),_) -> doBinaryBoolOp op e1 e2
+                  (Lit (LChar _),_)    -> doBinaryCharOp op e1 e2
+                  (Lit (LString _),_)  -> throwError $ UnsupportedOperation "not written yet"
+                  (var@(Var _), _)     -> infer var
+                  xs                   -> throwError $ UnsupportedOperation $ "unexpected error: " ++ show xs
 
     If cond tr fl -> do
         t1 <- infer cond
@@ -246,7 +255,7 @@ infer expr = case expr of
         return t3
 
     -- should never actually reach this, but discretion is the better part of valour
-    x -> throwError $ UnsupportedOperation $ show x
+    x -> throwError $ UnsupportedOperation $ "general error: " ++ show x
 
 -------------------------------
 -- UNARY & BINARY OPERATIONS --
@@ -255,6 +264,11 @@ infer expr = case expr of
 doConsOp :: Expr -> Expr -> Infer Type
 doConsOp e1 e2 = 
      case (e1, e2) of 
+          (App x y , _) -> do
+              t1 <- infer x
+              t2 <- infer y
+              uni t1 t2
+              return t1
           (_, Nil) -> do
               t1 <- infer e1
               return $ 
@@ -265,6 +279,7 @@ doConsOp e1 e2 =
               t2 <- infer x
               uni t1 t2
               doConsOp x xs
+          _     -> throwError $ UnsupportedOperation $ "unmatched cons: " ++ show e1 ++ show e2 -- debugging
 
 doUnaryChar :: UnaryOp -> Type -> Type -> Infer Type
 doUnaryChar op t1 tv = 
@@ -310,9 +325,6 @@ doBinaryMathsOp op e1 e2 = do
       OpAdd   -> getOp mathsOps OpAdd t1 t2
       OpSub   -> getOp mathsOps OpSub t1 t2
       OpMul   -> getOp mathsOps OpMul t1 t2
-      -- very ugly, there's surely a better way, but because type inference returns a generic
-      -- typeNumber, rather than typeInt or typeDouble, this is the easiest way to check that modulo 
-      -- only passes typechecking on ints
       OpMod   ->
           case (e1, e2) of
             (Lit (LInt _), Lit (LInt _)) -> getOp mathsOps OpMod t1 t2
@@ -331,10 +343,10 @@ doBinaryMathsOp op e1 e2 = do
       OpGe    -> getOp mathsOps OpGe t1 t2
       OpGt    -> getOp mathsOps OpGt t1 t2
       OpNotEq -> getOp mathsOps OpNotEq t1 t2
-      _               -> throwError $ UnsupportedOperation $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with numbers" ++ "\ESC[0m"
+      _       -> throwError $ UnsupportedOperation $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with numbers" ++ "\ESC[0m"
 
-doCharOp :: Binop -> Expr -> Expr -> Infer Type
-doCharOp op e1 e2 = do
+doBinaryCharOp :: Binop -> Expr -> Expr -> Infer Type
+doBinaryCharOp op e1 e2 = do
     t1 <- infer e1
     t2 <- infer e2
     case op of
@@ -346,8 +358,8 @@ doCharOp op e1 e2 = do
       OpNotEq -> getOp charOps OpNotEq t1 t2
       _       -> throwError $ UnsupportedOperation $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with chars" ++ "\ESC[0m"
 
-doBoolOp :: Binop -> Expr -> Expr -> Infer Type
-doBoolOp op e1 e2 = do
+doBinaryBoolOp :: Binop -> Expr -> Expr -> Infer Type
+doBinaryBoolOp op e1 e2 = do
     t1 <- infer e1
     t2 <- infer e2
     case op of
@@ -361,7 +373,7 @@ doBoolOp op e1 e2 = do
 getOp :: (Ord k) => Map.Map k Type -> k -> Type -> Type -> Infer Type
 getOp dict op t1 t2 = do
     tv <- fresh
-    let u1 = t1 `TArr` (t2 `TArr` tv)
+    let u1 = t1 `TArrow` (t2 `TArrow` tv)
         u2 = dict Map.! op
     uni u1 u2
     return tv
@@ -395,7 +407,7 @@ unifies :: Type -> Type -> Solve Subst
 unifies t1 t2 | t1 == t2 = return emptySubst
 unifies (TVar v) t = v `bind` t
 unifies t (TVar v) = v `bind` t
-unifies (TArr t1 t2) (TArr t3 t4) = unifyMany [t1, t2] [t3, t4]
+unifies (TArrow t1 t2) (TArrow t3 t4) = unifyMany [t1, t2] [t3, t4]
 unifies t1 t2 = throwError $ UnificationFail t1 t2
 
 -- Unification solver
