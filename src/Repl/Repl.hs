@@ -23,7 +23,6 @@ import Data.List (isPrefixOf, foldl')
 
 import System.Exit
 import System.Console.Repline
-import System.Console.Haskeline.Completion
 import qualified System.Process as S
 
 -----------
