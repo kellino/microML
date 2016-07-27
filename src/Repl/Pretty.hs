@@ -49,7 +49,6 @@ instance Pretty Expr where
     ppr _ ls@(Op OpCons _ _)     = text $ matchParens (ppList ls)
     ppr _ xs                     = text $ show xs
 
-
 instance Show TypeError where
       show (UnificationFail a b) =
         concat ["Cannot \ESC[1munify\ESC[0m types: ", pptype a, " with ", pptype b]
@@ -67,9 +66,10 @@ ppscheme = render . ppr 0
 pptype :: Type -> String
 pptype = render . ppr 0
 
--- WIP --
+-- WIP: doesn't quite work as expected on nested lists --
 ppList :: Expr -> String
 ppList (Op OpCons x Nil) = ppList x ++ "]"
+ppList (Op OpCons Nil (Op OpCons x xs)) = "[" ++ ppList x ++ ppList xs
 ppList (Op OpCons x xs)  = ppList x ++ ", " ++ ppList xs
 ppList l@Lit{}           = 
     case l of
