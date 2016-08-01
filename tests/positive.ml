@@ -1,3 +1,4 @@
+head xs
 let id x = x
 let flip f x y = f y x
 let sub1 a = 3 - a
