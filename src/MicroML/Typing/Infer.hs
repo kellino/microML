@@ -169,9 +169,35 @@ normalize (Forall _ body) = Forall (map snd ord) (normtype body)
 inferLambda :: Expr -> Infer Type
 inferLambda e = 
     case e of
-      (If cond _ _) -> inferLambda cond
-      _             -> return typeNum
+      (If cond _ _)                   -> inferLambda cond
+      (BinOp OpEq (Var _) (Var _))    -> polymorphic e
+      (BinOp OpEq (Var _) x)          -> infer x
+      (BinOp OpEq x (Var _))          -> infer x
+      (BinOp OpLe (Var _) x)          -> infer x
+      (BinOp OpLe x (Var _))          -> infer x
+      (BinOp OpLt (Var _) (Var _))    -> polymorphic e
+      (BinOp OpLt (Var _) x)          -> infer x
+      (BinOp OpLt x (Var _))          -> infer x
+      (BinOp OpGe (Var _) x)          -> infer x
+      (BinOp OpGe x (Var _))          -> infer x
+      (BinOp OpGt (Var _) x)          -> infer x
+      (BinOp OpGt x (Var _))          -> infer x
+      (BinOp OpNotEq (Var _) (Var _)) -> polymorphic e
+      (BinOp OpNotEq (Var _) x)       -> infer x
+      (BinOp OpNotEq x (Var _))       -> infer x
+      (Lam _ bdy)                     -> inferLambda bdy
+      BinOp{}                         -> return typeNum
+      Var{}                           -> polymorphic e         
+      x                               -> throwError $ UnsupportedOperation $ "inferLambda: " ++ show x
 
+polymorphic :: Expr -> Infer Type
+polymorphic (Lam x e) = do
+    tv <- fresh
+    t <- inEnv (x, Forall [] tv) (infer e)
+    return (tv `TArrow` t)
+polymorphic (BinOp _ (Var _) (Var _)) = fresh
+polymorphic (Var _) = fresh
+polymorphic x = throwError $ UnsupportedOperation $ "polymorphic: " ++ show x
 
 infer :: Expr -> Infer Type
 infer expr = case expr of
@@ -195,19 +221,15 @@ infer expr = case expr of
 
     Var x -> lookupEnv x
 
-    Lam x e -> do
-        let expr' = show e
-        if x `isInfixOf` expr'
-           then do  
+    Lam x e ->
+        if x `isInfixOf` show e
+           then do
                let lam' = inferLambda e
                t1 <- lam'
                t <- inEnv (x, Forall [] t1) (infer e)
                return (t1 `TArrow` t)
-           else do    
-               tv <- fresh
-               t <- inEnv (x, Forall [] tv) (infer e)
-               return (tv `TArrow` t)
-
+           else polymorphic (Lam x e)
+             
     App e1 e2 -> do
         t1 <- infer e1
         t2 <- infer e2
@@ -244,16 +266,16 @@ infer expr = case expr of
     BinOp op e1 e2 -> 
         case op of
           OpCons -> doConsOp e1 e2
-          OpEq   -> 
-              case (e1, e2) of
-                (Lit (LChar _),_)    -> doBinaryCharOp op e1 e2
-                (Lit (LBoolean _),_) -> doBinaryBoolOp op e1 e2
-                (Lit (LInt _),_)     -> doBinaryMathsOp op e1 e2
-                (Lit (LDouble _),_)  -> doBinaryMathsOp op e1 e2
-                (Lit (LString _),_)  -> throwError $ UnsupportedOperation "not written yet"
-                (Var _,_)            -> return typeBool
-                (BinOp{}, _)            -> return typeBool
-                _                    -> throwError $ UnsupportedOperation $ "the equals operation on " ++ show e1 ++ show e2 ++ " is undefined"
+          OpLt   -> do
+              t1 <- infer e1
+              t2 <- infer e2
+              uni t1 t2
+              return typeBool
+          OpEq   -> do
+              t1 <- infer e1
+              t2 <- infer e2
+              uni t1 t2
+              return typeBool
           _      -> 
               case (e1, e2) of
                   nil@(_, Nil)         -> throwError $ UnsupportedOperation $ "[] error " ++ show nil -- debugging
@@ -264,7 +286,7 @@ infer expr = case expr of
                   (Lit (LString _),_)  -> throwError $ UnsupportedOperation "not written yet"
                   (var@(Var _), _)     -> infer var
                   (op'@UnaryOp{}, _)   -> infer op'
-                  (op'@BinOp{}, _)        -> infer op'
+                  (op'@BinOp{}, _)     -> infer op'
                   (app@App{},_)        -> infer app
                   _                    -> throwError $ UnsupportedOperation $ "the " ++ show op ++ " operation is not supported on " ++ show e1 ++ show e2
 
