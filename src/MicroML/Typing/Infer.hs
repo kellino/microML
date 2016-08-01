@@ -180,8 +180,14 @@ inferLambda e =
       x                         -> throwError $ UnsupportedOperation $ "inferLambda: " ++ show x
 
 polymorphic :: Expr -> Infer Type
-polymorphic (BinOp OpSub (Var _) (Var _)) = return typeNum
-polymorphic (BinOp _ (Var _) (Var _)) = fresh
+polymorphic (BinOp OpAdd (Var _) (Var _))    = return typeNum
+polymorphic (BinOp OpSub (Var _) (Var _))    = return typeNum
+polymorphic (BinOp OpMul (Var _) (Var _))    = return typeNum
+polymorphic (BinOp OpDiv (Var _) (Var _))    = return typeNum
+polymorphic (BinOp OpIntDiv (Var _) (Var _)) = return typeNum
+polymorphic (BinOp OpExp (Var _) (Var _))    = return typeNum
+polymorphic (BinOp OpMod (Var _) (Var _))    = return typeNum
+polymorphic (BinOp _ (Var _) (Var _))        = fresh
 polymorphic (Var _) = fresh
 polymorphic (Lam x e) = do
     tv <- fresh
@@ -251,7 +257,7 @@ infer expr = case expr of
           (Lit (LDouble _))  -> doUnaryMaths op t1 tv
           (Lit (LBoolean _)) -> doUnaryBool op t1 tv
           var@(Var _)        -> infer var
-          BinOp _ x _           -> infer x
+          BinOp _ x _        -> infer x
           _                  -> throwError $ UnsupportedOperation $ "UnaryOp error: " ++ show op ++ show e1
 
     BinOp op e1 e2 -> 
@@ -286,16 +292,16 @@ infer expr = case expr of
     -- should never actually reach this, but discretion is the better part of valour
     x -> throwError $ UnsupportedOperation $ "general error: " ++ show x
 
+-------------------------------
+-- UNARY & BINARY OPERATIONS --
+-------------------------------
+
 inferBinOpBool :: Expr -> Expr -> Infer Type
 inferBinOpBool e1 e2 = do
     t1 <- infer e1
     t2 <- infer e2
     uni t1 t2
     return typeBool
-
--------------------------------
--- UNARY & BINARY OPERATIONS --
--------------------------------
 
 doConsOp :: Expr -> Expr -> Infer Type
 doConsOp e1 e2 = 
