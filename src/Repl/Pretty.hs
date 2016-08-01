@@ -46,7 +46,7 @@ instance Pretty Expr where
     ppr _ (Lit (LBoolean True))  = text "true"
     ppr _ (Lit (LBoolean False)) = text "false"
     ppr _ Nil                    = text "empty list"
-    ppr _ ls@(Op OpCons _ _)     = text $ matchParens (ppList ls)
+    ppr _ ls@(BinOp OpCons _ _)     = text $ matchParens (ppList ls)
     ppr _ xs                     = text $ show xs
 
 instance Show TypeError where
@@ -68,9 +68,9 @@ pptype = render . ppr 0
 
 -- WIP: doesn't quite work as expected on nested lists --
 ppList :: Expr -> String
-ppList (Op OpCons x Nil) = ppList x ++ "]"
-ppList (Op OpCons Nil (Op OpCons x xs)) = "[" ++ ppList x ++ ppList xs
-ppList (Op OpCons x xs)  = ppList x ++ ", " ++ ppList xs
+ppList (BinOp OpCons x Nil) = ppList x ++ "]"
+ppList (BinOp OpCons Nil (BinOp OpCons x xs)) = "[" ++ ppList x ++ ppList xs
+ppList (BinOp OpCons x xs)  = ppList x ++ ", " ++ ppList xs
 ppList l@Lit{}           = 
     case l of
       Lit (LInt n)         -> show n

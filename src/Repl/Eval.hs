@@ -28,6 +28,10 @@ eval env expr = case expr of
     Var x                   -> fromJust (Map.lookup x env) -- the type checker ensures we never get this far
     FixPoint e              -> eval env (App e (FixPoint e))
     Lam x body              -> Closure x body env
+    Exception a b           -> do
+        let a' = eval env a
+        case a' of
+          (PrimitiveErr _) -> eval env b
     App a b                 -> do
         let Closure n expr' clo = eval env a
         let arg = eval env b
@@ -54,7 +58,7 @@ eval env expr = case expr of
           Not   -> case a' of
                    (Lit (LBoolean True)) -> Lit . LBoolean $ False
                    (Lit (LBoolean False)) -> Lit . LBoolean $ True
-    Op op a b -> do
+    BinOp op a b -> do
         let a' = eval env a
         let b' = eval env b
         case op of
@@ -78,9 +82,9 @@ eval env expr = case expr of
           OpAppend -> a' `append` b'
 
 cons :: Expr -> Expr -> Expr
-cons a Nil = Op OpCons a Nil
-cons a (Op OpCons x Nil) = Op OpCons a (Op OpCons x Nil)
-cons a ls@(Op OpCons _ _) = Op OpCons a ls
+cons a Nil = BinOp OpCons a Nil
+cons a (BinOp OpCons x Nil) = BinOp OpCons a (BinOp OpCons x Nil)
+cons a ls@(BinOp OpCons _ _) = BinOp OpCons a ls
 
 add :: Expr -> Expr -> Expr
 add (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a + b
