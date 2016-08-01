@@ -120,7 +120,7 @@ list = do
     void $ spaces *> char '['
     elems <- expr `sepBy` char ',' <* spaces
     void $ char ']' <* spaces
-    return $ foldr (Op OpCons) Nil elems
+    return $ foldr (BinOp OpCons) Nil elems
 
 tuple :: Parser Expr
 tuple = do
@@ -167,6 +167,14 @@ ifthen = do
     void spaces
     return (If cond tr fl)
 
+raise :: Parser Expr
+raise = do
+    reserved "try"
+    e1 <- expr
+    reserved "except"
+    err <- stringLit
+    return $ Exception e1 err
+
 aexp :: Parser Expr
 aexp =
       parens expr
@@ -185,6 +193,7 @@ aexp =
   <|> variable
   <|> stringLit
   <|> charLit
+  <|> raise
 
 term :: Parser Expr
 term = Ex.buildExpressionParser primitives aexp
@@ -198,27 +207,27 @@ prefixOp name func = Ex.Prefix ( do {reservedOp name; return func } )
 primitives :: [[Op Expr]]
 primitives = [[ prefixOp "head"  (UnaryOp Car)
             ,   prefixOp "tail"  (UnaryOp Cdr)
-            ,   infixOp   ":"    (Op OpCons) Ex.AssocRight
-            ,   infixOp   "++"   (Op OpAppend) Ex.AssocRight ]
+            ,   infixOp   ":"    (BinOp OpCons) Ex.AssocRight
+            ,   infixOp   "++"   (BinOp OpAppend) Ex.AssocRight ]
             , [ prefixOp  "_log" (UnaryOp OpLog)
-            ,   infixOp   "^"    (Op OpExp) Ex.AssocLeft ]     -- maths operators
-            , [ infixOp   "*"    (Op OpMul) Ex.AssocLeft
-            ,   infixOp   "//"   (Op OpIntDiv) Ex.AssocLeft
-            ,   infixOp   "/"    (Op OpDiv) Ex.AssocLeft
-            ,   infixOp   "%"    (Op OpMod) Ex.AssocLeft ]
-            , [ infixOp   "+"    (Op OpAdd) Ex.AssocLeft
-            ,   infixOp   "-"    (Op OpSub) Ex.AssocLeft ]
-            , [ infixOp   "<="   (Op OpLe)  Ex.AssocLeft       -- boolean operators
-            ,   infixOp   ">="   (Op OpGe)  Ex.AssocLeft
-            ,   infixOp   "<"    (Op OpLt)  Ex.AssocLeft
-            ,   infixOp   ">"    (Op OpGt)  Ex.AssocLeft ]
-            , [ infixOp   "=="   (Op OpEq)  Ex.AssocLeft
-            ,   infixOp   "/="   (Op OpNotEq) Ex.AssocLeft ]
-            , [ infixOp   "and"  (Op OpAnd) Ex.AssocLeft
-            ,   infixOp   "or"   (Op OpOr)  Ex.AssocLeft
-            ,   infixOp   "xor"  (Op OpXor) Ex.AssocLeft
+            ,   infixOp   "^"    (BinOp OpExp) Ex.AssocLeft ]     -- maths operators
+            , [ infixOp   "*"    (BinOp OpMul) Ex.AssocLeft
+            ,   infixOp   "//"   (BinOp OpIntDiv) Ex.AssocLeft
+            ,   infixOp   "/"    (BinOp OpDiv) Ex.AssocLeft
+            ,   infixOp   "%"    (BinOp OpMod) Ex.AssocLeft ]
+            , [ infixOp   "+"    (BinOp OpAdd) Ex.AssocLeft
+            ,   infixOp   "-"    (BinOp OpSub) Ex.AssocLeft ]
+            , [ infixOp   "<="   (BinOp OpLe)  Ex.AssocLeft       -- boolean operators
+            ,   infixOp   ">="   (BinOp OpGe)  Ex.AssocLeft
+            ,   infixOp   "<"    (BinOp OpLt)  Ex.AssocLeft
+            ,   infixOp   ">"    (BinOp OpGt)  Ex.AssocLeft ]
+            , [ infixOp   "=="   (BinOp OpEq)  Ex.AssocLeft
+            ,   infixOp   "/="   (BinOp OpNotEq) Ex.AssocLeft ]
+            , [ infixOp   "and"  (BinOp OpAnd) Ex.AssocLeft
+            ,   infixOp   "or"   (BinOp OpOr)  Ex.AssocLeft
+            ,   infixOp   "xor"  (BinOp OpXor) Ex.AssocLeft
             ,   prefixOp  "not"  (UnaryOp Not) ]
-            , [ infixOp   "."    (Op OpComp) Ex.AssocRight ]]
+            , [ infixOp   "."    (BinOp OpComp) Ex.AssocRight ]]
 
 expr :: Parser Expr
 expr = do

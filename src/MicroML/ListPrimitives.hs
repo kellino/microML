@@ -12,24 +12,24 @@ runPrimError :: ExceptT e Identity a -> Either e a
 runPrimError ev = runIdentity $ runExceptT ev
 
 enumFromTo_ :: Expr -> Expr -> Expr
-enumFromTo_ (Lit (LInt a)) (Lit (LInt b)) = foldr (Op OpCons) Nil $ (Lit . LInt ) <$> [a .. b]
-enumFromTo_ (Lit (LDouble a)) (Lit (LDouble b)) = foldr (Op OpCons) Nil $ (Lit . LDouble ) <$> [a .. b]
-enumFromTo_ (Lit (LChar a)) (Lit (LChar b))     = foldr (Op OpCons) Nil $ (Lit . LChar) <$> [a .. b]
+enumFromTo_ (Lit (LInt a)) (Lit (LInt b)) = foldr (BinOp OpCons) Nil $ (Lit . LInt ) <$> [a .. b]
+enumFromTo_ (Lit (LDouble a)) (Lit (LDouble b)) = foldr (BinOp OpCons) Nil $ (Lit . LDouble ) <$> [a .. b]
+enumFromTo_ (Lit (LChar a)) (Lit (LChar b))     = foldr (BinOp OpCons) Nil $ (Lit . LChar) <$> [a .. b]
 enumFromTo_ _ _                                 = PrimitiveErr $ ListPrim ""
 
 car :: Expr -> PrimError Expr 
 car Nil = throwError "you're trying to perform Car on an empty list!"
-car (Op OpCons x _) =  return x
+car (BinOp OpCons x _) =  return x
 
 cdr :: Expr -> Expr
 cdr Nil = PrimitiveErr $ ListPrim "there is no head of an empty list!"
-cdr (Op OpCons _ xs) = xs
+cdr (BinOp OpCons _ xs) = xs
 cdr _   = error "you can only take the tail of a list"
 
 append :: Expr -> Expr -> Expr
 append xs Nil                               = xs
-append (Op OpCons x Nil) xs@(Op OpCons _ _) = Op OpCons x xs
-append (Op OpCons x xs) ys                  = Op OpCons x (append xs ys)
+append (BinOp OpCons x Nil) xs@(BinOp OpCons _ _) = BinOp OpCons x xs
+append (BinOp OpCons x xs) ys                  = BinOp OpCons x (append xs ys)
 append _ _                                  = PrimitiveErr $ ListPrim "one of your two objects isn't a list"
 
 ------------------------------------

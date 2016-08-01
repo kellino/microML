@@ -28,11 +28,12 @@ data Expr
   | Lit Lit
   | If Expr Expr Expr
   | FixPoint Expr
-  | Op Binop Expr Expr
+  | BinOp Binop Expr Expr
   | UnaryOp UnaryOp Expr
   | Closure Name Expr TermEnv
   | PrimitiveErr MLError
   | Nil
+  | Exception Expr Expr
   deriving (Show, Eq, Ord)
 
 data Lit

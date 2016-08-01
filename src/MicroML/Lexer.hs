@@ -15,7 +15,7 @@ type Operators a = Ex.OperatorTable L.Text () Identity a
 
 reservedNames :: [String]
 reservedNames = [ "let", "in", "if", "then", "else", "case", "of", "and", 
-                  "or", "not", "xor", "head", "tail", "to", "where", "true", "false" ]
+                  "or", "not", "xor", "head", "tail", "to", "where", "true", "false", "try", "except" ]
 
 reservedOps :: [String]
 reservedOps = [ "->", "\\", "+", "*", "-", "=", "==", "%", "^", "/", "<=", ">=", ">", "<", ":", "_", "++" ]
