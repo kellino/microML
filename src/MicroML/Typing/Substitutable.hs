@@ -26,12 +26,12 @@ class Substitutable a where
   ftv   :: a -> Set.Set TVar
 
 instance Substitutable Type where
-    apply _ (TCon a)       = TCon a
+    apply _ (TCon a)           = TCon a
     apply (Subst s) t@(TVar a) = Map.findWithDefault t a s
-    apply s (t1 `TArrow` t2) = apply s t1 `TArrow` apply s t2
+    apply s (t1 `TArrow` t2)   = apply s t1 `TArrow` apply s t2
 
-    ftv TCon{}         = Set.empty
-    ftv (TVar a)       = Set.singleton a
+    ftv TCon{}           = Set.empty
+    ftv (TVar a)         = Set.singleton a
     ftv (t1 `TArrow` t2) = ftv t1 `Set.union` ftv t2
 
 instance Substitutable TypeScheme where
@@ -41,7 +41,7 @@ instance Substitutable TypeScheme where
 
 instance Substitutable Constraint where
     apply s (t1, t2) = (apply s t1, apply s t2)
-    ftv (t1, t2) = ftv t1 `Set.union` ftv t2
+    ftv (t1, t2)     = ftv t1 `Set.union` ftv t2
 
 instance Substitutable a => Substitutable [a] where
     apply = map . apply
@@ -49,4 +49,4 @@ instance Substitutable a => Substitutable [a] where
 
 instance Substitutable Env where
     apply s (TypeEnv env) = TypeEnv $ Map.map (apply s) env
-    ftv (TypeEnv env) = ftv $ Map.elems env
+    ftv (TypeEnv env)     = ftv $ Map.elems env
