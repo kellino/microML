@@ -39,6 +39,7 @@ instance Pretty TypeScheme where
     ppr p (Forall ts t) = text "for all" <+> hcat (punctuate space (map (ppr p) ts)) <> text "." <+> ppr p t
 
 instance Pretty Expr where
+    ppr _ Closure{}              = text "<<closure>>"
     ppr _ (Lit (LInt i))         = integer i
     ppr _ (Lit (LDouble d))      = double d
     ppr _ (Lit (LString str))    = text str
