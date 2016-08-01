@@ -19,7 +19,7 @@ import Control.Monad.State
 import Control.Monad.RWS
 import Control.Monad.Identity
 
-import Data.List (nub)
+import Data.List (nub, isInfixOf)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 
@@ -166,6 +166,13 @@ normalize (Forall _ body) = Forall (map snd ord) (normtype body)
         Just x -> TVar x
         Nothing -> error "type variable not in signature"
 
+inferLambda :: Expr -> Infer Type
+inferLambda e = 
+    case e of
+      (If cond _ _) -> inferLambda cond
+      _             -> return typeNum
+
+
 infer :: Expr -> Infer Type
 infer expr = case expr of
     Lit (LInt _)     -> return typeNum
@@ -173,7 +180,11 @@ infer expr = case expr of
     Lit (LBoolean _) -> return typeBool
     Lit (LString _)  -> return typeString
     Lit (LChar _)    -> return typeChar
+    PrimitiveErr _   -> return typeError
     Nil              -> return typeNil
+    Exception a _    -> do
+        t1 <- infer a
+        return (t1 `TArrow` typeError)
 
     -- work in progress. This is just a placeholder
     Lit (LTup (x:xs)) -> do
@@ -185,9 +196,17 @@ infer expr = case expr of
     Var x -> lookupEnv x
 
     Lam x e -> do
-        tv <- fresh
-        t <- inEnv (x, Forall [] tv) (infer e)
-        return (tv `TArrow` t)
+        let expr' = show e
+        if x `isInfixOf` expr'
+           then do  
+               let lam' = inferLambda e
+               t1 <- lam'
+               t <- inEnv (x, Forall [] t1) (infer e)
+               return (t1 `TArrow` t)
+           else do    
+               tv <- fresh
+               t <- inEnv (x, Forall [] tv) (infer e)
+               return (tv `TArrow` t)
 
     App e1 e2 -> do
         t1 <- infer e1
@@ -219,10 +238,10 @@ infer expr = case expr of
           (Lit (LDouble _))  -> doUnaryMaths op t1 tv
           (Lit (LBoolean _)) -> doUnaryBool op t1 tv
           var@(Var _)        -> infer var
-          Op _ x _           -> infer x
+          BinOp _ x _           -> infer x
           _                  -> throwError $ UnsupportedOperation $ "UnaryOp error: " ++ show op ++ show e1
 
-    Op op e1 e2 -> 
+    BinOp op e1 e2 -> 
         case op of
           OpCons -> doConsOp e1 e2
           OpEq   -> 
@@ -233,7 +252,7 @@ infer expr = case expr of
                 (Lit (LDouble _),_)  -> doBinaryMathsOp op e1 e2
                 (Lit (LString _),_)  -> throwError $ UnsupportedOperation "not written yet"
                 (Var _,_)            -> return typeBool
-                (Op{}, _)            -> return typeBool
+                (BinOp{}, _)            -> return typeBool
                 _                    -> throwError $ UnsupportedOperation $ "the equals operation on " ++ show e1 ++ show e2 ++ " is undefined"
           _      -> 
               case (e1, e2) of
@@ -245,7 +264,7 @@ infer expr = case expr of
                   (Lit (LString _),_)  -> throwError $ UnsupportedOperation "not written yet"
                   (var@(Var _), _)     -> infer var
                   (op'@UnaryOp{}, _)   -> infer op'
-                  (op'@Op{}, _)        -> infer op'
+                  (op'@BinOp{}, _)        -> infer op'
                   (app@App{},_)        -> infer app
                   _                    -> throwError $ UnsupportedOperation $ "the " ++ show op ++ " operation is not supported on " ++ show e1 ++ show e2
 
@@ -277,7 +296,7 @@ doConsOp e1 e2 =
               return $ 
                   case t1 of
                     (TCon ty) -> TCon $ "[" ++ ty ++ "]"
-          (_, Op OpCons x xs) -> do
+          (_, BinOp OpCons x xs) -> do
               t1 <- infer e1
               t2 <- infer x
               uni t1 t2
