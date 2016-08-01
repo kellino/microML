@@ -169,26 +169,15 @@ normalize (Forall _ body) = Forall (map snd ord) (normtype body)
 inferLambda :: Expr -> Infer Type
 inferLambda e = 
     case e of
-      (If cond _ _)                   -> inferLambda cond
-      (BinOp OpEq (Var _) (Var _))    -> polymorphic e
-      (BinOp OpEq (Var _) x)          -> infer x
-      (BinOp OpEq x (Var _))          -> infer x
-      (BinOp OpLe (Var _) x)          -> infer x
-      (BinOp OpLe x (Var _))          -> infer x
-      (BinOp OpLt (Var _) (Var _))    -> polymorphic e
-      (BinOp OpLt (Var _) x)          -> infer x
-      (BinOp OpLt x (Var _))          -> infer x
-      (BinOp OpGe (Var _) x)          -> infer x
-      (BinOp OpGe x (Var _))          -> infer x
-      (BinOp OpGt (Var _) x)          -> infer x
-      (BinOp OpGt x (Var _))          -> infer x
-      (BinOp OpNotEq (Var _) (Var _)) -> polymorphic e
-      (BinOp OpNotEq (Var _) x)       -> infer x
-      (BinOp OpNotEq x (Var _))       -> infer x
-      (Lam _ bdy)                     -> inferLambda bdy
-      BinOp{}                         -> return typeNum
-      Var{}                           -> polymorphic e         
-      x                               -> throwError $ UnsupportedOperation $ "inferLambda: " ++ show x
+      (If cond _ _)             -> inferLambda cond
+      (BinOp _ (Var _) (Var _)) -> polymorphic e
+      (BinOp _ (Var _) x)       -> infer x
+      (BinOp _ x (Var _))       -> infer x
+      (Lam _ bdy)               -> inferLambda bdy
+      BinOp{}                   -> return typeNum
+      Var{}                     -> polymorphic e         
+      App x _                   -> infer x
+      x                         -> throwError $ UnsupportedOperation $ "inferLambda: " ++ show x
 
 polymorphic :: Expr -> Infer Type
 polymorphic (Lam x e) = do
@@ -265,18 +254,12 @@ infer expr = case expr of
 
     BinOp op e1 e2 -> 
         case op of
-          OpCons -> doConsOp e1 e2
-          OpLt   -> do
-              t1 <- infer e1
-              t2 <- infer e2
-              uni t1 t2
-              return typeBool
-          OpEq   -> do
-              t1 <- infer e1
-              t2 <- infer e2
-              uni t1 t2
-              return typeBool
-          _      -> 
+          OpCons  -> doConsOp e1 e2
+          OpGt    -> inferBinOpBool e1 e2
+          OpLt    -> inferBinOpBool e1 e2
+          OpEq    -> inferBinOpBool e1 e2
+          OpNotEq -> inferBinOpBool e1 e2
+          _       -> 
               case (e1, e2) of
                   nil@(_, Nil)         -> throwError $ UnsupportedOperation $ "[] error " ++ show nil -- debugging
                   (Lit (LInt _),_)     -> doBinaryMathsOp op e1 e2
@@ -300,6 +283,13 @@ infer expr = case expr of
 
     -- should never actually reach this, but discretion is the better part of valour
     x -> throwError $ UnsupportedOperation $ "general error: " ++ show x
+
+inferBinOpBool :: Expr -> Expr -> Infer Type
+inferBinOpBool e1 e2 = do
+    t1 <- infer e1
+    t2 <- infer e2
+    uni t1 t2
+    return typeBool
 
 -------------------------------
 -- UNARY & BINARY OPERATIONS --
