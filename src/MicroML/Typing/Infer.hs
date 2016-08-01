@@ -176,16 +176,18 @@ inferLambda e =
       (Lam _ bdy)               -> inferLambda bdy
       BinOp{}                   -> return typeNum
       Var{}                     -> polymorphic e         
-      App x _                   -> infer x
+      app@App{}                 -> polymorphic app
       x                         -> throwError $ UnsupportedOperation $ "inferLambda: " ++ show x
 
 polymorphic :: Expr -> Infer Type
+polymorphic (BinOp OpSub (Var _) (Var _)) = return typeNum
+polymorphic (BinOp _ (Var _) (Var _)) = fresh
+polymorphic (Var _) = fresh
 polymorphic (Lam x e) = do
     tv <- fresh
     t <- inEnv (x, Forall [] tv) (infer e)
     return (tv `TArrow` t)
-polymorphic (BinOp _ (Var _) (Var _)) = fresh
-polymorphic (Var _) = fresh
+polymorphic (App _ y) = inferLambda y
 polymorphic x = throwError $ UnsupportedOperation $ "polymorphic: " ++ show x
 
 infer :: Expr -> Infer Type
