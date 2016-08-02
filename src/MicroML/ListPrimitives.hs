@@ -18,7 +18,6 @@ enumFromTo_ (Lit (LChar a)) (Lit (LChar b))     = foldr (BinOp OpCons) Nil $ (Li
 enumFromTo_ _ _                                 = PrimitiveErr $ ListPrim ""
 
 car :: Expr -> PrimError Expr 
-car Nil = throwError "you're trying to perform Car on an empty list!"
 car (BinOp OpCons x _) =  return x
 
 cdr :: Expr -> Expr
