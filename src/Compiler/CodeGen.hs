@@ -15,6 +15,7 @@ import Control.Monad.State.Strict
 import Control.Monad.Identity
 import Control.Monad.Reader
 import Control.Monad.Except
+import Control.Applicative
 
 import qualified Data.Text.Lazy as L
 import Data.Either (rights)
@@ -49,15 +50,12 @@ hoistError :: Show a => Either a t -> t
 hoistError (Right vl) = vl
 hoistError (Left err) = error $ show err
 
-compileTopLevel :: (String, Expr) -> Compiler CExtDecl
-compileTopLevel (nm, expr) = do
-    let newNm = fromString nm
+generate :: (String, Expr) -> Compiler CExtDecl
+generate (nm, expr) = 
     case expr of
       -- if there's only a name and a Lit expression, then it must be a variable declaration
-      Lit (LInt n)     -> return $ export $ int newNm .= fromInteger n
-      Lit (LDouble d)  -> return $ export $ double newNm .= realToFrac d
-      Lit (LChar c)    -> return $ export $ char newNm .= chr c
-      Lit (LString st) -> return $ export $ charPtr newNm .= str st
+      Lit _            -> return $ generateLit nm expr
+      --If cond tr fls   -> return $ ternary (gen cond) (gen tr) (gen fls)
       Nil              -> undefined
       App (Var n) body -> return $ export $ do
           let (func, retty) = fromJust $ Map.lookup n microBitAPI
@@ -68,8 +66,22 @@ compileTopLevel (nm, expr) = do
       Lam n e -> return $ generateLam n e
       _ -> throwError "something strange has happened"
 
+gen :: Expr -> CExpr
+gen = undefined
+
 generateLam :: String -> Expr -> CExtDecl
 generateLam _ _ = undefined
+
+-- generates simple variable declarations of the form
+-- int x = 2;
+generateLit :: String -> Expr -> CExtDecl
+generateLit nm e1 = 
+    let newNm = fromString nm
+     in case e1 of  
+          (Lit (LInt n))     -> export $ int newNm .= fromInteger n
+          (Lit (LDouble d))  -> export $ double newNm .= realToFrac d
+          (Lit (LChar c))    -> export $ char newNm .= chr c
+          (Lit (LString st)) -> export $ charPtr newNm .= str st
 
 getRetType :: RetTy -> CDeclSpec
 getRetType rt = fromJust $ Prelude.lookup rt table
@@ -133,5 +145,5 @@ compile source fn = do
     if null res
        then die $ red ++ "Exit Failure: " ++ unred ++ "the given file was empty, so there's nothing to compile!"
        else do 
-           let code = map (runCompiler Map.empty . compileTopLevel) res
+           let code = map (runCompiler Map.empty . generate) res
            writeCFile fn $ rights code
