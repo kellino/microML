@@ -47,7 +47,7 @@ instance Pretty Expr where
     ppr _ (Lit (LBoolean True))  = text "true"
     ppr _ (Lit (LBoolean False)) = text "false"
     ppr _ Nil                    = text "empty list"
-    ppr _ ls@(BinOp OpCons _ _)     = text $ matchParens (ppList ls)
+    ppr _ ls@(BinOp OpCons _ _)  = text $ matchBrackets (ppList ls)
     ppr _ xs                     = text $ show xs
 
 instance Show TypeError where
@@ -82,8 +82,8 @@ ppList l@Lit{}           =
       Lit (LBoolean False) -> "false"
 ppList x                 = show x
 
-matchParens :: String -> String
-matchParens st = let len = length . takeWhile (== ']') . reverse $ st
+matchBrackets :: String -> String
+matchBrackets st = let len = length . takeWhile (== ']') . reverse $ st
                   in replicate len '[' ++ st
 
 ppexpr :: Expr -> String

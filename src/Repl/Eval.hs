@@ -91,7 +91,6 @@ add (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a + b
 add (Lit (LDouble a)) (Lit (LDouble b)) = Lit $ LDouble $ a + b
 add (Lit (LInt a)) (Lit (LDouble b)) = Lit $ LDouble $ realToFrac a + b
 add (Lit (LDouble a)) (Lit (LInt b)) = Lit $ LDouble $ a + realToFrac b
-add _ _ = error "unsupported operation"
 
 or', and', xor' :: Expr -> Expr -> Expr
 or' (Lit (LBoolean a)) (Lit (LBoolean b)) = Lit $ LBoolean $ a || b
