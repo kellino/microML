@@ -81,6 +81,7 @@ lookupEnv x = do
       Nothing   ->  throwError $ UnboundVariable $ show x
       Just s    ->  instantiate s
 
+-- letters and fresh generate new names for polymorphic variables
 letters :: [String]
 letters = [1..] >>= flip replicateM ['a'..'z']
 
@@ -166,6 +167,8 @@ normalize (Forall _ body) = Forall (map snd ord) (normtype body)
         Just x -> TVar x
         Nothing -> error "type variable not in signature"
 
+-- standard HM results in types which are a little too general to be useful for our purposes. Better
+-- to find the most constrained signature possible to prevent programming errors
 inferLambda :: Expr -> Infer Type
 inferLambda e = 
     case e of
@@ -173,12 +176,14 @@ inferLambda e =
       (BinOp _ (Var _) (Var _)) -> polymorphic e
       (BinOp _ (Var _) x)       -> infer x
       (BinOp _ x (Var _))       -> infer x
+      (UnaryOp Cdr x)           -> infer x
       (Lam _ bdy)               -> inferLambda bdy
       BinOp{}                   -> return typeNum
       Var{}                     -> polymorphic e         
       app@App{}                 -> polymorphic app
       x                         -> throwError $ UnsupportedOperation $ "inferLambda: " ++ show x
 
+-- generates types for lhs lambdas
 polymorphic :: Expr -> Infer Type
 polymorphic (BinOp OpAdd (Var _) (Var _))    = return typeNum
 polymorphic (BinOp OpSub (Var _) (Var _))    = return typeNum
@@ -187,15 +192,19 @@ polymorphic (BinOp OpDiv (Var _) (Var _))    = return typeNum
 polymorphic (BinOp OpIntDiv (Var _) (Var _)) = return typeNum
 polymorphic (BinOp OpExp (Var _) (Var _))    = return typeNum
 polymorphic (BinOp OpMod (Var _) (Var _))    = return typeNum
+polymorphic (BinOp OpCons (Var _) (Var _))   = do
+    (TVar (TV tv)) <- fresh
+    return $ TVar $ TV $ "[" ++ tv ++ "]"
 polymorphic (BinOp _ (Var _) (Var _))        = fresh
 polymorphic (Var _) = fresh
+polymorphic (App _ y) = inferLambda y
 polymorphic (Lam x e) = do
     tv <- fresh
     t <- inEnv (x, Forall [] tv) (infer e)
     return (tv `TArrow` t)
-polymorphic (App _ y) = inferLambda y
 polymorphic x = throwError $ UnsupportedOperation $ "polymorphic: " ++ show x
 
+-- the massive (and messy) inference function. 
 infer :: Expr -> Infer Type
 infer expr = case expr of
     Lit (LInt _)     -> return typeNum
@@ -240,11 +249,12 @@ infer expr = case expr of
         let sc = generalize env t1
         inEnv (x, sc) (infer e2)
 
-    FixPoint e1 -> do
-        t1 <- infer e1
-        tv <- fresh
-        uni (tv `TArrow` tv) t1
-        return tv
+    FixPoint e1 -> inferLambda e1
+    {-FixPoint e1 -> do-}
+        {-t1 <- infer e1-}
+        {-tv <- fresh-}
+        {-uni (tv `TArrow` tv) t1-}
+        {-return tv-}
 
     UnaryOp op e1 -> do
         t1 <- infer e1
@@ -321,14 +331,29 @@ doConsOp e1 e2 =
               t2 <- infer x
               uni t1 t2
               doConsOp x xs
-          (Var x, Var y) -> do
-              t1 <- infer (Var x)
-              t2 <- infer (Var y)
-              uni t1 t2
-              return t1
+          (Var _, Var _) -> do
+              ty1@(TCon t1) <- infer e1
+              t2 <- infer e2
+              uni (TCon $ "[" ++ t1 ++ "]") t2
+              return ty1 
+          (_, Var _) -> unifyWithListVar e1 e2
           (UnaryOp Car x, _) -> infer x
           (UnaryOp Cdr x, _) -> infer x
           _     -> throwError $ UnsupportedOperation $ "unmatched cons: " ++ show e1 ++ show e2 -- debugging
+
+unifyWithListVar :: Expr -> Expr -> Infer Type
+unifyWithListVar e1 e2 =
+    case (e1, e2) of
+      (Lit{} , _) -> newListTypeCon e1
+      (_, _) -> do
+          t1 <- infer e1
+          t2 <- infer e2
+          throwError $ UnificationFail t1 t2
+
+newListTypeCon :: Expr -> Infer Type
+newListTypeCon e1 = do
+    (TCon ty) <- infer e1
+    return $ TCon $ "[" ++ ty ++ "]"
 
 doUnaryChar :: UnaryOp -> Type -> Type -> Infer Type
 doUnaryChar op t1 tv = 
