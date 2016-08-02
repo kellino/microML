@@ -175,6 +175,11 @@ raise = do
     err <- stringLit
     return $ Exception e1 err
 
+using :: Parser Expr
+using = do
+    reserved "using"
+    stringLit
+
 aexp :: Parser Expr
 aexp =
       parens expr
@@ -194,6 +199,7 @@ aexp =
   <|> stringLit
   <|> charLit
   <|> raise
+  <|> using
 
 term :: Parser Expr
 term = Ex.buildExpressionParser primitives aexp
