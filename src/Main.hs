@@ -65,7 +65,7 @@ microML arg fs =
                  if tr 
                     then do
                         contents <- LIO.readFile (head fs) 
-                        compile contents (L.pack $ last fs)
+                        compile contents (L.pack $ last fs) (head fs)
                     else die $ red ++ "Exit Failure: " ++ unred ++ "the given file doesn't exist in that location, so it can't be compiled!"
       Jit         -> do -- die "The jit is not yet operable"
           exists <- findExecutable "llc"
