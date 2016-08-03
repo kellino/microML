@@ -58,15 +58,15 @@ microML arg fs =
       Interpreter -> shell
       ObjectFile  -> undefined
       Compiler    -> 
-          if length fs /= 2 
+          if length fs /= 2  -- only accepts one file for the moment
              then die $ red ++ "Exit Failure: " ++ unred ++ "you must provide a source file and a destination file"
              else do
-                  fl <- doesFileExist $ head fs
-                  if fl 
-                     then do
-                       contents <- LIO.readFile $ head fs
-                       compile contents $ L.pack (head $ tail fs)
-                       else die $ red ++ "Exit Failure: " ++ unred ++ "the given file doesn't exist in that location, so it can't be compiled!"
+                 tr <- doesFileExist $ head fs
+                 if tr 
+                    then do
+                        contents <- LIO.readFile (head fs) 
+                        compile contents (L.pack $ last fs)
+                    else die $ red ++ "Exit Failure: " ++ unred ++ "the given file doesn't exist in that location, so it can't be compiled!"
       Jit         -> do -- die "The jit is not yet operable"
           exists <- findExecutable "llc"
           if null exists
