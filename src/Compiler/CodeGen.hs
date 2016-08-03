@@ -16,7 +16,7 @@ import Control.Monad.Trans.Either
 import Control.Monad.Except
 import Control.Monad.Gen 
 import Language.C.DSL
-import Text.Printf
+--import Text.Printf
 
 import qualified Data.Text.Lazy as L
 import qualified Data.Map as Map
@@ -43,17 +43,17 @@ data Failure = Failure
           , location :: Loc
           , summary :: Info }
 
-hoistError :: Show a => Either a t -> t
-hoistError (Right vl) = vl
-hoistError (Left err) = error $ show err
-
 tellError :: Failure -> String
 tellError Failure{..} =   
-    printf "Error: failure while %s at %s. \n" stateS location summary
+    "Error: failure while " ++ stateS ++ " " ++ location ++ " " ++ summary
+    --printf "Error: failure while %s at %s. \n" stateS location summary
     where stateS = case state of
                     Parser -> "parsing" 
                     TypeCheck -> "typechecking" 
                     CodeGen -> "generating C code"
+
+failParse :: MonadError Failure m => Loc -> Info -> m a
+failParse loc info = throwError $ Failure Parser loc info
 
 failGen :: MonadError Failure m => Loc -> Info -> m a
 failGen loc info = throwError $ Failure CodeGen loc info
@@ -61,7 +61,7 @@ failGen loc info = throwError $ Failure CodeGen loc info
 compileMicroML :: Either TP.ParseError [(String, Expr)] -> Compiler [CExtDecl]
 compileMicroML res = 
     case res of
-      Left _  -> undefined
+      Left err -> failParse (show err) ""
       Right r -> codegen r
 
 codegen :: [(String, Expr)] -> Compiler [CExtDecl]
@@ -86,7 +86,7 @@ generate (nm, expr) =
           Lit (LChar c)    -> return $ export $ char newNm .= chr c
           Lit (LString st) -> return $ export $ charPtr newNm .= str st
           Nil              -> return undefined
-          x                -> failGen (show x) ""
+          x                -> failGen "c code generation" (show x)
 
 renderC :: [CExtDecl] -> String
 renderC = unlines . map (show . pretty)
@@ -101,9 +101,9 @@ writeCFile dest code = do
     let cFile = L.unpack dest ++ ".cpp"
     writeFile cFile $ microBitIncludes ++ renderC code
 
-compile :: L.Text -> L.Text -> IO ()
-compile source dest = do
-    let res = parseProgram "from source" source
+compile :: L.Text -> L.Text -> String -> IO ()
+compile source dest filename = do
+    let res = parseProgram filename source
     let compRes = runCompiler (compileMicroML res) 
     case compRes of
       Right ccode -> writeCFile dest ccode
