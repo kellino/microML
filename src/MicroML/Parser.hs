@@ -55,7 +55,7 @@ binary :: Parser Expr
 binary = do
     void spaces
     _ <- string "2#"
-    b <- many1 $ oneOf "10"
+    b <- many1 $ oneOf "10" 
     void spaces
     return $ Lit (LInt $ readBin b)
         where readBin = foldl' (\x y -> x*2 + y) 0 . map (fromIntegral . digitToInt)
@@ -200,9 +200,10 @@ aexp =
   <|> charLit
   <|> raise
   <|> using
+  <?> "an expression"
 
 term :: Parser Expr
-term = Ex.buildExpressionParser primitives aexp
+term = Ex.buildExpressionParser primitives aexp <?> "an expression or primitive type (such as a number)"
 
 infixOp :: String -> (a -> a -> a) -> Ex.Assoc -> Op a
 infixOp x f = Ex.Infix (reservedOp x >> return f)
@@ -273,7 +274,7 @@ val = do
   return ("it", ex)
 
 decl :: Parser Binding
-decl = try val <|> letDecl
+decl = try val <|> letDecl <?> "a declaration"
 
 top :: Parser Binding
 top = do
