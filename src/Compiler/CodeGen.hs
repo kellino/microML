@@ -69,6 +69,7 @@ codegen = flip evalStateT Map.empty
         . fmap (uncurry makeMain) 
         . runWriterT 
         . mapM generate
+        -- . pruneUnused
         . checkForDuplicates
 
 makeMain :: [CExtDecl] -> [(CDecl, Maybe String, CExpr)] -> [CExtDecl]
