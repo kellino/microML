@@ -18,7 +18,7 @@ data Markdown =
       deriving Show
 
 funcChars :: Parser Char
-funcChars = oneOf " :+<>-=)(\n"
+funcChars = oneOf " :+<>-=)(,;\n"
 
 header :: Parser Markdown
 header = do
@@ -73,7 +73,7 @@ prettyPrint st =
       (Emphasis s) -> "\ESC[1m" ++ s ++ "\ESC[0m"
       (Plain s) -> s
       (Header s) -> "\ESC[1;31m" ++ s ++ "\ESC[0m"
-      (BackGround s) -> "\ESC[43;30m" ++ s ++ "\ESC[0m"
+      (BackGround s) -> "\ESC[1;43;30m" ++ s ++ "\ESC[0m"
 
 printHelp :: String -> String
 printHelp help = 
