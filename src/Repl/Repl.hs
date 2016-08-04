@@ -7,6 +7,9 @@ module Repl.Repl where
 
 import Repl.Eval
 import Repl.Pretty
+import Repl.Help
+import Repl.HelpDicts
+
 import MicroML.Syntax
 import MicroML.Parser
 import MicroML.Lexer
@@ -19,6 +22,7 @@ import qualified Data.Text.Lazy.IO as L
 
 import Control.Monad.State.Strict
 
+import Data.Maybe
 import Data.List (isPrefixOf, foldl')
 
 import System.Exit
@@ -88,9 +92,8 @@ browse _ = do
   st <- get
   liftIO $ mapM_ putStrLn $ ppenv (typeEnv st)
 
--- :?
 help :: [String] -> Repl ()
-help = return $ liftIO $ putStrLn "can't help you on that one"
+help k = liftIO $ putStr $ printHelp $ fromJust $ Map.lookup (head k) standard
 
 -- :using command
 using :: [String] -> Repl ()
