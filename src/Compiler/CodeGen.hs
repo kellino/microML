@@ -5,6 +5,7 @@ module Compiler.CodeGen where
 
 import Compiler.CHelper
 import Compiler.MicroBitHeader
+import Compiler.CallGraph
 
 import MicroML.Parser
 import MicroML.Syntax
@@ -16,7 +17,6 @@ import Control.Monad.Trans.Either
 import Control.Monad.Except
 import Control.Monad.Gen 
 import Language.C.DSL
---import Text.Printf
 
 import qualified Data.Text.Lazy as L
 import qualified Data.Map as Map
@@ -69,6 +69,7 @@ codegen = flip evalStateT Map.empty
         . fmap (uncurry makeMain) 
         . runWriterT 
         . mapM generate
+        . checkForDuplicates
 
 makeMain :: [CExtDecl] -> [(CDecl, Maybe String, CExpr)] -> [CExtDecl]
 makeMain decls _ = 
