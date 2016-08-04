@@ -2,12 +2,8 @@ module Compiler.CallGraph where
 
 import MicroML.Syntax
 
-import qualified Data.Set as S
 import Data.List
 import Data.Function
-
-sortDefs :: [(String, Expr)] -> S.Set [(String, Expr)]
-sortDefs = undefined
 
 checkForDuplicates :: [(String, Expr)] -> [(String, Expr)]
 checkForDuplicates code 
@@ -18,6 +14,12 @@ checkForDuplicates code
         numbered :: [(Int, (String, Expr))]
         numbered = zip [1..] code
 
-
 getFuncName :: Int -> [(String, Expr)] -> String
 getFuncName n code = "\ESC[1m" ++ (fst . head . drop (n-1)) code ++ "\ESC[0m"
+
+pruneUnused :: [(String, Expr)] -> [(String, Expr)] -> [(String, Expr)]
+pruneUnused _ [] = []
+pruneUnused [] acc = acc
+pruneUnused (x:xs) acc 
+    | ("App " ++ fst x) `isInfixOf` concatMap (show . snd) xs = pruneUnused xs (x:acc) 
+    | otherwise                                    = error "Unused function definition"
