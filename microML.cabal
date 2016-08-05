@@ -29,6 +29,7 @@ executable microML
                      parsec,
                      repline >= 0.1.5.0,
                      cmdargs,
+                     filepath,
                      monad-gen,
                      either,
                      process,
