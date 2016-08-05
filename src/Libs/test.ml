@@ -10,6 +10,8 @@ id returns what was given to it, throwing away extra arguments
     > a : Char
 *)
 
+let id x = x
+
 (* 
 ==id==
 ***         id          ***
