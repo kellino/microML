@@ -46,6 +46,7 @@ semi       = Tok.semi lexer
 integer    = Tok.integer lexer
 chr        = Tok.charLiteral lexer
 str        = Tok.stringLiteral lexer
+commaSep   = Tok.commaSep lexer
 
 contents :: Parser a -> Parser a
 contents p = do
