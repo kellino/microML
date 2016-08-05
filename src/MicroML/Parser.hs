@@ -118,14 +118,14 @@ bool = (reserved "true" >> return (Lit (LBoolean True)))
 list :: Parser Expr
 list = do
     void $ spaces *> char '['
-    elems <- expr `sepBy` char ',' <* spaces
+    elems <- commaSep expr
     void $ char ']' <* spaces
     return $ foldr (BinOp OpCons) Nil elems
 
 tuple :: Parser Expr
 tuple = do
     void $ string "{"
-    elems <- expr `sepBy` char ',' <* spaces
+    elems <- commaSep expr
     void $ string "}"
     return $ Lit $ LTup elems
 

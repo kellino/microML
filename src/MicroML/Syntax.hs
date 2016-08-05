@@ -57,6 +57,7 @@ instance Show UnaryOp where
     show Cdr   = red ++ "Cdr" ++ unred
     show Minus = red ++ "negative" ++ unred
     show OpLog = red ++ "log" ++ unred
+    show x     = show x
 
 data Binop = 
         OpAdd | OpSub | OpMul | OpDiv | OpIntDiv | OpExp | OpMod 
