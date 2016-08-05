@@ -19,7 +19,6 @@ data Markdown =
       | Plain String
       | Background String
       | Underline String
-      | Definition String
       deriving (Eq, Show)
 
 funcChars :: Parser Char
@@ -32,10 +31,8 @@ funcName = do
     void $ string "=="
     return st
 
-definition :: Parser Markdown
-definition = do
-    st <- many1 $ alphaNum <|> funcChars
-    return $ Definition st
+comments :: Parser String
+comments = anyChar `manyTill` newline
 
 header :: Parser Markdown
 header = do
@@ -86,11 +83,10 @@ helpModl = do
     name <- funcName
     helpBlock <- many helpStyle
     void $ string "*)"
-    _ <- definition
     return (name, helpBlock)
 
 allHelp :: Parser [HelpBlock]
-allHelp = many helpModl 
+allHelp = many helpModl <* skipMany comments
 
 parseHelp :: SourceName -> L.Text -> Either ParseError [HelpBlock]
 parseHelp = parse (contents allHelp) 
