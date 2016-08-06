@@ -1,4 +1,4 @@
--- | A very limitied pseudo-markdown parser for pretty printing the help information to the terminal
+-- | A very limited pseudo-markdown parser for pretty printing the help information to the terminal
 -- in interactive sessions
 --
 {-# LANGUAGE OverloadedStrings #-}
@@ -6,7 +6,7 @@
 module Repl.Help where
 
 import Control.Monad (void)
-import MicroML.Lexer
+--import MicroML.Lexer
 
 import Text.Parsec
 import Text.Parsec.Text.Lazy
@@ -22,17 +22,17 @@ data Markdown =
       deriving (Eq, Show)
 
 funcChars :: Parser Char
-funcChars = oneOf " :+<>-=)(,;\n"
+funcChars = oneOf " ':+<>-=)(,;\"\n"
 
 funcName :: Parser String
 funcName = do
     void $ string "=="
-    st <- many1 alphaNum
+    st <- many1 alphaNum 
     void $ string "=="
     return st
 
 comments :: Parser String
-comments = anyChar `manyTill` newline
+comments = (anyChar <|> noneOf "*)") `manyTill` newline 
 
 header :: Parser Markdown
 header = do
@@ -70,7 +70,7 @@ plain = do
 helpStyle :: Parser Markdown
 helpStyle = header 
         <|> try background
-        <|> emph
+        <|> try emph
         <|> underline
         <|> plain
         <?> "markdown syntax"
@@ -79,14 +79,20 @@ type HelpBlock = (String, [Markdown])
 
 helpModl :: Parser HelpBlock
 helpModl = do
-    void $ string "(*"
-    name <- funcName
-    helpBlock <- many helpStyle
-    void $ string "*)"
+    void $ string "(*" <* spaces
+    name <- spaces *> funcName <* spaces
+    helpBlock <- many helpStyle <* spaces
+    void $ spaces *> string "*)"
     return (name, helpBlock)
 
 allHelp :: Parser [HelpBlock]
 allHelp = many helpModl <* skipMany comments
+
+contents :: Parser a -> Parser a
+contents p = do
+    r <- p
+    eof
+    return r
 
 parseHelp :: SourceName -> L.Text -> Either ParseError [HelpBlock]
 parseHelp = parse (contents allHelp) 
@@ -96,9 +102,11 @@ prettyPrint st =
     case st of
       (Emphasis s)   -> "\ESC[1m" ++ s ++ "\ESC[0m"
       (Plain s)      -> s
-      (Header s)     -> "\ESC[1;31m" ++ s ++ "\ESC[0m"
+      (Header s)     -> "\ESC[1;31m" ++ "\t" ++ s ++ "\t" ++ "\ESC[0m"
       (Background s) -> "\ESC[1;43;30m" ++ s ++ "\ESC[0m"
       (Underline s)  -> "\ESC[4m" ++ s ++ "\ESC[0m"
 
-renderHelp :: HelpBlock -> String
-renderHelp (nm, cts) =  nm ++ concatMap prettyPrint cts
+renderHelp :: [Markdown] -> String
+renderHelp = concatMap prettyPrint 
+{-renderHelp :: HelpBlock -> String-}
+{-renderHelp (_, cts) = concatMap prettyPrint cts-}
