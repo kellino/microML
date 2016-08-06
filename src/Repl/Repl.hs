@@ -32,46 +32,37 @@ import qualified System.Process as S
 -- Types -- 
 -----------
 
-data HelpEnv = HEnv { helps :: Map.Map String [Markdown]}
-    deriving (Eq, Show)
+type HelpEnv = Map.Map String [Markdown]
 
-hEmpty :: HelpEnv
-hEmpty = HEnv Map.empty
-
-hLookup :: Name -> HelpEnv -> Maybe [Markdown]
-hLookup k (HEnv env) = Map.lookup k env
-
-instance Monoid HelpEnv where
-    mempty = hEmpty
-    mappend (HEnv a) (HEnv b) = HEnv (Map.union a b)
+emptyHelpEnv :: HelpEnv
+emptyHelpEnv = Map.empty
 
 data IState = IState
-  { typeEnv :: Env  -- Type environment
-  , termEnv :: TermEnv  -- Value environment
-    , helpEnv :: HelpEnv -- Help environment
-  }
+      { typeEnv :: Env      -- Type environment
+      , termEnv :: TermEnv  -- Value environment
+      , helpEnv :: HelpEnv  -- Help environment
+      }
 
 initState :: IState
-initState = IState Env.empty emptyTmenv hEmpty
+initState = IState Env.empty emptyTmenv emptyHelpEnv
 
 type Repl a = HaskelineT (StateT IState IO) a
 
-hoistError :: (Show a1, MonadIO m) => Either a1 a -> HaskelineT m a
+hoistError :: (Show a1) => Either a1 a -> Repl a
 hoistError (Right val) = return val
 hoistError (Left err) = do
   liftIO $ print err
   abort
 
+ignoreError :: Either a1 a -> Repl a
+ignoreError (Right val) = return val
+
 evalDef :: TermEnv -> (String, Expr) -> TermEnv
 evalDef env (nm, ex) = termEnv'
   where (_, termEnv') = runEval env nm ex
 
-readHelp :: HelpEnv -> [HelpBlock] -> Either String HelpEnv
-readHelp env [] = Right env
-readHelp env ((nm, bdy):xs) = readHelp (hExtend env (nm, bdy)) xs
-
-hExtend :: HelpEnv -> (String, [Markdown]) -> HelpEnv
-hExtend env (func, bdy) = env { helps = Map.insert func bdy (helps env)}
+readHelp :: HelpEnv -> (String, [Markdown]) -> HelpEnv
+readHelp env (nm, cmts) = Map.insert nm cmts env
 
 exec :: Bool -> L.Text -> Repl ()
 exec update source = do
@@ -79,14 +70,11 @@ exec update source = do
 
     mod'     <- hoistError $ parseProgram "<stdin>" source
     typeEnv' <- hoistError $ inferTop (typeEnv st) mod'
-    helpEnv' <- 
-        case parseHelp "<from file>" source of
-          Left _ -> error "unable to open file"
-          Right r -> hoistError $ readHelp (helpEnv st) r
+    helpEnv' <- hoistError $ parseHelp "<from file>" source
 
     let st' = st { termEnv = foldl' evalDef (termEnv st) mod'
                  , typeEnv = typeEnv' `mappend` typeEnv st 
-                 , helpEnv = helpEnv' `mappend` helpEnv st 
+                 , helpEnv = foldl' readHelp (helpEnv st) helpEnv'
                  }
 
     when update (put st')
@@ -110,6 +98,13 @@ cmd source = exec True (L.pack source)
 -- Commands
 -------------------------------------------------------------------------------
 
+-- :Parse Tree
+pst :: [String] -> Repl ()
+pst expr = do
+    tree <- hoistError $ parseProgram "<stdin>" $ L.pack (concat expr)
+    tyEnv <- hoistError $ inferTop Env.empty tree
+    liftIO $ putStrLn $ show tree ++ concat (ppenv tyEnv)
+
 -- :browse command
 browse :: [String] -> Repl ()
 browse _ = do
@@ -117,31 +112,27 @@ browse _ = do
   liftIO $ mapM_ putStrLn $ ppenv (typeEnv st)
 
 help :: [String] -> Repl ()
-help _ = do
-    st <- get
-    liftIO $ print $ helpSize (helpEnv st)
-        where helpSize (HEnv env) = Map.size env
-
-
-{-help :: [String] -> Repl ()-}
-{-help _ = do-}
-    {-st <- get-}
-    {-liftIO $ mapM_ putStr $ ppHelp (helpEnv st)-}
-        {-where-}
-            {-ppHelp :: HelpEnv -> [String]-}
-            {-ppHelp (HEnv env) = map renderHelp $ Map.toList env-}
+help func = 
+    if null func
+       then liftIO $ putStrLn "you haven't entered a function"
+       else do st <- get
+               case Map.lookup (head func) (helpEnv st) of
+                  Nothing -> liftIO $ putStrLn $ "there is no help available for " ++ head func ++ " (:"
+                  Just val -> liftIO $ putStr $ "\n" ++ renderHelp val ++ "\n"
 
 -- :using command
 using :: [String] -> Repl ()
-using args = do
-    dir <- liftIO getHomeDirectory
-    let stdlib = dir </> ".microML/"
-    exists <- liftIO $ doesDirectoryExist stdlib
-    if exists
-       then do 
-           contents <- liftIO $ L.readFile $ stdlib ++ unwords args ++ ".ml"
-           exec True contents 
-       else error "\ESC[31mError\ESC[0m: Unable to locate standard library in home directory"
+using args = 
+    if null args 
+       then liftIO $ putStrLn "you must enter a filename!"
+       else do dir <- liftIO getHomeDirectory
+               let stdlib = dir </> ".microML/"
+               exists <- liftIO $ doesDirectoryExist stdlib
+               if exists
+                 then do 
+                    contents <- liftIO $ L.readFile $ stdlib ++ unwords args ++ ".mml"
+                    exec True contents 
+                 else error "\ESC[31mError\ESC[0m: Unable to locate standard library in home directory"
 
 -- :type command
 typeof :: [String] -> Repl ()
@@ -173,7 +164,7 @@ defaultMatcher = [
 -- Default tab completer
 comp :: (Monad m, MonadState IState m) => WordCompleter m
 comp n = do
-    let cmds = [":using", ":type", ":browse", ":quit", ":", ":help", ":?"]
+    let cmds = [":using", ":type", ":browse", ":quit", ":", ":help", ":?", ":pst"]
     Env.TypeEnv ctx <- gets typeEnv
     let defs = Map.keys ctx
     let builtins = reservedNames
@@ -188,6 +179,7 @@ options = [
       , ("!"      , sh)
       , ("?"      , help)
       , ("help"   , help) -- alternative
+      , ("pst"    , pst) -- view parse tree of a given expression
       ]
 
 -------------------------------------------------------------------------------
