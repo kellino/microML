@@ -6,6 +6,8 @@
 module Repl.Repl where
 
 import Repl.Eval hiding (mod')
+import Repl.HelpEnv
+import qualified Repl.HelpEnv as HE
 import Repl.Pretty
 import Repl.Help
 
@@ -32,11 +34,6 @@ import qualified System.Process as S
 -- Types -- 
 -----------
 
-type HelpEnv = Map.Map String [Markdown]
-
-emptyHelpEnv :: HelpEnv
-emptyHelpEnv = Map.empty
-
 data IState = IState
       { typeEnv :: Env      -- Type environment
       , termEnv :: TermEnv  -- Value environment
@@ -44,7 +41,7 @@ data IState = IState
       }
 
 initState :: IState
-initState = IState Env.empty emptyTmenv emptyHelpEnv
+initState = IState Env.empty emptyTmenv HE.empty
 
 type Repl a = HaskelineT (StateT IState IO) a
 
@@ -61,8 +58,8 @@ evalDef :: TermEnv -> (String, Expr) -> TermEnv
 evalDef env (nm, ex) = termEnv'
   where (_, termEnv') = runEval env nm ex
 
-readHelp :: HelpEnv -> (String, [Markdown]) -> HelpEnv
-readHelp env (nm, cmts) = Map.insert nm cmts env
+toHelpenv :: [HelpBlock] -> HelpEnv
+toHelpenv ls = HEnv $ Map.fromList ls
 
 exec :: Bool -> L.Text -> Repl ()
 exec update source = do
@@ -70,11 +67,9 @@ exec update source = do
 
     mod'     <- hoistError $ parseProgram "<stdin>" source
     typeEnv' <- hoistError $ inferTop (typeEnv st) mod'
-    helpEnv' <- hoistError $ parseHelp "<from file>" source
 
     let st' = st { termEnv = foldl' evalDef (termEnv st) mod'
                  , typeEnv = typeEnv' `mappend` typeEnv st 
-                 , helpEnv = foldl' readHelp (helpEnv st) helpEnv'
                  }
 
     when update (put st')
@@ -84,6 +79,20 @@ exec update source = do
       Just ex -> do
         let (val, _) = runEval (termEnv st') "it" ex
         showOutput val st'
+
+exec' :: L.Text -> Repl ()
+exec' source = do
+    st       <- get
+
+    mod'     <- hoistError $ parseProgram "<stdin>" source
+    typeEnv' <- hoistError $ inferTop (typeEnv st) mod'
+    helpEnv' <- hoistError $ parseHelp "<from file>" source
+
+    let st' = st { termEnv = foldl' evalDef (termEnv st) mod'
+                 , typeEnv = typeEnv' `mappend` typeEnv st 
+                 , helpEnv = toHelpenv helpEnv' `mappend` helpEnv st
+                 }
+    put st'
 
 showOutput :: Expr -> IState -> Repl ()
 showOutput arg st = 
@@ -112,13 +121,14 @@ browse _ = do
   liftIO $ mapM_ putStrLn $ ppenv (typeEnv st)
 
 help :: [String] -> Repl ()
-help func = 
-    if null func
+help args = 
+    if null args
        then liftIO $ putStrLn "you haven't entered a function"
        else do st <- get
-               case Map.lookup (head func) (helpEnv st) of
-                  Nothing -> liftIO $ putStrLn $ "there is no help available for " ++ head func ++ " (:"
-                  Just val -> liftIO $ putStr $ "\n" ++ renderHelp val ++ "\n"
+               let arg = unwords args
+               case HE.lookup arg (helpEnv st) of
+                   Just val -> liftIO $ putStr $ "\n" ++ renderHelp val ++ "\n"
+                   Nothing -> liftIO $ putStrLn $ "there is no help available for " ++ arg ++ " (:"
 
 -- :using command
 using :: [String] -> Repl ()
@@ -131,17 +141,20 @@ using args =
                if exists
                  then do 
                     contents <- liftIO $ L.readFile $ stdlib ++ unwords args ++ ".mml"
-                    exec True contents 
+                    exec' contents 
                  else error "\ESC[31mError\ESC[0m: Unable to locate standard library in home directory"
 
 -- :type command
 typeof :: [String] -> Repl ()
-typeof args = do
-  st <- get
-  let arg = unwords args
-  case Env.lookup arg (typeEnv st) of
-    Just val -> liftIO $ putStrLn $ ppsig' (arg, val)
-    Nothing -> exec False $ L.pack arg
+typeof args = 
+    if null args
+       then liftIO $ putStrLn "you must enter the name of a function"
+       else do
+          st <- get
+          let arg = unwords args
+          case Env.lookup arg (typeEnv st) of
+            Just val -> liftIO $ putStrLn $ ppsig' (arg, val)
+            Nothing -> exec False $ L.pack arg
 
 -- :quit command
 quit :: a -> Repl ()
