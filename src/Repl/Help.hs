@@ -22,18 +22,18 @@ data Markdown =
       deriving (Eq, Show)
 
 funcChars :: Parser Char
-funcChars = oneOf " ':+<>-=)(,;\"\n"
+funcChars = oneOf " '?:+<>-=)!(,;\"\n"
 
 funcName :: Parser String
 funcName = do
     void $ string "=="
-    st <- many1 alphaNum 
+    st <- many1 $ alphaNum <|> oneOf "?'_"
     void $ string "=="
     return st
 
 comments :: Parser String
 comments = do
-    void $ string "let"
+    void $ string "let" <|> string "--"
     _ <- anyChar `manyTill` newline
     return ""
 
