@@ -32,7 +32,10 @@ funcName = do
     return st
 
 comments :: Parser String
-comments = (anyChar <|> noneOf "*)") `manyTill` newline 
+comments = do
+    void $ string "let"
+    _ <- anyChar `manyTill` newline
+    return ""
 
 header :: Parser Markdown
 header = do
@@ -82,20 +85,17 @@ helpModl = do
     void $ string "(*" <* spaces
     name <- spaces *> funcName <* spaces
     helpBlock <- many helpStyle <* spaces
-    void $ spaces *> string "*)"
+    void $ spaces *> string "*)" <* spaces
+    skipMany (try comments)
     return (name, helpBlock)
 
 allHelp :: Parser [HelpBlock]
-allHelp = many helpModl <* skipMany comments
-
-contents :: Parser a -> Parser a
-contents p = do
-    r <- p
-    eof
-    return r
+allHelp = do
+    skipMany comments
+    sepEndBy1 helpModl (skipMany comments)
 
 parseHelp :: SourceName -> L.Text -> Either ParseError [HelpBlock]
-parseHelp = parse (contents allHelp) 
+parseHelp = parse allHelp
 
 prettyPrint :: Markdown -> String
 prettyPrint st = 
@@ -108,5 +108,3 @@ prettyPrint st =
 
 renderHelp :: [Markdown] -> String
 renderHelp = concatMap prettyPrint 
-{-renderHelp :: HelpBlock -> String-}
-{-renderHelp (_, cts) = concatMap prettyPrint cts-}
