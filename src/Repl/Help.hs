@@ -22,7 +22,7 @@ data Markdown =
       deriving (Eq, Show)
 
 funcChars :: Parser Char
-funcChars = oneOf " '?:+<>-=)!(,;\"\n"
+funcChars = oneOf " '?:+<>-=)!.(,;\"\n"
 
 funcName :: Parser String
 funcName = do
