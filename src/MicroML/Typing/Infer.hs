@@ -204,7 +204,10 @@ polymorphic (Lam x e) = do
     return (tv `TArrow` t)
 polymorphic x = throwError $ UnsupportedOperation $ "polymorphic: " ++ show x
 
--- the massive (and messy) inference function. 
+-----------------------------
+-- MAIN INFERENCE FUNCTION --
+-----------------------------
+
 infer :: Expr -> Infer Type
 infer expr = case expr of
     Lit (LInt _)     -> return typeNum
