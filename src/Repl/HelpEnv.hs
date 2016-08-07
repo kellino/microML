@@ -17,3 +17,7 @@ extend env (var, ts) =  env { unHelp = Map.insert var ts (unHelp env) }
 
 merge :: HelpEnv -> HelpEnv -> HelpEnv
 merge (HEnv a) (HEnv b) = HEnv (Map.union a b)
+
+instance Monoid HelpEnv where
+    mempty = empty
+    mappend = merge
