@@ -10,7 +10,6 @@ id returns what was given to it, throwing away extra arguments
     > a : Char
 *)
 let id x = x
-
 (* 
 ==compose== 
 ***     compose     ***
@@ -24,6 +23,4 @@ like this: a to a1 to a2
 It works like this:
     result = 5 <- (succ 4 = 5) <- (succ 3 = 4) <- 3
 *)
-let compose f x y = f (x y)
-
-(* == unary== having only one parameter, like **id (id :: a -> a)**, so id 5 = 5 *)
+let compose x y z = x (y z)
