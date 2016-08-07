@@ -218,7 +218,7 @@ banner = "\ESC[1;31m" ++
 
 ini :: Repl ()
 ini = do
-    using ["test"]
+    using ["standard"]
     liftIO $ putStrLn $ banner ++ "\n\n" ++ "\ESC[1mWelcome to microML\ESC[0m\n\n" 
 
 shell :: IO ()
