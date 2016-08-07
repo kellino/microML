@@ -1,0 +1,2 @@
+-- hello world in microML
+let main = scroll "Hello World! :)";
