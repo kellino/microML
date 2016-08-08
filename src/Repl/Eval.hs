@@ -49,7 +49,9 @@ eval env expr = case expr of
     UnaryOp op a -> do
         let a' = eval env a
         case op of
-          Car   -> hoistPrimError . runPrimError $ car a'
+          Show  -> show' a'
+          Read  -> read' a'
+          Car   -> car a'
           Cdr   -> cdr a'
           OpLog -> log' a'
           Minus ->  case a' of
