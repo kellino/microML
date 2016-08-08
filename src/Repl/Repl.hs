@@ -23,7 +23,9 @@ import qualified Data.Text.Lazy.IO as L
 import Data.List (isPrefixOf, foldl')
 
 import Control.Monad.State.Strict
+import Control.Exception (catch, IOException)
 
+import System.IO
 import System.Exit
 import System.Directory
 import System.FilePath
@@ -166,7 +168,11 @@ clear _ = liftIO $ S.callCommand "clear"
 
 -- :! access the shell -- unsafe!!
 sh :: [String] -> Repl ()
-sh arg = liftIO $ S.callCommand (unwords arg)
+sh arg = liftIO $ 
+    catch (S.callCommand (unwords arg))
+          (\e -> do let err = show (e :: IOException)
+                    hPutStr stderr ("Warning: Couldn't run " ++ unwords arg ++ " " ++ err ++ "\n")
+                    return ()) 
 
 -------------------------------------------------------------------------------
 -- Interactive Shell
