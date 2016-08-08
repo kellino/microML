@@ -1,4 +1,5 @@
-module Compiler.CallGraph where
+module Compiler.CallGraph 
+    (checkForDuplicates, validDefs) where
 
 import MicroML.Syntax
 
@@ -26,7 +27,6 @@ checkForDuplicates code
 
 getFuncName :: Int -> [(String, Expr)] -> String
 getFuncName n code = "\ESC[1m" ++ (fst . head . drop (n-1)) code ++ "\ESC[0m"
-
 
 ----------------------
 -- UNREACHABLE CODE --
