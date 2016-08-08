@@ -40,17 +40,21 @@ flags =
 
 parseCmds :: [String] -> IO ([Flag], [String])
 parseCmds argv = 
-    case getOpt Permute flags argv of
-      (args, fs, []) -> do
-          let files = if null fs then ["-"] else fs
-          if Help `elem` args
-             then do hPutStrLn stderr (usageInfo header flags)
-                     exitSuccess
-             else return (nub args, files)
-      (_,_,errs) -> do
-          hPutStrLn stderr (concat errs ++ usageInfo header flags)
-          exitWith (ExitFailure 1)
-      where header = "Usage: microML [-jcio] [file ...]"
+    if null argv
+       then do hPutStrLn stderr $ "Please enter one of the following option:\n" ++ usageInfo header flags
+               exitFailure
+       else
+            case getOpt Permute flags argv of
+              (args, fs, []) -> do
+                  let files = if null fs then ["-"] else fs
+                  if Help `elem` args
+                     then do hPutStrLn stderr (usageInfo header flags)
+                             exitSuccess
+                     else return (nub args, files)
+              (_,_,errs) -> do
+                  hPutStrLn stderr (concat errs ++ usageInfo header flags)
+                  exitWith (ExitFailure 1)
+              where header = "Usage: microML [-jcio] [file ...]"
 
 microML :: Flag -> [FilePath] -> IO ()
 microML arg fs =
