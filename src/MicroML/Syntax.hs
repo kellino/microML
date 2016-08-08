@@ -47,7 +47,7 @@ data Lit
   deriving (Show, Eq, Ord)
 
 data UnaryOp =
-     Chr | Ord 
+     Chr | Ord  | Read | Show
    | Car | Cdr 
    | Not | Minus | OpLog -- unary maths ops
     deriving (Eq, Ord)

@@ -214,6 +214,8 @@ prefixOp name func = Ex.Prefix ( do {reservedOp name; return func } )
 primitives :: [[Op Expr]]
 primitives = [[ prefixOp "head"  (UnaryOp Car)
             ,   prefixOp "tail"  (UnaryOp Cdr)
+            ,  prefixOp  "_read"  (UnaryOp Read)
+            ,  prefixOp  "_show"  (UnaryOp Show)
             ,   infixOp   ":"    (BinOp OpCons) Ex.AssocRight
             ,   infixOp   "++"   (BinOp OpAppend) Ex.AssocRight ]
             , [ prefixOp  "_log" (UnaryOp OpLog)

@@ -1,15 +1,8 @@
 module MicroML.ListPrimitives where
 
 import MicroML.Syntax
-import Control.Monad.Except
-import Control.Monad.Identity
 
 import qualified Data.Char as DC
-
-type PrimError a = ExceptT ErrorMsg Identity a
-
-runPrimError :: ExceptT e Identity a -> Either e a
-runPrimError ev = runIdentity $ runExceptT ev
 
 enumFromTo_ :: Expr -> Expr -> Expr
 enumFromTo_ (Lit (LInt a)) (Lit (LInt b)) = foldr (BinOp OpCons) Nil $ (Lit . LInt ) <$> [a .. b]
@@ -17,13 +10,11 @@ enumFromTo_ (Lit (LDouble a)) (Lit (LDouble b)) = foldr (BinOp OpCons) Nil $ (Li
 enumFromTo_ (Lit (LChar a)) (Lit (LChar b))     = foldr (BinOp OpCons) Nil $ (Lit . LChar) <$> [a .. b]
 enumFromTo_ _ _                                 = PrimitiveErr $ ListPrim ""
 
-car :: Expr -> PrimError Expr 
-car (BinOp OpCons x _) =  return x
+car :: Expr -> Expr 
+car (BinOp OpCons x _) = x
 
 cdr :: Expr -> Expr
-cdr Nil = PrimitiveErr $ ListPrim "there is no head of an empty list!"
 cdr (BinOp OpCons _ xs) = xs
-cdr _   = error "you can only take the tail of a list"
 
 append :: Expr -> Expr -> Expr
 append xs Nil                               = xs
@@ -34,6 +25,18 @@ append _ _                                  = PrimitiveErr $ ListPrim "one of yo
 ------------------------------------
 -- STRING MANIPULATION PRIMITIVES --
 ------------------------------------
+
+show' :: Expr -> Expr
+show' str@(Lit (LString _)) = str
+show' (Lit (LInt x))        = Lit . LString $ show x
+show' (Lit (LDouble x))     = Lit . LString $ show x
+show' (Lit (LChar x))       = Lit . LString $ show x
+show' (Lit (LBoolean x))    = Lit . LString $ show x
+
+read' :: Expr -> Expr
+read' int@(Lit (LInt _)) = int
+read' doub@(Lit (LDouble _)) = doub
+read' (Lit (LString x)) = Lit . LInt $ read x
 
 ord' :: Expr -> Expr
 ord' (Lit (LChar a)) = Lit . LInt $ (toInteger . DC.ord) a
