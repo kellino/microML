@@ -252,34 +252,33 @@ infer expr = case expr of
         let sc = generalize env t1
         inEnv (x, sc) (infer e2)
 
-    FixPoint e1 -> inferLambda e1
-    {-FixPoint e1 -> do-}
-        {-t1 <- infer e1-}
-        {-tv <- fresh-}
-        {-uni (tv `TArrow` tv) t1-}
-        {-return tv-}
-
-    UnaryOp op e1 -> do
+    FixPoint e1 -> do
         t1 <- infer e1
         tv <- fresh
-        case e1 of 
-          --(Lit (LString _))  -> doUnaryListOp op e1 tv
-          Nil                -> throwError $ UnsupportedOperation $ "you're trying to perform " ++ show op ++ " on nothing"
-          (Lit (LChar _))    -> doUnaryChar op t1 tv
-          (Lit (LInt _))     -> doUnaryMaths op t1 tv
-          (Lit (LDouble _))  -> doUnaryMaths op t1 tv
-          (Lit (LBoolean _)) -> doUnaryBool op t1 tv
-          var@(Var _)        -> infer var
-          BinOp _ x _        -> infer x
-          _                  -> throwError $ UnsupportedOperation $ "UnaryOp error: " ++ show op ++ show e1
+        uni (tv `TArrow` tv) t1
+        return tv
+
+    UnaryOp op e1 -> 
+        case op of
+          Car -> 
+              case e1 of
+                BinOp OpCons x _  -> infer x
+                Nil               -> throwError $ UnsupportedOperation "head of an empty list"
+                var@(Var _)       -> infer var
+                x                 -> throwError $ UnsupportedOperation $ "car: " ++ show x
+          Cdr -> infer e1
+          Show -> return typeString
+          Read -> return typeNum
 
     BinOp op e1 e2 -> 
         case op of
           OpCons  -> doConsOp e1 e2
           OpGt    -> inferBinOpBool e1 e2
+          OpGe    -> inferBinOpBool e1 e2
           OpLt    -> inferBinOpBool e1 e2
           OpEq    -> inferBinOpBool e1 e2
           OpNotEq -> inferBinOpBool e1 e2
+          OpLe    -> inferBinOpBool e1 e2
           _       -> 
               case (e1, e2) of
                   nil@(_, Nil)         -> throwError $ UnsupportedOperation $ "[] error " ++ show nil -- debugging
@@ -357,42 +356,6 @@ newListTypeCon :: Expr -> Infer Type
 newListTypeCon e1 = do
     (TCon ty) <- infer e1
     return $ TCon $ "[" ++ ty ++ "]"
-
-doUnaryChar :: UnaryOp -> Type -> Type -> Infer Type
-doUnaryChar op t1 tv = 
-    case op of
-      Ord -> do
-          uni t1 tv
-          return t1
-      Chr -> do
-          uni t1 tv
-          return t1
-      _   -> throwError $ UnsupportedOperation $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with characters" ++ "\ESC[0m"
-
-doUnaryBool :: UnaryOp -> Type -> Type -> Infer Type
-doUnaryBool op t1 tv =
-    case op of
-      Not -> do
-          uni t1 tv
-          return t1
-      _   -> throwError $ UnsupportedOperation $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with booleans" ++ "\ESC[0m"
-
-doUnaryMaths :: UnaryOp -> Type -> Type -> Infer Type
-doUnaryMaths op t1 tv =
-    case op of
-      Car   -> do
-          uni t1 tv
-          return t1
-      Cdr   -> do
-          uni t1 tv
-          return t1
-      OpLog -> do
-          uni t1 tv
-          return t1
-      Minus -> do
-          uni t1 tv
-          return t1
-      _ -> throwError $ UnsupportedOperation $ "you cannot do " ++ show op ++ "\ESC[1m" ++ " with numbers" ++ "\ESC[0m"
 
 doBinaryMathsOp :: Binop -> Expr -> Expr -> Infer Type
 doBinaryMathsOp op e1 e2 = do
