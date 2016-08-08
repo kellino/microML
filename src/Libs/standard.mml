@@ -1,7 +1,7 @@
 --GLOSSARY--
 (*
 ==unary== 
-***         unary         ***
+***unary***
 a **unary** function only takes **1** argument
 #Example:#
     > zero? 3           __zero? only takes one argument__
@@ -15,7 +15,7 @@ however
 
 (* 
 ==id==
-***         id          ***
+***id***
 ** id :: a -> a **
 id is a __unary__ function. It returns what was given to it without changes, throwing away extra arguments
 #Example:#
@@ -27,7 +27,7 @@ id is a __unary__ function. It returns what was given to it without changes, thr
 let id x = x
 (* 
 ==zero?== 
-*** zero? *** 
+***zero?*** 
 ** zero? :: Number -> Number ** 
 zero checks if a number or value is equal to 0
 #Example:#
