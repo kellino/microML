@@ -102,7 +102,7 @@ prettyPrint st =
     case st of
       (Emphasis s)   -> text "\ESC[1m" <> text s <> text "\ESC[0m"
       (Plain s)      -> text s
-      (Header s)     -> text "\ESC[1;31m" <> nest 5 (text s) <> text "\ESC[0m"
+      (Header s)     -> text "\ESC[1;31m" <> text s <> "\ESC[0m"
       (Background s) -> text "\ESC[1;43;30m" <> text "        "  <> text s <> text "        " <> text "\ESC[0m"
       (Underline s)  -> text "\ESC[4m" <> text s <> text "\ESC[0m"
 
