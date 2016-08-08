@@ -160,7 +160,11 @@ typeof args =
 quit :: a -> Repl ()
 quit _ = liftIO exitSuccess
 
--- access the shell -- needs error checking
+-- :clear
+clear :: a -> Repl ()
+clear _ = liftIO $ S.callCommand "clear"
+
+-- :! access the shell -- unsafe!!
 sh :: [String] -> Repl ()
 sh arg = liftIO $ S.callCommand (unwords arg)
 
@@ -177,7 +181,7 @@ defaultMatcher = [
 -- Default tab completer
 comp :: (Monad m, MonadState IState m) => WordCompleter m
 comp n = do
-    let cmds = [":using", ":type", ":browse", ":quit", ":", ":help", ":?", ":pst"]
+    let cmds = [":using", ":type", ":browse", ":quit", ":", ":help", ":?", ":pst", ":clear"]
     Env.TypeEnv ctx <- gets typeEnv
     let defs = Map.keys ctx
     let builtins = reservedNames
@@ -190,6 +194,7 @@ options = [
       , ("quit"   , quit)
       , ("type"   , typeof)
       , ("!"      , sh)
+      , ("clear"  , clear)
       , ("?"      , help)
       , ("help"   , help) -- alternative
       , ("pst"    , pst) -- view parse tree of a given expression
@@ -211,8 +216,8 @@ banner :: String
 banner = "\ESC[1;31m" ++
         "            _               ___  ___ _       \n" ++
         "           (_)              |  \\/  || |      \n" ++
-        "  _ __ ___  _  ___ _ __ ___ | .  . || |               \ESC[33;1mversion 0.01\ESC[1;31m\n" ++
-        " | '_ ` _ \\| |/ __| '__/ _ \\| |\\/| || |           \ESC[33;1mfor help type :?\ESC[1;31m\n" ++
+        "  _ __ ___  _  ___ _ __ ___ | .  . || |           \ESC[33;1mversion 0.05\ESC[1;31m\n" ++
+        " | '_ ` _ \\| |/ __| '__/ _ \\| |\\/| || |           \ESC[33;1mfor help type :? or :help\ESC[1;31m\n" ++
         " | | | | | | | (__| | | (_) | |  | || |____  \n" ++
         " |_| |_| |_|_|\\___|_|  \\___/\\_|  |_/\\_____/  \ESC[0m"
 
