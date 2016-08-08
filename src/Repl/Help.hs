@@ -40,7 +40,7 @@ comments = do
 header :: Parser Markdown
 header = do
     void $ many1 $ string "#"
-    st <- many1 (alphaNum <|> funcChars) 
+    st <- many1 (alphaNum <|> funcChars <?> "header") 
     void $ many1 $ string "#"
     return $ Header st
 
@@ -92,7 +92,7 @@ helpModl = do
 allHelp :: Parser [HelpBlock]
 allHelp = do
     skipMany comments
-    sepEndBy1 helpModl (skipMany comments)
+    sepEndBy1 helpModl (skipMany comments) <* spaces
 
 parseHelp :: SourceName -> L.Text -> Either ParseError [HelpBlock]
 parseHelp = parse allHelp

@@ -156,7 +156,8 @@ typeof args =
           let arg = unwords args
           case Env.lookup arg (typeEnv st) of
             Just val -> liftIO $ putStrLn $ ppsig' (arg, val)
-            Nothing -> exec False $ L.pack arg
+            Nothing  -> liftIO $ putStrLn $ "microML: " ++ show arg ++ " is not in scope"
+            --Nothing -> exec False $ L.pack arg
 
 -- :quit command
 quit :: a -> Repl ()
