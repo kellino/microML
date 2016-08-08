@@ -46,59 +46,19 @@ syn region   mmlEncl transparent matchgroup=mmlKeyword start="(" matchgroup=mmlK
 syn region   mmlEncl transparent matchgroup=mmlKeyword start="\[" matchgroup=mmlKeyword end="\]" contains=ALLBUT,@mmlContained,mmlBrackErr
 syn region   mmlEncl transparent matchgroup=mmlKeyword start="#\[" matchgroup=mmlKeyword end="\]" contains=ALLBUT,@mmlContained,mmlBrackErr
 
-
 " Comments
 syn region   mmlComment start="(\*" end="\*)" contains=mmlComment,mmlTodo
 syn region   mmlLineComment start="--" end="\n" contains=mmlString, mmlTodo
 syn keyword  mmlTodo contained TODO FIXME XXX
 
 " let
-syn region   mmlEnd matchgroup=mmlKeyword start="\<let\>" matchgroup=mmlKeyword end="\<end\>" contains=ALLBUT,@mmlContained,mmlEndErr
-
-" local
-syn region   mmlEnd matchgroup=mmlKeyword start="\<local\>" matchgroup=mmlKeyword end="\<end\>" contains=ALLBUT,@mmlContained,mmlEndErr
-
-" abstype
-syn region   mmlNone matchgroup=mmlKeyword start="\<abstype\>" matchgroup=mmlKeyword end="\<end\>" contains=ALLBUT,@mmlContained,mmlEndErr
-
-" begin
-syn region   mmlEnd matchgroup=mmlKeyword start="\<begin\>" matchgroup=mmlKeyword end="\<end\>" contains=ALLBUT,@mmlContained,mmlEndErr
+"syn region   mmlEnd matchgroup=mmlKeyword start="\<let\>" contains=ALLBUT,@mmlContained,mmlEndErr
+syn match    mmlLet "\<let\>"
 
 " if
 syn region   mmlNone matchgroup=mmlKeyword start="\<if\>" matchgroup=mmlKeyword end="\<then\>" contains=ALLBUT,@mmlContained,mmlThenErr
 
-" "open"
-syn region   mmlNone matchgroup=mmlKeyword start="\<open\>" matchgroup=mmlModule end="\<\u\(\w\|'\)*\(\.\u\(\w\|'\)*\)*\>" contains=@mmlAllErrs,mmlComment
-
-" "structure" - somewhat complicated stuff ;-)
-syn region   mmlModule matchgroup=mmlKeyword start="\<\(structure\|functor\)\>" matchgroup=mmlModule end="\<\u\(\w\|'\)*\>" contains=@mmlAllErrs,mmlComment skipwhite skipempty nextgroup=mmlPreDef
-syn region   mmlPreDef start="."me=e-1 matchgroup=mmlKeyword end="\l\|="me=e-1 contained contains=@mmlAllErrs,mmlComment,mmlModParam,mmlModTypeRestr,mmlModTRWith nextgroup=mmlModPreRHS
-syn region   mmlModParam start="([^*]" end=")" contained contains=@mmlAENoParen,mmlModParam1
-syn match    mmlModParam1 "\<\u\(\w\|'\)*\>" contained skipwhite skipempty nextgroup=mmlPreMPRestr
-
-syn region   mmlPreMPRestr start="."me=e-1 end=")"me=e-1 contained contains=@mmlAllErrs,mmlComment,mmlMPRestr,mmlModTypeRestr
-
-syn region   mmlMPRestr start=":" end="."me=e-1 contained contains=@mmlComment skipwhite skipempty nextgroup=mmlMPRestr1,mmlMPRestr2,mmlMPRestr3
-syn region   mmlMPRestr1 matchgroup=mmlModule start="\ssig\s\=" matchgroup=mmlModule end="\<end\>" contained contains=ALLBUT,@mmlContained,mmlEndErr,mmlModule
-syn region   mmlMPRestr2 start="\sfunctor\(\s\|(\)\="me=e-1 matchgroup=mmlKeyword end="->" contained contains=@mmlAllErrs,mmlComment,mmlModParam skipwhite skipempty nextgroup=mmlFuncWith
-syn match    mmlMPRestr3 "\w\(\w\|'\)*\(\.\w\(\w\|'\)*\)*" contained
-syn match    mmlModPreRHS "=" contained skipwhite skipempty nextgroup=mmlModParam,mmlFullMod
-syn region   mmlModRHS start="." end=".\w\|([^*]"me=e-2 contained contains=mmlComment skipwhite skipempty nextgroup=mmlModParam,mmlFullMod
-syn match    mmlFullMod "\<\u\(\w\|'\)*\(\.\u\(\w\|'\)*\)*" contained skipwhite skipempty nextgroup=mmlFuncWith
-
-syn region   mmlFuncWith start="([^*]"me=e-1 end=")" contained contains=mmlComment,mmlWith,mmlFuncStruct
-syn region   mmlFuncStruct matchgroup=mmlModule start="[^a-zA-Z]struct\>"hs=s+1 matchgroup=mmlModule end="\<end\>" contains=ALLBUT,@mmlContained,mmlEndErr
-
-syn match    mmlModTypeRestr "\<\w\(\w\|'\)*\(\.\w\(\w\|'\)*\)*\>" contained
-syn region   mmlModTRWith start=":\s*("hs=s+1 end=")" contained contains=@mmlAENoParen,mmlWith
-syn match    mmlWith "\<\(\u\(\w\|'\)*\.\)*\w\(\w\|'\)*\>" contained skipwhite skipempty nextgroup=mmlWithRest
-syn region   mmlWithRest start="[^)]" end=")"me=e-1 contained contains=ALLBUT,@mmlContained
-
-" "signature"
-syn region   mmlKeyword start="\<signature\>" matchgroup=mmlModule end="\<\w\(\w\|'\)*\>" contains=mmlComment skipwhite skipempty nextgroup=mmlMTDef
-syn match    mmlMTDef "=\s*\w\(\w\|'\)*\>"hs=s+1,me=s
-
-syn keyword  mmlKeyword  if then else
+syn keyword  mmlKeyword  if then else and or not xor
 syn keyword  mmlKeyword  let in case of
 
 syn keyword  mmlType     Boolean Number Char String
@@ -116,19 +76,19 @@ syn match    mmlCharErr      +#"\\\d\d"\|#"\\\d"+
 syn region   mmlString       start=+"+ skip=+\\\\\|\\"+ end=+"+
 
 syn match    mmlKeyChar      "="
+syn match    mmlKeyChar      "<"
+syn match    mmlKeyChar      ">"
+syn match    mmlKeyChar      "%"
 syn match    mmlKeyChar      ";"
 syn match    mmlKeyChar      "\*"
-syn match    mmlFunDef       "=>"
-syn match    mmlRefAssign    ":="
+syn match    mmlFunDef       "->"
 syn match    mmlOperator     "\^"
-syn match    mmlOperator     "::"
+syn match    mmlOperator     "/"
+syn match    mmlOperator     ":"
 syn match    mmlAnyVar       "\<_\>"
 
 syn match    mmlNumber	      "\<-\=\d\+\>"
 syn match    mmlNumber	      "\<-\=0[x|X]\x\+\>"
-syn match    mmlReal	      "\<-\=\d\+\.\d*\([eE][-+]\=\d\+\)\=[fl]\=\>"
-
-syn match    mmlRecordField   "\<\w\+\>\(\s*[=:]\)\@=" contained
 
 " Define the default highlighting.
 " For version 5.7 and earlier: only when not done already
@@ -145,6 +105,9 @@ if v:version >= 508 || !exists('did_mml_syntax_inits')
   HiLink mmlBrackErr	 Error
   HiLink mmlParenErr	 Error
 
+  HiLink mmlKeyword      Type
+  HiLink mmlLet          Type
+
   HiLink mmlCommentErr	 Error
 
   HiLink mmlEndErr	 Error
@@ -155,29 +118,10 @@ if v:version >= 508 || !exists('did_mml_syntax_inits')
   HiLink mmlComment	 Comment
   HiLink mmlLineComment  Comment
 
-  HiLink mmlModPath	 Include
-  HiLink mmlModule	 Include
-  HiLink mmlModParam1	 Include
-  HiLink mmlModType	 Include
-  HiLink mmlMPRestr3	 Include
-  HiLink mmlFullMod	 Include
-  HiLink mmlModTypeRestr Include
-  HiLink mmlWith	 Include
-  HiLink mmlMTDef	 Include
-
-  HiLink mmlConstructor  Constant
-
-  HiLink mmlModPreRHS	 Keyword
-  HiLink mmlMPRestr2	 Keyword
-  HiLink mmlKeyword	 Keyword
-  HiLink mmlFunDef	 Keyword
-  HiLink mmlRefAssign	 Keyword
   HiLink mmlKeyChar	 Keyword
   HiLink mmlAnyVar	 Keyword
   HiLink mmlTopStop	 Keyword
   HiLink mmlOperator	 Keyword
-
-  HiLink mmlRecordField  Identifier
 
   HiLink mmlBoolean	 Boolean
   HiLink mmlCharacter	 Character
