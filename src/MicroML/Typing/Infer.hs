@@ -264,7 +264,11 @@ infer expr = case expr of
               case e1 of
                 BinOp OpCons x _  -> infer x
                 Nil               -> throwError $ UnsupportedOperation "head of an empty list"
-                var@(Var _)       -> infer var
+                var@(Var _)       -> do
+                    (TCon x) <- infer var
+                    if head x /= '[' 
+                       then throwError $ UnsupportedOperation $ "\ESC[31mError: \ESC[1myou are trying to take the head of a non-list: " ++ show e1
+                       else return $ TCon $ tail . init $ x
                 x                 -> throwError $ UnsupportedOperation $ "car: " ++ show x
           Cdr -> infer e1
           Show -> return typeString
