@@ -6,10 +6,10 @@
 module Repl.Help where
 
 import Control.Monad (void)
---import MicroML.Lexer
 
 import Text.Parsec
 import Text.Parsec.Text.Lazy
+import Text.PrettyPrint
 
 import qualified Data.Text.Lazy as L
 
@@ -97,14 +97,14 @@ allHelp = do
 parseHelp :: SourceName -> L.Text -> Either ParseError [HelpBlock]
 parseHelp = parse allHelp
 
-prettyPrint :: Markdown -> String
+prettyPrint :: Markdown -> Doc
 prettyPrint st = 
     case st of
-      (Emphasis s)   -> "\ESC[1m" ++ s ++ "\ESC[0m"
-      (Plain s)      -> s
-      (Header s)     -> "\ESC[1;31m" ++ "\t" ++ s ++ "\t" ++ "\ESC[0m"
-      (Background s) -> "\ESC[1;43;30m" ++ s ++ "\ESC[0m"
-      (Underline s)  -> "\ESC[4m" ++ s ++ "\ESC[0m"
+      (Emphasis s)   -> text "\ESC[1m" <> text s <> text "\ESC[0m"
+      (Plain s)      -> text s
+      (Header s)     -> text "\ESC[1;31m" <> nest 5 (text s) <> text "\ESC[0m"
+      (Background s) -> text "\ESC[1;43;30m" <> text "        "  <> text s <> text "        " <> text "\ESC[0m"
+      (Underline s)  -> text "\ESC[4m" <> text s <> text "\ESC[0m"
 
 renderHelp :: [Markdown] -> String
-renderHelp = concatMap prettyPrint 
+renderHelp = concatMap (render . prettyPrint)
