@@ -176,6 +176,7 @@ inferLambda e =
       (BinOp _ (Var _) (Var _)) -> polymorphic e
       (BinOp _ (Var _) x)       -> infer x
       (BinOp _ x (Var _))       -> infer x
+      (UnaryOp Car x)           -> infer x
       (UnaryOp Cdr x)           -> infer x
       (Lam _ bdy)               -> inferLambda bdy
       BinOp{}                   -> return typeNum
