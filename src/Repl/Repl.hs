@@ -50,8 +50,8 @@ type Repl a = HaskelineT (StateT IState IO) a
 hoistError :: (Show a1) => Either a1 a -> Repl a
 hoistError (Right val) = return val
 hoistError (Left err) = do
-  liftIO $ print err
-  abort
+    liftIO $ print err
+    abort
 
 ignoreError :: Either a1 a -> Repl a
 ignoreError (Right val) = return val
