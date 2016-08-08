@@ -1,11 +1,9 @@
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE FlexibleContexts #-}
-
 module Compiler.CodeGen where
 
 import Compiler.CHelper
 import Compiler.MicroBitHeader
 import Compiler.CallGraph
+import Compiler.Failure
 
 import MicroML.Parser
 import MicroML.Syntax
@@ -14,7 +12,6 @@ import qualified Text.Parsec as TP
 import Control.Monad.State
 import Control.Monad.Writer
 import Control.Monad.Trans.Either
-import Control.Monad.Except
 import Control.Monad.Gen 
 import Language.C.DSL
 
@@ -32,31 +29,6 @@ data Var = SVar String | Gen Integer
 type CodeGen = WriterT [(CDecl, Maybe String, CExpr)] (StateT (Map.Map Var String) Compiler) 
 
 type Compiler = StateT Var (EitherT Failure (Gen Integer))
-
-data Stage = Parser | TypeCheck | CodeGen
-
-type Loc = String
-type Info = String
-
-data Failure = Failure 
-          { state :: Stage
-          , location :: Loc
-          , summary :: Info }
-
-tellError :: Failure -> String
-tellError Failure{..} =   
-    "Error: failure while " ++ stateS ++ " " ++ location ++ " " ++ summary
-    --printf "Error: failure while %s at %s. \n" stateS location summary
-    where stateS = case state of
-                    Parser -> "parsing" 
-                    TypeCheck -> "typechecking" 
-                    CodeGen -> "generating C code"
-
-failParse :: MonadError Failure m => Loc -> Info -> m a
-failParse loc info = throwError $ Failure Parser loc info
-
-failGen :: MonadError Failure m => Loc -> Info -> m a
-failGen loc info = throwError $ Failure CodeGen loc info
 
 compileMicroML :: Either TP.ParseError [(String, Expr)] -> Compiler [CExtDecl]
 compileMicroML res = 
