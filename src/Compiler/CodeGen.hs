@@ -69,7 +69,7 @@ codegen = flip evalStateT Map.empty
         . fmap (uncurry makeMain) 
         . runWriterT 
         . mapM generate
-        -- . pruneUnused
+        . validDefs
         . checkForDuplicates
 
 makeMain :: [CExtDecl] -> [(CDecl, Maybe String, CExpr)] -> [CExtDecl]
@@ -106,6 +106,7 @@ writeCFile dest code = do
 compile :: L.Text -> L.Text -> String -> IO ()
 compile source dest filename = do
     let res = parseProgram filename source
+  --  print res -- for debugging
     let compRes = runCompiler (compileMicroML res) 
     case compRes of
       Right ccode -> writeCFile dest ccode
