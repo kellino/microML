@@ -11,8 +11,11 @@ however
     > zero? (3 - 3)     __this is ok__
     > true : Boolean
 *)
-
-
+(*
+==boolean==
+***boolean***
+a true or false value
+*)
 (* 
 ==id==
 ***id***
@@ -36,8 +39,27 @@ zero checks if a number or value is equal to 0
     > false : Boolean
 *)
 let zero? x = if x == 0 then true else false;
-
+(*
+==odd?==
+***odd?***
+odd? checks if a number is odd, returning a __boolean__ value.
+#Example:#
+    > odd? 5
+    > true : Boolean
+    > odd? 4
+    > false : Boolean
+*)
 let odd? x = if x % 2 == 1 then true else false;
+(*
+==even?==
+***even?***
+even? checks if a number is even, returning a __boolean__ value.
+#Example:#
+    > even? 4
+    > true : Boolean
+    > even? 5
+    > false : Boolean
+*)
 let even? x = if x % 2 == 0 then true else false;
 let positive? x = if x > 0 then true else false; 
 let negative? x = if x < 0 then true else false;
