@@ -12,16 +12,38 @@ however
     > true : Boolean
 *)
 (*
+==polymorphic==
+***polymorphic***
+a polymorphic function can take arguments of more than one type
+#Example:#
+    > id :: a -> a
+    > id 3
+    > 3
+    > id 'a'
+    > a
+We do not need to write separate id functions for every possible type of input. Compare this with C
+where we would need a different function of the different inputs.
+*)
+(*
 ==boolean==
 ***boolean***
 a true or false value
 *)
 (*
-==higher order function==
+==hof==
 ***higher order function***
 a higher order function is a function that does one (or both) of the two following things
     > takes one or more functions as arguments (c.f flip)
     > return a function as a result
+The second example needs a little more explanation...
+#Example:#
+    > let twice f x = f (f x)       **this is including in the standard library**
+    > let add3 x = x + 3
+    > let g = twice add3            **g is also a higher order function!**
+    > g
+    > <<closure>> : Number -> Number
+    > g 7
+    > 13 : Number
 *)
 (* 
 ==id==
@@ -74,19 +96,19 @@ let even? x = if x % 2 == 0 then true else false;
 ==positive?==
 ***positive?***
 ** positive? :: Number -> Boolean **
-positive? checks if a number is positive, returning a __boolean__ value.
+positive? checks if a number is greater than or equal to 0, returning a __boolean__ value.
 #Example:#
     > positive? 4
     > true : Boolean
     > positive? (-5)
     > false : Boolean
 *)
-let positive? x = if x > 0 then true else false; 
+let positive? x = if x >= 0 then true else false; 
 (*
 ==negative?==
 ***negative?***
 ** negative? :: Number -> Boolean **
-negative? checks if a number is negative, returning a __boolean__ value.
+negative? checks if a number is less than 0, returning a __boolean__ value.
 #Example:#
     > negative? (-4)
     > true : Boolean
@@ -133,7 +155,7 @@ let succ x = x + 1;
 ==flip==
 ***flip***
 ** flip :: for all a b c. (a -> b -> c) -> b -> a -> c **
-flip is a __higher order function__. Its first argument is a function which takes two arguments.
+flip is a __hof__ (higher order function). Its first argument is a function which takes two arguments.
 Flip changes the order of the aruments.
 #Example:#
     > let sub a b = a - b
