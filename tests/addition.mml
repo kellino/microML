@@ -1,1 +1,2 @@
 let inc x = x + 1;
+let main = inc 5

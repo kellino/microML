@@ -1,1 +1,2 @@
 let inc x = x + 'a';
+let main = inc 4
