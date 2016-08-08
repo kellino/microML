@@ -1,6 +1,5 @@
 --GLOSSARY--
-(*
-==unary== 
+(* ==unary== 
 ***unary***
 a **unary** function only takes **1** argument
 #Example:#
@@ -11,9 +10,25 @@ however
     > zero? (3 - 3)     **this is ok**
     > true : Boolean
 *)
+
+(* 
+==binary==
+***binary***
+A **binary function** accepts only two arguments. A example would be __const__
+#Example:#
+    > const "hello" "there"
+    > "hello" : String
+A **binary number** is a base 2 number composed only of 0s and 1s. In microML we 
+enter them like this:
+#Example:#
+    > 1001001
+    > 73 : Number
+see __octal__ and __hex__
+*)
+
 (*
 ==polymorphic==
-***polymorphic***
+***polymorphism***
 a polymorphic function can take arguments of more than one type
 #Example:#
     > id :: a -> a
@@ -24,6 +39,7 @@ a polymorphic function can take arguments of more than one type
 We do not need to write separate id functions for every possible type of input. Compare this with C
 where we would need a different function of the different inputs.
 *)
+
 (*
 ==boolean==
 ***boolean***
@@ -45,6 +61,7 @@ The second example needs a little more explanation...
     > g 7
     > 13 : Number
 *)
+
 (* 
 ==id==
 ***id***
@@ -67,7 +84,7 @@ zero checks if a number or value is equal to 0
     > zero? x
     > false : Boolean
 *)
-let zero? x = if x == 0 then true else false;
+let zero? x = if x == 0 then true else false
 (*
 ==odd?==
 ***odd?***
@@ -79,7 +96,7 @@ odd? checks if a number is odd, returning a __boolean__ value.
     > odd? 4
     > false : Boolean
 *)
-let odd? x = if x % 2 == 1 then true else false;
+let odd? x = if x % 2 == 1 then true else false
 (*
 ==even?==
 ***even?***
@@ -91,7 +108,7 @@ even? checks if a number is even, returning a __boolean__ value.
     > even? 5
     > false : Boolean
 *)
-let even? x = if x % 2 == 0 then true else false;
+let even? x = if x % 2 == 0 then true else false
 (*
 ==positive?==
 ***positive?***
@@ -103,7 +120,7 @@ positive? checks if a number is greater than or equal to 0, returning a __boolea
     > positive? (-5)
     > false : Boolean
 *)
-let positive? x = if x >= 0 then true else false; 
+let positive? x = if x >= 0 then true else false
 (*
 ==negative?==
 ***negative?***
@@ -132,7 +149,7 @@ let show x = x;
 ==const==
 ***const***
 ** const :: for all a b. a -> b -> a **
-const return only the first of its two aruments, throwing the second away
+const return only the first of its two arguments, throwing the second away
 #Example:#
     > const 3 4
     > 3 : Number
