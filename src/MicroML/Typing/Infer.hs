@@ -217,7 +217,7 @@ infer expr = case expr of
     Lit (LString _)  -> return typeString
     Lit (LChar _)    -> return typeChar
     PrimitiveErr _   -> return typeError
-    Nil              -> return typeNil
+    Nil              -> return $ TCon $ "[" ++ "a" ++ "]"
     Exception a _    -> do
         t1 <- infer a
         return (t1 `TArrow` typeError)
@@ -267,9 +267,11 @@ infer expr = case expr of
                 Nil               -> throwError $ UnsupportedOperation "head of an empty list"
                 var@(Var _)       -> do
                     (TCon x) <- infer var
-                    if head x /= '[' 
-                       then throwError $ UnsupportedOperation $ "\ESC[31mError: \ESC[1myou are trying to take the head of a non-list: " ++ show e1
-                       else return $ TCon $ tail . init $ x
+                    if "String" `isInfixOf` x
+                       then return typeChar
+                       else if head x /= '[' 
+                                then throwError $ UnsupportedOperation $ "\ESC[31mError: \ESC[1myou are trying to take the head of a non-list: " ++ show e1
+                                else return $ TCon $ tail . init $ x
                 x                 -> throwError $ UnsupportedOperation $ "car: " ++ show x
           Cdr -> infer e1
           Show -> return typeString
@@ -291,7 +293,11 @@ infer expr = case expr of
                   (Lit (LDouble _),_)  -> doBinaryMathsOp op e1 e2
                   (Lit (LBoolean _),_) -> doBinaryBoolOp op e1 e2
                   (Lit (LChar _),_)    -> doBinaryCharOp op e1 e2
-                  (Lit (LString _),_)  -> throwError $ UnsupportedOperation "not written yet"
+                  (Lit (LString _),_)  -> do
+                      t1 <- infer e1
+                      t2 <- infer e2
+                      uni t1 t2
+                      return t2
                   (var@(Var _), _)     -> infer var
                   (op'@UnaryOp{}, _)   -> infer op'
                   (op'@BinOp{}, _)     -> infer op'
@@ -378,6 +384,7 @@ doBinaryMathsOp op e1 e2 = do
       OpGe     -> getOp mathsOps op t1 t2
       OpGt     -> getOp mathsOps op t1 t2
       OpNotEq  -> getOp mathsOps op t1 t2
+      OpPipe   -> return typeNum
       OpMod    ->
           case (e1, e2) of
             (Lit (LInt _), Lit (LInt _)) -> getOp mathsOps OpMod t1 t2
