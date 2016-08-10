@@ -11,12 +11,29 @@ import Compiler.MicroBitHeader
 --import Compiler.Failure
 import Compiler.CallGraph
 
+--import Control.Monad.State.Strict
 import Text.PrettyPrint
 import Text.Parsec (ParseError)
 import qualified Data.Map as Map
 
+--import Data.Maybe (fromMaybe)
+
+type CodeEnv = Map.Map Name Expr
+
+data CompilerState a = CompilerState { codeState :: CodeEnv }
+
+instance Monoid (CompilerState a) where
+    mempty = CompilerState Map.empty
+    mappend (CompilerState a) (CompilerState b) = CompilerState $ Map.union a b
+
+initState :: CompilerState CodeEnv
+initState = CompilerState Map.empty
+
 parensWithSemi :: Doc -> Doc
 parensWithSemi d = parens d <> semi <> "\n"
+
+semiWithNewLine :: Doc
+semiWithNewLine = semi <> "\n"
 
 bracesNewLine :: Doc -> Doc
 bracesNewLine d = braces ("\n\t" <> d) <> "\n"
@@ -48,20 +65,19 @@ genBody ex =
          (App (Var x) xs)  -> do
              let found = Map.lookup x microBitAPI
              case found of
-                  Nothing  -> error "instruction not found"
+                  Nothing  -> error "not found"
                   Just r   -> r <> parensWithSemi (genBody xs)
 
 generateCExpr :: Name -> Expr -> Doc
 generateCExpr nm e1 = 
-    getType e1 <> text nm <> " = " <> genBody e1
+    getType e1 <> text nm <> " = " <> genBody e1 <> semiWithNewLine
 
 getType :: Expr -> Doc
-getType (Lit (LInt _)) = "int"
-getType (Lit (LDouble _)) = "double"
-getType (Lit (LString _)) = "ManagedString"
-getType (Lit (LChar _)) = "char"
-getType (Lit (LBoolean _)) = "bool"
-
+getType (Lit (LInt _)) = "int" <> space
+getType (Lit (LDouble _)) = "double" <> space
+getType (Lit (LString _)) = "ManagedString" <> space
+getType (Lit (LChar _)) = "char" <> space
+getType (Lit (LBoolean _)) = "bool" <> space
 
 compileMicroML :: Either ParseError [(String, Expr)] -> [Doc]
 compileMicroML res = 
@@ -69,9 +85,12 @@ compileMicroML res =
          Left err -> error $ show err
          Right r -> codegen r
 
+hoistError :: Either ParseError [(String, Expr)] -> [(String, Expr)]
+hoistError (Right val) = val
+hoistError (Left err) = error $ show err
+
 compile :: L.Text -> L.Text -> String -> IO ()
 compile source dest filename = do
     let res = parseProgram filename source
-    print res -- debugging
     let compRes = compileMicroML res
     writeToFile dest compRes
