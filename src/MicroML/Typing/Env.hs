@@ -11,6 +11,27 @@ data Env = TypeEnv { types :: Map.Map Name TypeScheme }
 empty :: Env
 empty = TypeEnv Map.empty
 
+-- unfortunately the type checker can't expose the types of built-in functions if 
+-- requested in the repl (using the :typeof of :browse commands
+-- a simple fix is to add them in manually here, but it's a little bit of a kludge
+polyA :: TVar
+polyA = TV "a"
+
+microbit :: Env
+microbit = TypeEnv $ Map.fromList
+    [ ("scroll", Forall [polyA] $ TArrow (TVar polyA) (TVar polyA))
+    , ("head", Forall [TV "[a]"] $ TArrow (TVar $ TV "[a]") (TVar polyA))
+    , ("tail", Forall [TV "[a]"] $ TArrow (TVar $ TV "[a]") (TVar $ TV "[a]"))
+    , (":", Forall [TV "a"] $ TArrow (TVar $ TV "[a]") (TVar $ TV "[a]"))
+    , ("+", Forall  [] $ TArrow typeNum (TArrow typeNum typeNum))
+    , ("-", Forall  [] $ TArrow typeNum (TArrow typeNum typeNum))
+    , ("/", Forall  [] $ TArrow typeNum (TArrow typeNum typeNum))
+    , ("//", Forall  [] $ TArrow typeNum (TArrow typeNum typeNum))
+    , ("%", Forall  [] $ TArrow typeNum (TArrow typeNum typeNum))
+    , ("^", Forall  [] $ TArrow typeNum (TArrow typeNum typeNum))
+    , ("==", Forall  [] $ TArrow (TVar polyA ) (TArrow (TVar polyA) typeBool))
+    ]
+
 lookup :: Name -> Env -> Maybe TypeScheme
 lookup k (TypeEnv env) = Map.lookup k env
 
