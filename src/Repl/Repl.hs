@@ -43,7 +43,7 @@ data IState = IState
       }
 
 initState :: IState
-initState = IState Env.empty emptyTmenv HE.empty
+initState = IState Env.microbit emptyTmenv HE.empty
 
 type Repl a = HaskelineT (StateT IState IO) a
 
