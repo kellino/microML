@@ -1,3 +1,9 @@
+-- | as it stands this is a little too simplistic. It can detect stranded function definitions, but
+-- this two (or two) definitions call each other but are not reachable from main, compilation will
+-- still progress. 
+-- TODO implement a depth-first-search to find all functions reachable from main.
+
+
 module Compiler.CallGraph 
     (checkForDuplicates, validDefs) where
 
@@ -46,7 +52,7 @@ vars = nub . getVars
                 go acc []  = acc
                 go acc [_] = acc
                 go acc (x:y:xs)
-                  | x == "Var"  || x == "(Var"  = go (y:acc) xs
+                  | x == "Var"  || x == "(Var" || x == "Let" || x == "(Let" = go (y:acc) xs
                   | otherwise    = go acc (y:xs)
 
 calledVars :: [(String, Expr)] -> [String]

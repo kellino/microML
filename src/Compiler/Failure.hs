@@ -18,7 +18,6 @@ data Failure = Failure
 tellError :: Failure -> String
 tellError Failure{..} =   
     "Error: failure while " ++ stateS ++ " " ++ location ++ " " ++ summary
-    --printf "Error: failure while %s at %s. \n" stateS location summary
     where stateS = case state of
                     Parser -> "parsing" 
                     TypeCheck -> "typechecking" 

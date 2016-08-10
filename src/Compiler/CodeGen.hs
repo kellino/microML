@@ -1,6 +1,5 @@
 module Compiler.CodeGen where
 
-import Compiler.CHelper
 import Compiler.MicroBitHeader
 import Compiler.CallGraph
 import Compiler.Failure
@@ -17,7 +16,6 @@ import Language.C.DSL
 
 import qualified Data.Text.Lazy as L
 import qualified Data.Map as Map
-import Data.String (fromString)
 
 ----------------
 -- DATA TYPES --
@@ -40,27 +38,25 @@ codegen :: [(String, Expr)] -> Compiler [CExtDecl]
 codegen = flip evalStateT Map.empty 
         . fmap (uncurry makeMain) 
         . runWriterT 
-        . mapM generate
+        . mapM generateCode
         . validDefs
         . checkForDuplicates
 
 makeMain :: [CExtDecl] -> [(CDecl, Maybe String, CExpr)] -> [CExtDecl]
 makeMain decls _ = 
-    export (fun [intTy] "main" [] $ hBlock [
+    decls ++
+    [export (fun [intTy] "main" [] $ hBlock [
             microBitInit
-          , releaseFiber
-    ]) : decls
+    ])] 
 
-generate :: (String, Expr) -> CodeGen CExtDecl
-generate (nm, expr) = 
-    let newNm = fromString nm
-     in case expr of
-          Lit (LInt n)     -> return $ export $ int newNm .= fromInteger n
-          Lit (LDouble d)  -> return $ export $ double newNm .= realToFrac d
-          Lit (LChar c)    -> return $ export $ char newNm .= chr c
-          Lit (LString st) -> return $ export $ charPtr newNm .= str st
-          Nil              -> return undefined
-          x                -> failGen "c code generation" (show x)
+generateCode :: (String, Expr) -> CodeGen CExtDecl
+generateCode (nm, expr) = do
+    let funcName = nm
+    let body = makeFuncBody expr
+    return $ export $ fun [voidTy] funcName [] $ hBlock [ body ] 
+    
+makeFuncBody :: Expr -> CExpr
+makeFuncBody (Lam x xs) = makeFuncBody xs
 
 renderC :: [CExtDecl] -> String
 renderC = unlines . map (show . pretty)
@@ -78,7 +74,7 @@ writeCFile dest code = do
 compile :: L.Text -> L.Text -> String -> IO ()
 compile source dest filename = do
     let res = parseProgram filename source
-  --  print res -- for debugging
+    print res -- for debugging
     let compRes = runCompiler (compileMicroML res) 
     case compRes of
       Right ccode -> writeCFile dest ccode
