@@ -2,24 +2,21 @@
 
 module Compiler.MicroBitHeader where
 
-import Language.C.DSL
+import Text.PrettyPrint
 import qualified Data.Map as Map
 
-type RetTy = String
 
-microBitIncludes :: String
-microBitIncludes = "#include \"MicroBit.h\"\n\nMicroBit uBit;\n"
-
-microBitAPI :: Map.Map String (CExpr, RetTy)
+microBitAPI :: Map.Map String Doc
 microBitAPI = Map.fromList [
-    ("scroll", ("uBit.display.scroll", "void"))                       
+    ("scroll", "uBit.display.scroll")
+  , ("print", "uBit.display.print" )
     ]
 
-blank :: CExpr
-blank = ""
+microBitIncludes :: Doc
+microBitIncludes = "#include \"MicroBit.h\"\n\nMicroBit uBit;\n"
 
-microBitInit :: CExpr
-microBitInit = "uBit.init()"
+bitInit :: Doc
+bitInit = "ubit.init();\n"
 
-releaseFiber :: CExpr
-releaseFiber = "release_fiber()"
+fiber :: Doc
+fiber = "fiber_release();\n"
