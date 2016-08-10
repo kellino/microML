@@ -12,15 +12,18 @@ enumFromTo_ _ _                                 = PrimitiveErr $ ListPrim ""
 
 car :: Expr -> Expr 
 car (BinOp OpCons x _) = x
+car (Lit (LString x)) = Lit . LChar $ head x
 
 cdr :: Expr -> Expr
 cdr (BinOp OpCons _ xs) = xs
+cdr (Lit (LString xs)) = Lit . LString $ tail xs
 
 append :: Expr -> Expr -> Expr
-append xs Nil                               = xs
+append xs Nil                                     = xs
 append (BinOp OpCons x Nil) xs@(BinOp OpCons _ _) = BinOp OpCons x xs
-append (BinOp OpCons x xs) ys                  = BinOp OpCons x (append xs ys)
-append _ _                                  = PrimitiveErr $ ListPrim "one of your two objects isn't a list"
+append (BinOp OpCons x xs) ys                     = BinOp OpCons x (append xs ys)
+append (Lit (LString x)) (Lit (LString y))        = Lit . LString $ x ++ y
+append _ _                                        = PrimitiveErr $ ListPrim "one of your two objects isn't a list"
 
 ------------------------------------
 -- STRING MANIPULATION PRIMITIVES --

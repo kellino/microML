@@ -236,7 +236,8 @@ primitives = [[ prefixOp "head"  (UnaryOp Car)
             ,   infixOp   "or"   (BinOp OpOr)  Ex.AssocLeft
             ,   infixOp   "xor"  (BinOp OpXor) Ex.AssocLeft
             ,   prefixOp  "not"  (UnaryOp Not) ]
-            , [ infixOp   "."    (BinOp OpComp) Ex.AssocRight ]]
+            , [ infixOp   "."    (BinOp OpComp) Ex.AssocRight 
+            ,   infixOp   ">>"   (BinOp OpPipe) Ex.AssocLeft ]]
 
 expr :: Parser Expr
 expr = do
