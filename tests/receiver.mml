@@ -1,0 +1,12 @@
+-- | simple receiver program for robotics testing
+
+let onData mbe =  
+    let s = "uBit.radio.datagram.recv()" in
+    if s == "1" 
+        then print "A"
+        else print "B"
+
+let main =
+    let setGroup = 123 in
+    let enable = true  in 
+    listen >> onData >> print 
