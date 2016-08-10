@@ -82,6 +82,7 @@ eval env expr = case expr of
           OpNotEq  -> a' `opNotEq` b'
           OpCons   -> a' `cons` b'
           OpAppend -> a' `append` b'
+          OpPipe   -> eval env (App b a)
 
 cons :: Expr -> Expr -> Expr
 cons a Nil = BinOp OpCons a Nil
