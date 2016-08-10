@@ -1,23 +1,25 @@
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE FlexibleContexts #-}
 
 module Compiler.Failure where
 
 import Control.Monad.Except
+import Text.PrettyPrint
 
 data Stage = Parser | TypeCheck | CodeGen
 
-type Loc = String
-type Info = String
+type Loc = Doc
+type Info = Doc
 
 data Failure = Failure 
-          { state :: Stage
+          { state    :: Stage
           , location :: Loc
-          , summary :: Info }
+          , summary  :: Info }
 
-tellError :: Failure -> String
+tellError :: Failure -> Doc
 tellError Failure{..} =   
-    "Error: failure while " ++ stateS ++ " " ++ location ++ " " ++ summary
+    "Error: failure while " <> stateS <> " " <> location <> " " <> summary
     where stateS = case state of
                     Parser -> "parsing" 
                     TypeCheck -> "typechecking" 
