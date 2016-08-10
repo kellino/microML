@@ -38,7 +38,7 @@ getFuncName n code = "\ESC[1m" ++ (fst . head . drop (n-1)) code ++ "\ESC[0m"
 -- UNREACHABLE CODE --
 ----------------------
 
--- | While is seems a bit mean to abandon compilation because of an unused definition, microML is
+-- | While it may seem a bit mean to abandon compilation because of an unused definition, microML is
 -- primarily intended as a teaching language and should therefore be a little stricter on these
 -- issues. It is more likely that a student has simply forgotten to call a function rather than
 -- to have written something without any obvious use or for future development purposes.
