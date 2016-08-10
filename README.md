@@ -24,7 +24,7 @@ or
 ```ml
 microML ⊦ let incBy1 = \x -> x + 1
 microML ⊦ incBy1 2
-microML ⊦ 3 : NUmber
+microML ⊦ 3 : Number
 ```
 
 More complex things can be entered at the repl as well (at the moment everything must be on one line)
