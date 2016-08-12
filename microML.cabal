@@ -1,7 +1,7 @@
 Name:           microML
-Version:        0.0.1
+Version:        0.0.5
 Synopsis:       Functional Programming for BBC micro:bit
-Description:    A simple functional programming language which compiles to C++
+Description:    A simple functional programming language with a repl and a compiler to micro:bit c++ 
 Author:         David Kelly
 Maintainer:     dkellino@gmail.com
 
@@ -11,26 +11,23 @@ Build-type:     Simple
 Cabal-version:  >=1.6
 
 test-suite microMLTest
-  hs-source-dirs:    tests, src/Language
+  hs-source-dirs:    tests
   main-is:           Main.hs
   type:              exitcode-stdio-1.0
   ghc-options:       -Wall -threaded
   build-depends:     base,
-                     hspec,
-                     hspec-expectations,
-                     hspec-megaparsec
+                     hspec
 
 executable microML
   hs-source-dirs:    src
   Main-is:           Main.hs
   
   -- Packages needed in order to build this package.
-  Build-depends:     base >= 3,
+  Build-depends:     base, 
                      parsec,
-                     repline >= 0.1.5.0,
+                     repline,
                      cmdargs,
                      filepath,
-                     monad-gen,
                      either,
                      process,
                      random,
@@ -39,9 +36,9 @@ executable microML
                      text,
                      pretty,
                      containers,
-                     transformers,
-                     llvm-general,
-                     llvm-general-pure,
-                     c-dsl >= 0.3.1
+                     transformers
+                     --setenv,
+                     --llvm-general,
+                     --llvm-general-pure
 
-  ghc-options:   -Wall -O2 -fwarn-tabs -fno-warn-name-shadowing -fno-warn-missing-signatures -fno-warn-incomplete-patterns -fno-warn-unused-binds
+  ghc-options:   -Wall -O2 -threaded -fwarn-tabs -fno-warn-name-shadowing -fno-warn-missing-signatures -fno-warn-incomplete-patterns -fno-warn-unused-binds
