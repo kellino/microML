@@ -16,8 +16,6 @@ import Text.PrettyPrint
 import Text.Parsec (ParseError)
 import qualified Data.Map as Map
 
---import Data.Maybe (fromMaybe)
-
 type CodeEnv = Map.Map Name Expr
 
 data CompilerState a = CompilerState { codeState :: CodeEnv }
@@ -45,7 +43,9 @@ writeToFile dest code = do
     writeFile cFile $ render (microBitIncludes <> code')
 
 codegen :: [(String, Expr)] -> [Doc]
-codegen = map genTopLevel . validDefs . checkForDuplicates
+codegen = map genTopLevel 
+        . validDefs 
+        . checkForDuplicates
 
 genTopLevel :: (String, Expr) -> Doc
 genTopLevel ("main", expr) = generateMain expr
@@ -79,18 +79,12 @@ getType (Lit (LString _)) = "ManagedString" <> space
 getType (Lit (LChar _)) = "char" <> space
 getType (Lit (LBoolean _)) = "bool" <> space
 
-compileMicroML :: Either ParseError [(String, Expr)] -> [Doc]
-compileMicroML res = 
-    case res of
-         Left err -> error $ show err
-         Right r -> codegen r
-
 hoistError :: Either ParseError [(String, Expr)] -> [(String, Expr)]
 hoistError (Right val) = val
 hoistError (Left err) = error $ show err
 
 compile :: L.Text -> L.Text -> String -> IO ()
 compile source dest filename = do
-    let res = parseProgram filename source
-    let compRes = compileMicroML res
+    let res = hoistError $ parseProgram filename source
+    let compRes = codegen res
     writeToFile dest compRes
