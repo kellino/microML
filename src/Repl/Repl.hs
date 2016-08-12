@@ -133,10 +133,11 @@ help args =
                    Nothing -> liftIO $ putStrLn $ "there is no help available for " ++ arg ++ " (:"
 
 -- :using command
+-- this is only for files kept in the standard library
 using :: [String] -> Repl ()
 using args = 
     if null args 
-       then liftIO $ putStrLn "you must enter a filename!"
+       then liftIO $ putStrLn "you must enter a library name!"
        else do dir <- liftIO getHomeDirectory
                let stdlib = dir </> ".microML/"
                exists <- liftIO $ doesDirectoryExist stdlib
@@ -145,6 +146,12 @@ using args =
                     contents <- liftIO $ L.readFile $ stdlib ++ unwords args ++ ".mml"
                     exec' contents 
                  else error "\ESC[31mError\ESC[0m: Unable to locate standard library in home directory"
+
+-- :load command
+load :: [String] -> Repl ()
+load args = do
+  contents <- liftIO $ L.readFile (unwords args)
+  exec True contents
 
 -- :type command
 typeof :: [String] -> Repl ()
@@ -182,13 +189,13 @@ sh arg = liftIO $
 -- Prefix tab completer
 defaultMatcher :: MonadIO m => [(String, CompletionFunc m)]
 defaultMatcher = [
-    (":using"  , fileCompleter)
+    (":load"  , fileCompleter)
   ]
 
 -- Default tab completer
 comp :: (Monad m, MonadState IState m) => WordCompleter m
 comp n = do
-    let cmds = [":using", ":type", ":browse", ":quit", ":", ":help", ":?", ":pst", ":clear"]
+    let cmds = [":using", ":type", ":browse", ":quit", ":!", ":help", ":?", ":pst", ":clear", ":load"]
     Env.TypeEnv ctx <- gets typeEnv
     let defs = Map.keys ctx
     let builtins = reservedNames
@@ -205,6 +212,7 @@ options = [
       , ("?"      , help)
       , ("help"   , help) -- alternative
       , ("pst"    , pst) -- view parse tree of a given expression
+      , ("load"   , load)
       ]
 
 -------------------------------------------------------------------------------

@@ -34,7 +34,8 @@ funcName = do
 comments :: Parser String
 comments = do
     void $ string "let" <|> string "--"
-    _ <- anyChar `manyTill` newline
+        <|> string "\n"
+    void $ anyChar `manyTill` newline
     return ""
 
 header :: Parser Markdown
@@ -92,10 +93,10 @@ helpModl = do
 allHelp :: Parser [HelpBlock]
 allHelp = do
     skipMany comments
-    sepEndBy1 helpModl (skipMany comments) <* spaces
+    sepEndBy1 helpModl (skipMany comments) 
 
 parseHelp :: SourceName -> L.Text -> Either ParseError [HelpBlock]
-parseHelp = parse allHelp
+parseHelp = parse allHelp 
 
 prettyPrint :: Markdown -> Doc
 prettyPrint st = 
