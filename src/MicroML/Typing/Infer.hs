@@ -178,8 +178,9 @@ inferLambda e =
       (BinOp _ x (Var _))       -> infer x
       (UnaryOp Car x)           -> infer x
       (UnaryOp Cdr x)           -> infer x
+      (UnaryOp OpLog _)         -> return typeNum
       (Lam _ bdy)               -> inferLambda bdy
-      BinOp{}                   -> return typeNum
+      BinOp{}                   -> return typeNum -- placeholder
       Var{}                     -> polymorphic e         
       app@App{}                 -> polymorphic app
       x                         -> throwError $ UnsupportedOperation $ "inferLambda: " ++ show x
