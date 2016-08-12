@@ -1,0 +1,12 @@
+-- GLOSSARY --
+(*
+==head==
+***head***
+** head :: [a] -> a
+head takes the first element from a list
+#Example:#
+    > head [1,2,3]
+    > 1 : Number
+    > head []
+    > head of an empty list     **this is an error**
+*)
