@@ -1,18 +1,10 @@
--- | as it stands this is a little too simplistic. It can detect stranded function definitions, but
--- this two (or two) definitions call each other but are not reachable from main, compilation will
--- still progress. 
--- TODO implement a depth-first-search to find all functions reachable from main.
+module Compiler.CallGraph where
 
-
-module Compiler.CallGraph 
-    (checkForDuplicates, validDefs) where
+import Data.List (nub, nubBy)
+import Data.Function (on)
 
 import MicroML.Syntax
 
-import Data.List
-import Data.Function
-
-import Control.Arrow (second)
 
 ----------------
 -- DUPLICATES --
@@ -35,64 +27,37 @@ getFuncName :: Int -> [(String, Expr)] -> String
 getFuncName n code = "\ESC[1m" ++ (fst . head . drop (n-1)) code ++ "\ESC[0m"
 
 ----------------------
--- UNREACHABLE CODE --
+-- UNREACHABLE CODE -- 
 ----------------------
 
--- | While it may seem a bit mean to abandon compilation because of an unused definition, microML is
--- primarily intended as a teaching language and should therefore be a little stricter on these
--- issues. It is more likely that a student has simply forgotten to call a function rather than
--- to have written something without any obvious use or for future development purposes.
+doesMainExist :: [(String, Expr)] -> Either String [(String, Expr)]
+doesMainExist code = if "main" `elem` map fst code then Right code else Left "no main"
 
--- removes duplicate vars from an expression
-vars :: Expr -> [String]
-vars = nub . getVars 
-    where getVars :: Expr -> [String]
-          getVars ex = go [] (words . show $ ex)
-            where 
-                go acc []  = acc
-                go acc [_] = acc
-                go acc (x:y:xs)
-                  | x == "Var"  || x == "(Var" || x == "Let" || x == "(Let" = go (y:acc) xs
-                  | otherwise    = go acc (y:xs)
+putMainFirst :: [(String, Expr)] -> [(String, Expr)]
+putMainFirst code = dropWhile notMain code ++ takeWhile notMain code
+    where notMain (x,_) = x /= "main"
 
-calledVars :: [(String, Expr)] -> [String]
-calledVars code = map (filter (/= ')')) $ concatMap (snd . second vars) code
+getRHSVars :: (String, Expr) -> (String, [String])
+getRHSVars (nm, xs) = (nm, nub . extract . words . stripQuotes . stripParens . show $ xs)
+        where stripParens = filter (\x -> x /= '(' && x /= ')')
+              stripQuotes = filter (/= '\"')
+              extract = go []
+                  where go acc []  = acc
+                        go acc [_] = acc
+                        go acc (x:y:ys)
+                            | x == "Var" = go (y:acc) ys
+                            | otherwise = go acc (y:ys)
 
--- | if there is no main, then abandon immediately
-doesMainExist :: [(String, Expr)] -> Bool
-doesMainExist ex = "main" `elem` map fst ex
+getTopLevel :: [(String, Expr)] -> [String]
+getTopLevel = foldr (\(x, _) a -> x : a) []  
 
--- | is a function called on the rhs of an equation?
-isCalled :: String -> [String] -> Bool
-isCalled lhs rhs = show lhs `elem` rhs
+isCalled :: [(String, Expr)] -> [(String, [String])]
+isCalled code = map isCalled' code
+    where isCalled' ex@(x,_) = (x, filter (`elem` tops) $ snd . getRHSVars $ ex)
+          tops = getTopLevel code
 
-topLevelVars :: [(String, Expr)] -> [String]
-topLevelVars = map fst 
-
-callable :: [String] -> [(String, Expr)] -> [String] -> [String]
-callable [] _ acc = acc 
-callable _ [] acc = acc
-callable (x:xs) code acc 
-  | isCalled x code'   = callable xs code (x:acc)
-  | otherwise          = callable xs code acc
-  where code' = calledVars code
-
-toCompile :: [(String, Expr)] -> [String]
-toCompile code = "main" : callable (topLevelVars code) code []
-
-unused :: [(String, Expr)] -> [String]
-unused code = topLevelVars code \\ toCompile code
-
-validDefs :: [(String, Expr)] -> [(String, Expr)]
-validDefs code =
-    if not $ doesMainExist code
-       then error "\ESC[31;1mError:\ESC[0m A \ESC[31;1mmain function\ESC[0m has not been defined, so abandoning compilation. Please write a main function."
-       else vds code
-
-vds :: [(String, Expr)] -> [(String, Expr)]
-vds code 
-   | not (null duds)  = error $ "\ESC[31;1mError:\ESC[0m the following function" ++ plural ++ " defined but not reachable: " ++ join duds
-   | otherwise                 = code
-   where duds = unused code
-         plural = if length duds == 1 then " is" else "s are"
-         join s = if length s == 1 then head duds else intercalate ", " duds
+makeCallGraph :: [(String, Expr)] -> [(String, [String])]
+makeCallGraph code = 
+    case doesMainExist code of
+         Right _ -> isCalled (putMainFirst code)
+         Left  _ -> error "no main function found"
