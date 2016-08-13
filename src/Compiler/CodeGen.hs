@@ -5,6 +5,7 @@ module Compiler.CodeGen where
 import MicroML.Syntax
 import MicroML.Parser
 import Compiler.MicroBitHeader
+import Compiler.CallGraph
 
 import qualified Data.Text.Lazy as L
 import qualified Data.Map as Map
@@ -17,10 +18,6 @@ import System.FilePath
 
 import Control.Monad.Identity
 import Control.Monad.Except
-
-example :: [(String, Expr)]
-example = [("main", App (Var "scroll") (Lit (LString "Hello")))]
-         --, ("hello", App (App (App (Var "compose") (Var "double")) (Var "double")) (Lit (LInt 2)))]
 
 type Compiler a = ExceptT String Identity a
 
@@ -48,24 +45,21 @@ genBody env ex =
          (Lit (LChar c))    -> return $ char c
          (Lit (LString x))  -> return $ doubleQuotes $ text x
          (Lit (LBoolean x)) -> return $ text . map toLower . show $ x
-         (Var _)            -> undefined
-         (Let nm e1 e2)     -> do 
-                  e1' <- generateCExpr env nm e1
-                  e2' <- genBody env e2
-                  return $ e1' <> e2'
-
-         (App (Var x) xs)   -> do
+         (Var x)            -> do
              let found = Map.lookup x microBitAPI
              case found of
                   Nothing  -> case Map.lookup x env of
                                    Nothing -> error "not found"
-                                   Just r -> do -- genBody env r <> parensWithSemi (genBody env xs)
-                                       r1 <- genBody env r
-                                       r2 <- genBody env xs
-                                       return $ r1 <> parensWithSemi r2
-                  Just r   -> do  
-                      r2 <- genBody env xs
-                      return $ r <> parensWithSemi r2
+                                   Just r -> genBody env r
+                  Just r   -> return r  
+         (Let nm e1 e2)     -> do 
+                  e1' <- generateCExpr env nm e1
+                  e2' <- genBody env e2
+                  return $ e1' <> e2'
+         (App x xs)   -> do
+             x' <- genBody env x
+             xs' <- genBody env xs
+             return $ x' <> xs'
          x                 -> throwError $ "cannot genBody the expression " ++ show x
 
 semiWithNewLine :: Doc
@@ -97,12 +91,13 @@ runCompiler ev = runIdentity (runExceptT ev)
 
 codegen :: [(String, Expr)] -> Compiler [Doc]
 codegen prog = 
-    let code = Map.fromList prog
-        in mapM (genTopLevel code) prog
+    let prog' = checkForDuplicates prog
+        code  = Map.fromList prog'
+        in mapM (genTopLevel code) prog'
 
 hoistError :: Either ParseError [(String, Expr)] -> [(String, Expr)]
 hoistError (Right val) = val
-hoistError (Left err) = error $ show err
+hoistError (Left err) = error $ "\ESC[31;1mParse Error\ESC[0m: " ++ show err
 
 writeToFile :: L.Text -> [Doc] -> IO ()
 writeToFile dest code = do
