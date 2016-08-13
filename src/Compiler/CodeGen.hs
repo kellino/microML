@@ -6,6 +6,7 @@ import MicroML.Syntax
 import MicroML.Parser
 import Compiler.MicroBitHeader
 import Compiler.CallGraph
+import Compiler.Failure
 
 import qualified Data.Text.Lazy as L
 import qualified Data.Map as Map
@@ -20,7 +21,7 @@ import Control.Monad.Identity
 import Control.Monad.Reader
 import Control.Monad.Except
 
-type Compiler a = ReaderT UserCode (ExceptT String Identity) a
+type Compiler a = ReaderT UserCode (ExceptT Failure Identity) a
 
 type UserCode = Map.Map String Expr
 
@@ -51,7 +52,7 @@ genBody ex =
                   Nothing -> do
                       env <- ask
                       case Map.lookup x env of
-                           Nothing -> throwError $ "Error: binding " ++ x ++ " has not been found"
+                           Nothing -> failGen (text x) " : no binding found"
                            Just r  -> genBody r
                   Just r  -> return r
          (Let nm e1 e2)     -> do 
@@ -62,7 +63,7 @@ genBody ex =
              x' <- genBody x
              xs' <- genBody xs
              return $ x' <> parensWithSemi xs'
-         x                 -> throwError $ "cannot genBody the expression " ++ show x
+         _                 -> failGen (text . show $ ex) ": this operation is presently unsupported"
 
 semiWithNewLine :: Doc
 semiWithNewLine = semi <> "\n"
@@ -79,9 +80,9 @@ getType (Lit (LDouble _)) = return $ "double" <> space
 getType (Lit (LString _)) = return $ "ManagedString" <> space
 getType (Lit (LChar _)) = return $ "char" <> space
 getType (Lit (LBoolean _)) = return $ "bool" <> space
-getType _ = throwError "cannot get type of this expression"
+getType x = failGen (text . show $ x) ": unable to ascertain type of this expression"
 
-runCompiler :: UserCode -> Compiler a -> Either String a
+runCompiler :: UserCode -> Compiler a -> Either Failure a
 runCompiler env ev = runIdentity (runExceptT (runReaderT ev env))
 
 codegen :: [(String, Expr)] -> Compiler [Doc]
@@ -91,10 +92,17 @@ hoistError :: Either ParseError [(String, Expr)] -> [(String, Expr)]
 hoistError (Right val) = val
 hoistError (Left err) = error $ "\ESC[31;1mParse Error\ESC[0m: " ++ show err
 
+validateExtension :: String -> String
+validateExtension fl -- = if (snd . splitExtension) fl == ".cpp" then fl else (fst . splitExtension $ fl) ++ ".cpp"
+    | extension == ".cpp" = fl
+    | extension == "" = fl ++ ".cpp"
+    | otherwise = error $ red ++ "File Extension Error: " ++ unred ++ extension ++ " is not a valid filetype for compiled microML.\n"
+                        ++ "Please try either .cpp or don't add an extension"
+    where extension = snd . splitExtension $ fl
+
 writeToFile :: L.Text -> [Doc] -> IO ()
 writeToFile dest code = do
-    let safe = fst $ splitExtension $ L.unpack dest
-    let cFile = safe ++ ".cpp"
+    let cFile = validateExtension $ L.unpack dest
     let code' = foldr (<>) "" code
     writeFile cFile $ render (microBitIncludes <> code')
 
@@ -103,5 +111,5 @@ compile source dest filename = do
     let res = hoistError $ parseProgram filename source
     let code = checkForDuplicates res
     case runCompiler (Map.fromList code) $ codegen code of
-         Left e -> print e
+         Left e -> print $ tellError e
          Right r -> writeToFile dest r

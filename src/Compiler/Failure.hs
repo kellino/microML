@@ -7,7 +7,7 @@ module Compiler.Failure where
 import Control.Monad.Except
 import Text.PrettyPrint
 
-data Stage = Parser | TypeCheck | CodeGen
+data Stage = Parser | TypeCheck | CodeGen 
 
 type Loc = Doc
 type Info = Doc
@@ -24,9 +24,6 @@ tellError Failure{..} =
                     Parser -> "parsing" 
                     TypeCheck -> "typechecking" 
                     CodeGen -> "generating C code"
-
-failParse :: MonadError Failure m => Loc -> Info -> m a
-failParse loc info = throwError $ Failure Parser loc info
 
 failGen :: MonadError Failure m => Loc -> Info -> m a
 failGen loc info = throwError $ Failure CodeGen loc info
