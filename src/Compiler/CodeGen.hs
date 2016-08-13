@@ -17,49 +17,51 @@ import Text.Parsec (ParseError)
 import System.FilePath
 
 import Control.Monad.Identity
+import Control.Monad.Reader
 import Control.Monad.Except
 
-type Compiler a = ExceptT String Identity a
+type Compiler a = ReaderT UserCode (ExceptT String Identity) a
 
 type UserCode = Map.Map String Expr
 
-genTopLevel :: UserCode -> (String, Expr) -> Compiler Doc
-genTopLevel env ("main", expr) = generateMain env expr
-genTopLevel env (nm, expr) = generateFunc env nm expr
+genTopLevel ::  (String, Expr) -> Compiler Doc
+genTopLevel ("main", expr) = generateMain expr
+genTopLevel (nm, expr) = generateFunc nm expr
 
-generateMain :: UserCode -> Expr -> Compiler Doc
-generateMain env ex = do
-    ex' <- genBody env ex
+generateMain ::  Expr -> Compiler Doc
+generateMain ex = do
+    ex' <- genBody ex
     return $ "init main()" <> bracesNewLine (bitInit <> ex' <> fiber)
 
-generateFunc :: UserCode -> Name -> Expr -> Compiler Doc
-generateFunc env nm ex =  do
-    ex' <- genBody env ex
+generateFunc :: Name -> Expr -> Compiler Doc
+generateFunc nm ex =  do
+    ex' <- genBody ex
     return $ text nm <> "()" <> bracesNewLine ex'
 
-genBody :: UserCode -> Expr -> Compiler Doc
-genBody env ex = 
+genBody :: Expr -> Compiler Doc
+genBody ex = 
     case ex of
          (Lit (LInt n))     -> return $ integer n
          (Lit (LDouble d))  -> return $ double d
          (Lit (LChar c))    -> return $ char c
          (Lit (LString x))  -> return $ doubleQuotes $ text x
          (Lit (LBoolean x)) -> return $ text . map toLower . show $ x
-         (Var x)            -> do
-             let found = Map.lookup x microBitAPI
-             case found of
-                  Nothing  -> case Map.lookup x env of
-                                   Nothing -> error "not found"
-                                   Just r -> genBody env r
-                  Just r   -> return r  
+         Var x              -> 
+             case Map.lookup x microBitAPI of
+                  Nothing -> do
+                      env <- ask
+                      case Map.lookup x env of
+                           Nothing -> throwError $ "Error: binding " ++ x ++ " has not been found"
+                           Just r  -> genBody r
+                  Just r  -> return r
          (Let nm e1 e2)     -> do 
-                  e1' <- generateCExpr env nm e1
-                  e2' <- genBody env e2
-                  return $ e1' <> e2'
+             env <- ask
+             let e1' = e1
+             local (const (Map.insert nm e1' env)) (genBody e2)
          (App x xs)   -> do
-             x' <- genBody env x
-             xs' <- genBody env xs
-             return $ x' <> xs'
+             x' <- genBody x
+             xs' <- genBody xs
+             return $ x' <> parensWithSemi xs'
          x                 -> throwError $ "cannot genBody the expression " ++ show x
 
 semiWithNewLine :: Doc
@@ -71,13 +73,6 @@ parensWithSemi d = parens d <> semi <> "\n"
 bracesNewLine :: Doc -> Doc
 bracesNewLine d = braces ("\n\t" <> d) <> "\n"
 
-generateCExpr :: UserCode -> Name -> Expr -> Compiler Doc
-generateCExpr env nm e1 = do
-    ty <- getType e1
-    let nm' = text nm
-    e1' <- genBody env e1
-    return $ ty <> nm' <> " = " <> e1' <> semiWithNewLine
-
 getType :: Expr -> Compiler Doc
 getType (Lit (LInt _)) = return $ "int" <> space
 getType (Lit (LDouble _)) = return $ "double" <> space
@@ -86,14 +81,11 @@ getType (Lit (LChar _)) = return $ "char" <> space
 getType (Lit (LBoolean _)) = return $ "bool" <> space
 getType _ = throwError "cannot get type of this expression"
 
-runCompiler :: ExceptT e Identity a -> Either e a
-runCompiler ev = runIdentity (runExceptT ev)
+runCompiler :: UserCode -> Compiler a -> Either String a
+runCompiler env ev = runIdentity (runExceptT (runReaderT ev env))
 
 codegen :: [(String, Expr)] -> Compiler [Doc]
-codegen prog = 
-    let prog' = checkForDuplicates prog
-        code  = Map.fromList prog'
-        in mapM (genTopLevel code) prog'
+codegen = mapM genTopLevel
 
 hoistError :: Either ParseError [(String, Expr)] -> [(String, Expr)]
 hoistError (Right val) = val
@@ -109,6 +101,7 @@ writeToFile dest code = do
 compile :: L.Text -> L.Text -> String -> IO ()
 compile source dest filename = do
     let res = hoistError $ parseProgram filename source
-    case runCompiler $ codegen res of
+    let code = checkForDuplicates res
+    case runCompiler (Map.fromList code) $ codegen code of
          Left e -> print e
          Right r -> writeToFile dest r
