@@ -1,5 +1,5 @@
 -- | a test of a let .. in construction
 
 let main =
-    let s = "hello world"
+    let s = "hello microML"
     in scroll s
