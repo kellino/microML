@@ -1,0 +1,7 @@
+-- a test of multiple nested let expressions
+
+let main =
+    let s = "hello" in
+    let t = "there" in
+    scroll s
+    scroll t
