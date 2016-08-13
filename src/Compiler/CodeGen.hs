@@ -1,15 +1,19 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module CodeGen where
+module Compiler.CodeGen where
 
 import MicroML.Syntax
+import MicroML.Parser
 import Compiler.MicroBitHeader
 
 import qualified Data.Text.Lazy as L
 import qualified Data.Map as Map
-import Text.PrettyPrint
 import Data.Char (toLower)
+
+import Text.PrettyPrint
 import Text.Parsec (ParseError)
+
+import System.FilePath
 
 import Control.Monad.Identity
 import Control.Monad.Except
@@ -102,9 +106,14 @@ hoistError (Left err) = error $ show err
 
 writeToFile :: L.Text -> [Doc] -> IO ()
 writeToFile dest code = do
-    let cFile = L.unpack dest ++ ".cpp"
+    let safe = fst $ splitExtension $ L.unpack dest
+    let cFile = safe ++ ".cpp"
     let code' = foldr (<>) "" code
     writeFile cFile $ render (microBitIncludes <> code')
 
-main :: IO ()
-main = print $ runCompiler $ codegen example
+compile :: L.Text -> L.Text -> String -> IO ()
+compile source dest filename = do
+    let res = hoistError $ parseProgram filename source
+    case runCompiler $ codegen res of
+         Left e -> print e
+         Right r -> writeToFile dest r
