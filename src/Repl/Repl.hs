@@ -143,7 +143,10 @@ using args =
                exists <- liftIO $ doesDirectoryExist stdlib
                if exists
                  then do 
-                    contents <- liftIO $ L.readFile $ stdlib ++ unwords args ++ ".mml"
+                    -- just in case someone writes in "standard.mml", check for an extension and
+                    -- remove it, adding the extension again if necessary
+                    let safe = fst $ splitExtension $ unwords args
+                    contents <- liftIO $ L.readFile $ stdlib ++ safe ++ ".mml"
                     exec' contents 
                  else error "\ESC[31mError\ESC[0m: Unable to locate standard library in home directory"
 
