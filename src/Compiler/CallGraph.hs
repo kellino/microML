@@ -3,7 +3,7 @@ module Compiler.CallGraph
     , reachableFromMain) 
     where
 
-import Data.List (nub, nubBy, sort, (\\), intercalate)
+import Data.List (nub, nubBy, sort, (\\))
 import Data.Graph
 import Data.Function (on)
 import Data.Maybe (fromJust)
@@ -64,7 +64,7 @@ getOrderedNodes :: [(String, Expr)] -> [(String, [String])]
 getOrderedNodes code = 
     case doesMainExist code of
          Right _ -> isCalled (putMainFirst code)
-         Left  _ -> error "no main function found"
+         Left  _ -> error $ redError ++ "no main function found"
 
 buildGraph :: [(String, Expr)] -> Graph
 buildGraph code = buildG (1, length code) $ concatMap (\(x, xs) -> zip (repeat x) xs) $ call mainFirst table
@@ -81,13 +81,20 @@ reachableFromMain cd =
      in if reach /= all'
            then error $ tellError (map fst (getOrderedNodes cd)) (all' \\ reach)
            else cd
+     
+-----------
+-- ERROR --
+-----------
 
 tellError :: [String] -> [Int] -> String
 tellError nodes unreachable = 
     let funcs = map (\x -> nodes !! (x-1)) unreachable
     in if length funcs == 1
-       then "The function " ++ bold ++ head funcs ++ clear ++ " is unreachable from main, so compilation is being abandoned."
-       else "The functions " ++ ppr funcs ++ " are unreachable from main, so compilation is being abandoned"
+       then redError ++ "The function " ++ bold ++ head funcs ++ clear ++ " is unreachable from main, so compilation is being abandoned."
+       else redError ++ "The functions " ++ ppr funcs ++ " are unreachable from main, so compilation is being abandoned"
     where ppr funcs'
             | length funcs' == 2    = bold ++ head funcs' ++ clear ++ " and " ++ bold ++ last funcs' ++ clear
-            | otherwise            = intercalate ", " funcs'
+            | otherwise            = bold ++ head funcs' ++ clear ++ ", " ++ ppr funcs'
+
+redError = red ++ "Error: " ++ clear
+
