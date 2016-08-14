@@ -1,6 +1,9 @@
-module Compiler.CallGraph where
+module Compiler.CallGraph 
+    ( checkForDuplicates
+    , reachableFromMain) 
+    where
 
-import Data.List (nub, nubBy, sort, (\\))
+import Data.List (nub, nubBy, sort, (\\), intercalate)
 import Data.Graph
 import Data.Function (on)
 import Data.Maybe (fromJust)
@@ -67,12 +70,24 @@ buildGraph :: [(String, Expr)] -> Graph
 buildGraph code = buildG (1, length code) $ concatMap (\(x, xs) -> zip (repeat x) xs) $ call mainFirst table
     where table = zip (getTopLevel mainFirst) [1..] 
           mainFirst = putMainFirst code
-          call c t = map (\(x, xs) -> (fromJust $ lookup x t, map (\y -> fromJust $ lookup y t) xs)) (getOrderedNodes c)
+          call c t = map (\(x, xs) -> (tLookup x t, map (`tLookup` t) xs)) (getOrderedNodes c)
+          tLookup x' t' = fromJust $ lookup x' t'
 
+-- | the main function for the module
 reachableFromMain :: [(String, Expr)] -> [(String, Expr)]
 reachableFromMain cd = 
     let reach = sort $ reachable (buildGraph cd) 1
         all'   = [1..(length cd)]
      in if reach /= all'
-           then error $ show $ all' \\ reach
+           then error $ tellError (map fst (getOrderedNodes cd)) (all' \\ reach)
            else cd
+
+tellError :: [String] -> [Int] -> String
+tellError nodes unreachable = 
+    let funcs = map (\x -> nodes !! (x-1)) unreachable
+    in if length funcs == 1
+       then "The function " ++ bold ++ head funcs ++ clear ++ " is unreachable from main, so compilation is being abandoned."
+       else "The functions " ++ ppr funcs ++ " are unreachable from main, so compilation is being abandoned"
+    where ppr funcs'
+            | length funcs' == 2    = bold ++ head funcs' ++ clear ++ " and " ++ bold ++ last funcs' ++ clear
+            | otherwise            = intercalate ", " funcs'
