@@ -21,6 +21,25 @@ test-suite microMLTest
 executable microML
   hs-source-dirs:    src
   Main-is:           Main.hs
+
+  Other-modules:     Compiler.CallGraph,
+                     Compiler.CodeGen,
+                     Compiler.Failure,
+                     Compiler.MicroBitHeader,
+                     MicroML.Lexer,
+                     MicroML.ListPrimitives,
+                     MicroML.Parser,
+                     MicroML.Syntax,
+                     MicroML.Typing.Env,
+                     MicroML.Typing.Infer,
+                     MicroML.Typing.Substitutable,
+                     MicroML.Typing.Type,
+                     MicroML.Typing.TypeError,
+                     Repl.Eval,
+                     Repl.Help,
+                     Repl.HelpEnv,
+                     Repl.Pretty,
+                     Repl.Repl
   
   -- Packages needed in order to build this package.
   Build-depends:     base, 
