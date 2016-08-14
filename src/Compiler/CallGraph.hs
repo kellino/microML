@@ -1,10 +1,11 @@
 module Compiler.CallGraph where
 
-import Data.List (nub, nubBy)
+import Data.List (nub, nubBy, sort, (\\))
+import Data.Graph
 import Data.Function (on)
+import Data.Maybe (fromJust)
 
 import MicroML.Syntax
-
 
 ----------------
 -- DUPLICATES --
@@ -56,8 +57,22 @@ isCalled code = map isCalled' code
     where isCalled' ex@(x,_) = (x, filter (`elem` tops) $ snd . getRHSVars $ ex)
           tops = getTopLevel code
 
-makeCallGraph :: [(String, Expr)] -> [(String, [String])]
-makeCallGraph code = 
+getOrderedNodes :: [(String, Expr)] -> [(String, [String])]
+getOrderedNodes code = 
     case doesMainExist code of
          Right _ -> isCalled (putMainFirst code)
          Left  _ -> error "no main function found"
+
+buildGraph :: [(String, Expr)] -> Graph
+buildGraph code = buildG (1, length code) $ concatMap (\(x, xs) -> zip (repeat x) xs) $ call mainFirst table
+    where table = zip (getTopLevel mainFirst) [1..] 
+          mainFirst = putMainFirst code
+          call c t = map (\(x, xs) -> (fromJust $ lookup x t, map (\y -> fromJust $ lookup y t) xs)) (getOrderedNodes c)
+
+reachableFromMain :: [(String, Expr)] -> [(String, Expr)]
+reachableFromMain cd = 
+    let reach = sort $ reachable (buildGraph cd) 1
+        all'   = [1..(length cd)]
+     in if reach /= all'
+           then error $ show $ all' \\ reach
+           else cd
