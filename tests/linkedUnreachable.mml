@@ -1,0 +1,10 @@
+-- should fail to compile as two functions (although calling each other)
+-- are not reachable from main
+
+let inc x = x + 1
+let incAgain x = inc (inc x) 
+let double x = x * 2
+let compose x y z = x (y z)
+
+let main = compose double double 5
+
