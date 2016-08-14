@@ -63,6 +63,7 @@ evalDef env (nm, ex) = termEnv'
 toHelpenv :: [HelpBlock] -> HelpEnv
 toHelpenv ls = HEnv $ Map.fromList ls
 
+-- | execution function while repl is running
 exec :: Bool -> L.Text -> Repl ()
 exec update source = do
     st       <- get
@@ -82,6 +83,7 @@ exec update source = do
         let (val, _) = runEval (termEnv st') "it" ex
         showOutput val st'
 
+-- | execution function at initial loading time
 exec' :: L.Text -> Repl ()
 exec' source = do
     st       <- get
@@ -112,7 +114,7 @@ cmd source = exec True (L.pack source)
 -- :Parse Tree
 pst :: [String] -> Repl ()
 pst expr = do
-    tree <- hoistError $ parseProgram "<stdin>" $ L.pack (concat expr)
+    tree <- hoistError $ parseProgram "<stdin>" $ L.pack $ concatMap (++ " ") expr
     tyEnv <- hoistError $ inferTop Env.empty tree
     liftIO $ putStrLn $ show tree ++ concat (ppenv tyEnv)
 
