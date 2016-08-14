@@ -86,7 +86,7 @@ runCompiler :: UserCode -> Compiler a -> Either Failure a
 runCompiler env ev = runIdentity (runExceptT (runReaderT ev env))
 
 codegen :: [(String, Expr)] -> Compiler [Doc]
-codegen = mapM genTopLevel
+codegen = mapM genTopLevel . reachableFromMain
 
 hoistError :: Either ParseError [(String, Expr)] -> [(String, Expr)]
 hoistError (Right val) = val
@@ -109,6 +109,7 @@ writeToFile dest code = do
 compile :: L.Text -> L.Text -> String -> IO ()
 compile source dest filename = do
     let res = hoistError $ parseProgram filename source
+    -- writeFile "text" $ show res -- for debugging
     let code = checkForDuplicates res
     case runCompiler (Map.fromList code) $ codegen code of
          Left e -> print $ tellError e
