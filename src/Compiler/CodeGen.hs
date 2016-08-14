@@ -86,7 +86,9 @@ runCompiler :: UserCode -> Compiler a -> Either Failure a
 runCompiler env ev = runIdentity (runExceptT (runReaderT ev env))
 
 codegen :: [(String, Expr)] -> Compiler [Doc]
-codegen = mapM genTopLevel . reachableFromMain
+codegen = mapM genTopLevel 
+        . reachableFromMain 
+        . checkForDuplicates
 
 hoistError :: Either ParseError [(String, Expr)] -> [(String, Expr)]
 hoistError (Right val) = val
