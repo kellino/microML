@@ -167,19 +167,6 @@ ifthen = do
     void spaces
     return (If cond tr fl)
 
-raise :: Parser Expr
-raise = do
-    reserved "try"
-    e1 <- expr
-    reserved "except"
-    err <- stringLit
-    return $ Exception e1 err
-
-using :: Parser Expr
-using = do
-    reserved "using"
-    stringLit
-
 aexp :: Parser Expr
 aexp =
       parens expr
@@ -198,8 +185,6 @@ aexp =
   <|> variable
   <|> stringLit
   <|> charLit
-  <|> raise
-  <|> using
   <?> "an expression"
 
 term :: Parser Expr

@@ -11,13 +11,13 @@ import MicroML.Syntax
 ----------------
 
 -- | if there are any duplicate definitions then abandon compilation. The line numbering function
--- is very crude and not fit for purpose. It assumes each function only occupies one line and that
--- there are no comments!
+--   is very crude and not fit for purpose. It assumes each function only occupies one line and that
+--   there are no comments!
 
 checkForDuplicates :: [(String, Expr)] -> [(String, Expr)]
 checkForDuplicates code 
   | length code == length nubbed  = code
-  | otherwise  = error $ "\ESC[31mError: \ESC[0mduplicate definition of function " ++ getFuncName (length nubbed) code ++ 
+  | otherwise  = error $ red ++ "Error" ++ clear ++ ": duplicate definition of function " ++ getFuncName (length nubbed) code ++ 
       " found at line " ++ "\ESC[1m" ++ show (length nubbed) ++ "\ESC[0m. Aborting." 
   where nubbed = nubBy ((==) `on` fst . snd) numbered
         numbered :: [(Int, (String, Expr))]

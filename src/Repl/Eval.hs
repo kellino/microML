@@ -28,10 +28,6 @@ eval env expr = case expr of
     Var x                   -> fromJust (Map.lookup x env) -- the type checker ensures we never get this far
     FixPoint e              -> eval env (App e (FixPoint e))
     Lam x body              -> Closure x body env
-    Exception a b           -> do
-        let a' = eval env a
-        case a' of
-          (PrimitiveErr _) -> eval env b
     App a b                 -> do
         let Closure n expr' clo = eval env a
         let arg = eval env b

@@ -33,7 +33,6 @@ data Expr
   | Closure Name Expr TermEnv
   | PrimitiveErr MLError
   | Nil
-  | Exception Expr Expr
   deriving (Show, Eq, Ord)
 
 data Lit
@@ -53,10 +52,10 @@ data UnaryOp =
     deriving (Eq, Ord)
 
 instance Show UnaryOp where
-    show Car   = red ++ "Car" ++ unred
-    show Cdr   = red ++ "Cdr" ++ unred
-    show Minus = red ++ "negative" ++ unred
-    show OpLog = red ++ "log" ++ unred
+    show Car   = red ++ "Car" ++ clear
+    show Cdr   = red ++ "Cdr" ++ clear
+    show Minus = red ++ "negative" ++ clear
+    show OpLog = red ++ "log" ++ clear
     show x     = show x
 
 data Binop = 
@@ -66,26 +65,26 @@ data Binop =
       deriving (Eq, Ord)      
 
 instance Show Binop where
-    show OpAdd    = red ++ "addition" ++ unred
-    show OpSub    = red ++ "subtraction" ++ unred
-    show OpMul    = red ++ "multiplication" ++ unred
-    show OpDiv    = red ++ "division" ++ unred
-    show OpIntDiv = red ++ "integer division" ++ unred
-    show OpExp    = red ++ "exponents" ++ unred
-    show OpMod    = red ++ "modulo" ++ unred
-    show OpOr     = red ++ "inclusive or" ++ unred
-    show OpXor    = red ++ "exclusive or" ++ unred
-    show OpAnd    = red ++ "logical and" ++ unred
-    show OpEq     = red ++ "equals" ++ unred
-    show OpLe     = red ++ "less than or equal to" ++ unred
-    show OpLt     = red ++ "less than" ++ unred
-    show OpGe     = red ++ "greater than or equal to" ++ unred
-    show OpGt     = red ++ "greater than" ++ unred
-    show OpNotEq  = red ++ "not equal to" ++ unred
-    show OpCons   = red ++ "Cons" ++ unred
-    show OpComp   = red ++ "composition" ++ unred
-    show OpAppend = red ++ "concatenation" ++ unred
-    show OpPipe   = red ++ "pipe" ++ unred
+    show OpAdd    = red ++ "addition" ++ clear
+    show OpSub    = red ++ "subtraction" ++ clear
+    show OpMul    = red ++ "multiplication" ++ clear
+    show OpDiv    = red ++ "division" ++ clear
+    show OpIntDiv = red ++ "integer division" ++ clear
+    show OpExp    = red ++ "exponents" ++ clear
+    show OpMod    = red ++ "modulo" ++ clear
+    show OpOr     = red ++ "inclusive or" ++ clear
+    show OpXor    = red ++ "exclusive or" ++ clear
+    show OpAnd    = red ++ "logical and" ++ clear
+    show OpEq     = red ++ "equals" ++ clear
+    show OpLe     = red ++ "less than or equal to" ++ clear
+    show OpLt     = red ++ "less than" ++ clear
+    show OpGe     = red ++ "greater than or equal to" ++ clear
+    show OpGt     = red ++ "greater than" ++ clear
+    show OpNotEq  = red ++ "not equal to" ++ clear
+    show OpCons   = red ++ "Cons" ++ clear
+    show OpComp   = red ++ "composition" ++ clear
+    show OpAppend = red ++ "concatenation" ++ clear
+    show OpPipe   = red ++ "pipe" ++ clear
 
 data MLError
     = MathsPrim String 
@@ -102,6 +101,7 @@ instance Show MLError where
 -- HELPER DEFS --
 -----------------
 
-red, unred :: String
+red, clear, bold :: String
 red = "\ESC[31m"
-unred = "\ESC[0m"
+clear = "\ESC[0m"
+bold = "\ESC[1m"

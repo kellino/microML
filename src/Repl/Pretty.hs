@@ -90,14 +90,13 @@ ppexpr :: Expr -> String
 ppexpr = render . ppr 0
 
 ppsig :: (Expr, TypeScheme) -> String
-ppsig (a, b) = bold ++ ppexpr a ++ unbold ++ " : " ++ ppscheme b
+ppsig (a, b) = pbold ++ ppexpr a ++ clear ++ " : " ++ ppscheme b
 
 ppsig' :: (String, TypeScheme) -> String
-ppsig' (a, b) = bold ++ a ++ unbold ++ " : " ++ ppscheme b
+ppsig' (a, b) = pbold ++ a ++ clear ++ " : " ++ ppscheme b
 
 ppenv :: Env -> [String]
 ppenv (TypeEnv env) = map ppsig' $ Map.toList env
 
-bold, unbold :: String
-bold = "\ESC[37m"
-unbold = "\ESC[0m"
+pbold :: String
+pbold = "\ESC[37m"

@@ -96,7 +96,7 @@ validateExtension :: String -> String
 validateExtension fl -- = if (snd . splitExtension) fl == ".cpp" then fl else (fst . splitExtension $ fl) ++ ".cpp"
     | extension == ".cpp" = fl
     | extension == "" = fl ++ ".cpp"
-    | otherwise = error $ red ++ "File Extension Error: " ++ unred ++ extension ++ " is not a valid filetype for compiled microML.\n"
+    | otherwise = error $ red ++ "File Extension Error: " ++ clear ++ extension ++ " is not a valid filetype for compiled microML.\n"
                         ++ "Please try either .cpp or don't add an extension"
     where extension = snd . splitExtension $ fl
 

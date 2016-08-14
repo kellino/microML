@@ -1,7 +1,7 @@
-(* Church encoding and Peano numeral *)
+-- Church encoding and Peano numeral
 
-tr x y = x;
-fls x y = y;
+let tr x y = x;
+let fls x y = y;
 
 let zero f x = x;
 let one f x = f x;
@@ -14,5 +14,5 @@ let seven f x = f (f (f (f (f (f (f x))))));
 let eight f x = f (f (f (f (f (f (f (f x)))))));
 let nine f x = f (f (f (f (f (f (f (f (f x))))))));
 let ten f x = f (f (f (f (f (f (f (f (f (f x)))))))));
-
 let isZero n = n (\x -> fls) tr;
+(* ==church numeral== *)

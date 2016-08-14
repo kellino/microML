@@ -219,9 +219,6 @@ infer expr = case expr of
     Lit (LChar _)    -> return typeChar
     PrimitiveErr _   -> return typeError
     Nil              -> return $ TCon $ "[" ++ "a" ++ "]"
-    Exception a _    -> do
-        t1 <- infer a
-        return (t1 `TArrow` typeError)
 
     -- work in progress. This is just a placeholder
     Lit (LTup (x:xs)) -> do

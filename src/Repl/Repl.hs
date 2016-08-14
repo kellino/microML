@@ -11,7 +11,7 @@ import qualified Repl.HelpEnv as HE
 import Repl.Pretty
 import Repl.Help
 
-import MicroML.Syntax
+import MicroML.Syntax hiding (clear)
 import MicroML.Parser
 import MicroML.Lexer hiding (contents)
 import MicroML.Typing.Env as Env

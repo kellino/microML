@@ -1,8 +1,8 @@
 module Main  where
 
 import Compiler.CodeGen
-import MicroML.Syntax (red, unred)
-import Repl.Repl
+import MicroML.Syntax (red, clear)
+import Repl.Repl hiding (clear)
 
 import System.IO (hPutStrLn, stderr)
 import System.Exit
@@ -63,18 +63,18 @@ microML arg fs =
       ObjectFile  -> undefined
       Compiler    -> 
           if length fs /= 2  -- only accepts one file for the moment
-             then die $ red ++ "Exit Failure: " ++ unred ++ "you must provide a source file and a destination file"
+             then die $ red ++ "Exit Failure: " ++ clear ++ "you must provide a source file and a destination file"
              else do
                  tr <- doesFileExist $ head fs
                  if tr 
                     then do
                         contents <- LIO.readFile (head fs) 
                         compile contents (L.pack $ last fs) (head fs)
-                    else die $ red ++ "Exit Failure: " ++ unred ++ "the given file doesn't exist in that location, so it can't be compiled!"
+                    else die $ red ++ "Exit Failure: " ++ clear ++ "the given file doesn't exist in that location, so it can't be compiled!"
       Jit         -> do -- die "The jit is not yet operable"
           exists <- findExecutable "llc"
           if null exists
-             then die $ "Unable to find" ++ red  ++ " LLVM " ++ unred ++ " on your computer."
+             then die $ "Unable to find" ++ red  ++ " LLVM " ++ clear ++ " on your computer."
                         ++ " Are you sure it is installed?"
              else die "This jit is not yet operable"
 
