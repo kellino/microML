@@ -1,0 +1,5 @@
+-- test of a simple if statement
+
+let main = 
+    let x = 2 in 
+    if x == 2 then scroll "hello" else scroll "goodbye"
