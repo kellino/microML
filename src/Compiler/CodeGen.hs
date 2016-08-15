@@ -12,7 +12,7 @@ import qualified Data.Text.Lazy as L
 import qualified Data.Map as Map
 import Data.Char (toLower)
 
-import Text.PrettyPrint
+import Text.PrettyPrint hiding (equals)
 import Text.Parsec (ParseError)
 
 import System.FilePath
@@ -21,7 +21,7 @@ import Control.Monad.Identity
 import Control.Monad.Reader
 import Control.Monad.Except
 
-type Compiler a = ReaderT UserCode (ExceptT Failure Identity) a
+type Compiler a =  ReaderT UserCode (ExceptT Failure Identity) a 
 
 type UserCode = Map.Map String Expr
 
@@ -32,12 +32,19 @@ genTopLevel (nm, expr) = generateFunc nm expr
 generateMain ::  Expr -> Compiler Doc
 generateMain ex = do
     ex' <- genBody ex
-    return $ "init main()" <> bracesNewLine (bitInit <> ex' <> fiber)
+    return $ "int main()" <> bracesNewLine (bitInit <> ex' <> fiber)
 
 generateFunc :: Name -> Expr -> Compiler Doc
 generateFunc nm ex =  do
     ex' <- genBody ex
     return $ text nm <> "()" <> bracesNewLine ex'
+
+genIf :: Expr -> Compiler Doc
+genIf (If cond tr fls) = do
+    cond' <- genBody cond
+    tr'   <- genBody tr
+    fls'  <- genBody fls
+    return $ "if" <> parens cond' <> bracesNewLine tr' <> "else " <> fls'
 
 genBody :: Expr -> Compiler Doc
 genBody ex = 
@@ -47,23 +54,39 @@ genBody ex =
          (Lit (LChar c))    -> return $ char c
          (Lit (LString x))  -> return $ doubleQuotes $ text x
          (Lit (LBoolean x)) -> return $ text . map toLower . show $ x
+         Lam _ _            -> undefined
          Var x              -> 
              case Map.lookup x microBitAPI of
-                  Nothing -> do
-                      env <- ask
-                      case Map.lookup x env of
-                           Nothing -> failGen (text x) " : no binding found"
-                           Just r  -> genBody r
+                  Nothing -> return $ text x
                   Just r  -> return r
-         (Let nm e1 e2)     -> do 
-             env <- ask
-             let e1' = e1
-             local (const (Map.insert nm e1' env)) (genBody e2)
-         (App x xs)   -> do
+         Let nm e1 e2       -> do
+             ret <- getType e1
+             e1' <- genBody e1
+             e2' <- genBody e2
+             return $ ret <> text nm <> " = " <> e1' <> semiWithNewLine <> e2'
+         {-(Let nm e1 e2)     -> do -}
+             {-env <- ask-}
+             {-let e1' = e1-}
+             {-local (const (Map.insert nm e1' env)) (genBody e2)-}
+         ifstat@If{}        -> genIf ifstat
+         App x xs           -> do
              x' <- genBody x
              xs' <- genBody xs
              return $ x' <> parensWithSemi xs'
-         _                 -> failGen (text . show $ ex) ": this operation is presently unsupported"
+         BinOp op e1 e2    -> do
+             e1' <- genBody e1
+             e2' <- genBody e2
+             return $ e1' <> text getop <> e2'
+             where getop =
+                    case op of
+                     OpAdd    -> " + "
+                     OpEq     -> " == "
+                     OpSub    -> " - "
+                     OpMul    -> " * "
+                     OpDiv    -> " / "
+                     OpIntDiv -> " / "
+                     OpMod    -> " % "
+         _                 -> failGen (text $ show ex) ": this operation is presently unsupported"
 
 semiWithNewLine :: Doc
 semiWithNewLine = semi <> "\n"
