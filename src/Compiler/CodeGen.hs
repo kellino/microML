@@ -37,6 +37,14 @@ type UserCode = Map.Map String Expr
 -- CPP CODE GENERATION -- 
 -------------------------
 
+-- generate fresh names for unnamed bindings in microML (eg. when using the >> operator)
+fresh :: Compiler Doc
+fresh = do
+    s <- get
+    put s{ count = count s + 1 }
+    return $ text (letters !! count s)
+    where letters = [1..] >>= flip replicateM ['a' .. 'z']
+
 genTopLevel ::  (String, Expr) -> Compiler Doc
 genTopLevel ("main", expr) = generateMain expr
 genTopLevel (nm, expr) = generateFunc nm expr
