@@ -17,13 +17,25 @@ import Text.Parsec (ParseError)
 
 import System.FilePath
 
-import Control.Monad.Identity
-import Control.Monad.Reader
+import Control.Monad.RWS hiding ((<>))
 import Control.Monad.Except
 
-type Compiler a =  ReaderT UserCode (ExceptT Failure Identity) a 
+---------------
+-- DATATYPES --
+---------------
+
+type Compiler a = (RWST UserCode [Doc] CompilerState (Except Failure) a)
+
+data CompilerState = CompilerState { count :: Int }
+
+initCompiler :: CompilerState
+initCompiler = CompilerState { count = 0 }
 
 type UserCode = Map.Map String Expr
+
+-------------------------
+-- CPP CODE GENERATION -- 
+-------------------------
 
 genTopLevel ::  (String, Expr) -> Compiler Doc
 genTopLevel ("main", expr) = generateMain expr
@@ -64,10 +76,6 @@ genBody ex =
              e1' <- genBody e1
              e2' <- genBody e2
              return $ ret <> text nm <> " = " <> e1' <> semiWithNewLine <> e2'
-         {-(Let nm e1 e2)     -> do -}
-             {-env <- ask-}
-             {-let e1' = e1-}
-             {-local (const (Map.insert nm e1' env)) (genBody e2)-}
          ifstat@If{}        -> genIf ifstat
          App x xs           -> do
              x' <- genBody x
@@ -88,15 +96,6 @@ genBody ex =
                      OpMod    -> " % "
          _                 -> failGen (text $ show ex) ": this operation is presently unsupported"
 
-semiWithNewLine :: Doc
-semiWithNewLine = semi <> "\n"
-
-parensWithSemi :: Doc -> Doc
-parensWithSemi d = parens d <> semi <> "\n"
-
-bracesNewLine :: Doc -> Doc
-bracesNewLine d = braces ("\n\t" <> d) <> "\n"
-
 getType :: Expr -> Compiler Doc
 getType (Lit (LInt _)) = return $ "int" <> space
 getType (Lit (LDouble _)) = return $ "double" <> space
@@ -105,13 +104,14 @@ getType (Lit (LChar _)) = return $ "char" <> space
 getType (Lit (LBoolean _)) = return $ "bool" <> space
 getType x = failGen (text . show $ x) ": unable to ascertain type of this expression"
 
-runCompiler :: UserCode -> Compiler a -> Either Failure a
-runCompiler env ev = runIdentity (runExceptT (runReaderT ev env))
+semiWithNewLine :: Doc
+semiWithNewLine = semi <> "\n"
 
-codegen :: [(String, Expr)] -> Compiler [Doc]
-codegen = mapM genTopLevel 
-        . reachableFromMain 
-        . checkForDuplicates
+parensWithSemi :: Doc -> Doc
+parensWithSemi d = parens d <> semi <> "\n"
+
+bracesNewLine :: Doc -> Doc
+bracesNewLine d = braces ("\n\t" <> d) <> "\n"
 
 hoistError :: Either ParseError [(String, Expr)] -> [(String, Expr)]
 hoistError (Right val) = val
@@ -131,6 +131,14 @@ writeToFile dest code = do
     let code' = foldr (<>) "" code
     writeFile cFile $ render (microBitIncludes <> code')
 
+codegen :: [(String, Expr)] -> Compiler [Doc]
+codegen = mapM genTopLevel 
+        . reachableFromMain 
+        . checkForDuplicates
+
+runCompiler :: UserCode -> Compiler a -> Either Failure (a, [Doc])
+runCompiler env m = runExcept $ evalRWST m env initCompiler
+
 compile :: L.Text -> L.Text -> String -> IO ()
 compile source dest filename = do
     let res = hoistError $ parseProgram filename source
@@ -138,4 +146,4 @@ compile source dest filename = do
     let code = checkForDuplicates res
     case runCompiler (Map.fromList code) $ codegen code of
          Left e -> print $ tellError e
-         Right r -> writeToFile dest r
+         Right r -> writeToFile dest $ fst r
