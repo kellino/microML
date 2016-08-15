@@ -7,6 +7,7 @@ import MicroML.Parser
 import Compiler.MicroBitHeader
 import Compiler.CallGraph
 import Compiler.Failure
+import Compiler.PrettyCPP
 
 import qualified Data.Text.Lazy as L
 import qualified Data.Map as Map
@@ -92,17 +93,8 @@ genBody ex =
          BinOp op e1 e2    -> do
              e1' <- genBody e1
              e2' <- genBody e2
-             return $ e1' <> text getop <> e2'
-             where getop =
-                    case op of
-                     OpAdd    -> " + "
-                     OpEq     -> " == "
-                     OpSub    -> " - "
-                     OpMul    -> " * "
-                     OpDiv    -> " / "
-                     OpIntDiv -> " / "
-                     OpMod    -> " % "
-         _                 -> failGen (text $ show ex) ": this operation is presently unsupported"
+             return $ e1' <> ppr op <> e2'
+         _                 -> failGen (showText ex) ": this operation is presently unsupported"
 
 getType :: Expr -> Compiler Doc
 getType (Lit (LInt _)) = return $ "int" <> space
@@ -110,16 +102,7 @@ getType (Lit (LDouble _)) = return $ "double" <> space
 getType (Lit (LString _)) = return $ "ManagedString" <> space
 getType (Lit (LChar _)) = return $ "char" <> space
 getType (Lit (LBoolean _)) = return $ "bool" <> space
-getType x = failGen (text . show $ x) ": unable to ascertain type of this expression"
-
-semiWithNewLine :: Doc
-semiWithNewLine = semi <> "\n"
-
-parensWithSemi :: Doc -> Doc
-parensWithSemi d = parens d <> semi <> "\n"
-
-bracesNewLine :: Doc -> Doc
-bracesNewLine d = braces ("\n\t" <> d) <> "\n"
+getType x = failGen (showText x) ": unable to ascertain type of this expression"
 
 hoistError :: Either ParseError [(String, Expr)] -> [(String, Expr)]
 hoistError (Right val) = val
