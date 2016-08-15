@@ -1,12 +1,19 @@
 module Compiler.CallGraph 
     ( checkForDuplicates
-    , reachableFromMain) 
+    , reachableFromMain
+    , drawGraph) 
     where
 
 import Data.List (nub, nubBy, sort, (\\))
 import Data.Graph
 import Data.Function (on)
 import Data.Maybe (fromJust)
+
+import System.IO
+import System.Process
+import System.Directory
+import System.FilePath
+import Control.Exception (catch, IOException)
 
 import MicroML.Syntax
 
@@ -73,6 +80,36 @@ buildGraph code = buildG (1, length code) $ concatMap (\(x, xs) -> zip (repeat x
           call c t = map (\(x, xs) -> (tLookup x t, map (`tLookup` t) xs)) (getOrderedNodes c)
           tLookup x' t' = fromJust $ lookup x' t'
 
+-- | super simple directed graph in graphviz dot format
+formatDot :: [(String, Expr)] -> String
+formatDot cd = "digraph G {\n" ++ concat body ++ "}"
+    where body = map (\x -> show (fst x) ++ " -> " ++ show (snd x) ++ ";\n") 
+            $ concatMap (\(y, ys) -> zip (repeat y) ys) $ getOrderedNodes cd
+
+writeDot :: String -> IO ()
+writeDot = writeFile "/tmp/callgraph.dot" 
+
+generatePng :: IO ()
+generatePng = do
+    dot <- findExecutable "dot"
+    case dot of
+         Nothing -> error "graphviz is not available on this system"
+         Just _  -> do
+             dir <- getCurrentDirectory
+             let dest = dir </> "callgraph.png"
+             catch (callCommand ("dot -Tpng " ++ "/tmp/callgraph.dot" ++ "> " ++ dest))
+                   (\e -> do let err = show (e :: IOException)
+                             hPutStr stderr $ red ++ "Warning: " ++ clear ++
+                                    " Couldn't run \"dot\"\n." ++ err ++ 
+                                    "\nAbandoning graph compilation. Sorry :("
+                             return ())
+
+drawGraph :: [(String, Expr)] -> IO ()
+drawGraph cd = do
+    let graph = formatDot cd
+    writeDot graph
+    generatePng
+
 -- | the main function for the module
 reachableFromMain :: [(String, Expr)] -> [(String, Expr)]
 reachableFromMain cd = 
@@ -81,7 +118,7 @@ reachableFromMain cd =
      in if reach /= all'
            then error $ tellError (map fst (getOrderedNodes cd)) (all' \\ reach)
            else cd
-     
+
 -----------
 -- ERROR --
 -----------
@@ -90,11 +127,13 @@ tellError :: [String] -> [Int] -> String
 tellError nodes unreachable = 
     let funcs = map (\x -> nodes !! (x-1)) unreachable
     in if length funcs == 1
-       then redError ++ "The function " ++ bold ++ head funcs ++ clear ++ " is unreachable from main, so compilation is being abandoned."
-       else redError ++ "The functions " ++ ppr funcs ++ " are unreachable from main, so compilation is being abandoned"
+       then redError ++ "The function " ++ bold ++ head funcs ++ clear ++ " is unreachable from main, so compilation is being abandoned.\n" ++ graphGen
+       else redError ++ "The functions " ++ ppr funcs ++ " are unreachable from main, so compilation is being abandoned\n" ++ graphGen
     where ppr funcs'
             | length funcs' == 2    = bold ++ head funcs' ++ clear ++ " and " ++ bold ++ last funcs' ++ clear
             | otherwise            = bold ++ head funcs' ++ clear ++ ", " ++ ppr funcs'
+          graphGen = "Try running microML with the -g flag to see a png of the program graph, e.g microML - g myfile.mml"
 
+redError :: String
 redError = red ++ "Error: " ++ clear
 
