@@ -1,8 +1,10 @@
 module Main  where
 
-import Compiler.CodeGen
+import Compiler.CodeGen 
+import Compiler.CallGraph
+import MicroML.Parser
 import MicroML.Syntax (red, clear)
-import Repl.Repl hiding (clear)
+import Repl.Repl hiding (clear, hoistError)
 
 import System.IO (hPutStrLn, stderr)
 import System.Exit
@@ -21,6 +23,7 @@ data Flag =
     | Jit
     | Compiler
     | ObjectFile
+    | CallGraph
     | Help
     deriving (Eq, Ord, Enum, Show, Bounded)
 
@@ -34,6 +37,8 @@ flags =
     "Starts the microML interactive environment" 
     , Option ['o'] [] (NoArg ObjectFile)
     "The name of the new file you want to save"
+    , Option ['g'] [] (NoArg CallGraph)
+    "Produces a png image of the program's call graph (how each function is linked to the others)"
     , Option [] ["help"] (NoArg Help)
     "Prints this help message"
     ]
@@ -61,6 +66,13 @@ microML arg fs =
     case arg of
       Interpreter -> shell
       ObjectFile  -> undefined
+      CallGraph   -> 
+          if length fs /= 1 -- only accept one file at a time
+             then die $ red ++ "Exit Failure: " ++ clear ++ "you must provide only one source file at a time. Sorry :("
+             else do
+                 contents <- LIO.readFile(head fs)
+                 let res = hoistError $ parseProgram "from file" contents
+                 drawGraph res
       Compiler    -> 
           if length fs /= 2  -- only accepts one file for the moment
              then die $ red ++ "Exit Failure: " ++ clear ++ "you must provide a source file and a destination file"
