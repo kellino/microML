@@ -52,13 +52,13 @@ instance Pretty Expr where
 
 instance Show TypeError where
       show (UnificationFail a b) =
-        concat ["Cannot \ESC[1munify\ESC[0m types: ", pptype a, " with ", pptype b]
+        concat ["Cannot ", bold, "match", clear, " expected type ", bold, pptype a, clear, " with actual type ", bold, pptype b, clear]
       show (InfiniteType (TV a) b) =
-        concat ["Cannot construct the \ESC[0minfinite\ESC[0m type: ", a, " = ", pptype b]
+        concat ["Cannot construct the ", red, "infinite type", clear, ": ", a, " = ", pptype b]
       show (Ambigious cs) =
         concat ["Cannot not match expected type: '" ++ pptype a ++ "' with actual type: '" ++ pptype b ++ "'\n" | (a,b) <- cs]
-      show (UnboundVariable a) = "Not in scope: " ++ a
-      show (UnsupportedOperation a) = "\ESC[1m" ++ a ++ "\ESC[0m"
+      show (UnboundVariable a) = "Not in scope: " ++  bold ++ a ++ clear
+      show (UnsupportedOperation a) = bold ++ a ++ clear
       show (UnificationMismatch a b) = show a ++ show b
 
 ppscheme :: TypeScheme -> String
