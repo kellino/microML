@@ -27,7 +27,7 @@ instance Pretty TVar where
     ppr _ (TV x) = text x
 
 instance Pretty Type where
-    ppr p (TArrow a b) = parensIf (isArrow a) (ppr p a) <+> text "\ESC[37m→\ESC[0m" <+> ppr p b  
+    ppr p (TArrow a b) = parensIf (isArrow a) (ppr p a) <+> text pbold <+> "→" <+> text clear <+> ppr p b  
         where
           isArrow TArrow{} = True
           isArrow _ = False
@@ -42,8 +42,8 @@ instance Pretty Expr where
     ppr _ Closure{}              = text "<<closure>>"
     ppr _ (Lit (LInt i))         = integer i
     ppr _ (Lit (LDouble d))      = double d
-    ppr _ (Lit (LString str))    = text str
-    ppr _ (Lit (LChar c))        = text [c]        -- convert char to a string
+    ppr _ (Lit (LString str))    = doubleQuotes $ text str 
+    ppr _ (Lit (LChar c))        = quotes $ text [c]        -- convert char to a string
     ppr _ (Lit (LBoolean True))  = text "true"
     ppr _ (Lit (LBoolean False)) = text "false"
     ppr _ Nil                    = text "empty list"
