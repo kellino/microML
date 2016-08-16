@@ -112,7 +112,8 @@ cmd source = exec True (L.pack source)
 -- Commands
 -------------------------------------------------------------------------------
 
--- :Parse Tree
+-- | view the parse tree of an expression in the repl
+-- :pst command
 pst :: [String] -> Repl ()
 pst expr = do
     tree <- hoistError $ parseProgram "<stdin>" $ L.pack $ concatMap (++ " ") expr
@@ -172,7 +173,6 @@ typeof args =
           case Env.lookup arg (typeEnv st) of
             Just val -> liftIO $ putStrLn $ ppsig' (arg, val)
             Nothing  -> liftIO $ putStrLn $ "microML: " ++ show arg ++ " is not in scope"
-            --Nothing -> exec False $ L.pack arg
 
 -- :quit command
 quit :: a -> Repl ()
@@ -182,7 +182,7 @@ quit _ = liftIO exitSuccess
 clear :: a -> Repl ()
 clear _ = liftIO $ S.callCommand "clear"
 
--- :! access the shell -- unsafe!!
+-- :! access the shell, errors are wrapped in an IOException
 sh :: [String] -> Repl ()
 sh arg = liftIO $ 
     catch (S.callCommand (unwords arg))
