@@ -39,7 +39,8 @@ executable microML
                      Repl.Help,
                      Repl.HelpEnv,
                      Repl.Pretty,
-                     Repl.Repl
+                     Repl.Repl,
+                     Repl.ParseTree
   
   -- Packages needed in order to build this package.
   Build-depends:     base, 
@@ -55,7 +56,8 @@ executable microML
                      text,
                      pretty,
                      containers,
-                     transformers
+                     transformers,
+                     pretty-tree
                      --setenv,
                      --llvm-general,
                      --llvm-general-pure
