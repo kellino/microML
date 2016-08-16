@@ -26,6 +26,7 @@ executable microML
                      Compiler.CodeGen,
                      Compiler.Failure,
                      Compiler.MicroBitHeader,
+                     Compiler.PrettyCPP,
                      MicroML.Lexer,
                      MicroML.ListPrimitives,
                      MicroML.Parser,
