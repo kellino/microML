@@ -9,6 +9,7 @@ import Repl.Eval hiding (mod')
 import Repl.HelpEnv
 import qualified Repl.HelpEnv as HE
 import Repl.Pretty
+import Repl.ParseTree
 import Repl.Help
 
 import MicroML.Syntax hiding (clear)
@@ -116,7 +117,7 @@ pst :: [String] -> Repl ()
 pst expr = do
     tree <- hoistError $ parseProgram "<stdin>" $ L.pack $ concatMap (++ " ") expr
     tyEnv <- hoistError $ inferTop Env.empty tree
-    liftIO $ putStrLn $ show tree ++ concat (ppenv tyEnv)
+    liftIO . showTree . head $ tree
 
 -- :browse command
 browse :: [String] -> Repl ()
