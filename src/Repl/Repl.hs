@@ -116,8 +116,10 @@ cmd source = exec True (L.pack source)
 pst :: [String] -> Repl ()
 pst expr = do
     tree <- hoistError $ parseProgram "<stdin>" $ L.pack $ concatMap (++ " ") expr
-    tyEnv <- hoistError $ inferTop Env.empty tree
-    liftIO . showTree . head $ tree
+    let tyEnv = inferTop Env.empty tree
+    case tyEnv of
+         Left err -> liftIO . print $ err 
+         Right _ -> liftIO . showTree . head $ tree
 
 -- :browse command
 browse :: [String] -> Repl ()
