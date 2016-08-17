@@ -1,0 +1,3 @@
+let text = "hello microML"
+
+let main = text >> print

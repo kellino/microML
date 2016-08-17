@@ -3,5 +3,4 @@
 let main =
     let s = "hello" in
     let t = "there" in
-    scroll s
-    scroll t
+    scroll s ++ t
