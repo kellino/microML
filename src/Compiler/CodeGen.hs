@@ -16,7 +16,6 @@ import Repl.Pretty()
 import qualified Data.Text.Lazy as L
 import qualified Data.Map as Map
 import Data.Char (toLower)
-import Data.Maybe (fromJust)
 
 import Text.PrettyPrint hiding (equals)
 
@@ -48,7 +47,7 @@ initState code = CodeState (Map.fromList code) (genTypeEnv code)
 genTypeEnv :: [(String, Expr)] -> Env
 genTypeEnv cd = 
     case inferTop Env.empty cd of
-         Left err -> error $ show err
+         Left err -> error "type error"
          Right val -> val
 
 -------------------------
@@ -94,7 +93,7 @@ genBody ex =
     case ex of
          (Lit (LInt n))     -> return $ integer n
          (Lit (LDouble d))  -> return $ double d
-         (Lit (LChar c))    -> return $ char c
+         (Lit (LChar c))    -> return $ quotes $ char c
          (Lit (LString x))  -> return $ doubleQuotes $ text x
          (Lit (LBoolean x)) -> return $ text . map toLower . show $ x
          Lam _ _            -> failGen "" "not written yet"
@@ -167,3 +166,5 @@ compile source dest filename = do
     case runCompiler (initState code) $ codegen code of
          Left e -> print $ tellError e
          Right r -> writeToFile dest $ fst r
+
+
