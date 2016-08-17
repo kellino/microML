@@ -20,6 +20,7 @@ import Data.Char (toLower)
 import Text.PrettyPrint hiding (equals)
 
 import System.FilePath
+import System.Directory
 
 import Control.Monad.RWS hiding ((<>))
 import Control.Monad.Except
@@ -150,6 +151,7 @@ writeToFile dest code = do
     let cFile = validateExtension $ L.unpack dest
     let code' = foldr (<>) "" code
     writeFile cFile $ render (microBitIncludes <> code')
+    -- if clang-format exists, then use it to clean up the formatting.
     formatPrintedFile cFile
 
 codegen :: [(String, Expr)] -> Compiler [Doc]

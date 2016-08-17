@@ -13,14 +13,17 @@ import Control.Exception (catch, IOException)
 
 
 -- use clang-format, if installed, to render nice cpp, otherwise leave it ugly
+formatPrintedFile :: String -> IO ()
 formatPrintedFile fl = do
-    clang <- findExecutable "clang-format" 
+    clang <- findExecutable "clang-format"
     case clang of
          Nothing -> putStr ""
-         Just _ -> catch (callCommand $ "clang-format " ++ fl ++ "> " ++ fl') 
-                        (\e -> do let err = show (e :: IOException)
-                                  hPutStr stderr ("Clang-format was unable to reformat" ++ fl ++ "\n" ++ err ++ "\n")
-                                  return ())
+         Just _  -> do 
+            catch (callCommand $ "clang-format " ++ fl ++ "> " ++ fl')
+                  (\e -> do let err = show (e :: IOException)
+                            hPutStr stderr ("Clang-format was unable to reformat" ++ fl ++ "\n" ++ err ++ "\n")
+                            return ())
+            renameFile fl' fl
     where fl' = fst (splitExtension fl) ++ "F" ++ ".cpp"
 
 showText :: Show a => a -> Doc 
