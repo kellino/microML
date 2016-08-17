@@ -7,6 +7,7 @@ import Text.PrettyPrint
 
 import System.Directory
 import System.Process
+import System.FilePath
 import System.IO
 import Control.Exception (catch, IOException)
 
@@ -16,11 +17,11 @@ formatPrintedFile fl = do
     clang <- findExecutable "clang-format" 
     case clang of
          Nothing -> putStr ""
-         Just _ -> 
-            catch (callCommand $ "clang-format " ++ fl)
-                  (\e -> do let err = show (e :: IOException)
-                            hPutStr stderr ("Clang-format was unable to reformat" ++ fl ++ "\n" ++ err ++ "\n")
-                            return ())
+         Just _ -> catch (callCommand $ "clang-format " ++ fl ++ "> " ++ fl') 
+                        (\e -> do let err = show (e :: IOException)
+                                  hPutStr stderr ("Clang-format was unable to reformat" ++ fl ++ "\n" ++ err ++ "\n")
+                                  return ())
+    where fl' = fst (splitExtension fl) ++ "F" ++ ".cpp"
 
 showText :: Show a => a -> Doc 
 showText = text . show
