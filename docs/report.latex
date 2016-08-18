@@ -1,11 +1,11 @@
-\documentclass[11pt, a4paper]{article}
+\documentclass[11pt, a4paper]{report}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{minted}
 \usepackage{palatino}
 \usepackage{geometry}
 \usepackage[hidelinks]{hyperref}
-\geometry{a4paper,left=15mm,right=15mm, top=1cm, bottom=2cm}
+\geometry{a4paper,left=25mm,right=25mm, top=1cm, bottom=2cm}
 \usepackage{color, colortbl}
 \definecolor{Seagreen}{rgb}{0.18, 0.54, 0.34}
 \definecolor{Lawngreen}{rgb}{0.48, 0.99, 0}
@@ -14,12 +14,50 @@
 \usepackage{verbatimbox}
 
 \begin{document}
-\title{Functional Programming on the BBC micro:bit: A Study in Language Design}
-\author{David Kelly}
+\begin{titlepage}
+	\centering
+%	\includegraphics[width=0.15\textwidth]{example-image-1x1}\par\vspace{1cm}
+        {\scshape\LARGE University College London\par}
+	\vspace{1cm}
+        {\scshape\Large MSc Computer Science Final Project\par}
+	\vspace{1.5cm}
+        {\huge\bfseries microML: A Language for the BBC micro:bit \par}
+	\vspace{2cm}
+        {\Large\itshape David Kelly\par}
+	\vfill
+	supervised by\par
+        Rae \textsc{Harbird}
 
-\maketitle
+	\vfill
+        {\large \today\par}
+    \end{titlepage}
+
+\tableofcontents
+
+\newpage
 
 \chapter{Introduction}
+
+\begin{flushright}
+    \textit{'a monad is a monoid in the category of endofunctors, what's the problem?'} \\
+    --- not Philip Wadler\footnote{The quote is actually from \textit{A Brief, Incomplete, and Mostly
+            Wrong History of Programming Languages by James Iry. 
+            \url{}https://james-iry.blogspot.co.uk/2009/05/brief-incomplete-and-mostly-wrong.html},
+        but is itself a paraphase from \textit{Categories for the Working Mathematician}.}
+\end{flushright}
+
+\section{Motivation}
+A genuine piece of documentation for the Control.Monad.Trans.EitherT
+library\footnote{\url{https://hackage.haskell.org/package/either-4.4.1.1/docs/Control-Monad-Trans-Either.html}}
+available on \textit{Hackage} informs us that `an apomorphism is the generalized anamorphism for this 
+Monad'.  Such statements, while (almost certainly) factually correct are of little use to the
+average `jobbing' programmer and indeed might be considered to have the effect of deliberately alienating a large part
+of the software engineering workforce. One can only hope that this was not the intention, because
+functional languages, especially those which use static type analysis and inference have a great
+deal to offer to the programming community in terms of expressiveness and safety. Must it be the
+case therefore that introductory material is so intimidating? Is there a way to encourage students
+to think functionally, in a type-orientated manner, without the heavy mathematical baggage that is
+simple surplus to requirements when writing one's first programs?
 
 \section{Functional Programming and the micro:bit} The BBC micro:bit is a microprocessor device aimed at
 bringing programming to young children and teenagers. At present it supports a number of 
@@ -34,7 +72,7 @@ teaching tool on the micro:bit, allowing the student to focus almost entirely on
 and a great deal less on syntax and \textit{boilerplate}.
 Functional languages are increasingly being used in every area of real-world applications. Regarding 
 robotics, in which Rae has expressed an interest, there has already been some research conducted 
-in the use of the declarative style for low level robotics programming\cite{Lambda in Motion: Controlling
+in the use of the declarative style for low level robotics programming\footnote{Lambda in Motion: Controlling
     Robots with Haskell, Peterson John, Paul Hudak and Conal Elliott}. This at least demonstrates
 that the functional style is applicable to the problem area, but further research would be required
 to test the suitability of the micro:bit as a low-level controller. Certainly, anything which can be
@@ -141,6 +179,8 @@ in the suggested implementation, hiding unnecessary detail with the loss of a li
 transparency.}
 
 \section{Aims and Goals}
+
+\subsection{Project Aims}
 It seems only apposite that a functional language for the micro:bit, assuming that it is not
 self-hosting, should be written in a more mature functional language. Haskell was chosen for this
 task as it presented a good opportunity to `come to grips' with the language and the paradigm. A
@@ -155,14 +195,47 @@ all have in common is that they are intended for an audience who are already int
 science, or are indeed computer scientists. Even classic texts, such as \textit{The Implementation
     and  Interpretation of Computer Programming} is squarely pitched at a sophisticated audience.
 The micro:bit is the opposite: it is for students with no previous programming experience,
-students who are not mathmaticians, teachers who are neither mathaticians nor programmers.
+students who are not mathematicians, teachers who are neither mathematicians nor programmers.
 Functional programming has a reputation in the programming community as being complex and only for a
 special type of person. The aim of this project is to show that this is not necessarily be the case.
 With this in mind, the aim is to make the language as education as possible, at the expense of
 sacrificing expressiveness. 
 
 Mention here no call with current continuation or macros, as obscuring underlying goals, which are
-inductive reasoning and intro to types and composition.
+inductive reasoning and intro to types and function composition.
 
+Development progressed iteratively. Having no previous experience of engineering a large software
+project in Haskell, initial development was largely \textit{ad hoc} and unstructured. A great deal
+of time was spent just in understanding the principles of state manipulation in a side-effect free
+language. Luckily there were a number of tutorials which served as the backbone, or perhaps more
+accurately, foetus, of the final project. Traces of these tutorials can still be seen scattered
+throughout the final codebase. These were perhaps both a help and a hinderance, as their original
+authors had not perhaps foreseen that they would be so heavily expanded and built-upon. Strong
+foundations might have results in a project which was more realised, with fewer edge cases and areas
+where the solutions are not as robust as could be desired. \\
+
+\subsection{Project Goals}
+Formally put, the project's goals were \\
+
+\begin{itemize}
+    \item Create an uncluttered syntax for a functional language. The initial inspiration was a
+        mixture of Scheme and Miranda. Scheme was considered the better model for evaluation (but
+        not for syntax) as it is very simple and relatively pure. While Scheme lacks such items as algebraic data types
+        and pattern matching, it clearly exposes the underlying lambda calculus.
+    \item Write a repl environment for students to explore code and concepts. All modern languages
+        ought to have a repl, so that individual snippets of code can be tested without the delay of
+        compilation and the increased difficulty of pinpointing errors. The repl environment ought
+        to be `friendly' and provide as much assistance to the user as possible. 
+    \item Have effective type inference so that students do not need to explicitly type variables.
+        While not every functional language has type inference\footnote{Idris, a dependently typed language,
+            requires type annotations due to the undecidability of inference of dependent types.},
+        it is a fundamental feature of the ML family. Having type inference means that the `truth'
+        of types is not hidden from the student as it would be with JavaScript or Python, but the
+        onus of type annotations is also absent.
+    \item Compiler to micro:bit flavoured C++. This was the part of the project which was most
+        pertinent to the micro:bit, but also that which would require the most time to bring to a
+        degree where compilation of even complicated programs could be accomplished with safety and
+        precision. 
+\end{itemize}
 
 \end{document}
