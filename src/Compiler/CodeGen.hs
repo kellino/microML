@@ -168,5 +168,3 @@ compile source dest filename = do
     case runCompiler (initState code) $ codegen code of
          Left e -> print $ tellError e
          Right r -> writeToFile dest $ fst r
-
-
