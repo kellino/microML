@@ -12,4 +12,5 @@ microML
 *.out
 *.toc
 *.log
+*.pdf
 _minted-report
