@@ -8,3 +8,8 @@ microML
 .o
 .hi
 *.cpp
+*.aux
+*.out
+*.toc
+*.log
+_minted-report
