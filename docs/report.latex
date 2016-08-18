@@ -1,16 +1,18 @@
-\documentclass[11pt, a4paper]{report}
+\documentclass[12pt, a4paper]{report}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{minted}
 \usepackage{palatino}
 \usepackage{geometry}
 \usepackage[hidelinks]{hyperref}
-\geometry{a4paper,left=25mm,right=25mm, top=1cm, bottom=2cm}
+%\geometry{a4paper,left=25mm,right=25mm, top=1cm, bottom=2cm}
 \usepackage{color, colortbl}
 \definecolor{Seagreen}{rgb}{0.18, 0.54, 0.34}
 \definecolor{Lawngreen}{rgb}{0.48, 0.99, 0}
 \definecolor{LRed}{rgb}{1, 0.8, 0.8}
 \definecolor{GoldenRod}{rgb}{0.93, 0.65, 0.12}
+\usepackage[center]{titlesec}
+\linespread{1.3}
 \usepackage{verbatimbox}
 
 \begin{document}
@@ -237,5 +239,7 @@ Formally put, the project's goals were \\
         degree where compilation of even complicated programs could be accomplished with safety and
         precision. 
 \end{itemize}
+
+\chapter{Context}
 
 \end{document}
