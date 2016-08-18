@@ -1,4 +1,4 @@
---GLOSSARY--
+-- GLOSSARY --
 (* ==unary== 
 ***unary***
 a **unary** function only takes **1** argument
@@ -232,7 +232,6 @@ let compose f g x = f (g x);
 A shortcut for **if xs == []**. Helpful when defining a __recursive__ function on a list.
 *)
 let end? xs = if xs == [] then true else false;
-
 
 -- TODO
 -- | do not yet get past the type checker !! | --
