@@ -122,6 +122,16 @@ pst expr = do
          Left err -> liftIO . print $ err 
          Right _ -> liftIO . showTree . head $ tree
 
+pstText :: [String] -> Repl ()
+pstText expr = do
+    tree <- hoistError $ parseProgram "<stdin>" $ L.pack $ concatMap (++ " ") expr
+    let tyEnv = inferTop Env.empty tree
+    case tyEnv of
+         Left err -> liftIO . print $ err 
+         Right _ -> do  --  liftIO . putStrLn . head $ tree
+             liftIO . putStrLn $ "The parsetree of " ++ bold ++ (fst . head) tree ++ "\ESC[0m" ++ " is: "
+             liftIO . putStrLn $ show . snd . head $ tree
+
 -- :browse command
 browse :: [String] -> Repl ()
 browse _ = do
@@ -203,7 +213,7 @@ defaultMatcher = [
 -- Default tab completer
 comp :: (Monad m, MonadState IState m) => WordCompleter m
 comp n = do
-    let cmds = [":using", ":type", ":browse", ":quit", ":!", ":help", ":?", ":pst", ":clear", ":load"]
+    let cmds = [":using", ":type", ":browse", ":quit", ":!", ":help", ":?", ":pst", ":clear", ":load", ":pstText"]
     Env.TypeEnv ctx <- gets typeEnv
     let defs = Map.keys ctx
     let builtins = reservedNames
@@ -220,6 +230,7 @@ options = [
       , ("?"      , help)
       , ("help"   , help) -- alternative
       , ("pst"    , pst) -- view parse tree of a given expression
+      , ("pstText", pstText)
       , ("load"   , load)
       ]
 
