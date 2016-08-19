@@ -1,8 +1,10 @@
 \documentclass[12pt, a4paper]{report}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
+\usepackage{amsmath}
 \usepackage{minted}
 \usepackage{palatino}
+\usepackage{syntax}
 \usepackage{geometry}
 \usepackage[hidelinks]{hyperref}
 \usepackage{tikz}
@@ -24,7 +26,7 @@
 	\vspace{1cm}
         {\scshape\Large MSc Computer Science Final Project\par}
 	\vspace{1.5cm}
-        {\huge\bfseries microML: A Language for the BBC micro:bit \par}
+        {\huge\bfseries microML \\ A Language for the BBC micro:bit \par}
 	\vspace{2cm}
         {\Large\itshape David Kelly\par}
 	\vfill
@@ -51,6 +53,33 @@
 
 \newpage
 
+\begin{abstract}
+    It is increasingly being recognized in educational circles that introductory lessons in programming is a
+    vital part of the modern school curriculum. Programming education in UK has not traditionally
+    formed part of the syllabus. Nearly all teenagers have access to computers and devices, but very
+    few know how to program them themselves. The raspberry pi has seen a remarkable growth in
+    popularity since its introduction a mere four years ago. The BBC micro:bit is a project in the
+    same spirit as the raspberry pi, but with a remit specifically for UK secondary school students.
+
+    MicroML is an attempt to bring the fundamental concepts of the functional programming paradigm
+    to the micro:bit, and thusly to the large body of untapped talent lying in Britain's secondary
+    schools. It should allow the students to explore such ideas as recursive thinking, structural
+    induction, polymorphism and higher order types without ever having to be exposed to the
+    underlying theory of such things, something which no other functional language does. 
+
+    The project was conceived and written in Haskell. It does not build on any other existing
+    project. Apart from reliance on standard Haskell libraries all of the major design work was
+    written `ab nihilo', including syntax design, the parser, type inference and the compiler. 
+
+    MicroML, at point of submission, is a strong base from which to do further work. It has
+    polymetric type inference, markdown-style inline documentation, a fully-featured repl
+    environment with extensive error checking capabilities, the ability to check source code for
+    common programming errors (such as duplicate function definitions and unreachable functions) and
+    produce images of program call graphs. It has been designed with the principle aim of making a
+    environment conducive to learning, without being condescending.
+
+\end{abstract}
+
 \chapter{Introduction}
 
 \begin{flushright}
@@ -69,7 +98,7 @@ available on \textit{Hackage} informs us that `an apomorphism is the generalized
 Monad'.  Such statements, while (almost certainly) factually correct are of little use to the
 average `jobbing' programmer and indeed might be considered to have the effect of deliberately alienating a large part
 of the software engineering workforce. One can only hope that this was not the intention, because
-functional languages, especially those which use static type analysis and inference have a great
+functional languages, especially those which use static type analysis and inference, have a great
 deal to offer to the programming community in terms of expressiveness and safety. Must it be the
 case therefore that introductory material is so intimidating? Is there a way to encourage students
 to think functionally, in a type-orientated manner, without the heavy mathematical baggage that is
@@ -397,6 +426,162 @@ it was decided that time constraints did not allow for proper utilization of the
 very large) so other alternatives were explored in the hope of at least producing a testable backend
 within the timeframe of the project. 
 
+\chapter{Requirements and Analysis}
 
+nothing here yet
+
+\chapter{Design and Implementation}
+
+microML uses an enriched lambda calculus as its base
+\vspace{5mm}
+
+\begin{minipage}[t]{0.5\textwidth}
+    \begin{grammar}
+        <Expr> ::= Var
+        \alt{} Constructor 
+        \alt{} Application <Expr> <Expr>
+        \alt{} Let Name <Expr> <Expr>
+        \alt{} Literal 
+        \alt{} If <Expr> then <Expr> else <Expr>
+        \alt{} FixPoint <Expr>
+        \alt{} UnaryOp <Expr>
+        \alt{} BinOp <Expr> <Expr>
+        \alt{} PrimitiveErr 
+    \end{grammar}
+\end{minipage}
+\begin{minipage}[t]{0.5\textwidth}
+    \begin{grammar}
+        <Literal> ::= Integer
+        \alt{} Double
+        \alt{} Boolean
+        \alt{} String
+        \alt{} Char
+        \alt{} Tuple of <Literal>
+    \end{grammar}
+\end{minipage}
+\vspace{5mm}
+
+In addition to these basic primitives and control structures, microML also makes use of three
+primitives inherited from languages in the Lisp family:
+
+\begin{grammar}
+    <ListOp> ::= Car
+    \alt{} Cdr
+    \alt{} Cons
+\end{grammar}
+
+These primitives are accessed through the \textit{head}, \textit{tail} and (:) built-in functions and are
+essential for recursing over lists.\
+
+microML, in addition to floats and ints, also supports binary, octal and hex numbers\footnote{The
+    syntax for these is inspired by erlang, one simply writes the number in the form eg 2\#110 for a
+    binary 6. Likewise octal is 8\# and hex 16\#}. These are not
+treated as primitives however, and are automatically converted to an appropriate representation.
+
+The \textit{FixPoint} primitive allows for the creation of recursive functions by satisfying the equation
+\begin{flalign*}
+    &y\ f\ = f (y\ f) &
+\end{flalign*}
+
+The most famous fix-point combinator without a doubt is Curry's \textit{Y-combinator}:
+\begin{flalign*}
+    &Y = (\lambda f. (\lambda x.\ f (x x)) (\lambda x.\ f (x x))) &
+\end{flalign*}
+
+To see how this can be used to simulate recursion\footnote{there are many excellent texts which
+    give detailed explanations of the \textit{Y-combinator}, such as \dots } it is necessary simply
+to supply an argument in the form of a lambda abstraction.
+
+\begin{eqnarray*}
+    && Y g = (\lambda f. (\lambda x.\ f (x x)) (\lambda x.\ f (x x))) g \\
+    & \to_\beta & (\lambda x.\ g (x x)) (\lambda x.\ g (x x)) \\
+    & \to_\beta & g ((\lambda x.\ g (x x)) (\lambda x.\ g (x x))) \\
+    & \equiv & g (Y g)
+\end{eqnarray*}
+
+While two different number types are supported by the parser, the type checker only recognizes the
+type \textit{Number}. The compiler will benefit from knowledge of the number type, ie int or double,
+whereas the user (a school-aged student) will not.
+
+\section{Parsing}
+A number of different libraries were examined before settling on the `standard'
+\textit{Parsec} library of parser combinators\footnote{A combinator is a lambda expression which
+    contains no occurrences of a free variable, ie all of its arguments are
+    explicitly supplied to it, and it does not rely on any global state or globally defined
+    variables}. \textit{Parsec} is a highly
+flexible tool, perhaps more similar to \textit{ANTLR}\footnote{\url{http://www.antlr.org/}} than to
+\textit{Yacc} or \textit{Bison}. Explicit regular expressions are not required, as the parser /
+lexer is a composite of a great number of small, specialized parser functions, which are linked
+together. If one parser fails, the next is tried until either parsing succeeds or a fatal error
+occurs. 
+
+Other libraries, such as \textit{MegaParsec} and \textit{Trifecta}, both respected and
+powerful, were examined. Trifecta especially seems like a very interesting parsing library,
+with excellent support for detailed, custom error messages. This would have been ideal for a
+teaching language of the nature of microML: unfortunately there is an almost total absence of
+documentation on the use of Trifecta, and internet tutorials of any size beyond the trivial 
+do not seem to exist. The programming
+language \textbf{Idris} uses Trifecta for its parser, so future iterations of microML might be able
+to migrate to Trifecta after careful examination of the Idris source. 
+
+MegaParsec has excellent
+support for indentation sensitive grammars, which Parsec does not. Again, this would be a useful
+feature to add to microML at a later stage of development. It seems to be however, at the present time, misplaced
+energy to focus on what is essentially syntactic sugar when other, more vital, elements of the
+project are still not functioning as they should or have not even been started. Moreover, MegaParsec
+is a relatively new, and non-standard, library whereas most installations of Haskell ship with
+Parsec as a component of the standard library. Of course, eschewing the new in favour of that which
+is ubiquitous (often in the name of backwards compatibility) is a bad habit which retards the
+development of better software. In this case however, the added power of MegaParsec is not yet
+required.
+
+Formally, parsec belongs to the family of LL(1) parsers. Obviously this does slightly reduce the
+flexibility of the language design\footnote{LL(1) parsers can only recognize a subset of the
+    context-free languages.}. Haskell itself does not use an LL(1) parser, but rather an LALR(1)
+built using \textit{Happy} and \textit{Alex}, much in the manner of a parser constructed using
+\textit{Yacc}, but such power is not required for the much more limited range of expression
+available in microML. If the language were ever to be expanded or made more robust, it would perhaps
+be reasonable to rewrite the parser to make use of this model.
+
+\section{Type Inference}
+microML uses an implementation of
+\textit{algorithmW}\footnote{based on the following tutorial implementation
+    \url{https://github.com/wh5a/Algorithm-W-Step-By-Step/blob/master/AlgorithmW.lhs}} for ML-style type inference. At present it is
+not possible to declare the types of functions, they can only be inferred. As this is primarily a
+teaching language with a very simple type system, this is not the drawback that it might otherwise
+be. 
+
+A full description of Hindley-Milner type inference is beyond the scope of this report, however a
+brief overview of the concept is appropriate.
+
+At a trivial level, primitives have a predetermined type, so \textbf{(Lit (LInt 4))} has type
+\textbf{Number}, likewise \textbf{(Lit (LBoolean true))} has type \textbf{Boolean}.
+
+At a slightly higher level, many operators only work on certain types, so the presence of these
+operators can help the inference system to resolve the constraints. For example
+
+(+) is defined to work only on objects of type Number.
+
+An expression of the type \textit{true + false} will fail with a \textit{unification error} as (+)
+is not a supported operator for this data type.
+
+Hindley-Milner is guaranteed to give the most general type signature possible. MicroML supports
+\textit{polymorphic} types. For example, the \textit{higher order} function 
+`twice'\footnote{called `ap' in Haskell} has the form
+
+\begin{minted}{haskell}
+    twice f x = f (f x)
+\end{minted}
+
+which has the type
+\begin{flalign*}
+    & for\ all\ a. (a \rightarrow a) \rightarrow a \rightarrow a &
+\end{flalign*}
+
+The opening parentheses indicate that the first argument to \textit{twice} must be a function that
+takes one input of type `a' and maps it to something of the same type. The next `a' refers to x, and
+must be of a type accepted by the function f. The final result of the function must also be of the
+same type. It is not important what type `a' actually is, as long as these contraints hold. Herein
+lies the true power of type inference.
 
 \end{document}
