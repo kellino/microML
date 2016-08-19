@@ -33,6 +33,18 @@
 
 	\vfill
         {\large \today\par}
+
+        \vfill
+
+        This report is submitted as part requirement for the MSc Computer Science
+        degree at UCL\. It is substantially the result of my own work except where ex-
+        plicitly indicated in the text.
+        
+        \vfill
+
+        The report may be freely copied and distributed provided the source is explicitly
+        acknowledged.
+
     \end{titlepage}
 
 \tableofcontents
@@ -51,7 +63,7 @@
 \end{flushright}
 
 \section{Motivation}
-A genuine piece of documentation for the Control.Monad.Trans.EitherT
+The Walder quote might be spurious, but a genuine piece of documentation for the Control.Monad.Trans.EitherT
 library\footnote{\url{https://hackage.haskell.org/package/either-4.4.1.1/docs/Control-Monad-Trans-Either.html}}
 available on \textit{Hackage} informs us that `an apomorphism is the generalized anamorphism for this 
 Monad'.  Such statements, while (almost certainly) factually correct are of little use to the
@@ -327,5 +339,64 @@ programming with types as it were, is against the nature of the language itself.
 true of Python, which discourages direct type checking on the part of the programmer (though such
 facilities do exist.). Good type inference, with easy to read error messages, is an essential
 feature of microML without which it would struggle to justify its existence.
+
+\section{Sources}
+This project has drawn on a large variety of sources, some only tangentally, but others central to
+the realization of the project, without which microML, as embryonic as it might be, would not exist
+at all. A number of tutorials (detailed in the bibilography) gave a strong starting position upon
+which to build. Luckily there are a number of trivial examples of repls written in Haskell which
+give an idea of what might be accomplished. Full scale compilers are a little more unusual, but such
+classic texts as `Modern Compiler Implementation in Standard ML', the so-called \textit{Tiger Book},
+can be adapted to Haskell with minimal inconvenience. For type theory the central text is
+undoubtedly `Types and Programming Languages' without which many a tutorial on type inference would
+have remained decidedly opaque.
+
+Many papers were consulted initially while deciding on the best approach for microML's type system.
+In practice, very little of this reading has made it into the language as currently constituted, but
+it is hoped that the design allows for future development to integrate some of these possible
+features easily. Always bearing in mind of course the intended scope of the language. This perhaps
+was one of the most difficult design decisions: what had a legitimate place in a language for a
+simple processor aimed at teachers, and what could be implemented simply for the interests of the
+developer, or because it was simple to do? Design decisions based on ease of implementation or to
+please the vanity of the designer are correct only be coincidence, and this is a poor way to
+design\footnote{This recalls Tony Hoare's `Billion Dollar Mistake'.}.
+
+\section{Software, Tools, Libraries}
+Haskell is ideally suited to the creation of DSLs. This is largely due to its \textit{algebraic data
+    types} which can easily be used to represent the BNF of an embedded language. Morever Haskell is
+blessed with the Parsec library of parser combinators\footnote{A \textit{combinator} is simply a
+    function with no free variables, so it only operates on parameters directly passed to it without
+    reference to any global data within the function body.}, which mitigates against the necesssity of
+writing lex and yacc files to create a functioning parser. A parser for another language can be
+implemented directly in Haskell, using standard Haskell syntax. Haskell moreover has an extensive
+library system, located on \textit{Hackage}. There is a library for almost any conceivable
+requirement. Haskell has two main build tools for project management. Neither is as tightly
+integrated into the language as might be ideal. One need only compare newer languages, such as Rust
+and Elixir, where the build tools (Cargo and Mix in this case) are an integral part of the language,
+to realize that both \textit{Cabal} and \textit{Stack} have a rather \textit{ad hoc} appearance.
+
+All Hackage packages are availalbe through Cabal, but version management is not rigourously
+enforced. Builds can break easily and frequently. So-called `Cabal dependency
+Hell'\footnote{\url{https://wiki.haskell.org/Cabal/Survival}} is a real problem, especially for
+those with no prior experience with the tool. It is poor design to inflict such problems on an end
+user who only wants to build a piece of software from source rather then having the programmer
+subsume them. Stack helps in this direction but maintaining a stable list of packages and creating a
+strong sandboxed environment for development. The price to be paid is a reduced number of availalbe
+libraries, so build problems can still occur over external dependencies. MicroML was firstly a Cabal
+project, but was migrated to Stack later in development. This largely produced a more stable
+build and allowed for the use of \textit{intero}\footnote{intero is an alternative to ghci --- the
+    Haskell interactive environment, but provides better type information and error messages,
+    moreover it has good integration with neovim, the author's editor of choice.} but unfortunately also meant that some experimental
+code (specially the JIT compiler) had to be disabled. This will be discussed more fully in chapter
+<unknown>.
+
+Some libraries and approaches were abandoned during the development process. Most notably a deal of
+time was put into using the \textit{Language-C} library for manipulating the C AST in Haskell. While
+this would certainly be the correct approach for writing the C code generation element of microML,
+it was decided that time constraints did not allow for proper utilization of the library (which is
+very large) so other alternatives were explored in the hope of at least producing a testable backend
+within the timeframe of the project. 
+
+
 
 \end{document}
