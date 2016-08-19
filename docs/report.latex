@@ -5,7 +5,8 @@
 \usepackage{palatino}
 \usepackage{geometry}
 \usepackage[hidelinks]{hyperref}
-%\geometry{a4paper,left=25mm,right=25mm, top=1cm, bottom=2cm}
+\usepackage{tikz}
+\usetikzlibrary{matrix}
 \usepackage{color, colortbl}
 \definecolor{Seagreen}{rgb}{0.18, 0.54, 0.34}
 \definecolor{Lawngreen}{rgb}{0.48, 0.99, 0}
@@ -43,9 +44,10 @@
 \begin{flushright}
     \textit{'a monad is a monoid in the category of endofunctors, what's the problem?'} \\
     --- not Philip Wadler\footnote{The quote is actually from \textit{A Brief, Incomplete, and Mostly
-            Wrong History of Programming Languages by James Iry. 
+            Wrong History of Programming Languages by James Iry
             \url{}https://james-iry.blogspot.co.uk/2009/05/brief-incomplete-and-mostly-wrong.html},
-        but is itself a paraphase from \textit{Categories for the Working Mathematician}.}
+        where it is deliberately falsely attributed,
+        but it is itself a close paraphase from \textit{Categories for the Working Mathematician}.}
 \end{flushright}
 
 \section{Motivation}
@@ -61,127 +63,8 @@ case therefore that introductory material is so intimidating? Is there a way to 
 to think functionally, in a type-orientated manner, without the heavy mathematical baggage that is
 simple surplus to requirements when writing one's first programs?
 
-\section{Functional Programming and the micro:bit} The BBC micro:bit is a microprocessor device aimed at
-bringing programming to young children and teenagers. At present it supports a number of 
-different programming languages, most visibly \textit{MicroPython, JavaScript} and \textit{TouchDevelop}.
-These languages, while mainstream and popular,\footnote{With the exception of \textit{TouchDevelop}
-    of course.} all fundamentally support the same programming paradigm, the imperative. Doubtless it is
-vital for all would-be coders to have knowledge and experience with the imperative/procedural
-approach to structuring code, but it is not the only approach, and perhaps not the best for
-beginners or those with only a passing interest in coding. It is the contention of the author that a
-syntactically simple, (relatively) \textit{pure} functional language would make for an ideal 
-teaching tool on the micro:bit, allowing the student to focus almost entirely on the problem domain, 
-and a great deal less on syntax and \textit{boilerplate}.
-Functional languages are increasingly being used in every area of real-world applications. Regarding 
-robotics, in which Rae has expressed an interest, there has already been some research conducted 
-in the use of the declarative style for low level robotics programming\footnote{Lambda in Motion: Controlling
-    Robots with Haskell, Peterson John, Paul Hudak and Conal Elliott}. This at least demonstrates
-that the functional style is applicable to the problem area, but further research would be required
-to test the suitability of the micro:bit as a low-level controller. Certainly, anything which can be
-programmed in microPython could also be written (possible more briefly and with fewer bugs) in a
-functional language.
-
-\section{The what and why of functional languages}
-To motivate and to clarify the discussion, it is necessary to derive some picture of what might
-constitute a functional language, and why it might be a useful way to teach programming to younger
-learners. Being more a philosophical stance than technical necessity, it is possible to mix various
-paradigms together to form \textit{hybrid} languages. In practice, most programming languages take
-precisely this approach\footnote{Truly pure languages are a rare thing: in the realms of OOP perhaps
-only \textit{Smalltalk} and \textit{Ruby} qualify. In the functional language family, the only
-mainstream entirely pure language is Haskell.}. Python, for example, supports a great deal of the 
-functional paradigm, as does JavaScript. These already exist on the micro:bit: why not just use those? 
-Consider the following simple scenario, we want to sum all the occurrences of the number 3 in the
-following list: 
-
-\mint{python}|nums = [2,3,4,3,2,3,5]|
-
-To do this in an imperative manner, something like the following might be written:
-
-\begin{minted}{python}
-    sum = 0
-    for i in range(len(nums)):
-        if nums[i] == 3:
-        sum += 3
-\end{minted}
-
-To solve this in Python using functional concepts, something like this might be used:
-
-\mint{python}|sum(list(filter((lambda x: x == 3), nums)))|
-
-This is clearly an improvement in terms of brevity, and is perhaps a little easier to understand. The
-main difficulty here in the physical writing of the code is balancing the parentheses, but any good
-editor should be able to do this automatically. The filter
-higher order function \textit{filter} has a fairly clear meaning to any native English speaker.
-However the rather obscure use of \textit{list} and, even worse, \textit{lambda} still makes
-this rather difficult for the student. There is a number of topics which would need to be explained
-here which reduce the utility of this as a teaching example. Why is the syntax still relatively
-cumbersome? Because Python was not conceived as a functional language, many of these features have
-been grafted onto a traditional imperative substructure, and the syntax reveals this.
-The equivalent function in Haskell would be:
-
-\mint{haskell}|sum (filter (==3) nums)|
-
-Haskell provides some syntactic sugar to reduce the number of brackets even further\footnote{Apologies for the slightly misleading typography
-    here, the package being used for syntax highlighting seems unable to properly interpret \LaTeX escape symbols. It should read simply \$.}
-
-
-\mint{haskell}|sum \$ filter (==3) nums|    
-To make all of this code more generic the Python needs to be wrapped in a function definition:
-
-\begin{minted}{python}
-    def sumAllOccurrences(n, nums):
-        sum = 0
-        for i in range(len(nums)):
-            if nums[i] == n:
-                sum += n
-        return sum
-\end{minted}
-
-And the equivalent in Haskell:
-
-\mint{haskell}|sumAllOccurrences n ns = sum \$ filter (==n) ns|
-
-In fact, we can do even better than this:
-
-\mint{haskell}|sumAllOccurrences p ns = sum \$ filter p ns|
-
-where p is any predicate we care to pass in, such as (==3) or (\textless2). The python code does not prevent
-someone from passing in junk values (leading to a runtime error) but the Haskell code, with the
-addition of a simple \textit{type signature} can easily be altered to only receive integers,
-ensuring type safety. This need not be explained to the student in these terms, but they will
-benefit from their program not crashing in unexpected and difficult to detect ways.
-
-\begin{minted}{haskell}
-    sumAllOccurrences :: (Int -> Bool) -> [Int] -> Int
-    sumAllOccurrences p ns = sum \$ filter p ns
-\end{minted}
-
-This is more powerful than the equivalent Python for loop definition, and a great deal more
-flexible. Obviously this could also be implemented in python using filters and lambda expressions,
-but it would still need to be couched inside a function definition.\footnote{This is slightly
-disingenuous, as a list comprehension, in both Python and Haskell, would work well here. It does
-serve to illustrate the general point. Of course, list comprehensions were first introduced in
-functional programming languages.}. In this simple example much of the essence of the functional
-programming style can be seen. The advantages are clear: fewer lines of code usually means fewer bugs and less
-development time. Students can get to solving problems almost immediately, without the worry (or
-rather a reduced worry) about the syntactical correctness of their loops, or balancing a host of
-nested parentheses. 
-Haskell is a large and complicated language and not suitable for younger students\footnote{make a
-    reference here or somewhere to the eitherT library, by Kmett}. Its runtime is
-large and complex, and would almost certainly not run efficiently on the micro:bit. Its emphasis on
-purity has led it to introduce a number of features which, while theoretically elegant, are
-complex even for experienced programmers. There is however a family of other, related, languages, mostly
-descended directly or indirectly from ML\footnote{Excepting the Lisp family representatives,
-\textit{Common Lisp} and \textit{Scheme}}, which place different emphasis on parts of the functional
-paradigm.\footnote{The table is a simplified (and slight corrected) version of the available from
-\url{https://en.wikipedia.org/wiki/Comparison_of_functional_programming_languages}. Monads, monoids
-and functors, while important concepts in functional languages, are definitely out of scope for a
-teaching language to teenagers. The approach taken by \textit{Miranda} is that which will be followed
-in the suggested implementation, hiding unnecessary detail with the loss of a little referential
-transparency.}
 
 \section{Aims and Goals}
-
 \subsection{Project Aims}
 It seems only apposite that a functional language for the micro:bit, assuming that it is not
 self-hosting, should be written in a more mature functional language. Haskell was chosen for this
@@ -241,5 +124,208 @@ Formally put, the project's goals were \\
 \end{itemize}
 
 \chapter{Context}
+\section{The BBC micro:bit} The BBC micro:bit is a microprocessor device aimed at
+bringing programming to young adults and teenagers. At present it supports a number of 
+different programming languages, most visibly \textit{MicroPython, JavaScript} and \textit{TouchDevelop}.
+These languages, while mainstream and popular,\footnote{With the exception of \textit{TouchDevelop}
+    of course.} all fundamentally support the same programming paradigm, the imperative. Doubtless it is
+vital for all would-be coders to have knowledge and experience with the imperative/procedural
+approach to structuring code, but it is not the only approach, and perhaps not the best for
+beginners or those with only a passing interest in coding. It is the contention of the author that a
+syntactically simple, (relatively) \textit{pure} functional language would make for an ideal 
+teaching tool on the micro:bit, allowing the student to focus almost entirely on the problem domain, 
+and a great deal less on syntax and \textit{boilerplate}.
+Functional languages are increasingly being used in every area of real-world applications. Regarding 
+robotics, in which Rae has expressed an interest, there has already been some research conducted 
+in the use of the declarative style for low level robotics programming\footnote{Lambda in Motion: Controlling
+    Robots with Haskell, Peterson John, Paul Hudak and Conal Elliott}. This at least demonstrates
+that the functional style is applicable to the problem area, but further research would be required
+to test the suitability of the micro:bit as a low-level controller. Certainly, anything which can be
+programmed in microPython could also be written (possible more briefly and with fewer bugs) in a
+functional language.
+
+\section{Teaching Languages}
+There is a long history of languages designed with the express purpose of teaching rather than
+production. These generally fall into two streams of development: reduced versions of established
+professional languages, and graphical environments. In general, the visual programming languages, of
+which \textit{Scratch} is undoubtedly the most well established, are intended for a younger age
+group. On the micro:bit \textit{Microsoft Block Editor} is of this variety. 
+\textit{Microsoft Touch Develop} and \textit{Code Kingdoms JavaScript} appear to offer a hybrid
+experience, with textual code presented in a coloured, graphical editor. Finally there is a port of
+the \textit{Python} programming language, which best typifies that school of tuition where a real
+langage is used in a simplified context.
+
+\section{Python as Teaching Language}
+While Python was not explicitly designed as a teaching language, in recent years it has increasingly
+been used as an introductory language in university settings. MIT, where Scheme was first created
+and promoted, has begun to teach its introductory courses in Python. With Python already available
+on the micro:bit, why is there the need for another text-based language on the same platform? Is
+this not just `muddying the waters' of what should be a simple educational tool. Do instructors
+really have the time to learn another language if students should express an interest in programming
+functionally?
+
+
+\section{Python vs Miranda/Haskell}
+In an attempt to address some of these questions, it is necessary to derive some picture of what might
+constitute a functional language, and why it might be a useful way to teach programming to younger
+learners. Being more a philosophical stance than technical necessity, it is possible to mix various
+paradigms together to form \textit{hybrid} languages. In practice, most programming languages take
+precisely this approach\footnote{Truly pure languages are a rare thing: in the realms of OOP perhaps
+only \textit{Smalltalk} and \textit{Ruby} qualify. In the functional language family, the only
+mainstream entirely pure language is Haskell.}. Python, for example, supports a great deal of the 
+functional paradigm, as does JavaScript. These already exist on the micro:bit: why not just use those? 
+Consider the following simple scenario, we want to sum all the occurrences of the number 3 in the
+following list: 
+
+\mint{python}|nums = [2,3,4,3,2,3,5]|
+
+To do this in an imperative manner, something like the following might be written:
+
+\begin{minted}{python}
+    sum = 0
+    for i in range(len(nums)):
+        if nums[i] == 3:
+        sum += 3
+\end{minted}
+
+To solve this in Python using functional concepts, something like this might be used:
+
+\mint{python}|sum(list(filter((lambda x: x == 3), nums)))|
+
+This is clearly an improvement in terms of brevity, and is perhaps a little easier to understand. The
+main difficulty here in the physical writing of the code is balancing the parentheses, but any good
+editor should be able to do this automatically. The filter
+higher order function \textit{filter} has a fairly clear meaning to any native English speaker.
+However the rather obscure use of \textit{list} and, even worse, \textit{lambda} still makes
+this rather difficult for the student. There is a number of topics which would need to be explained
+here which reduce the utility of this as a teaching example. Why is the syntax still relatively
+cumbersome? Because Python was not conceived as a functional language, many of these features have
+been grafted onto a traditional imperative substructure, and the syntax reveals this.
+The equivalent function in Haskell would be:
+
+\mint{haskell}|sum (filter (==3) nums)|
+
+Haskell provides some syntactic sugar to reduce the number of brackets even 
+further\footnote{Apologies for the slightly misleading typography here, the package being used for
+syntax highlighting seems unable to properly interpret \LaTeX escape symbols. It should read simply \$.}
+
+
+\mint{haskell}|sum \$ filter (==3) nums|    
+To make all of this code more generic the Python needs to be wrapped in a function definition:
+
+\begin{minted}{python}
+    def sumAllOccurrences(n, nums):
+        sum = 0
+        for i in range(len(nums)):
+            if nums[i] == n:
+                sum += n
+        return sum
+\end{minted}
+
+And the equivalent in Haskell:
+
+\mint{haskell}|sumAllOccurrences n ns = sum \$ filter (==n) ns|
+
+In fact, we can do even better than this:
+
+\mint{haskell}|sumAllOccurrences p ns = sum \$ filter p ns|
+
+where p is any predicate we care to pass in, such as (==3) or (\textless2). The python code does not prevent
+someone from passing in junk values (leading to a runtime error) but the Haskell code, with the
+addition of a simple \textit{type signature} can easily be altered to only receive integers,
+ensuring type safety. This need not be explained to the student in these terms, but they will
+benefit from their program not crashing in unexpected and difficult to detect ways.
+
+\begin{minted}{haskell}
+    sumAllOccurrences :: (Int -> Bool) -> [Int] -> Int
+    sumAllOccurrences p ns = sum \$ filter p ns
+\end{minted}
+
+This is more powerful than the equivalent Python for loop definition, and a great deal more
+flexible. Obviously this could also be implemented in python using filters and lambda expressions,
+but it would still need to be couched inside a function definition.\footnote{This is slightly
+disingenuous, as a list comprehension, in both Python and Haskell, would work well here. It does
+serve to illustrate the general point. Of course, list comprehensions were first introduced in
+functional programming languages.}. In this simple example much of the essence of the functional
+programming style can be seen. The advantages are clear: fewer lines of code usually means fewer bugs and less
+development time. Students can get to solving problems almost immediately, without the worry (or
+rather a reduced worry) about the syntactical correctness of their loops, or balancing a host of
+nested parentheses. 
+Haskell is a large and complicated language and not suitable for younger students\footnote{make a
+    reference here or somewhere to the eitherT library, by Kmett}. Its runtime is
+large and complex, and would almost certainly not run efficiently on the micro:bit. Its emphasis on
+purity has led it to introduce a number of features which, while theoretically elegant, are
+complex even for experienced programmers. There is however a family of other, related, languages, mostly
+descended directly or indirectly from ML\footnote{Excepting the Lisp family representatives,
+\textit{Common Lisp} and \textit{Scheme}}, which place different emphasis on parts of the functional
+paradigm.\footnote{The table is a simplified (and slight corrected) version of the available from
+\url{https://en.wikipedia.org/wiki/Comparison_of_functional_programming_languages}. Monads, monoids
+and functors, while important concepts in functional languages, are definitely out of scope for a
+teaching language to teenagers. The approach taken by \textit{Miranda} is that which will be followed
+in the suggested implementation, hiding unnecessary detail with the loss of a little referential
+transparency.}
+
+\section{Research}
+With the thought in mind of creating a Miranda style language for the micro:bit, came the necessity
+to decide on the technologies and theoretical basis for the language. Being an implementation of the
+lambda calculus, it was necessary to choose an axis on the \textit{lambda cube} for further
+development. 
+
+\subsection{The Lambda Cube}
+The Lambda Cude was introduced by mathematician Henk Barendregt as a visualization framework for
+Coquand's calculus of contructions. The simple untyped lambda calculus is not represented.
+
+
+\begin{tikzpicture}
+  \matrix (m) [matrix of math nodes, row sep=3em,
+    column sep=3em]{
+        & \lambda\omega & & \lambda P \omega \\
+        \lambda 2 & & \lambda P 2 & \\
+        & \lambda \underline{\omega} & & \lambda P \underline{\omega} \\
+        \lambda \rightarrow & & \lambda P  & \\};
+  \path[-stealth]
+    (m-1-2) edge (m-1-4) edge (m-2-1) edge (m-3-2)
+    (m-1-4) edge (m-3-4) edge (m-2-3)
+    (m-2-1) edge [-,line width=6pt,draw=white] (m-2-3)
+            edge (m-2-3) edge (m-4-1)
+    (m-3-2) edge (m-3-4)
+            edge (m-4-1)
+    (m-4-1) edge (m-4-3)
+    (m-3-4) edge (m-4-3)
+    (m-2-3) edge [-,line width=6pt,draw=white] (m-4-3)
+            edge (m-4-3);
+\end{tikzpicture}
+
+This can be understood as a exploring refinements of of type lambda calculi. Starting in the bottom
+left hand corner $\lambda \rightarrow$ is the simply type lambda calculus as developed by Church,
+Curry and Feys in the 1940s\footnote{Types and Programming Languages p11 gives a simple timeline of
+    type theory research.}. The top right corner, the `summit' of calculi is $\lambda P \omega$, which
+represents dependent types. Perhaps no truly practical programming language occupies this space at
+present. Theorem provers, such as \textit{Coq} have not been used for enterprise software, and
+perhaps it is not possible to do so. \textit{Idris}, a dependently typed programming language
+written in Haskell is an attempt to write a general programming language with depenent types. It is
+too early in its development at this stage to say whether it will meet with success. A number of
+issues, principally the undecidability of type inference over dependent types, would seem to be a
+limiting factor to general acceptance. 
+
+Naturally, microML makes no attempt to implement $\lambda P \omega$. `Real world' functional
+languages, such as Haskell, actually implement hybrid systems which are not represented on the cube.
+Most importantly, subtyping (represented as $\lambda F_{<:}$) is missing as a construct from the cube, 
+even though almost all language which support record syntax must allow some form of subtyping.
+
+$\lambda 2$, or \textit{System F} is that system which allows for parametric polymorphism (often
+called \textit{generics} in such languages as Java and C++). This seemed a suitable target for
+microML's type system. It has the added advantage that there is a well-established algorithm, Damas
+--- Milner algorithm W, which runs in $\mathcal{O}n$ time for non-pathological input\footnote{Worst case
+    complexity for algorithm W actually falls into exponential time, but an input program would have
+    to be both perversely written and extremely large before this would become a significant
+    liability.}. Type inference was deemed an important addition to microML as introducing the
+concept of types, which though fundamental to modern computing, carries the risk of rendering it too
+difficult and different conceptually from the other languages already available on the micro:bit.
+These all have in common so-called \textit{duck} typing, and interaction with the type system,
+programming with types as it were, is against the nature of the language itself. This is especially
+true of Python, which discourages direct type checking on the part of the programmer (though such
+facilities do exist.). Good type inference, with easy to read error messages, is an essential
+feature of microML without which it would struggle to justify its existence.
 
 \end{document}
