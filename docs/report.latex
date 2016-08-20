@@ -314,7 +314,8 @@ development.
 
 \subsection{The Lambda Cube}
 The Lambda Cude was introduced by mathematician Henk Barendregt as a visualization framework for
-Coquand's calculus of contructions. The simple untyped lambda calculus is not represented.
+Coquand's calculus of contructions. The simple untyped lambda calculus is not
+represented.\footnote{Pierce p.465 has a slightly different treatment of the axes.}
 
 
 \begin{tikzpicture}
