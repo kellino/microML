@@ -651,10 +651,10 @@ is ubiquitous (often in the name of backwards compatibility) is a bad habit whic
 development of better software. In this case however, the added power of MegaParsec is not yet
 required.
 
-Formally, parsec belongs to the family of LL(1) parsers. Obviously this does slightly reduce the
+Formally, parsec belongs to the family of \textbf{LL(1)} parsers. Obviously this does slightly reduce the
 flexibility of the language design\footnote{LL(1) parsers can only recognize a subset of the
-    context-free languages.}. Haskell itself does not use an LL(1) parser, but rather an LALR(1)
-built using \textit{Happy} and \textit{Alex}, much in the manner of a parser constructed using
+    context-free languages.}. Haskell itself does not use an LL(1) parser, but rather an
+    \textbf{LALR(1)} built using \textit{Happy} and \textit{Alex}, much in the manner of a parser constructed using
 \textit{Yacc}, but such power is not required for the much more limited range of expression
 available in microML\. If the language were ever to be expanded or made more robust, it would perhaps
 be reasonable to rewrite the parser to make use of this model.
@@ -728,7 +728,6 @@ is the ability to print the parse tree of an expression within the repl. See fig
     \label{fig:tree}
 \end{SCfigure}
 
-
 \section{Implementation}
 MicroML is written in Haskell throughout. However it should be stated that this is not the pure
 Haskell of the 2010 report, but makes use of a number of extremely useful extensions provided by
@@ -749,9 +748,26 @@ use of LLVM\footnote{\url{http://llvm.org/}} with the associated Haskell
 bindings\footnote{Unfortunately the bindings are still only for LLVM 3.5, whereas the upstream
 version is now 3.8. For this, and other reasons to be discusses, the JIT compiler was abandoned for
 this first microML deliverable.}. The compiler also makes optional use of \textbf{clang-format}, a
-command line utility available with \textbf{clang} for formatting the generated C++ code. The
-graphics program \textbf{graphviz} is also used (again optionally) for producing png files of a
-program's callgraph. 
+command line utility available with \textbf{clang}\footnote{\url{http://clang.llvm.org/}} for formatting 
+the generated C++ code. The graphics program \textbf{graphviz} is also used (again optionally) for 
+producing \textit{png} files of a program's callgraph. 
+
+Handling state in Haskell is by no means trivial, and does not allow for easy prototyping. One needs
+to understand exactly how to structure a solution to a problem before embarking on development,
+otherwise one risks having to rewrite large sections of code when it becomes apparent that a
+particular function needs to reside inside a particular monad, and does not. For example it is not
+possible to trivially wrap a function in a \textit{try / except} clause as one would in Python.
+Anything which might through an exception needs to be inside the ExceptT monad transformer. The type
+checker will reject anything else. This can be sidestepped to a certain extent by throwing an
+unchecked \textbf{error}\footnote{a wrapper around the prelude library function \textbf{undefined}},
+but such an error kills the runtime system, crashing the program. 
+
+To successfully combine state with error handling it is necessary to `string together' various monad
+transformers over a base monad type. While this is an elegant solution and makes writing pure code
+easier, it is by no means obvious how to create these initial `stacks' of monads. The advantage
+however is that, once the complexity of stack construction has been overcome, this complexity is
+`locked away' within one or two data types and functions, allowing the programmer essentially to
+forget about state management and error handling details. 
 
 \chapter{Testing}
 
