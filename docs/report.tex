@@ -7,6 +7,8 @@
 \usepackage{syntax}
 \usepackage{geometry}
 \usepackage[hidelinks]{hyperref}
+\usepackage{graphicx}
+\usepackage{sidecap}
 \usepackage{tikz}
 \usetikzlibrary{matrix}
 \usepackage{color, colortbl}
@@ -662,14 +664,12 @@ not possible to declare the types of functions, they can only be inferred. As th
 teaching language with a very simple type system, this is not the drawback that it might otherwise
 be. 
 
-A full description of Hindley-Milner type inference is beyond the scope of this report, however a
-brief overview of the concept is appropriate.
-
 MicroML attempts to be an implementation of \textit{System F}, or the \textbf{second-order lambda
 calculus}. It is a typed lambda calculus which supports universal quantification over types, and is
 thus the basis for \textbf{parametric polymorphism} in functional programming languages. A full
 description of System F is beyond the scope of this report. Interested readers are directed to
-\cite{Pierce}.
+\cite{Pierce}. System F is a `sweet spot' in the lambda cube as it admits relatively easy type
+reconstruction, which is the basis of algorithm W.
 
 At a trivial level, primitives have a predetermined type, so \textbf{(Lit (LInt 4))} has type
 \textbf{Number}, likewise \textbf{(Lit (LBoolean true))} has type \textbf{Boolean}.
@@ -701,12 +701,32 @@ must be of a type accepted by the function f. The final result of the function m
 same type. It is not important what type `a' actually is, as long as these constraints hold. Herein
 lies the true power of type inference.
 
+
+\section{Comments}
+MicroML also features a small embedded language (a variant on \textbf{markdown}) for commenting
+files. A separate parser was written for a small subset of markdown and pretty printing facilities
+for the terminal. It is assumed that the terminal is capable of rendering standard \textbf{ascii}
+escape sequences. 
+
+\begin{SCfigure}
+    \includegraphics[scale=0.4]{images/comment.jpg}
+    {\caption{Comments as seen in the terminal}}
+\end{SCfigure}
+
 \section{Implementation}
 MicroML is written in Haskell throughout. However it should be stated that this is not the pure
 Haskell of the 2010 report, but makes use of a number of extremely useful extensions provided by
 GHC\. This does unfortunately limit the portability of microML to a certain extent, but it would also
-be fair to say the GHC has largely become the `de facto' Haskell implementation, moving it more in
-the direction of Python, which is defined by CPython, rather than a formal document description.
+be reasonable to say the GHC has largely become the `de facto' Haskell implementation, moving the
+language as a whole more in the direction of the Python model, which is defined by CPython, 
+rather than a formal document description.
+
+In addition to the main program, there is also a simple vim plugin with syntax highlighting and
+comment folding and a primitive autocomplete, which makes editing microML in the editor a slightly more pleasant experience.
+Granted, it is a little at odds with the stated objective of microML, which is ease of use and
+suitability for beginners, to promote vim as \textit{editor of choice} but this was largely
+convenience for the author whose preferred editor is \textbf{neovim}, an ambitious fork of
+vim.\footnote{\url{https://neovim.io/}} 
 
 \chapter{Testing}
 
