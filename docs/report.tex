@@ -665,6 +665,12 @@ be.
 A full description of Hindley-Milner type inference is beyond the scope of this report, however a
 brief overview of the concept is appropriate.
 
+MicroML attempts to be an implementation of \textit{System F}, or the \textbf{second-order lambda
+calculus}. It is a typed lambda calculus which supports universal quantification over types, and is
+thus the basis for \textbf{parametric polymorphism} in functional programming languages. A full
+description of System F is beyond the scope of this report. Interested readers are directed to
+\cite{Pierce}.
+
 At a trivial level, primitives have a predetermined type, so \textbf{(Lit (LInt 4))} has type
 \textbf{Number}, likewise \textbf{(Lit (LBoolean true))} has type \textbf{Boolean}.
 
