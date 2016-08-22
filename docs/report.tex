@@ -20,6 +20,9 @@
 \linespread{1.3}
 \usepackage{verbatimbox}
 
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1em}
+
 \begin{document}
 \begin{titlepage}
 	\centering
@@ -64,18 +67,18 @@
     to the micro:bit, and thusly to the large body of untapped talent lying in Britain's secondary
     schools. It should allow the students to explore such ideas as recursive thinking, structural
     induction, polymorphism and higher order types without ever having to be exposed to the
-    underlying theory of such things, something which no other functional language does. 
+    underlying theory of such things, something which no other functional language does.  
 
     The project was conceived and written in Haskell. It does not build on any other existing
     project. Apart from reliance on standard Haskell libraries all of the major design work was
-    written `ab nihilo', including syntax design, the parser, type inference and the compiler. 
+    written `ab nihilo', including syntax design, the parser, type inference and the compiler.  
 
     MicroML, at point of submission, is a strong base from which to do further work. It has
     polymetric type inference, markdown-style inline documentation, a fully-featured repl
     environment with extensive error checking capabilities, the ability to check source code for
     common programming errors (such as duplicate function definitions and unreachable functions) and
     produce images of program call graphs. It has been designed with the principle aim of making a
-    environment conducive to learning, without being condescending.
+    environment conducive to learning, without being condescending. 
 
 \end{abstract}
 \chapter{Introduction}
@@ -138,7 +141,7 @@ they would be so heavily expanded and built-upon. Strong foundations might have 
 which was more realised, with fewer edge cases and areas where the solutions are not as robust as could be desired. \\
 
 \subsection{Project Goals}
-Formally put, the project's goals are \\
+Formally put, the project's goals are 
 
 \begin{itemize}
     \item Create an uncluttered syntax for a functional language. The initial inspiration was a
@@ -191,7 +194,7 @@ group. On the micro:bit \textit{Microsoft Block Editor} is of this variety.
 \textit{Microsoft Touch Develop} and \textit{Code Kingdoms JavaScript} appear to offer a hybrid
 experience, with textual code presented in a coloured, graphical editor. Finally there is a port of
 the \textit{Python} programming language, which best typifies that school of tuition where a real
-langage is used in a simplified context.
+language is used in a simplified context.
 
 \section{Python as Teaching Language}
 While Python was not explicitly designed as a teaching language, in recent years it has increasingly
@@ -247,7 +250,6 @@ Haskell provides some syntactic sugar to reduce the number of brackets even
 further\footnote{Apologies for the slightly misleading typography here, the package being used for
 syntax highlighting seems unable to properly interpret \LaTeX escape symbols. It should read simply \$.}
 
-
 \mint{haskell}|sum \$ filter (==3) nums|    
 To make all of this code more generic the Python needs to be wrapped in a function definition:
 
@@ -289,10 +291,10 @@ programming style can be seen. The advantages are clear: fewer lines of code usu
 development time. Students can get to solving problems almost immediately, without the worry (or
 rather a reduced worry) about the syntactical correctness of their loops, or balancing a host of
 nested parentheses. 
-Haskell is a large and complicated language and not suitable for younger students\footnote{make a
-    reference here or somewhere to the eitherT library, by Kmett}. Its runtime is
-large and complex, and would almost certainly not run efficiently on the micro:bit. Its emphasis on
-purity has led it to introduce a number of features which, while theoretically elegant, are
+%Haskell is a large and complicated language and not suitable for younger students\footnote{make a
+%    reference here or somewhere to the eitherT library, by Kmett}. 
+Its runtime is large and complex, and would almost certainly not run efficiently on the micro:bit. 
+Its emphasis on purity has led it to introduce a number of features which, while theoretically elegant, are
 complex even for experienced programmers. There is however a family of other, related, languages, mostly
 descended directly or indirectly from ML\footnote{Excepting the Lisp family representatives,
 \textit{Common Lisp} and \textit{Scheme}}, which place different emphasis on parts of the functional
@@ -542,6 +544,7 @@ or even change type.
 
 \chapter{Design and Implementation}
 
+\subsection{Design}
 microML uses an enriched lambda calculus as its base
 \vspace{5mm}
 
@@ -616,7 +619,7 @@ While two different number types are supported by the parser, the type checker o
 type \textit{Number}. The compiler will benefit from knowledge of the number type, i.e.\ int or double,
 whereas the user (a school-aged student) will not.
 
-\section{Parsing}
+\subsection{Parsing}
 A number of different libraries were examined before settling on the `standard'
 \textit{Parsec} library of parser combinators\footnote{A combinator is a lambda expression which
     contains no occurrences of a free variable, i.e.\ all of its arguments are
@@ -656,7 +659,7 @@ built using \textit{Happy} and \textit{Alex}, much in the manner of a parser con
 available in microML\. If the language were ever to be expanded or made more robust, it would perhaps
 be reasonable to rewrite the parser to make use of this model.
 
-\section{Type Inference}
+\subsection{Type Inference}
 MicroML uses an implementation of
 \textit{algorithm W}\footnote{based on the following tutorial implementation
     \url{https://github.com/wh5a/Algorithm-W-Step-By-Step/blob/master/AlgorithmW.lhs}} for ML-style type inference. At present it is
@@ -701,23 +704,36 @@ must be of a type accepted by the function f. The final result of the function m
 same type. It is not important what type `a' actually is, as long as these constraints hold. Herein
 lies the true power of type inference.
 
-
-\section{Comments}
+\subsection{Comments}
 MicroML also features a small embedded language (a variant on \textbf{markdown}) for commenting
-files. A separate parser was written for a small subset of markdown and pretty printing facilities
+files\footnote{Please see appendix --- for the accepted syntax}. A separate parser was written 
+for a small subset of markdown and pretty printing facilities
 for the terminal. It is assumed that the terminal is capable of rendering standard \textbf{ascii}
-escape sequences. 
+escape sequences. Figure~\ref{fig:comments} illustrates a typical encounter with the comment system.
 
 \begin{SCfigure}
     \includegraphics[scale=0.4]{images/comment.jpg}
     {\caption{Comments as seen in the terminal}}
+    \label{fig:comments}
 \end{SCfigure}
+
+In addition to help regarding function definitions, there is also a glossary of terms for those new
+to programming. Terms in the glossary are underlined in the main commentary text.  Another teaching 
+tool has been added to the repl environment which the author believes to be unique
+is the ability to print the parse tree of an expression within the repl. See figure~\ref{fig:tree}
+
+\begin{SCfigure}
+    \includegraphics[scale=0.6]{images/tree.jpg}
+    {\caption{Parse tree of a simple expression as viewed in the terminal}}
+    \label{fig:tree}
+\end{SCfigure}
+
 
 \section{Implementation}
 MicroML is written in Haskell throughout. However it should be stated that this is not the pure
 Haskell of the 2010 report, but makes use of a number of extremely useful extensions provided by
-GHC\. This does unfortunately limit the portability of microML to a certain extent, but it would also
-be reasonable to say the GHC has largely become the `de facto' Haskell implementation, moving the
+the Glasgow Haskell Compiler, GHC\. This does unfortunately limit the portability of microML to a certain extent, 
+but it would also be reasonable to say the GHC has largely become the `de facto' Haskell implementation, moving the
 language as a whole more in the direction of the Python model, which is defined by CPython, 
 rather than a formal document description.
 
@@ -727,6 +743,15 @@ Granted, it is a little at odds with the stated objective of microML, which is e
 suitability for beginners, to promote vim as \textit{editor of choice} but this was largely
 convenience for the author whose preferred editor is \textbf{neovim}, an ambitious fork of
 vim.\footnote{\url{https://neovim.io/}} 
+
+External dependencies to the main program are deliberately few. An experimental JIT compiler makes
+use of LLVM\footnote{\url{http://llvm.org/}} with the associated Haskell
+bindings\footnote{Unfortunately the bindings are still only for LLVM 3.5, whereas the upstream
+version is now 3.8. For this, and other reasons to be discusses, the JIT compiler was abandoned for
+this first microML deliverable.}. The compiler also makes optional use of \textbf{clang-format}, a
+command line utility available with \textbf{clang} for formatting the generated C++ code. The
+graphics program \textbf{graphviz} is also used (again optionally) for producing png files of a
+program's callgraph. 
 
 \chapter{Testing}
 
