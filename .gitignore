@@ -13,4 +13,6 @@ microML
 *.toc
 *.log
 *.pdf
+*.fls
+(.fdb_latexmk)
 _minted-report
