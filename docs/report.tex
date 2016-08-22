@@ -575,6 +575,10 @@ microML uses an enriched lambda calculus as its base
 \end{minipage}
 \vspace{5mm}
 
+It will be observed that two number formats are supported in the parse tree, integers (which in
+Haskell are unbounded big numbers) and doubles. The type system however only recognizes a
+generalized \textbf{Number}. This decision will be discussed more fully in Section~\ref{sec:type}.
+
 In addition to these basic primitives and control structures, microML also makes use of three
 primitives inherited from languages in the Lisp family:
 
@@ -660,6 +664,7 @@ available in microML\. If the language were ever to be expanded or made more rob
 be reasonable to rewrite the parser to make use of this model.
 
 \subsection{Type Inference}
+\label{sec:type}
 MicroML uses an implementation of
 \textit{algorithm W}\footnote{based on the following tutorial implementation
     \url{https://github.com/wh5a/Algorithm-W-Step-By-Step/blob/master/AlgorithmW.lhs}} for ML-style type inference. At present it is
@@ -760,7 +765,8 @@ possible to trivially wrap a function in a \textit{try / except} clause as one w
 Anything which might through an exception needs to be inside the ExceptT monad transformer. The type
 checker will reject anything else. This can be sidestepped to a certain extent by throwing an
 unchecked \textbf{error}\footnote{a wrapper around the prelude library function \textbf{undefined}},
-but such an error kills the runtime system, crashing the program. 
+but such an error kills the runtime system, crashing the program.\footnote{mgrabmueller was
+invaluable for understanding the monad transformer abstraction.}
 
 To successfully combine state with error handling it is necessary to `string together' various monad
 transformers over a base monad type. While this is an elegant solution and makes writing pure code
@@ -783,7 +789,7 @@ Not written yet
 
 \section{Future Work}
 While the basic core of the language is largely complete (at least in the repl environment) a great
-deal of work remains to be done on the compiler and making the language more usable as a educational
+deal of work remains to be done on the compiler and making the language more usable as an educational
 tool.
 
 \end{document}
