@@ -21,17 +21,17 @@
 \begin{document}
 \begin{titlepage}
 	\centering
-%	\includegraphics[width=0.15\textwidth]{example-image-1x1}\par\vspace{1cm}
+        %% \includegraphics[width=0.15\textwidth]{example-image-1x1}\par\vspace{1cm}
         {\scshape\LARGE University College London\par}
 	\vspace{1cm}
-        {\scshape\Large MSc Computer Science Final Project\par}
+        {\scshape\Large MSc Computer Science}
 	\vspace{1.5cm}
-        {\huge\bfseries microML \\ A Language for the BBC micro:bit \par}
+        {\huge\bfseries MicroML \\ A Functional Programming Language for the BBC micro:bit \par}
 	\vspace{2cm}
-        {\Large\itshape David Kelly\par}
+        {\huge\itshape David Kelly\par}
 	\vfill
 	supervised by\par
-        Rae \textsc{Harbird}
+        {\large Rae \textsc{Harbird}}
 
 	\vfill
         {\large \today\par}
@@ -39,20 +39,17 @@
         \vfill
 
         This report is submitted as part requirement for the MSc Computer Science
-        degree at UCL\. It is substantially the result of my own work except where ex-
-        plicitly indicated in the text.
+        degree at UCL\. It is substantially the result of my own work except where 
+        explicitly indicated in the text.
         
         \vfill
 
         The report may be freely copied and distributed provided the source is explicitly
         acknowledged.
 
-    \end{titlepage}
-
+\end{titlepage}
 \tableofcontents
-
 \newpage
-
 \begin{abstract}
     It is increasingly being recognized in educational circles that introductory lessons in programming is a
     vital part of the modern school curriculum. Programming education in UK has not traditionally
@@ -79,31 +76,29 @@
     environment conducive to learning, without being condescending.
 
 \end{abstract}
-
 \chapter{Introduction}
 
 \begin{flushright}
-    \textit{'a monad is a monoid in the category of endofunctors, what's the problem?'} \\
+    \textit{`a monad is a monoid in the category of endofunctors, what's the problem?'} \\
     --- not Philip Wadler\footnote{The quote is actually from \textit{A Brief, Incomplete, and Mostly
             Wrong History of Programming Languages by James Iry
-            \url{}https://james-iry.blogspot.co.uk/2009/05/brief-incomplete-and-mostly-wrong.html},
+        \url{https://james-iry.blogspot.co.uk/2009/05/brief-incomplete-and-mostly-wrong.html}},
         where it is deliberately falsely attributed,
-        but it is itself a close paraphase from \textit{Categories for the Working Mathematician}.}
+        but it is itself a close paraphrase from \textit{Categories for the Working Mathematician}.}
 \end{flushright}
 
 \section{Motivation}
-The Walder quote might be spurious, but a genuine piece of documentation for the Control.Monad.Trans.EitherT
+The Wadler quote might be spurious, but a genuine piece of documentation drawn from the Control.Monad.Trans.EitherT
 library\footnote{\url{https://hackage.haskell.org/package/either-4.4.1.1/docs/Control-Monad-Trans-Either.html}}
-available on \textit{Hackage} informs us that `an apomorphism is the generalized anamorphism for this 
+available from \textit{Hackage} informs us that `an apomorphism is the generalized anamorphism for this 
 Monad'.  Such statements, while (almost certainly) factually correct are of little use to the
-average `jobbing' programmer and indeed might be considered to have the effect of deliberately alienating a large part
+average `jobbing' programmer and indeed must be considered to have the effect of deliberately alienating a large part
 of the software engineering workforce. One can only hope that this was not the intention, because
 functional languages, especially those which use static type analysis and inference, have a great
 deal to offer to the programming community in terms of expressiveness and safety. Must it be the
 case therefore that introductory material is so intimidating? Is there a way to encourage students
-to think functionally, in a type-orientated manner, without the heavy mathematical baggage that is
-simple surplus to requirements when writing one's first programs?
-
+to think functionally, in a type-orientated manner, without the heavy mathematical `baggage' that is
+simply surplus to requirements when writing one's first programs?
 
 \section{Aims and Goals}
 \subsection{Project Aims}
@@ -114,12 +109,12 @@ single 10-week module in Miranda was not, as anticipated, sufficient preparation
 of constructing an entire program in a language which is almost aggressive in its focus on purity. 
 
 The primary target, or goal, of the project is to produce, as a first iteration, the basis of a
-language designed primarly for teaching purposes, but practical enough to write real programs for
+language designed primarily for teaching purposes, but practical enough to write real programs for
 the micro:bit. Many languages have been implemented over the years with the express aim of teaching
 programming concepts. Perhaps the most famous and successful of these is Scheme. However, what they
 all have in common is that they are intended for an audience who are already interested in computer
 science, or are indeed computer scientists. Even classic texts, such as \textit{The Implementation
-    and  Interpretation of Computer Programming} is squarely pitched at a sophisticated audience.
+and Interpretation of Computer Programming} is squarely pitched at a sophisticated audience.
 The micro:bit is the opposite: it is for students with no previous programming experience,
 students who are not mathematicians, teachers who are neither mathematicians nor programmers.
 Functional programming has a reputation in the programming community as being complex and only for a
@@ -127,21 +122,21 @@ special type of person. The aim of this project is to show that this is not nece
 With this in mind, the aim is to make the language as education as possible, at the expense of
 sacrificing expressiveness. 
 
-Mention here no call with current continuation or macros, as obscuring underlying goals, which are
-inductive reasoning and intro to types and function composition.
+% Mention here no call with current continuation or macros, as obscuring underlying goals, which are
+% inductive reasoning and intro to types and function composition.
 
 Development progressed iteratively. Having no previous experience of engineering a large software
-project in Haskell, initial development was largely \textit{ad hoc} and unstructured. A great deal
-of time was spent just in understanding the principles of state manipulation in a side-effect free
-language. Luckily there were a number of tutorials which served as the backbone, or perhaps more
-accurately, foetus, of the final project. Traces of these tutorials can still be seen scattered
-throughout the final codebase. These were perhaps both a help and a hinderance, as their original
-authors had not perhaps foreseen that they would be so heavily expanded and built-upon. Strong
-foundations might have results in a project which was more realised, with fewer edge cases and areas
-where the solutions are not as robust as could be desired. \\
+project in Haskell, initial development was largely \textit{ad hoc} and unstructured. Haskell is not
+an ideal language for development in this manner. A great deal of time was spent just in understanding 
+the principles of state manipulation in a side-effect free language. Luckily there were a number of 
+tutorials which served as the backbone, or perhaps more accurately, embryo, of the final project. 
+Traces of these tutorials can still be seen scattered throughout the final codebase. These were 
+perhaps both a help and a hindrance, as their original authors had not perhaps foreseen that 
+they would be so heavily expanded and built-upon. Strong foundations might have results in a project 
+which was more realised, with fewer edge cases and areas where the solutions are not as robust as could be desired. \\
 
 \subsection{Project Goals}
-Formally put, the project's goals were \\
+Formally put, the project's goals are \\
 
 \begin{itemize}
     \item Create an uncluttered syntax for a functional language. The initial inspiration was a
@@ -182,7 +177,7 @@ in the use of the declarative style for low level robotics programming\footnote{
     Robots with Haskell, Peterson John, Paul Hudak and Conal Elliott}. This at least demonstrates
 that the functional style is applicable to the problem area, but further research would be required
 to test the suitability of the micro:bit as a low-level controller. Certainly, anything which can be
-programmed in microPython could also be written (possible more briefly and with fewer bugs) in a
+programmed in MicroPython could also be written (possible more briefly and with fewer bugs) in a
 functional language.
 
 \section{Teaching Languages}
@@ -313,8 +308,8 @@ lambda calculus, it was necessary to choose an axis on the \textit{lambda cube} 
 development. 
 
 \subsection{The Lambda Cube}
-The Lambda Cude was introduced by mathematician Henk Barendregt as a visualization framework for
-Coquand's calculus of contructions. The simple untyped lambda calculus is not
+The Lambda Cube was introduced by mathematician Henk Barendregt as a visualization framework for
+Coquand's calculus of constructions. The simple untyped lambda calculus is not
 represented.\footnote{Pierce p.465 has a slightly different treatment of the axes.}
 
 
@@ -345,12 +340,12 @@ Curry and Feys in the 1940s\footnote{Types and Programming Languages p11 gives a
 represents dependent types. Perhaps no truly practical programming language occupies this space at
 present. Theorem provers, such as \textit{Coq} have not been used for enterprise software, and
 perhaps it is not possible to do so. \textit{Idris}, a dependently typed programming language
-written in Haskell is an attempt to write a general programming language with depenent types. It is
+written in Haskell, is an attempt to write a general programming language with dependent types. It is
 too early in its development at this stage to say whether it will meet with success. A number of
 issues, principally the undecidability of type inference over dependent types, would seem to be a
 limiting factor to general acceptance. 
 
-Naturally, microML makes no attempt to implement $\lambda P \omega$. `Real world' functional
+Naturally, microML makes no attempt to implement $\lambda P\omega$. `Real world' functional
 languages, such as Haskell, actually implement hybrid systems which are not represented on the cube.
 Most importantly, subtyping (represented as $\lambda F_{<:}$) is missing as a construct from the cube, 
 even though almost all language which support record syntax must allow some form of subtyping.
@@ -358,7 +353,7 @@ even though almost all language which support record syntax must allow some form
 $\lambda 2$, or \textit{System F} is that system which allows for parametric polymorphism (often
 called \textit{generics} in such languages as Java and C++). This seemed a suitable target for
 microML's type system. It has the added advantage that there is a well-established algorithm, Damas
---- Milner algorithm W, which runs in $\mathcal{O}n$ time for non-pathological input\footnote{Worst case
+--- Milner algorithm W, which runs in $\mathcal{O}(n)$ time for non-pathological input\footnote{Worst case
     complexity for algorithm W actually falls into exponential time, but an input program would have
     to be both perversely written and extremely large before this would become a significant
     liability.}. Type inference was deemed an important addition to microML as introducing the
@@ -393,25 +388,25 @@ design\footnote{This recalls Tony Hoare's `Billion Dollar Mistake'.}.
 
 \section{Software, Tools, Libraries}
 Haskell is ideally suited to the creation of DSLs. This is largely due to its \textit{algebraic data
-    types} which can easily be used to represent the BNF of an embedded language. Morever Haskell is
+    types} which can easily be used to represent the BNF of an embedded language. Moreover Haskell is
 blessed with the Parsec library of parser combinators\footnote{A \textit{combinator} is simply a
     function with no free variables, so it only operates on parameters directly passed to it without
-    reference to any global data within the function body.}, which mitigates against the necesssity of
+    reference to any global data within the function body.}, which mitigates against the necessity of
 writing lex and yacc files to create a functioning parser. A parser for another language can be
 implemented directly in Haskell, using standard Haskell syntax. Haskell moreover has an extensive
 library system, located on \textit{Hackage}. There is a library for almost any conceivable
 requirement. Haskell has two main build tools for project management. Neither is as tightly
 integrated into the language as might be ideal. One need only compare newer languages, such as Rust
 and Elixir, where the build tools (Cargo and Mix in this case) are an integral part of the language,
-to realize that both \textit{Cabal} and \textit{Stack} have a rather \textit{ad hoc} appearance.
+to realize that both \textit{Cabal} and \textit{Stack} have a rather \textit{grafted on} aspect.
 
-All Hackage packages are availalbe through Cabal, but version management is not rigourously
+All Hackage packages are available through Cabal, but version management is not rigorously
 enforced. Builds can break easily and frequently. So-called `Cabal dependency
 Hell'\footnote{\url{https://wiki.haskell.org/Cabal/Survival}} is a real problem, especially for
 those with no prior experience with the tool. It is poor design to inflict such problems on an end
 user who only wants to build a piece of software from source rather then having the programmer
 subsume them. Stack helps in this direction but maintaining a stable list of packages and creating a
-strong sandboxed environment for development. The price to be paid is a reduced number of availalbe
+strong sandboxed environment for development. The price to be paid is a reduced number of available
 libraries, so build problems can still occur over external dependencies. MicroML was firstly a Cabal
 project, but was migrated to Stack later in development. This largely produced a more stable
 build and allowed for the use of \textit{intero}\footnote{intero is an alternative to ghci --- the
@@ -425,11 +420,123 @@ time was put into using the \textit{Language-C} library for manipulating the C A
 this would certainly be the correct approach for writing the C code generation element of microML,
 it was decided that time constraints did not allow for proper utilization of the library (which is
 very large) so other alternatives were explored in the hope of at least producing a testable backend
-within the timeframe of the project. 
+within the time frame of the project. 
 
 \chapter{Requirements and Analysis}
 
-nothing here yet
+If the task is to design and implement a functional programming language, the obvious question is: What is a functional language? 
+Examining some of the leading languages widely regarded as belonging to the family, a number of
+features emerge.
+
+\begin{center}
+\addvbuffer[20pt 20pt]
+{\begin{tabular}{|c|cccccc|}
+    \hline
+                & Pure                    & Lazy Evaluation     & Typing                      & Algebraic Data Types     & Immutable Data          & Closures \\
+    \hline
+    Common Lisp & No                      & \cellcolor{LRed}Yes & Dynamic                     & \cellcolor{GoldenRod}Yes & No                      & \cellcolor{LRed}Yes \\
+    Scheme      & No                      & No                  & Dynamic                     & No                       & No                      & \cellcolor{LRed}Yes \\
+    ML          & No                      & No                  & \cellcolor{Lawngreen}Static & \cellcolor{GoldenRod}Yes & No                      & \cellcolor{LRed}Yes \\
+    F\#         & No                      & \cellcolor{LRed}Yes & \cellcolor{Lawngreen}Static & \cellcolor{GoldenRod}Yes & No                      & \cellcolor{LRed}Yes \\
+    Clojure     & No                      & \cellcolor{LRed}Yes & Dynamic                     & \cellcolor{GoldenRod}Yes & \cellcolor{Seagreen}Yes & \cellcolor{LRed}Yes \\
+    Miranda     & \cellcolor{Seagreen}Yes & \cellcolor{LRed}Yes & \cellcolor{Lawngreen}Static & \cellcolor{GoldenRod}Yes & \cellcolor{Seagreen}Yes & \cellcolor{LRed}Yes \\
+    Haskell     & \cellcolor{Seagreen}Yes & \cellcolor{LRed}Yes & \cellcolor{Lawngreen}Static & \cellcolor{GoldenRod}Yes & \cellcolor{Seagreen}Yes & \cellcolor{LRed}Yes \\
+    \hline
+\end{tabular}}
+\end{center}
+
+\textit{Purity} is a rather vexed term than has seen a great deal of discussion in the literature
+and on such websites as \textit{reddit}. For the purposes of the following discussion, purity will
+be considered the ability to write equational code within an impure framework. A Haskell program,
+for example, lives within the IO monad. The IO monad is necessarily impure, as it involves
+interacting with a system (in this case the operating system) where such interactions are not
+predicated on input data. However, on the assumption that the operating system will perform the
+actions requested of it, the code running \textit{inside} the IO monad can be understood as
+completely referentially transparent. That is, a function called with the same arguments will always
+return the same results. This is not necessarily the case with a language like Scheme, which as the
+`set!' operator for manipulating global state in a non-transparent manner. 
+
+The table shows clearly that there are a few central features which are associated with functional
+languages, and other features which are less essential. Bearing in mind the target audience and the
+target device, is should be fairly safe to abandon explicit monads and monoids. Higher order functions are
+essential to the paradigm, as is partial function application.\footnote{i.e.\ allowing functions to
+    accept fewer arguments than their arity would suggest. The classic example is \mint{haskell}|inc = (+1)| where
+    the + operator has been partially applied.}
+
+Algebraic data types (ADTs) are found in nearly all of the major functional languages. The notable
+exception again is Scheme. This is of additional interest in that Scheme is the only Language of
+those listed which was explicitly designed as a teaching language. It is worth clarifying at this
+stage that any complete lambda calculus implementation has the potential to create ADTs, the missing
+element is the syntactic sugar provided the sum and product types in languages such as ML and
+Haskell. The same is also true of tuples and lists, which do not require special status in a
+lambda calculus language, but are often given so for reasons of efficiency and programmer
+satisfaction. The immediate application of ADTS for  micro:bit programming is not immediately
+apparent, so, much in the manner of Scheme, these will not be considered a priority of microML.
+
+\section{Requirements \& Constraints: Language Design}
+Miranda\textsuperscript{TM} is a language created by David Turner in the early 1980s\footnote{The wikipedia 
+    page says that Miranda supports monads. This is not correct, in
+    the sense that it is not possible for the programmer to create monad instances or explicitly
+    interact with monads. It is also
+unlikely that Miranda is using monadic concepts at the implementation level as these were first
+introduced into Haskell a number of years after the introduction of Miranda}. It is a member
+of the ML family, one of the first purely functional programming languages, and the direct parent of
+Haskell and Haskell's various offshoots. Indeed, one of the reasons for the creation of Haskell was
+the fact that Miranda was trademarked and closed source. It might best be described as a (small)
+subset of Haskell\footnote{Though it would be more accurate to describe Haskell as a superset of
+    Miranda.}. It is still used as a teaching language and has a very clean, simply syntax. A
+reduced version of Miranda is suggested for the language, which will go under the working title of
+microML.\footnote{microMiranda would probably be a more honest name, but there might be a small
+    risk of copyright infringement.}
+
+Miranda has an reasonably rich standard library, which comes automatically with the interpreter. MicroML
+should have a subset of this standard library, with functions such as map, filter and fold\footnote{Miranda 
+    distinguishes between left and right folds. This, while very flexible, might be
+too complex for most students. Both Clojure and Python have a simple \textit{reduce} which has the
+behaviour of a right fold. In Clojure \textit{apply} is similar to a left fold.}. As far as possible, 
+all built-in functions should be \textit{safe}, that is, there should be no
+partial functions in the standard library. A partial function is one which does not produce a legal
+result for every legal input, for example taking the head of an empty list in Haskell or Miranda
+results in a error.
+
+\begin{minted}{haskell}
+    head []
+    *** Exception: Prelude.head: empty list
+\end{minted} 
+
+However this is not a necessity\footnote{The head function in Haskell's standard prelude is a legacy
+    from Miranda which unfortunately is too late to change easily. The Idris language (itself
+    written in Haskell) has a built-in function totality checker, usable from the repl, to ensure
+that such unsafe practices are deliberate rather than accidental or due to programmer laziness.} 
+and safe versions of these functions should be written for microML. 
+
+Laziness, or more accurately non-strictness,  is an interesting feature of many functional languages, 
+but it is a little unclear at the moment what this would mean for programming on the micro:bit. 
+Laziness is chiefly useful when dealing with infinite data structures, which is an unlikely
+scenario. Moreover, lazy evaluation can make reasoning about the structure of a program more
+difficult than is necessary at this stage of the programmer's development, where a more literal
+`first this then this' might be easier to understand. 
+
+Another of the more interesting features of the ML family is type inference and static typing. This
+is unlikely to be of huge interest to the average student, but it has many benefits. Most
+importantly, errors which in a language like Python would only be caught at runtime do not get past
+the compilation stage of an ML-style language. Student-friendly (rather than detailed
+programmer-friendly) error messages will have to be
+written to help the student understand what they have done wrong. Type inference should limit the
+student's direct interaction with the type system, which can be very difficult to understand.
+
+Every functional language has algebraic data types. They are fundamental to how any large program is
+constructed. They can be used to simulate enumerations in other languages and as value constructors
+(vital in constructing ASTs for example). With regard to the field of robotics for example, to
+should be possible to create ADTs which describe the behaviour and attributes of the robot.
+
+Immutability of data is a key (but not universal) feature of the functional paradigm. It allows for
+referential transparency and an easier approach to concurrency. Again, these are not features which
+are vital to the micro:bit, but they will help students in the future who wish to continue their
+coding. Indeed, immutability is in many ways more intuitive for students. If x = 6, then it is 6 for
+the entire program. This is a much simpler concept than having a value for x which can go up and down,
+or even change type.
+
 
 \chapter{Design and Implementation}
 
@@ -448,6 +555,7 @@ microML uses an enriched lambda calculus as its base
         \alt{} UnaryOp <Expr>
         \alt{} BinOp <Expr> <Expr>
         \alt{} PrimitiveErr 
+        \alt{} Nil
     \end{grammar}
 \end{minipage}
 \begin{minipage}[t]{0.5\textwidth}
@@ -466,18 +574,20 @@ In addition to these basic primitives and control structures, microML also makes
 primitives inherited from languages in the Lisp family:
 
 \begin{grammar}
-    <ListOp> ::= Car
+    <UnaryOp> ::= Car
     \alt{} Cdr
     \alt{} Cons
+    \alt{} Show
+    \alt{} Read
 \end{grammar}
 
 These primitives are accessed through the \textit{head}, \textit{tail} and (:) built-in functions and are
 essential for recursing over lists.\
 
-microML, in addition to floats and ints, also supports binary, octal and hex numbers\footnote{The
-    syntax for these is inspired by erlang, one simply writes the number in the form eg 2\#110 for a
+MicroML, in addition to floats and ints, also supports binary, octal and hex numbers\footnote{The
+    syntax for these is inspired by erlang, one simply writes the number in the form e.g.\ 2\#110 for a
     binary 6. Likewise octal is 8\# and hex 16\#}. These are not
-treated as primitives however, and are automatically converted to an appropriate representation.
+treated as primitives however, and are automatically converted to an appropriate numeric representation.
 
 The \textit{FixPoint} primitive allows for the creation of recursive functions by satisfying the equation
 \begin{flalign*}
@@ -501,13 +611,13 @@ to supply an argument in the form of a lambda abstraction.
 \end{eqnarray*}
 
 While two different number types are supported by the parser, the type checker only recognizes the
-type \textit{Number}. The compiler will benefit from knowledge of the number type, ie int or double,
+type \textit{Number}. The compiler will benefit from knowledge of the number type, i.e.\ int or double,
 whereas the user (a school-aged student) will not.
 
 \section{Parsing}
 A number of different libraries were examined before settling on the `standard'
 \textit{Parsec} library of parser combinators\footnote{A combinator is a lambda expression which
-    contains no occurrences of a free variable, ie all of its arguments are
+    contains no occurrences of a free variable, i.e.\ all of its arguments are
     explicitly supplied to it, and it does not rely on any global state or globally defined
     variables}. \textit{Parsec} is a highly
 flexible tool, perhaps more similar to \textit{ANTLR}\footnote{\url{http://www.antlr.org/}} than to
@@ -541,12 +651,12 @@ flexibility of the language design\footnote{LL(1) parsers can only recognize a s
     context-free languages.}. Haskell itself does not use an LL(1) parser, but rather an LALR(1)
 built using \textit{Happy} and \textit{Alex}, much in the manner of a parser constructed using
 \textit{Yacc}, but such power is not required for the much more limited range of expression
-available in microML. If the language were ever to be expanded or made more robust, it would perhaps
+available in microML\. If the language were ever to be expanded or made more robust, it would perhaps
 be reasonable to rewrite the parser to make use of this model.
 
 \section{Type Inference}
-microML uses an implementation of
-\textit{algorithmW}\footnote{based on the following tutorial implementation
+MicroML uses an implementation of
+\textit{algorithm W}\footnote{based on the following tutorial implementation
     \url{https://github.com/wh5a/Algorithm-W-Step-By-Step/blob/master/AlgorithmW.lhs}} for ML-style type inference. At present it is
 not possible to declare the types of functions, they can only be inferred. As this is primarily a
 teaching language with a very simple type system, this is not the drawback that it might otherwise
@@ -582,7 +692,31 @@ which has the type
 The opening parentheses indicate that the first argument to \textit{twice} must be a function that
 takes one input of type `a' and maps it to something of the same type. The next `a' refers to x, and
 must be of a type accepted by the function f. The final result of the function must also be of the
-same type. It is not important what type `a' actually is, as long as these contraints hold. Herein
+same type. It is not important what type `a' actually is, as long as these constraints hold. Herein
 lies the true power of type inference.
+
+\section{Implementation}
+MicroML is written in Haskell throughout. However it should be stated that this is not the pure
+Haskell of the 2010 report, but makes use of a number of extremely useful extensions provided by
+GHC\. This does unfortunately limit the portability of microML to a certain extent, but it would also
+be fair to say the GHC has largely become the `de facto' Haskell implementation, moving it more in
+the direction of Python, which is defined by CPython, rather than a formal document description.
+
+\chapter{Testing}
+
+Not written yet
+
+\chapter{Conclusions and Project Evaluation}
+
+\section{Achievements}
+Not written yet
+
+\section{Evaluation}
+Not written yet
+
+\section{Future Work}
+While the basic core of the language is largely complete (at least in the repl environment) a great
+deal of work remains to be done on the compiler and making the language more usable as a educational
+tool.
 
 \end{document}
