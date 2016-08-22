@@ -10,7 +10,6 @@ however
     > zero? (3 - 3)     **this is ok**
     > true : Boolean
 *)
-
 (* 
 ==binary==
 ***binary***
@@ -25,7 +24,6 @@ enter them like this:
     > 73 : Number
 see __octal__ and __hex__
 *)
-
 (*
 ==polymorphic==
 ***polymorphism***
@@ -39,7 +37,6 @@ a polymorphic function can take arguments of more than one type
 We do not need to write separate id functions for every possible type of input. Compare this with C
 where we would need a different function of the different inputs.
 *)
-
 (*
 ==boolean==
 ***boolean***
@@ -61,7 +58,6 @@ The second example needs a little more explanation...
     > g 7
     > 13 : Number
 *)
-
 (* 
 ==id==
 ***id***
@@ -74,7 +70,6 @@ id is a __unary__ function. It returns what was given to it without changes, thr
     > a : Char
 *)
 let id x = x
-
 (* 
 ==zero?== 
 ***zero?*** 
@@ -86,7 +81,6 @@ zero checks if a number or value is equal to 0
     > false : Boolean
 *)
 let zero? x = if x == 0 then true else false
-
 (*
 ==odd?==
 ***odd?***
@@ -99,7 +93,6 @@ odd? checks if a number is odd, returning a __boolean__ value.
     > false : Boolean
 *)
 let odd? x = if x % 2 == 1 then true else false
-
 (*
 ==even?==
 ***even?***
@@ -112,7 +105,6 @@ even? checks if a number is even, returning a __boolean__ value.
     > false : Boolean
 *)
 let even? x = if x % 2 == 0 then true else false
-
 (*
 ==positive?==
 ***positive?***
@@ -125,7 +117,6 @@ positive? checks if a number is greater than or equal to 0, returning a __boolea
     > false : Boolean
 *)
 let positive? x = if x >= 0 then true else false
-
 (*
 ==negative?==
 ***negative?***
@@ -138,7 +129,6 @@ negative? checks if a number is less than 0, returning a __boolean__ value.
     > false : Boolean
 *)
 let negative? x = if x < 0 then true else false;
-
 (*
 ==show==
 ***show***
@@ -151,7 +141,6 @@ show takes a value and returns it as a string
     > "a" : String
 *)
 let show x = x; 
-
 (* 
 ==const==
 ***const***
@@ -165,7 +154,6 @@ const return only the first of its two arguments, throwing the second away
 Note that const is __polymorphic__: it can take two arguments of any type, the same or different.
 *)
 let const x y = x;
-
 (*
 ==succ==
 ***succ***
@@ -176,7 +164,6 @@ succ adds one to a number
     > 4 : Number
 *)
 let succ x = x + 1;
-
 (*
 ==flip==
 ***flip***
@@ -191,7 +178,6 @@ Flip changes the order of the aruments.
     > 1 : Number
 *)
 let flip f = \x y -> f y x;
-
 (*
 ==twice==
 ***twice***
@@ -207,7 +193,6 @@ Why 6?
     > 6
 *)
 let twice f x = f (f x);
-
 (*
 ==pipe==
 ***pipe***
@@ -220,7 +205,6 @@ pipe takes a value and **pushes it through** a function (reading from left to ri
     > 7 : Number
 *)
 let pipe x f = f x;
-
 (*
 ==compose==
 ***compose***
@@ -237,7 +221,6 @@ What has happened here?
     > 10            **and the result is 10**
 *)
 let compose f g x = f (g x);
-
 (*
 ==end?==
 ***end?***
