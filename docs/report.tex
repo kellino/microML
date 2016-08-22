@@ -694,6 +694,15 @@ Hindley-Milner is guaranteed to give the most general type signature possible. M
 \textit{polymorphic} types. For example, the \textit{higher order} function 
 `twice'\footnote{called `ap' in Haskell} has the form
 
+MicroML has a unified \textbf{Number} type for inference, even though the underlying AST stores
+appropriate information regarding the exact form of representation. Miranda too features a unified
+number type, with automatic overloading of operators and numeric functions. This makes the interface
+a little easier to use initially, as explicit casting is not possible within Miranda. Haskell
+overcomes this problem with the use of \textit{type classes}, but this is too sophisticated a method
+for microML.\ The loss of detail regarding the types of numbers is unfortunate, but was considered
+expedient in the design so as to introduce more basic concepts of type, rather than computer
+representation.
+
 \begin{minted}{haskell}
     twice f x = f (f x)
 \end{minted}
