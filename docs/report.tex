@@ -12,6 +12,7 @@
 \usepackage{sidecap}
 \usepackage{tikz}
 \usetikzlibrary{matrix}
+\usepackage{cite}
 \usepackage{color, colortbl}
 \definecolor{Seagreen}{rgb}{0.18, 0.54, 0.34}
 \definecolor{Lawngreen}{rgb}{0.48, 0.99, 0}
@@ -675,7 +676,7 @@ MicroML attempts to be an implementation of \textit{System F}, or the \textbf{se
 calculus}. It is a typed lambda calculus which supports universal quantification over types, and is
 thus the basis for \textbf{parametric polymorphism} in functional programming languages. A full
 description of System F is beyond the scope of this report. Interested readers are directed to
-\cite{Pierce}. System F is a `sweet spot' in the lambda cube as it admits relatively easy type
+\cite{Pierce:2002:TPL:509043}. System F is a `sweet spot' in the lambda cube as it admits relatively easy type
 reconstruction, which is the basis of algorithm W.
 
 At a trivial level, primitives have a predetermined type, so \textbf{(Lit (LInt 4))} has type
@@ -739,6 +740,16 @@ is the ability to print the parse tree of an expression within the repl. See fig
     {\caption{Parse tree of a simple expression as viewed in the terminal}}
     \label{fig:tree}
 \end{SCfigure}
+
+\subsection{Programming Style}
+It is the intention of microML to encourage a modularity of design, aiming at function composition
+above all. Large, complex functions are to be actively discouraged in favour of smaller, more
+`mobile' units. Both Haskell and Miranda support the function composition operator, a single dot.
+This is directly taken for the mathematical notion of composition, where it is notated $ f \circ g
+$. While it is doubtless more mathematically pure to copy this approach, the expected user of
+microML is not a graduate mathematician, but probably only has a GSCE level of maths. MicroML
+follows the model of \textbf{Elixir} with its left-to-right \textit{pipe} operator $ |> $. However
+microML prefers the notation $ >> $ as being more explicitly about direction and movement.
 
 \section{Implementation}
 MicroML is written in Haskell throughout. However it should be stated that this is not the pure
@@ -851,6 +862,49 @@ Not written yet
 \section{Future Work}
 While the basic core of the language is largely complete (at least in the repl environment) a great
 deal of work remains to be done on the compiler and making the language more usable as an educational
-tool.
+tool. As a number of features were included in an unfortunately \textit{ad hoc} manner, integration
+is not as tight as might be desired. An obvious case of this is the existence of two separate
+parsers, one for mml source code, and another for documentation. This has resulted in a rather
+fragile relationship between the two, and an over-sensitivity to context (especially around the
+existence of unanticipated whitespace) and code duplication in the Repl.Repl module. It also entails
+two passes over a source file, which is wasteful of computer resources and time. A future iteration
+would seek to unite these into one, more robust parser. Regarding the parser, it might also be a
+possibility to make it indentation sensitive. This could result in more readable source files for
+students. However, one of the stated aims of microML is to encourage piping of small functions (in
+the manner of the unix pipe) rather than building large functions. An indentation sensitive parser
+might actively encourage the growth of function complexity. Further investigation would be required
+before a definitive decision could be reached.
+
+The present approach to C++ compilation, while valid as a proof of concept, is perhaps not robust
+enough to allow for genuine expansion to the level of complexity which might be required of it.
+Alternative, better, strategies would involve direct translation of the microML AST to the C++ AST,
+enabling the compiler to perform optimisations. Apart from checking the validity of the source file,
+the compiler is unable to conduct optimisation routines. Time has been the single greatest factor in
+limiting the efficacy of the compiler element of the project. There is a library for the manipulation
+of C code in Haskell\footnote{\url{https://hackage.haskell.org/package/language-c}} but there is
+nothing specifically for C++. Either the existing library would have  to be modified to allow for
+class manipulation and the micro:bit's \textit{managed types} or a new library would have to
+written. This is far beyond the scope of the present project, but would seem to be a necessary step
+to render the compiler a more industry standard product. 
+
+Of features missing from the language definition itself, the most obvious omissions are
+\textbf{pattern matching} and \textbf{algebraic data types}. The absence of ADTs has already been
+discussed, but there presence would be most useful for writing of standard library modules. Without
+ADTs the creation of new data structures, while possible, is far more difficult than need be.
+Pattern matching is largely syntactic sugar for nested \textit{if --- else if} clauses, and indeed
+is desugared in Haskell to nested case statements. A student using microML can simply write such
+things themselves, but the ubiquity of pattern matching syntax suggests that it ought to be included
+in the language at some point, even if it cannot be regarded as a \textit{primitive} of the
+functional style. 
+
+The type inference system is compliant with \textit{System F}. While this is not the most demanding
+of type environments within which to work, it might still be too rigid for students with no
+programming experience at all, and represent a barrier to entry. Future work might examine the
+possibility of \textit{delaying}, or proroguing\footnote{Afshari, Barr, Su} type checking until the student has fleshed out an
+approximate solution to a problem. Type-checking then
+
+\chapter{Bibliography}
+\bibliography{bibliography}{}
+\bibliographystyle{plain}
 
 \end{document}
