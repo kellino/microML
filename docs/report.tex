@@ -3,6 +3,7 @@
 \usepackage[english]{babel}
 \usepackage{amsmath}
 \usepackage{minted}
+\usepackage{dirtree}
 \usepackage{palatino}
 \usepackage{syntax}
 \usepackage{geometry}
@@ -781,9 +782,63 @@ however is that, once the complexity of stack construction has been overcome, th
 `locked away' within one or two data types and functions, allowing the programmer essentially to
 forget about state management and error handling details. 
 
+\subsection{Project Structure}
+Every effort was made to organize the source code in a logical and consistent manner, such that
+another programmer should, without great difficulty.
+\dirtree{%
+.1 microML.
+.2 docs.
+.2 src.
+.3 Compiler.
+.3 Jit.
+.3 Libs.
+.3 Main.hs.
+.3 MicroML.
+.4 Typing.
+.3 Repl
+.2 test.
+.3 compiler.
+.2 utils.
+.3 vim-mmlFold.
+.3 mml.vim.
+.2 microML.cabal.
+.2 stack.yaml.
+}
+
 \chapter{Testing}
 
-Not written yet
+Software testing is a vital part of any seriously intended development project. Only an arrogant
+programmer, or one of little experience (often the two go together) would claim that a function or
+module had been written without mistakes, or that all edge cases had been properly handled. It is
+difficult for a human to be ruthlessly systematic: precisely the approach that testing needs, and
+precisely that which a computer does with ease. Thankfully Haskell has a number of powerful testing
+frameworks, making the writing of unit tests especially simple. Both \textit{Cabal} and
+\textit{Stack} support integrated testing, making the process of running tests and building trivial.
+
+There are four generally recognized levels of software testing. Unit testing is the examination of
+individual methods or functions to ascertain that they behave as expected under a variety of
+conditions. This time of testing is best conducted during software development, in concert with the
+writing of the actual executable software. Integration testing ensures that individual modules (or
+classes) work together as expected. This is one level of abstraction higher than unit-testing.
+System testing looks at the functioning of the entire system, and finally acceptance testing sees
+whether the end product will be suitable to the client. 
+
+The Hspec\footnote{\url{https://hspec.github.io/}} package focuses primarily on unit testing of
+Haskell functions. Real \textit{TDD} would have seen tests written in parallel with production code.
+Due to the lack of experience the author had with Haskell at the beginning of the product, this was
+not the development method deployed as it would have been too heavy a cognitive burden in addition
+to wrestling with various problems of type, state and program structure. Unit tests were written
+after the fact, and, at time of writing, do not yet have full coverage of source code.
+
+To run tests while building it is necessary simply to entire the command `stack test' in the
+terminal, which is equivalent to building and testing the software.
+
+Testing the ability of the compiler to produce C++ code involved the addition of integration tests
+to the Hspec framework. These are handled separately in the form of multiple small \textit{mml}
+files. A simple bash script runs each file individually through the microML compiler. At time of
+writing, the compiler does not yet successfully pass all of these integration tests. More work needs
+to be done before the compiler can seriously be considered to be `fit for purpose'. The script must
+be run from the utils folders of the project.
 
 \chapter{Conclusions and Project Evaluation}
 
