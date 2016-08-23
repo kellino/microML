@@ -1,8 +1,8 @@
-module ListPrimitivesTest where
+module ListPrimitivesSpec where
 
+import Test.Hspec
 import MicroML.ListPrimitives
 import MicroML.Syntax
-import Test.Hspec
 
 
 listprims :: IO ()
