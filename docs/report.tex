@@ -27,85 +27,87 @@
 
 \begin{document}
 \begin{titlepage}
-	\centering
-        %% \includegraphics[width=0.15\textwidth]{example-image-1x1}\par\vspace{1cm}
-        {\scshape\LARGE University College London\par}
-	\vspace{1cm}
-        {\scshape\Large MSc Computer Science}
-	\vspace{1.5cm}
-        {\huge\bfseries MicroML \\ A Functional Programming Language for the BBC micro:bit \par}
-	\vspace{2cm}
-        {\huge\itshape David Kelly\par}
-	\vfill
-	supervised by\par
-        {\large Rae \textsc{Harbird}}
+    \centering
+    %% \includegraphics[width=0.15\textwidth]{example-image-1x1}\par\vspace{1cm}
+    {\scshape\LARGE University College London\par}
+    \vspace{1cm}
+    {\scshape\Large MSc Computer Science}
+    \vspace{1.5cm}
+    {\huge\bfseries MicroML \\ A Functional Programming Language for the BBC micro:bit \par}
+    \vspace{2cm}
+    {\huge\itshape David Kelly\par}
+    \vfill
+    supervised by\par
+    {\large Rae \textsc{Harbird}}
 
-	\vfill
-        {\large \today\par}
+    \vfill
+    {\large \today\par}
 
-        \vfill
+    \vfill
 
-        This report is submitted as part requirement for the MSc Computer Science
-        degree at UCL\. It is substantially the result of my own work except where 
-        explicitly indicated in the text.
-        
-        \vfill
+    This report is submitted as part requirement for the MSc Computer Science
+    degree at UCL\. It is substantially the result of my own work except where 
+    explicitly indicated in the text.
+    
+    \vfill
 
-        The report may be freely copied and distributed provided the source is explicitly
-        acknowledged.
-
+    The report may be freely copied and distributed provided the source is explicitly
+    acknowledged.
 \end{titlepage}
+
 \tableofcontents
 \newpage
+
 \begin{abstract}
-    It is increasingly being recognized in educational circles that introductory lessons in programming is a
-    vital part of the modern school curriculum. Programming education in UK has not traditionally
-    formed part of the syllabus. Nearly all teenagers have access to computers and devices, but very
-    few know how to program them themselves. The raspberry pi has seen a remarkable growth in
-    popularity since its introduction a mere four years ago. The BBC micro:bit is a project in the
-    same spirit as the raspberry pi, but with a remit specifically for UK secondary school students.
+It is increasingly being recognized in educational circles that introductory lessons in programming
+are a vital part of the modern school curriculum. Programming education in UK has not traditionally
+formed a central part of the syllabus. Nearly all teenagers have access to computers and devices, but very
+few know how to program them themselves. The raspberry pi has seen a remarkable growth in
+popularity since its introduction a mere four years ago. The BBC micro:bit is a project in the
+same spirit as the raspberry pi, but with a remit specifically for UK secondary school students.
 
-    MicroML is an attempt to bring the fundamental concepts of the functional programming paradigm
-    to the micro:bit, and thusly to the large body of untapped talent lying in Britain's secondary
-    schools. It should allow the students to explore such ideas as recursive thinking, structural
-    induction, polymorphism and higher order types without ever having to be exposed to the
-    underlying theory of such things, something which no other functional language does.  
+MicroML is an attempt to bring the fundamental concepts of the functional programming paradigm
+to the micro:bit, and thusly to the large body of untapped talent lying in Britain's secondary
+schools. It should allow the students to explore such ideas as recursive thinking, structural
+induction, polymorphism and higher order types without ever having to be exposed to the
+underlying theory of such things, something which no other functional language does.  
 
-    The project was conceived and written in Haskell. It does not build on any other existing
-    project. Apart from reliance on standard Haskell libraries all of the major design work was
-    written `ab nihilo', including syntax design, the parser, type inference and the compiler.  
+The project was conceived and written in Haskell. It does not build on any other existing
+project. Apart from reliance on standard Haskell libraries all of the major design work was
+written `ab nihilo', including syntax design, the parser, type inference, repl and compiler.  
 
-    MicroML, at point of submission, is a strong base from which to do further work. It has
-    polymetric type inference, markdown-style inline documentation, a fully-featured repl
-    environment with extensive error checking capabilities, the ability to check source code for
-    common programming errors (such as duplicate function definitions and unreachable functions) and
-    produce images of program call graphs. It has been designed with the principle aim of making a
-    environment conducive to learning, without being condescending. 
+MicroML, at point of submission, is a strong base from which to do further work. It has
+polymetric type inference, markdown-style inline documentation, a fully-featured repl
+environment with extensive error checking capabilities, the ability to check source code for
+common programming errors (such as duplicate function definitions and unreachable functions) and
+produce images of program callgraphs. It has been designed with the principle aim of making an
+environment conducive to learning, without being condescending or overly simplistic. 
 
 \end{abstract}
 \chapter{Introduction}
 
-\begin{flushright}
-    \textit{`a monad is a monoid in the category of endofunctors, what's the problem?'} \\
-    --- not Philip Wadler\footnote{The quote is actually from \textit{A Brief, Incomplete, and Mostly
-            Wrong History of Programming Languages by James Iry
-        \url{https://james-iry.blogspot.co.uk/2009/05/brief-incomplete-and-mostly-wrong.html}},
-        where it is deliberately falsely attributed,
-        but it is itself a close paraphrase from \textit{Categories for the Working Mathematician}.}
+\begin{flushright} \textit{`a monad is a monoid in the category of endofunctors, what's
+the problem?'} \\ --- not Philip Wadler\footnote{The quote is actually from \textit{A
+Brief, Incomplete, and Mostly Wrong History of Programming Languages by James Iry
+\url{https://james-iry.blogspot.co.uk/2009/05/brief-incomplete-and-mostly-wrong.html}}, where it is
+deliberately falsely attributed, but it is itself a close paraphrase from \textit{Categories for the
+Working Mathematician}.} 
 \end{flushright}
 
-\section{Motivation}
-The Wadler quote might be spurious, but a genuine piece of documentation drawn from the Control.Monad.Trans.EitherT
-library\footnote{\url{https://hackage.haskell.org/package/either-4.4.1.1/docs/Control-Monad-Trans-Either.html}}
-available from \textit{Hackage} informs us that `an apomorphism is the generalized anamorphism for this 
-Monad'.  Such statements, while (almost certainly) factually correct are of little use to the
-average `jobbing' programmer and indeed must be considered to have the effect of deliberately alienating a large part
-of the software engineering workforce. One can only hope that this was not the intention, because
-functional languages, especially those which use static type analysis and inference, have a great
-deal to offer to the programming community in terms of expressiveness and safety. Must it be the
-case therefore that introductory material is so intimidating? Is there a way to encourage students
-to think functionally, in a type-orientated manner, without the heavy mathematical `baggage' that is
-simply surplus to requirements when writing one's first programs?
+\section{Motivation} 
+The Wadler quote might be spurious, but a genuine piece of
+documentation drawn from the Control.Monad.Trans.EitherT
+library\footnote{\url{https://hackage.haskell.org/package/either-4.4.1.1/docs/Control-Monad-Trans-Ei
+ther.html}} available from \textit{Hackage} informs us that `an apomorphism is the generalized
+anamorphism for this Monad'. Such statements, while (almost certainly) factually correct are of
+little use to the average `jobbing' programmer and indeed must be considered to have the effect
+of deliberately alienating a large part of the software engineering workforce. One can only hope
+that this was not the intention, because functional languages, especially those which use static
+type analysis and inference, have a great deal to offer to the programming community in terms
+of expressiveness and safety. Must it be the case therefore that introductory material is so
+intimidating? Is there a way to encourage students to think functionally, in a type-orientated
+manner, without the heavy mathematical `baggage' that is simply surplus to requirements when writing
+one's first programs?
 
 \section{Aims and Goals}
 \subsection{Project Aims}
@@ -143,7 +145,7 @@ they would be so heavily expanded and built-upon. Strong foundations might have 
 which was more realised, with fewer edge cases and areas where the solutions are not as robust as could be desired. \\
 
 \subsection{Project Goals}
-Formally put, the project's goals are 
+Formally put, the project's goals in order of importance are 
 
 \begin{itemize}
     \item Create an uncluttered syntax for a functional language. The initial inspiration was a
@@ -160,7 +162,7 @@ Formally put, the project's goals are
         it is a fundamental feature of the ML family. Having type inference means that the `truth'
         of types is not hidden from the student as it would be with JavaScript or Python, but the
         onus of type annotations is also absent.
-    \item Compiler to micro:bit flavoured C++. This was the part of the project which was most
+    \item Compiler to micro:bit flavoured C++. This part of the project which was most
         pertinent to the micro:bit, but also that which would require the most time to bring to a
         degree where compilation of even complicated programs could be accomplished with safety and
         precision. 
@@ -885,7 +887,21 @@ of C code in Haskell\footnote{\url{https://hackage.haskell.org/package/language-
 nothing specifically for C++. Either the existing library would have  to be modified to allow for
 class manipulation and the micro:bit's \textit{managed types} or a new library would have to
 written. This is far beyond the scope of the present project, but would seem to be a necessary step
-to render the compiler a more industry standard product. 
+to render the compiler a more industry standard product.
+
+Related to the compiler is the issue of \textit{memory management} on the micro:bit. The API already
+exposes a number of managed types which do not require manual freeing, but microML supports closures
+and also could be made to support \textit{continuation passing style}, both of which would need to
+claim space on the heap and therefore need freeing at some point. A simple \textit{mark \& sweep}
+garbage collector is used by microPython. The memory management process for the JavaScript
+implementation is not open source. Experiments with microPython have revealed that the garbage
+collector takes too much of the available memory for itself. On such a constrained system this can
+lead to problems when attempting to use the inbuilt censors or bluetooth. An alternative might be
+the use of a \textit{region inference algorithm}\cite{Tofte:2004:RRM:993034.993040}. Work on
+MLKit\footnote{\url{http://www.elsman.com/mlkit/}} has shown that region inference memory management
+can, at least sometimes, at as a realistic replacement to garbage collection. In a system where
+programs are expected to be relatively uncomplicated, such as on the micro:bit, this might be an
+ideal `fit'.
 
 Of features missing from the language definition itself, the most obvious omissions are
 \textbf{pattern matching} and \textbf{algebraic data types}. The absence of ADTs has already been
@@ -903,9 +919,16 @@ programming experience at all, and represent a barrier to entry. Future work mig
 possibility of \textit{delaying}, or proroguing type checking until the student has fleshed out an
 approximate solution to a problem\cite{Afshari:2012:LPP:2384592.2384595}. Type-checking then
 becoming an interactive tool for improving software, rather than an overly tight straitjacket it can
-seem for those not used to moving within such constraints
+seem for those not used to moving within such constraints.
 
-\chapter{Bibliography}
+If such a prorogued system could be implemented, then it might be possible to `climb the lambda
+cube' as it were. A student could first program dynamically, with duck typing in the manner of
+Python, then refine the program to be compliant with System F. It might therefore also be possible
+to increase program safety and security by then introducing elements of dependent types where
+appropriate. This incremental approach to static typing could encourage students to work with the
+type system rather than feel they are fighting it. Even a partially dependently-typed program could
+result in a number of possible compiler optimisations and greater runtime safety.
+
 \bibliography{bibliography}{}
 \bibliographystyle{plain}
 
