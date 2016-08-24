@@ -1,6 +1,6 @@
 module Main where
 
-import ListPrimitivesTest
+import ListPrimitivesSpec
 
 main :: IO ()
 main = listprims
