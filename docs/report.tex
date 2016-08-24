@@ -825,6 +825,60 @@ another programmer should, without great difficulty.
 .2 stack.yaml.
 }
 
+\subsubsection{JIT}
+The JIT compiler makes use of the LLVM 3.5 bindings available from
+\textit{Hackage}\footnote{\url{https://hackage.haskell.org/package/llvm-general-3.5.1.2}}. LLVM is
+capable of outputting a C++ file, in addition to machine code or the LLVM \textit{IR}. An online
+tutorial\footnote{\url{http://www.stephendiehl.com/llvm/}} formed the basis for the experiment. It
+was felt that LLVM might be able to produce suitable code for the micro:bit, with optimisations well
+out of scope for a simple nano-pass compiler such as has been implemented. The JIT was abandoned
+during development however when it became clear that the generated C++ code was too heavily indebted
+to the LLVM environment. While the code was correct, it would not compile under gcc without heavy,
+intelligent, editing. It was deemed more difficult to render the code compilable under
+\textit{yotta} than it would be to simply write a simplistic native compiler.
+
+\subsubsection{Compiler}
+The compiler makes a single pass over the source file, and does not utilize an intermediate
+representation. Some error checking and simple optimisation is performed however. The compiler
+conducts a number of tests on the source code before attempting a translation into C++. First the
+code is searched to ensure there is a main function. In the repl, there is no necessity of a clear
+entry point, but a compiled file needs to have a clear and defined structure. If a main function is
+found not to exist, an appropriate error message is issued. Moreover, the compiler searches for
+duplicate definitions. This is partially to check for carelessness on the part of the student, but
+also to help enforce data Immutability. Top level re-declaration of values is rejected by the
+compiler. Perhaps the most interesting feature of the preprocessing phase is found in CallGraph.hs.
+The source code is analysed and converted to a \textit{DAG}, or directed acyclic graph. This is then
+searched, using a depth first search algorithm, to discover all functions reachable from
+\textit{main}. If any function, or functions are found to be unreachable, compilation is abandoned
+and a message is issued describing the procedure for creating a callgraph.png. See
+Figure~\ref{fig:callgraph}.
+
+\begin{SCfigure}
+    \includegraphics[scale=0.4]{images/callgraph.png}
+    {\caption{A example callgraph for a simple program. This would fail to compile.}}
+    \label{fig:callgraph}
+\end{SCfigure}
+
+Code generation is done in much the same manner that the repl performs evaluation, but instead of
+reducing each term to normal form, translates them to statements and expressions in C++. 
+
+\subsubsection{Repl}
+The repl is probably the most fully realized interface to the language. Perhaps the most interesting
+feature is its handling of multiple states with a custom datatype. 
+
+\begin{minted}{haskell}
+    data IState = IState
+        { typeEnv :: Env
+        , termEnv :: TermEnv
+        , helpEnv :: HelpEnv
+        }
+    type Repl a = HaskelineT (StateT IState IO) a
+\end{minted}
+
+The Repl monad carries with it three separate hashmaps, holding stateful information regarding the
+types of functions, the function definitions, and the help environment. This last is not accessible
+for writing from within the repl, but only via file.
+
 \chapter{Testing}
 
 Software testing is a vital part of any seriously intended development project. Only an arrogant
@@ -923,10 +977,10 @@ functional style.
 The type inference system is compliant with \textit{System F}. While this is not the most demanding
 of type environments within which to work, it might still be too rigid for students with no
 programming experience at all, and represent a barrier to entry. Future work might examine the
-possibility of \textit{delaying}, or proroguing type checking until the student has fleshed out an
+possibility of delaying, or \textit{proroguing} type checking until the student has fleshed out an
 approximate solution to a problem\cite{Afshari:2012:LPP:2384592.2384595}. Type-checking then
 becoming an interactive tool for improving software, rather than an overly tight straitjacket it can
-seem for those not used to moving within such constraints.
+seem for those not used to moving within its constraints.
 
 If such a prorogued system could be implemented, then it might be possible to `climb the lambda
 cube' as it were. A student could first program dynamically, with duck typing in the manner of
@@ -941,6 +995,7 @@ result in a number of possible compiler optimisations and greater runtime safety
 \nocite{adams2012layout}
 \nocite{Appel:1997:MCI:248430}
 \nocite{groote}
+\nocite{Harper:2012:PFP:2431407}
 \nocite{rwh}
 \nocite{frob}
 \nocite{torc}
