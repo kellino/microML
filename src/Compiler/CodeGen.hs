@@ -20,7 +20,6 @@ import Data.Char (toLower)
 import Text.PrettyPrint hiding (equals)
 
 import System.FilePath
-import System.Directory
 
 import Control.Monad.RWS hiding ((<>))
 import Control.Monad.Except
