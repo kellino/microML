@@ -21,16 +21,11 @@
 \usepackage{titlesec}
 \linespread{1.3}
 \usepackage{verbatimbox}
+
 %% draw nice frame around code fragments
 %% \newminted{haskell}{frame=lines,framerule=0.5pt}
-
 \definecolor{light-gray}{rgb}{0.9,0.9,0.9}
 \setminted{bgcolor=light-gray}  % this line causes the problem
-
-\makeatletter
-\patchcmd{\minted@colorbg}{\noindent}{\medskip\noindent}{}{}
-\apptocmd{\endminted@colorbg}{\par\medskip}{}{}
-\makeatother
 
 %% fix line spacing to 1.5
 \setlength{\parindent}{0pt}
@@ -44,6 +39,9 @@
     {\titlerule\vspace{1.5ex}\filright}
     [\vspace{1ex}\titlerule]
 
+%% nice headings for each page
+\pagestyle{headings}
+
 %% doc starts here
 \begin{document}
 
@@ -53,7 +51,7 @@
     %% \includegraphics[width=0.15\textwidth]{example-image-1x1}\par\vspace{1cm}
     {\scshape\LARGE University College London\par}
     \vspace{1cm}
-    {\scshape\Large MSc Computer Science}
+    {\scshape\Large MSc Computer Science\par}
     \vspace{1.5cm}
     {\huge\bfseries MicroML \\ A Functional Programming Language for the BBC micro:bit \par}
     \vspace{2cm}
@@ -105,7 +103,6 @@ common programming errors (such as duplicate function definitions and unreachabl
 produce images of program callgraphs. It has been designed with the principle aim of making an
 environment conducive to learning, without being condescending or overly simplistic. 
 \end{abstract}
-
 \chapter{Introduction}
 
 \begin{flushright} \textit{`a monad is a monoid in the category of endofunctors, what's
@@ -446,7 +443,6 @@ If the task is to design and implement a functional programming language, the ob
 Examining some of the leading languages widely regarded as belonging to the family, a number of
 features emerge.
 
-\begin{center}
 \addvbuffer[20pt 20pt]
 {\begin{tabular}{|c|cccccc|}
     \hline
@@ -461,7 +457,6 @@ features emerge.
     Haskell     & \cellcolor{Seagreen}Yes & \cellcolor{LRed}Yes & \cellcolor{Lawngreen}Static & \cellcolor{GoldenRod}Yes & \cellcolor{Seagreen}Yes & \cellcolor{LRed}Yes \\
     \hline
 \end{tabular}}
-\end{center}
 
 \textit{Purity} is a rather vexed term than has seen a great deal of discussion in the literature
 and on such websites as \textit{reddit}. For the purposes of the following discussion, purity will
@@ -478,7 +473,7 @@ The table shows clearly that there are a few central features which are associat
 languages, and other features which are less essential. Bearing in mind the target audience and the
 target device, is should be fairly safe to abandon explicit monads and monoids. Higher order functions are
 essential to the paradigm, as is partial function application.\footnote{i.e.\ allowing functions to
-    accept fewer arguments than their arity would suggest. The classic example is \mint{haskell}|inc = (+1)| where
+    accept fewer arguments than their arity would suggest. The classic example is $ inc = (+1) $ where
     the + operator has been partially applied.}
 
 Algebraic data types (ADTs) are found in nearly all of the major functional languages. The notable
@@ -488,7 +483,7 @@ stage that any complete lambda calculus implementation has the potential to crea
 element is the syntactic sugar provided the sum and product types in languages such as ML and
 Haskell. The same is also true of tuples and lists, which do not require special status in a
 lambda calculus language, but are often given so for reasons of efficiency and programmer
-satisfaction. The immediate application of ADTS for  micro:bit programming is not immediately
+satisfaction. The immediate application of ADTS for micro:bit programming is not immediately
 apparent, so, much in the manner of Scheme, these will not be considered a priority of microML.
 
 \section{Requirements \& Constraints: Language Design}
