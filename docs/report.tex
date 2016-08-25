@@ -52,7 +52,6 @@
 %% title page
 \begin{titlepage}
     \centering
-    %% \includegraphics[width=0.15\textwidth]{example-image-1x1}\par\vspace{1cm}
     {\scshape\LARGE University College London\par}
     \vspace{1cm}
     {\scshape\Large MSc Computer Science\par}
@@ -363,25 +362,28 @@ The Lambda Cube was introduced by mathematician Henk Barendregt as a visualizati
 Coquand's calculus of constructions\cite{Barendregt:1993:LCT:162552.162561}. The simple untyped lambda calculus is not
 represented.\footnote{\cite{Pierce:2002:TPL:509043} has a slightly different treatment of the axes.}
 
-\begin{tikzpicture}
-  \matrix (m) [matrix of math nodes, row sep=3em,
-    column sep=3em]{
-        & \lambda\omega & & \lambda P \omega \\
-        \lambda 2 & & \lambda P 2 & \\
-        & \lambda \underline{\omega} & & \lambda P \underline{\omega} \\
-        \lambda \rightarrow & & \lambda P  & \\};
-  \path[-stealth]
-    (m-1-2) edge (m-1-4) edge (m-2-1) edge (m-3-2)
-    (m-1-4) edge (m-3-4) edge (m-2-3)
-    (m-2-1) edge [-,line width=6pt,draw=white] (m-2-3)
-            edge (m-2-3) edge (m-4-1)
-    (m-3-2) edge (m-3-4)
-            edge (m-4-1)
-    (m-4-1) edge (m-4-3)
-    (m-3-4) edge (m-4-3)
-    (m-2-3) edge [-,line width=6pt,draw=white] (m-4-3)
-            edge (m-4-3);
-\end{tikzpicture}
+\begin{figure}[!h]
+    \centering
+    \begin{tikzpicture}
+      \matrix (m) [matrix of math nodes, row sep=3em,
+        column sep=3em]{
+            & \lambda\omega & & \lambda P \omega \\
+            \lambda 2 & & \lambda P 2 & \\
+            & \lambda \underline{\omega} & & \lambda P \underline{\omega} \\
+            \lambda \rightarrow & & \lambda P  & \\};
+      \path[-stealth]
+        (m-1-2) edge (m-1-4) edge (m-2-1) edge (m-3-2)
+        (m-1-4) edge (m-3-4) edge (m-2-3)
+        (m-2-1) edge [-,line width=6pt,draw=white] (m-2-3)
+                edge (m-2-3) edge (m-4-1)
+        (m-3-2) edge (m-3-4)
+                edge (m-4-1)
+        (m-4-1) edge (m-4-3)
+        (m-3-4) edge (m-4-3)
+        (m-2-3) edge [-,line width=6pt,draw=white] (m-4-3)
+                edge (m-4-3);
+    \end{tikzpicture}
+\end{figure}
 
 This can be understood as a exploring refinements of of type lambda calculi. Starting in the bottom
 left hand corner $\lambda \rightarrow$ is the simply type lambda calculus as developed by Church,
@@ -504,7 +506,7 @@ lambda calculus language, but are often given so for reasons of efficiency and p
 satisfaction. The immediate application of ADTS for micro:bit programming is not immediately
 apparent, so, much in the manner of Scheme, these will not be considered a priority of microML.
 
-\section{Requirements \& Constraints: Language Design} 
+\section{Language Design} 
 Miranda\textsuperscript{TM} is a language
 created by David Turner in the early 1980s\footnote{The wikipedia page says that Miranda supports
 monads. This is not correct, in the sense that it is not possible for the programmer to create
@@ -647,25 +649,28 @@ MicroML, in addition to floats and ints, also supports binary, octal and hex num
 treated as primitives however, and are automatically converted to an appropriate numeric representation.
 
 The \textit{FixPoint} primitive allows for the creation of recursive functions by satisfying the equation
-\begin{flalign*}
-    &y\ f\ = f (y\ f) &
-\end{flalign*}
+\begin{displaymath}
+    y\ f\ = f (y\ f)
+\end{displaymath}
 
 The most famous fix-point combinator without a doubt is Curry's \textit{Y-combinator}:
-\begin{flalign*}
-    &Y = (\lambda f. (\lambda x.\ f (x x)) (\lambda x.\ f (x x))) &
-\end{flalign*}
+\begin{displaymath}
+    Y = (\lambda f. (\lambda x.\ f (x x)) (\lambda x.\ f (x x)))
+\end{displaymath}
 
 To see how this can be used to simulate recursion\footnote{there are many excellent texts which
     give detailed explanations of the \textit{Y-combinator}, such as \dots } it is necessary simply
 to supply an argument in the form of a lambda abstraction.
 
-\begin{eqnarray*}
-    && Y g = (\lambda f. (\lambda x.\ f (x x)) (\lambda x.\ f (x x))) g \\
-    & \to_\beta & (\lambda x.\ g (x x)) (\lambda x.\ g (x x)) \\
-    & \to_\beta & g ((\lambda x.\ g (x x)) (\lambda x.\ g (x x))) \\
-    & \equiv & g (Y g)
-\end{eqnarray*}
+\begin{figure}
+    \centering
+    \begin{eqnarray*}
+        && Y g = (\lambda f. (\lambda x.\ f (x x)) (\lambda x.\ f (x x))) g \\
+        & \to_\beta & (\lambda x.\ g (x x)) (\lambda x.\ g (x x)) \\
+        & \to_\beta & g ((\lambda x.\ g (x x)) (\lambda x.\ g (x x))) \\
+        & \equiv & g (Y g)
+    \end{eqnarray*}
+\end{figure}
 
 While two different number types are supported by the parser, the type checker only recognizes the
 type \textit{Number}. The compiler will benefit from knowledge of the number type, i.e.\ int or double,
@@ -683,63 +688,65 @@ lexer is a composite of a great number of small, specialized parser functions, w
 together. If one parser fails, the next is tried until either parsing succeeds or a fatal error
 occurs. 
 
-Other libraries, such as \textit{MegaParsec} and \textit{Trifecta}, both respected and
-powerful, were examined. Trifecta especially seems like a very interesting parsing library,
-with excellent support for detailed, custom error messages. This would have been ideal for a
-teaching language of the nature of microML: unfortunately there is an almost total absence of
-documentation on the use of Trifecta, and internet tutorials of any size beyond the trivial 
-do not seem to exist. The programming
-language \textbf{Idris} uses Trifecta for its parser, so future iterations of microML might be able
-to migrate to Trifecta after careful examination of the Idris source. 
+Other libraries, such as \textit{MegaParsec} and \textit{Trifecta}, both respected and powerful,
+were examined. Trifecta especially seems like a very interesting parsing library, with excellent
+support for detailed, custom error messages. This would have been ideal for a teaching language
+of the nature of microML:\@ unfortunately there is an almost total absence of documentation on the
+use of Trifecta, and internet tutorials of any size beyond the trivial do not seem to exist. The
+programming language \textbf{Idris} uses Trifecta for its parser, so future iterations of microML
+might be able to migrate to Trifecta after careful examination of the Idris source.
 
-MegaParsec has excellent
-support for indentation sensitive grammars, which Parsec does not. Again, this would be a useful
-feature to add to microML at a later stage of development. It seems to be however, at the present time, misplaced
-energy to focus on what is essentially syntactic sugar when other, more vital, elements of the
-project are still not functioning as they should or have not even been started. Moreover, MegaParsec
-is a relatively new, and non-standard, library whereas most installations of Haskell ship with
-Parsec as a component of the standard library. Of course, eschewing the new in favour of that which
-is ubiquitous (often in the name of backwards compatibility) is a bad habit which retards the
-development of better software. In this case however, the added power of MegaParsec is not yet
-required.
+MegaParsec has excellent support for indentation sensitive grammars, which Parsec does not.
+Again, this would be a useful feature to add to microML at a later stage of development. It seems
+to be however, at the present time, misplaced energy to focus on what is essentially syntactic
+sugar when other, more vital, elements of the project are still not functioning as they should or
+have not even been started. Moreover, MegaParsec is a relatively new, and non-standard, library
+whereas most installations of Haskell ship with Parsec as a component of the standard library. Of
+course, eschewing the new in favour of that which is ubiquitous (often in the name of backwards
+compatibility) is a bad habit which retards the development of better software. In this case
+however, the added power of MegaParsec is not yet required.
 
-Formally, parsec belongs to the family of \textbf{LL(1)} parsers. Obviously this does slightly reduce the
-flexibility of the language design\footnote{LL(1) parsers can only recognize a subset of the
-    context-free languages.}. Haskell itself does not use an LL(1) parser, but rather an
-    \textbf{LALR(1)} built using \textit{Happy} and \textit{Alex}, much in the manner of a parser constructed using
-\textit{Yacc}, but such power is not required for the much more limited range of expression
-available in microML\. If the language were ever to be expanded or made more robust, it would perhaps
-be reasonable to rewrite the parser to make use of this model.
+Formally, parsec belongs to the family of \textbf{LL(1)} parsers. Obviously this does slightly
+reduce the flexibility of the language design\footnote{LL(1) parsers can only recognize a subset
+of the context-free languages.}. Haskell itself does not use an LL(1) parser, but rather an
+\textbf{LALR(1)} built using \textit{Happy} and \textit{Alex}, much in the manner of a parser
+constructed using \textit{Yacc}, but such power is not required for the much more limited range of
+expression available in microML\. If the language were ever to be expanded or made more robust, it
+would perhaps be reasonable to rewrite the parser to make use of this model.
 
 \subsection{Type Inference}
 \label{sec:type}
-MicroML uses an implementation of
-\textit{algorithm W}\footnote{based on the following tutorial implementation
-    \url{https://github.com/wh5a/Algorithm-W-Step-By-Step/blob/master/AlgorithmW.lhs}} for ML-style type inference. At present it is
-not possible to declare the types of functions, they can only be inferred. As this is primarily a
-teaching language with a very simple type system, this is not the drawback that it might otherwise
-be. 
+MicroML uses an implementation of \textit{algorithm W}\footnote{based on the following tutorial
+implementation \url{https://github.com/wh5a/Algorithm-W-Step-By-Step/blob/master/AlgorithmW.lhs}}
+for ML-style type inference. At present it is not possible to declare the types of functions, they
+can only be inferred. As this is primarily a teaching language with a very simple type system, this
+is not the drawback that it might otherwise be.
 
-MicroML attempts to be an implementation of \textit{System F}, or the \textbf{second-order lambda
-calculus}. It is a typed lambda calculus which supports universal quantification over types, and is
-thus the basis for \textbf{parametric polymorphism} in functional programming languages. A full
+MicroML is an implementation of \textit{System F}, or the \textbf{second-order lambda calculus}.
+It is a typed lambda calculus which supports universal quantification over types, and is thus
+the basis for \textbf{parametric polymorphism} in functional programming languages. A full
 description of System F is beyond the scope of this report. Interested readers are directed to
-\cite{Pierce:2002:TPL:509043}. System F is a `sweet spot' in the lambda cube as it admits relatively easy type
-reconstruction, which is the basis of algorithm W.
+\cite{Pierce:2002:TPL:509043} or see Appendix~\ref{appendix:sysf} for a summary. System F is a
+`sweet spot' in the lambda cube as it admits relatively easy type reconstruction, which is the basis
+of algorithm W.
 
 At a trivial level, primitives have a predetermined type, so \textbf{(Lit (LInt 4))} has type
 \textbf{Number}, likewise \textbf{(Lit (LBoolean true))} has type \textbf{Boolean}.
 
 At a slightly higher level, many operators only work on certain types, so the presence of these
-operators can help the inference system to resolve the constraints. For example 
-(+) is defined to work only on objects of type Number.
-
-An expression of the type \textit{true + false} will fail with a \textit{unification error} as (+)
-is not a supported operator for this data type.
+operators can help the inference system to resolve the constraints. For example (+) is defined to
+work only on objects of type Number. An expression of the type \textit{true + false} will fail with
+a \textit{unification error} as (+) is not a supported operator for this data type.
 
 Hindley-Milner is guaranteed to give the most general type signature possible. MicroML supports
-\textit{polymorphic} types. For example, the \textit{higher order} function 
-`twice'\footnote{called `ap' in Haskell} has the form
+\textit{polymorphic} types. For example, the \textit{higher order} function
+`compose'\footnote{Represented in Haskell by the $\circ$ operator } has type:
+
+\begin{flalign*}
+    compose : \forall a b c. (a \rightarrow b) \rightarrow (c \rightarrow a) \rightarrow c \rightarrow b
+\end{flalign*}
+
+For readability's sake, the repl uses the words `for all' rather than the $\forall$ symbol.
 
 MicroML has a unified \textbf{Number} type for inference, even though the underlying AST stores
 appropriate information regarding the exact form of representation. Miranda too features a unified
@@ -750,21 +757,6 @@ for microML.\ The loss of detail regarding the types of numbers is unfortunate, 
 expedient in the design so as to introduce more basic concepts of type, rather than computer
 representation.
 
-\begin{minted}{haskell}
-    twice f x = f (f x)
-\end{minted}
-
-which has the type
-\begin{flalign*}
-    & for\ all\ a. (a \rightarrow a) \rightarrow a \rightarrow a &
-\end{flalign*}
-
-The opening parentheses indicate that the first argument to \textit{twice} must be a function that
-takes one input of type `a' and maps it to something of the same type. The next `a' refers to x, and
-must be of a type accepted by the function f. The final result of the function must also be of the
-same type. It is not important what type `a' actually is, as long as these constraints hold. Herein
-lies the true power of type inference.
-
 \subsection{Comments}
 MicroML also features a small embedded language (a variant on \textbf{markdown}) for commenting
 files. See~\ref{appendix:md} for the syntax. A separate parser was written 
@@ -772,21 +764,21 @@ for a small subset of markdown and pretty printing facilities
 for the terminal. It is assumed that the terminal is capable of rendering standard \textbf{ascii}
 escape sequences. Figure~\ref{fig:comments} illustrates a typical encounter with the comment system.
 
-\begin{SCfigure}
-    \includegraphics[scale=0.4]{images/comment.jpg}
+\begin{figure}
+    \includegraphics[width=\textwidth]{images/comment.jpg}
     {\caption{Comments as seen in the terminal}}
     \label{fig:comments}
-\end{SCfigure}
+\end{figure}
 
 In addition to help regarding function definitions, there is also a glossary of terms for those new
 to programming. Terms in the glossary are underlined in the main commentary text.  Another teaching 
 tool has been added to the repl environment which the author believes to be unique
-is the ability to print the parse tree of an expression within the repl. See figure~\ref{fig:tree}
+is the ability to print the parse tree of an expression within the repl. See figure~\ref{fig:tree}.
 
 \begin{SCfigure}
+    \label{fig:tree}
     \includegraphics[scale=0.6]{images/tree.jpg}
     {\caption{Parse tree of a simple expression as viewed in the terminal}}
-    \label{fig:tree}
 \end{SCfigure}
 
 \subsection{Programming Style}
@@ -843,7 +835,8 @@ forget about state management and error handling details.
 
 \subsection{Project Structure}
 Every effort was made to organize the source code in a logical and consistent manner, such that
-another programmer should, without great difficulty.
+another programmer should, without great difficulty. \\
+
 \dirtree{%
 .1 microML.
 .2 docs.
@@ -854,7 +847,7 @@ another programmer should, without great difficulty.
 .3 Main.hs.
 .3 MicroML.
 .4 Typing.
-.3 Repl
+.3 Repl.
 .2 test.
 .3 compiler.
 .2 utils.
@@ -954,11 +947,27 @@ writing, the compiler does not yet successfully pass all of these integration te
 to be done before the compiler can seriously be considered to be `fit for purpose'. The script must
 be run from the utils folders of the project.
 
-
 \chapter{Conclusions and Project Evaluation}
 
 \section{Achievements}
-Not written yet
+The project has met all of the goals and requirements initially specified, but this is not to say
+that the project cannot be improved or could even, in any real sense, be said to be finished. The
+syntax (see Appendix~\ref{appendix:syntax}) is clean and uncomplicated, but also quite limiting for
+students who would like to be more `expressive'. It is felt that, for those advanced students who
+find microML to be limiting, that there already exist a large number of more powerful languages
+which they can go on to explore, not least of which is Haskell itself. 
+
+MicroML supports full parametric polymorphic type inference. As such it can be considered a complete
+implementation of \textit{System F}. This could be extended to make it more flexible, e.g.\ sum and
+product types. The lack of subtyping might be considered a drawback in a genuine language. It would
+be theoretically pleasing to allow students to access the implementation details of number types,
+constraining user-defined functions to integer or double. This is not presently possible for
+functions written by students\footnote{Though it is possible for system-defined operators and
+functions. For example the modulo `\%' operator will throw and error if either of its operands are
+not integer literals. This is `hard-coded' into the inference engine, which is unfortunate.}.
+
+The compiler element of the project successfully compiles many simple programs written in microML,
+including the traditional `hello world'
 
 \section{Evaluation}
 At the fundamental design level, perhaps the most unfortunate decision was to make the \textit{Expr}
@@ -1045,13 +1054,17 @@ appropriate. This incremental approach to static typing could encourage students
 type system rather than feel they are fighting it. Even a partially dependently-typed program could
 result in a number of possible compiler optimisations and greater runtime safety.
 
+%% appendices
 \begin{appendices}
     \chapter{System F}
     \label{appendix:sysf}
     not written yet
+    \chapter{MicroML Syntax}
+    \label{appendix:syntax}
+    not written yet
     \chapter{Comment Markdown}
     \label{appendix:md}
-    not written yet
+    \input{markdown}
 \end{appendices}
 
 %% check this list to make sure things have been cited
