@@ -33,16 +33,16 @@
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{1em}
 
+\titlespacing*{\chapter}{0pt}{-40pt}{20pt}
 %% nice title formatting
 \titleformat{\chapter}[display]
     {\bfseries\huge}
     {\filleft\Large\chaptertitlename~\thechapter}
     {3ex}
-    {\titlerule\vspace{1.5ex}\filright}
+    {\titlerule\vspace{2ex}\filright}
     [\vspace{1ex}\titlerule]
 
 %% nice headings for each page
-%\pagestyle{headings}
 \pagestyle{fancy}
 \renewcommand\sectionmark[1]{} %section doesn't set a mark
 
@@ -741,9 +741,8 @@ a \textit{unification error} as (+) is not a supported operator for this data ty
 Hindley-Milner is guaranteed to give the most general type signature possible. MicroML supports
 \textit{polymorphic} types. For example, the \textit{higher order} function
 `compose'\footnote{Represented in Haskell by the $\circ$ operator } has type:
-
 \begin{flalign*}
-    compose : \forall a b c. (a \rightarrow b) \rightarrow (c \rightarrow a) \rightarrow c \rightarrow b
+    compose : \forall\:a\:b\:c.\;(a \rightarrow b) \rightarrow (c \rightarrow a) \rightarrow c \rightarrow b
 \end{flalign*}
 
 For readability's sake, the repl uses the words `for all' rather than the $\forall$ symbol.
@@ -1058,7 +1057,7 @@ result in a number of possible compiler optimisations and greater runtime safety
 \begin{appendices}
     \chapter{System F}
     \label{appendix:sysf}
-    not written yet
+    \input{sysf}
     \chapter{MicroML Syntax}
     \label{appendix:syntax}
     not written yet
