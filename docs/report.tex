@@ -22,6 +22,7 @@
 \usepackage{titlesec}
 \linespread{1.3}
 \usepackage{verbatimbox}
+\usepackage[toc,page]{appendix}
 
 %% draw nice frame around code fragments
 %% \newminted{haskell}{frame=lines,framerule=0.5pt}
@@ -203,8 +204,8 @@ beginners or those with only a passing interest in coding. It is the contention 
 a syntactically simple, (relatively) \textit{pure} functional language would make for an ideal
 teaching tool on the micro:bit, allowing the student to focus almost entirely on the problem domain,
 and a great deal less on syntax and \textit{boilerplate}. Functional languages are increasingly
-being used in every area of real-world applications. Regarding robotics, in which Rae has expressed
-an interest, there has already been some research conducted in the use of the declarative style
+being used in every area of real-world applications. In robotics, a field where the micro:bit has
+already been used with some success, there has been some research conducted in the use of the declarative style
 for low level robotics programming\cite{frob}. This at least demonstrates that the functional style
 is applicable to the problem area, but further research would be required to test the suitability of
 the micro:bit as a low-level controller. Certainly, anything which can be programmed in MicroPython
@@ -318,7 +319,7 @@ of scope for a teaching language to teenagers. The approach taken by \textit{Mir
 will be followed in the suggested implementation, hiding unnecessary detail with the loss of a
 little referential transparency.}
 
-\section{Research}
+\section{Research: Literature Review}
 With the thought in mind of creating a Miranda style language for the micro:bit, came the necessity
 to decide on the technologies and theoretical basis for the language. Being an implementation of the
 lambda calculus, it was necessary to choose an axis on the \textit{lambda cube} for further
@@ -330,6 +331,32 @@ and \cite{rwh}. For language design and implementation a number of websites were
 \cite{scheme}, \cite{diehl} were particularly useful. Two further tutorials deserve special mention
 as they gave simplified accounts of algorithm W \cite{algoW} and the usage of monad transformers
 \cite{transformers}.
+
+Many papers were consulted initially while deciding on the best approach for microML's type
+system\footnote{These are listed in the bibliography.}.
+In practice, very little of this reading has made it into the language as currently constituted, but
+it is hoped that the design allows for future development to integrate some of these possible
+features more easily. Always bearing in mind of course the intended scope of the language. This perhaps
+was one of the most difficult design decisions: what had a legitimate place in a language for a
+simple processor aimed at teachers, and what could be implemented simply for the interests of the
+developer, or because it was simple to do? Design decisions based on ease of implementation or to
+please the vanity of the designer are correct only be coincidence, and this is a poor way to
+design\footnote{This recalls Tony Hoare's `Billion Dollar Mistake'.}. Of greatest use were
+\cite{Pierce:2002:TPL:509043} with its excellent general account of type theory (and implementation
+chapters written in \textit{OCaml}) and\@\cite{Pierce:2004:ATT:1076265} with its exploration of type
+inference in ML\@. 
+
+For basic language design, both\@\cite{spj2} and\@\cite{spj1} were important, the former for the
+theoretical basis and the latter for its more practical stance. Regarding language design in
+general, both~\cite{Harper:2012:PFP:2431407} and~\cite{plp} were invaluable, especially the latter
+with its very clear and concrete handling of the topic. Many details of syntax were inspired by
+information gleaned from this book.
+
+Compiler implementation has a large body of literature. For background reading on BNF and
+parsing,~\cite{torc} gives perhaps the clearest, most modern explanation.
+\cite{Appel:1997:MCI:248430} is also extremely useful for its more practical approach. This work,
+the so-called \textit{Tiger Book} is available in a number of different languages. The ML edition is
+the most pertinent to this project.
 
 \subsection{The Lambda Cube}
 The Lambda Cube was introduced by mathematician Henk Barendregt as a visualization framework for
@@ -374,40 +401,20 @@ Most importantly, subtyping (represented as $\lambda F_{<:}$) is missing as a co
 even though almost all language which support record syntax must allow some form of subtyping.
 
 $\lambda 2$, or \textit{System F} is that system which allows for parametric polymorphism (often
-called \textit{generics} in such languages as Java and C++). This seemed a suitable target for
-microML's type system. It has the added advantage that there is a well-established algorithm, Damas
---- Milner algorithm W, which runs in $\mathcal{O}(n)$ time for non-pathological input\footnote{Worst case
-    complexity for algorithm W actually falls into exponential time, but an input program would have
-    to be both perversely written and extremely large before this would become a significant
-    liability.}. Type inference was deemed an important addition to microML as introducing the
-concept of types, which though fundamental to modern computing, carries the risk of rendering it too
-difficult and different conceptually from the other languages already available on the micro:bit.
-These all have in common so-called \textit{duck} typing, and interaction with the type system,
-programming with types as it were, is against the nature of the language itself. This is especially
-true of Python, which discourages direct type checking on the part of the programmer (though such
-facilities do exist.). Good type inference, with easy to read error messages, is an essential
-feature of microML without which it would struggle to justify its existence.
-
-\section{Sources}
-This project has drawn on a large variety of sources, some only tangentally, but others central to
-the realization of the project, without which microML, as embryonic as it might be, would not exist
-at all. A number of tutorials (detailed in the bibilography) gave a strong starting position upon
-which to build. Luckily there are a number of trivial examples of repls written in Haskell which
-give an idea of what might be accomplished. Full scale compilers are a little more unusual, but such
-classic texts as `Modern Compiler Implementation in Standard ML', the so-called \textit{Tiger Book},
-can be adapted to Haskell with minimal inconvenience. For type theory the central text is
-undoubtedly `Types and Programming Languages' without which many a tutorial on type inference would
-have remained decidedly opaque.
-
-Many papers were consulted initially while deciding on the best approach for microML's type system.
-In practice, very little of this reading has made it into the language as currently constituted, but
-it is hoped that the design allows for future development to integrate some of these possible
-features easily. Always bearing in mind of course the intended scope of the language. This perhaps
-was one of the most difficult design decisions: what had a legitimate place in a language for a
-simple processor aimed at teachers, and what could be implemented simply for the interests of the
-developer, or because it was simple to do? Design decisions based on ease of implementation or to
-please the vanity of the designer are correct only be coincidence, and this is a poor way to
-design\footnote{This recalls Tony Hoare's `Billion Dollar Mistake'.}.
+called \textit{generics} in such languages as Java and C++)\footnote{See~\ref{appendix:sysf} for
+details for a more complete description.}. This seemed a suitable target for microML's type system.
+It has the added advantage that there is a well-established algorithm, Damas --- Milner algorithm
+W, which runs in $\mathcal{O}(n)$ time for non-pathological input\footnote{Worst case complexity
+for algorithm W actually falls into exponential time, but an input program would have to be both
+perversely written and extremely large before this would become a significant liability.}. Type
+inference was deemed an important addition to microML as introducing the concept of types, which
+though fundamental to modern computing, carries the risk of rendering it too difficult and different
+conceptually from the other languages already available on the micro:bit. These all have in common
+so-called \textit{duck} typing, and interaction with the type system, programming with types as
+it were, is against the nature of the language itself. This is especially true of Python, which
+discourages direct type checking on the part of the programmer (though such facilities do exist.).
+Good type inference, with easy to read error messages, is an essential feature of microML without
+which it would struggle to justify its existence.
 
 \section{Software, Tools, Libraries}
 Haskell is ideally suited to the creation of DSLs. This is largely due to its \textit{algebraic data
@@ -445,26 +452,29 @@ it was decided that time constraints did not allow for proper utilization of the
 very large) so other alternatives were explored in the hope of at least producing a testable backend
 within the time frame of the project. 
 
+
 \chapter{Requirements and Analysis}
 
 If the task is to design and implement a functional programming language, the obvious question is: What is a functional language? 
 Examining some of the leading languages widely regarded as belonging to the family, a number of
 features emerge.
 
-\addvbuffer[20pt 20pt]
-{\begin{tabular}{|c|cccccc|}
-    \hline
-                & Pure                    & Lazy Evaluation     & Typing                      & Algebraic Data Types     & Immutable Data          & Closures \\
-    \hline
-    Common Lisp & No                      & \cellcolor{LRed}Yes & Dynamic                     & \cellcolor{GoldenRod}Yes & No                      & \cellcolor{LRed}Yes \\
-    Scheme      & No                      & No                  & Dynamic                     & No                       & No                      & \cellcolor{LRed}Yes \\
-    ML          & No                      & No                  & \cellcolor{Lawngreen}Static & \cellcolor{GoldenRod}Yes & No                      & \cellcolor{LRed}Yes \\
-    F\#         & No                      & \cellcolor{LRed}Yes & \cellcolor{Lawngreen}Static & \cellcolor{GoldenRod}Yes & No                      & \cellcolor{LRed}Yes \\
-    Clojure     & No                      & \cellcolor{LRed}Yes & Dynamic                     & \cellcolor{GoldenRod}Yes & \cellcolor{Seagreen}Yes & \cellcolor{LRed}Yes \\
-    Miranda     & \cellcolor{Seagreen}Yes & \cellcolor{LRed}Yes & \cellcolor{Lawngreen}Static & \cellcolor{GoldenRod}Yes & \cellcolor{Seagreen}Yes & \cellcolor{LRed}Yes \\
-    Haskell     & \cellcolor{Seagreen}Yes & \cellcolor{LRed}Yes & \cellcolor{Lawngreen}Static & \cellcolor{GoldenRod}Yes & \cellcolor{Seagreen}Yes & \cellcolor{LRed}Yes \\
-    \hline
-\end{tabular}}
+\begin{table}
+    \resizebox{\textwidth}{!}
+    {\begin{tabular}{|c|cccccc|}
+        \hline
+                    & Pure                    & Lazy Evaluation     & Typing                      & Algebraic Data Types     & Immutable Data          & Closures \\
+        \hline
+        Common Lisp & No                      & \cellcolor{LRed}Yes & Dynamic                     & \cellcolor{GoldenRod}Yes & No                      & \cellcolor{LRed}Yes \\
+        Scheme      & No                      & No                  & Dynamic                     & No                       & No                      & \cellcolor{LRed}Yes \\
+        ML          & No                      & No                  & \cellcolor{Lawngreen}Static & \cellcolor{GoldenRod}Yes & No                      & \cellcolor{LRed}Yes \\
+        F\#         & No                      & \cellcolor{LRed}Yes & \cellcolor{Lawngreen}Static & \cellcolor{GoldenRod}Yes & No                      & \cellcolor{LRed}Yes \\
+        Clojure     & No                      & \cellcolor{LRed}Yes & Dynamic                     & \cellcolor{GoldenRod}Yes & \cellcolor{Seagreen}Yes & \cellcolor{LRed}Yes \\
+        Miranda     & \cellcolor{Seagreen}Yes & \cellcolor{LRed}Yes & \cellcolor{Lawngreen}Static & \cellcolor{GoldenRod}Yes & \cellcolor{Seagreen}Yes & \cellcolor{LRed}Yes \\
+        Haskell     & \cellcolor{Seagreen}Yes & \cellcolor{LRed}Yes & \cellcolor{Lawngreen}Static & \cellcolor{GoldenRod}Yes & \cellcolor{Seagreen}Yes & \cellcolor{LRed}Yes \\
+        \hline
+    \end{tabular}}
+\end{table}
 
 \textit{Purity} is a rather vexed term than has seen a great deal of discussion in the literature
 and on such websites as \textit{reddit}. For the purposes of the following discussion, purity will
@@ -494,21 +504,20 @@ lambda calculus language, but are often given so for reasons of efficiency and p
 satisfaction. The immediate application of ADTS for micro:bit programming is not immediately
 apparent, so, much in the manner of Scheme, these will not be considered a priority of microML.
 
-\section{Requirements \& Constraints: Language Design}
-Miranda\textsuperscript{TM} is a language created by David Turner in the early 1980s\footnote{The wikipedia 
-    page says that Miranda supports monads. This is not correct, in
-    the sense that it is not possible for the programmer to create monad instances or explicitly
-    interact with monads. It is also
-unlikely that Miranda is using monadic concepts at the implementation level as these were first
-introduced into Haskell a number of years after the introduction of Miranda}. It is a member
-of the ML family, one of the first purely functional programming languages, and the direct parent of
-Haskell and Haskell's various offshoots. Indeed, one of the reasons for the creation of Haskell was
-the fact that Miranda was trademarked and closed source. It might best be described as a (small)
-subset of Haskell\footnote{Though it would be more accurate to describe Haskell as a superset of
-    Miranda.}. It is still used as a teaching language and has a very clean, simply syntax. A
-reduced version of Miranda is suggested for the language, which will go under the working title of
-microML.\footnote{microMiranda would probably be a more honest name, but there might be a small
-    risk of copyright infringement.}
+\section{Requirements \& Constraints: Language Design} 
+Miranda\textsuperscript{TM} is a language
+created by David Turner in the early 1980s\footnote{The wikipedia page says that Miranda supports
+monads. This is not correct, in the sense that it is not possible for the programmer to create
+monad instances or explicitly interact with monads. It is also unlikely that Miranda is using
+monadic concepts at the implementation level as these were first introduced into Haskell a number of
+years after the introduction of Miranda}. It is a member of the ML family, one of the first purely
+functional programming languages, and the direct parent of Haskell and Haskell's various offshoots.
+Indeed, one of the reasons for the creation of Haskell was the fact that Miranda was trademarked and
+closed source. It might best be described as a (small) subset of Haskell\footnote{Though it would
+be more accurate to describe Haskell as a superset of Miranda.}. It is still used as a teaching
+language and has a very clean, simply syntax. A reduced version of Miranda is suggested for the
+language, which will go under the working title of microML.\footnote{microMiranda would probably be
+a more honest name, but there might be a small risk of copyright infringement.}
 
 Miranda has an reasonably rich standard library, which comes automatically with the interpreter. MicroML
 should have a subset of this standard library, with functions such as map, filter and fold\footnote{Miranda 
@@ -558,6 +567,28 @@ coding. Indeed, immutability is in many ways more intuitive for students. If x =
 the entire program. This is a much simpler concept than having a value for x which can go up and down,
 or even change type.
 
+\section{Constraints}
+The following are the design constraints for microML:
+
+\begin{itemize}
+    \item C++ Compiler. This author had originally proposed using an existing Scheme to C compiler
+        to turn microML code to something runnable on the micro:bit. It would have been relatively
+        easy to convert the microML AST to Scheme. This would have taken advantage of the code
+        optimisations and garbage collection of the Scheme compiler\footnote{Either Chicken
+        \url{https://www.call-cc.org/} or \url{http://dynamo.iro.umontreal.ca/wiki/index.php/Main_Page} would have been suitable
+        choices.}. However, the client from MicroSoft preferred a direct compilation from microML to
+        C++. This, while perhaps of greater educational benefit, was also much more difficult to
+        achieve within the project time frame. 
+    \item Repl Environment. MicroML should be an interactive experience, with immediate feedback to
+        the student. The easiest way to achieve this, rather than constantly flashing to the
+        micro:bit and waiting for an error, is to have a repl which the student can use to explore
+        concepts and problems. 
+    \item Clear Syntax. As far as can be determined, the syntax should be intuitive and simple. That
+        is, there should be ideally one way to do things (the antithesis of \textit{Perl's} ethos)
+        and consistent. For this reason some features, such as function composition, have been
+        reinterpreted to allow the student to read from left to right. The language structure also
+        minimizes the number of parentheses needed in an expression.
+\end{itemize}
 
 \chapter{Design and Implementation}
 
@@ -736,7 +767,7 @@ lies the true power of type inference.
 
 \subsection{Comments}
 MicroML also features a small embedded language (a variant on \textbf{markdown}) for commenting
-files\footnote{Please see appendix --- for the accepted syntax}. A separate parser was written 
+files. See~\ref{appendix:md} for the syntax. A separate parser was written 
 for a small subset of markdown and pretty printing facilities
 for the terminal. It is assumed that the terminal is capable of rendering standard \textbf{ascii}
 escape sequences. Figure~\ref{fig:comments} illustrates a typical encounter with the comment system.
@@ -887,6 +918,7 @@ The Repl monad carries with it three separate hashmaps, holding stateful informa
 types of functions, the function definitions, and the help environment. This last is not accessible
 for writing from within the repl, but only via file.
 
+
 \chapter{Testing}
 
 Software testing is a vital part of any seriously intended development project. Only an arrogant
@@ -921,6 +953,7 @@ files. A simple bash script runs each file individually through the microML comp
 writing, the compiler does not yet successfully pass all of these integration tests. More work needs
 to be done before the compiler can seriously be considered to be `fit for purpose'. The script must
 be run from the utils folders of the project.
+
 
 \chapter{Conclusions and Project Evaluation}
 
@@ -1012,18 +1045,20 @@ appropriate. This incremental approach to static typing could encourage students
 type system rather than feel they are fighting it. Even a partially dependently-typed program could
 result in a number of possible compiler optimisations and greater runtime safety.
 
+\begin{appendices}
+    \chapter{System F}
+    \label{appendix:sysf}
+    not written yet
+    \chapter{Comment Markdown}
+    \label{appendix:md}
+    not written yet
+\end{appendices}
 
 %% check this list to make sure things have been cited
 \nocite{adams2012layout}
-\nocite{Appel:1997:MCI:248430}
 \nocite{groote}
-\nocite{Harper:2012:PFP:2431407}
-\nocite{torc}
-\nocite{spj1}
-\nocite{spj2}
-\nocite{plp}
+\nocite{9780511608865}
 
 \bibliography{bibliography}{}
 \bibliographystyle{plain}
-
 \end{document}
