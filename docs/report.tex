@@ -13,6 +13,7 @@
 \usepackage{tikz}
 \usetikzlibrary{matrix}
 \usepackage{cite}
+\usepackage{fancyhdr}
 \usepackage{color, colortbl}
 \definecolor{Seagreen}{rgb}{0.18, 0.54, 0.34}
 \definecolor{Lawngreen}{rgb}{0.48, 0.99, 0}
@@ -40,7 +41,9 @@
     [\vspace{1ex}\titlerule]
 
 %% nice headings for each page
-\pagestyle{headings}
+%\pagestyle{headings}
+\pagestyle{fancy}
+\renewcommand\sectionmark[1]{} %section doesn't set a mark
 
 %% doc starts here
 \begin{document}
@@ -75,10 +78,11 @@
     acknowledged.
 \end{titlepage}
 
+{\pagestyle{plain}
 \tableofcontents
-\newpage
+\cleardoublepage}
 
-\begin{abstract}
+\chapter*{Abstract}
 It is increasingly being recognized in educational circles that introductory lessons in programming
 are a vital part of the modern school curriculum. Programming education in UK has not traditionally
 formed a central part of the syllabus. Nearly all teenagers have access to computers and devices, but very
@@ -102,7 +106,7 @@ environment with extensive error checking capabilities, the ability to check sou
 common programming errors (such as duplicate function definitions and unreachable functions) and
 produce images of program callgraphs. It has been designed with the principle aim of making an
 environment conducive to learning, without being condescending or overly simplistic. 
-\end{abstract}
+
 \chapter{Introduction}
 
 \begin{flushright} \textit{`a monad is a monoid in the category of endofunctors, what's
@@ -201,8 +205,7 @@ teaching tool on the micro:bit, allowing the student to focus almost entirely on
 and a great deal less on syntax and \textit{boilerplate}. Functional languages are increasingly
 being used in every area of real-world applications. Regarding robotics, in which Rae has expressed
 an interest, there has already been some research conducted in the use of the declarative style
-for low level robotics programming\footnote{Lambda in Motion: Controlling Robots with Haskell,
-Peterson John, Paul Hudak and Conal Elliott}. This at least demonstrates that the functional style
+for low level robotics programming\cite{frob}. This at least demonstrates that the functional style
 is applicable to the problem area, but further research would be required to test the suitability of
 the micro:bit as a low-level controller. Certainly, anything which can be programmed in MicroPython
 could also be written (possible more briefly and with fewer bugs) in a functional language.
@@ -226,7 +229,6 @@ on the micro:bit, why is there the need for another text-based language on the s
 this not just `muddying the waters' of what should be a simple educational tool. Do instructors
 really have the time to learn another language if students should express an interest in programming
 functionally?
-
 
 \section{Python vs Miranda/Haskell}
 In an attempt to address some of these questions, it is necessary to derive some picture of what might
@@ -322,11 +324,17 @@ to decide on the technologies and theoretical basis for the language. Being an i
 lambda calculus, it was necessary to choose an axis on the \textit{lambda cube} for further
 development. 
 
+As one of the principle learning goals was to develop some skill with Haskell, a number of books and
+tutorials were consulted. Of most immediate use for basic programming were \cite{Lipovaca:2011:LYH:2018642}
+and \cite{rwh}. For language design and implementation a number of websites were consulted, among which
+\cite{scheme}, \cite{diehl} were particularly useful. Two further tutorials deserve special mention
+as they gave simplified accounts of algorithm W \cite{algoW} and the usage of monad transformers
+\cite{transformers}.
+
 \subsection{The Lambda Cube}
 The Lambda Cube was introduced by mathematician Henk Barendregt as a visualization framework for
-Coquand's calculus of constructions. The simple untyped lambda calculus is not
-represented.\footnote{Pierce p.465 has a slightly different treatment of the axes.}
-
+Coquand's calculus of constructions\cite{Barendregt:1993:LCT:162552.162561}. The simple untyped lambda calculus is not
+represented.\footnote{\cite{Pierce:2002:TPL:509043} has a slightly different treatment of the axes.}
 
 \begin{tikzpicture}
   \matrix (m) [matrix of math nodes, row sep=3em,
@@ -350,7 +358,7 @@ represented.\footnote{Pierce p.465 has a slightly different treatment of the axe
 
 This can be understood as a exploring refinements of of type lambda calculi. Starting in the bottom
 left hand corner $\lambda \rightarrow$ is the simply type lambda calculus as developed by Church,
-Curry and Feys in the 1940s\footnote{Types and Programming Languages p11 gives a simple timeline of
+Curry and Feys in the 1940s\footnote{\cite{Pierce:2002:TPL:509043} p11 gives a simple timeline of
     type theory research.}. The top right corner, the `summit' of calculi is $\lambda P \omega$, which
 represents dependent types. Perhaps no truly practical programming language occupies this space at
 present. Theorem provers, such as \textit{Coq} have not been used for enterprise software, and
@@ -920,7 +928,21 @@ be run from the utils folders of the project.
 Not written yet
 
 \section{Evaluation}
-Not written yet
+At the fundamental design level, perhaps the most unfortunate decision was to make the \textit{Expr}
+datatype a simple type with kind \textit{*}. This decision has meant that it was not possible to
+make \textit{Expr} an instance of the \textit{Functor} typeclass\footnote{A datatype needs at least
+kind $ * \rightarrow * $ to be a member of the Functor typeclass.}, meaning that a complex
+expression was not mappable or foldable. There are instances in the code where expressions have been
+converted into strings via `show' in order to filter or search for elements. This is rather
+inefficient and, given the nature and complexity of regular expressions, potentially bug-prone. This
+problem would have been alleviated by a definition for `fmap'. Once \textit{Expr} is a functor, it
+would then be relatively trivial to make a monoid instance, and even, if necessary, a monad
+instance, or at the very least an instance of \textit{Applicative}. Tag information regarding type
+could have been carried in the additional arity required by the functor typeclass. \textit{Expr}
+would then have kind $ * \rightarrow * $ with the first * being a type label. This would also have
+made inference easier and quicker. However it was nearing the end of the project before the author
+had enough knowledge and skill to be aware of these subtleties, and such a change would require a
+rather substantial rewriting of much of the MicroML module.
 
 \section{Future Work}
 While the basic core of the language is largely complete (at least in the repl environment) a great
@@ -996,8 +1018,6 @@ result in a number of possible compiler optimisations and greater runtime safety
 \nocite{Appel:1997:MCI:248430}
 \nocite{groote}
 \nocite{Harper:2012:PFP:2431407}
-\nocite{rwh}
-\nocite{frob}
 \nocite{torc}
 \nocite{spj1}
 \nocite{spj2}
