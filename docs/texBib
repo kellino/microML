@@ -13,11 +13,13 @@ if [ -x "$pdflatex" ] && [ -x "$bibtex" ]; then
         pdflatex "$file".tex
         bibtex "$file".aux
         pdflatex "$file".tex
+        pdflatex "$file".tex
     else
         echo "minted detected, so using shell escape"
         echo "compiling $file"
         pdflatex -shell-escape "$file".tex
         bibtex "$file".aux
+        pdflatex -shell-escape "$file".tex
         pdflatex -shell-escape "$file".tex
     fi
 fi
