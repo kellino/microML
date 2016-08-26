@@ -25,6 +25,11 @@
 \usepackage{verbatimbox}
 \usepackage[toc,page]{appendix}
 \usepackage{tabu}
+\usepackage{colortbl}
+
+%% fake lists inside a table environment
+\usepackage{booktabs}
+\newcommand{\tabitem}{~~\llap{\textbullet}~~}
 
 %% draw nice frame around code fragments
 %% \newminted{haskell}{frame=lines,framerule=0.5pt}
@@ -593,8 +598,50 @@ The following are the design constraints for microML:
         minimizes the number of parentheses needed in an expression.
 \end{itemize}
 
-\chapter{Design and Implementation}
+\section{Use Cases}
+The primary use case is in schools. The micro:bit has been, or is intended to be, rolled
+out to every secondary school in the UK\@. As such it is has not been designed as a commercial
+product. The user is envisaged to be a young adult, between the ages of 13 and 18, and the
+instructor, usually a teacher and not a computer science specialist.
 
+\begin{table}
+    \begin{tabu}{|>{\columncolor[gray]{0.9}}p{3.5cm}| p{10cm} |}
+        \hline
+        Use Case & \textbf{Student Use Case} \\
+        \hline
+        Participating Actors & Student \\
+        \hline
+        Flow of Events & \tabitem The student starts with a problem set by the instructor. \\
+                       & \tabitem The student opens the repl and explores the problem domain. \\
+                       & \tabitem The student creates some working code and copies it to a text file.  \\
+                       & \tabitem The student runs the file through the compiler. \\
+                       & \tabitem The student passes the resulting C++ file through \textit{yotta} \\
+                       & \tabitem The student flashes the binary to the micro:bit. \\
+        \hline
+        Alternative Flows & \tabitem The student uses a text editor to right code directly. For this
+        a simple vim plugin has been provided. At present, only vim is supported. \\
+        \hline
+        Entry Conditions & not sure yet \\
+        \hline
+        Exit Conditions & not sure yet \\
+        \hline
+    \end{tabu}
+\end{table}
+
+\begin{table}
+    \resizebox{\textwidth}{!}
+    {\begin{tabu}{l | l |}
+        \hline
+        Use Case & Student Use Case \\
+        Participating Actors & Student \\
+        Flow of Events & stuff here \\
+        Alternative Flows & stuff here \\
+        Entry Conditions & not sure yet \\
+        Exit Conditions & not sure yet \\
+    \end{tabu}}
+\end{table}
+
+\chapter{Design and Implementation}
 \subsection{Design}
 microML uses an enriched lambda calculus as its base
 \vspace{5mm}
@@ -1024,7 +1071,7 @@ collector takes too much of the available memory for itself. On such a constrain
 lead to problems when attempting to use the inbuilt censors or bluetooth. An alternative might be
 the use of a \textit{region inference algorithm}\cite{Tofte:2004:RRM:993034.993040}. Work on
 MLKit\footnote{\url{http://www.elsman.com/mlkit/}} has shown that region inference memory management
-can, at least sometimes, at as a realistic replacement to garbage collection. In a system where
+can, at least sometimes, act as a realistic replacement to garbage collection. In a system where
 programs are expected to be relatively uncomplicated, such as on the micro:bit, this might be an
 ideal `fit'.
 
@@ -1037,6 +1084,12 @@ is desugared in Haskell to nested case statements. A student using microML can s
 things themselves, but the ubiquity of pattern matching syntax suggests that it ought to be included
 in the language at some point, even if it cannot be regarded as a \textit{primitive} of the
 functional style. 
+
+Another important feature at present only partially implemented are user-defined
+exceptions\footnote{the parser and typechecker recognize the syntax, but the evaluator does not}.
+The approach in ~\cite{groote} to a lambda calculus of exception handling would make for an area
+of further interesting study, allowing exceptions to be thoroughly integrated into the existing
+language.
 
 The type inference system is compliant with \textit{System F}. While this is not the most demanding
 of type environments within which to work, it might still be too rigid for students with no
