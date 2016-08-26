@@ -34,7 +34,7 @@ funcName = do
 comments :: Parser String
 comments = do
     void $ string "let" <|> string "--"
-        <|> string "\n"
+    --    <|> string "\n"
     void $ anyChar `manyTill` newline
     return ""
 
@@ -93,7 +93,7 @@ helpModl = do
 allHelp :: Parser [HelpBlock]
 allHelp = do
     skipMany comments
-    sepEndBy1 helpModl (skipMany comments) 
+    sepEndBy1 helpModl (skipMany (comments <|> string "\n"))
 
 parseHelp :: SourceName -> L.Text -> Either ParseError [HelpBlock]
 parseHelp = parse allHelp 
