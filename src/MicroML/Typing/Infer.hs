@@ -274,6 +274,7 @@ infer expr = case expr of
           Cdr -> infer e1
           Show -> return typeString
           Read -> return typeNum
+          OpLog -> infer e1 
 
     BinOp op e1 e2 -> 
         case op of
