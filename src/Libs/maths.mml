@@ -14,10 +14,11 @@ let square a = a * a;
 let sqrt x = x^0.5;
 let floor x = x // 1;
 let ceiling x = 1 + (floor x);
---let ln x        = _log x; 
---let log2 x      = _log x / _log x;
---let log10 x     = _log x / _log 10;
---let logBase x y = _log y / _log x;
+let floatToInt x = floor x
+let ln x        = _log x; 
+let log2 x      = _log x / _log x;
+let log10 x     = _log x / _log 10;
+let logBase x y = _log y / _log x;
 -- naive fibonacci
 --let fib n = if n < 2 then 1 else (fib (n-1)) + (fib (n-2))
 --let gcd a b = if a - b == 0 then a else if a < b then gcd b a else gcd b (a-b)
