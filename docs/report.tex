@@ -1074,7 +1074,7 @@ garbage collector is used by microPython. The memory management process for the 
 implementation is not open source. Experiments with microPython have revealed that the garbage
 collector takes too much of the available memory for itself. On such a constrained system this can
 lead to problems when attempting to use the inbuilt censors or bluetooth. An alternative might be
-the use of a \textit{region inference algorithm}\cite{Tofte:2004:RRM:993034.993040}. Work on
+the use of a \textit{region inference algorithm}\cite{Tofte:1998:RIA:291891.291894}. Work on
 MLKit\footnote{\url{http://www.elsman.com/mlkit/}} has shown that region inference memory management
 can, at least sometimes, act as a realistic replacement to garbage collection. In a system where
 programs are expected to be relatively uncomplicated, such as on the micro:bit, this might be an
@@ -1092,7 +1092,7 @@ functional style.
 
 Another important feature at present only partially implemented are user-defined
 exceptions\footnote{the parser and typechecker recognize the syntax, but the evaluator does not}.
-The approach in ~\cite{groote} to a lambda calculus of exception handling would make for an area
+The approach in ~\cite{deGroote1995} to a lambda calculus of exception handling would make for an area
 of further interesting study, allowing exceptions to be thoroughly integrated into the existing
 language.
 
@@ -1129,8 +1129,8 @@ result in a number of possible compiler optimisations and greater runtime safety
 
 %% check this list to make sure things have been cited
 \nocite{adams2012layout}
-\nocite{groote}
 \nocite{9780511608865}
+\nocite{Wadler:1995:MFP:647698.734146}
 
 \bibliography{bibliography}{}
 \bibliographystyle{plain}
