@@ -90,21 +90,21 @@
 \cleardoublepage}
 
 \chapter*{Abstract}
-It is increasingly being recognized in educational circles that introductory lessons in programming
+It is increasingly recognized in educational circles that introductory lessons in programming
 are a vital part of the modern school curriculum. Programming education in UK has not traditionally
 formed a central part of the syllabus. Nearly all teenagers have access to computers and devices, but very
-few know how to program them themselves. The raspberry pi has seen a remarkable growth in
+few know how to program them. The raspberry pi has seen a remarkable growth in
 popularity since its introduction a mere four years ago. The BBC micro:bit is a project in the
 same spirit as the raspberry pi, but with a remit specifically for UK secondary school students.
 
-MicroML is an attempt to bring the fundamental concepts of the functional programming paradigm
-to the micro:bit, and thusly to the large body of untapped talent lying in Britain's secondary
-schools. It should allow the students to explore such ideas as recursive thinking, structural
-induction, polymorphism and higher order types without ever having to be exposed to the
-underlying theory of such things, something which no other functional language does.  
+MicroML is an attempt to bring the fundamental concepts of the functional programming paradigm to
+the micro:bit, and thusly to the large body of untapped talent lying in Britain's schools. It 
+allows students to explore such ideas as recursive thinking, structural induction, polymorphism
+and higher order functions without ever having to be exposed to the underlying theory of such things,
+something which no other functional language does.
 
 The project was conceived and written in Haskell. It does not build on any other existing
-project. Apart from reliance on standard Haskell libraries all of the major design work was
+project. Apart from reliance on standard Haskell libraries all of the major language elements were 
 written `ab nihilo', including syntax design, the parser, type inference, repl and compiler.  
 
 MicroML, at point of submission, is a strong base from which to do further work. It has
@@ -120,17 +120,17 @@ environment conducive to learning, without being condescending or overly simplis
 the problem?'} \\ --- not Philip Wadler\footnote{The quote is actually from \textit{A
 Brief, Incomplete, and Mostly Wrong History of Programming Languages by James Iry
 \url{https://james-iry.blogspot.co.uk/2009/05/brief-incomplete-and-mostly-wrong.html}}, where it is
-deliberately falsely attributed, but it is itself a close paraphrase from~\cite{opac-b1078351} p.138.} 
+deliberately falsely attributed, but it is itself a close paraphrase of~\cite{opac-b1078351} p.138.} 
 \end{flushright}
 
 \section{Motivation} 
 The Wadler quote might be spurious, but a genuine piece of
-documentation drawn from the Control.Monad.Trans.EitherT
+Haskell documentation drawn from the Control.Monad.Trans.EitherT
 library\footnote{\url{https://hackage.haskell.org/package/either-4.4.1.1/docs/Control-Monad-Trans-Ei
 ther.html}} available from \textit{Hackage} informs us that `an apomorphism is the generalized
-anamorphism for this Monad'. Such statements, while (almost certainly) factually correct are of
-little use to the average `jobbing' programmer and indeed must be considered to have the effect
-of deliberately alienating a large part of the software engineering workforce. One can only hope
+anamorphism for this Monad'. Such statements, while (almost certainly) factually correct are
+of little use to the `average' programmer and indeed must be considered to have the effect of
+deliberately alienating a large part of the software engineering workforce. One can only hope
 that this was not the intention, because functional languages, especially those which use static
 type analysis and inference, have a great deal to offer to the programming community in terms
 of expressiveness and safety. Must it be the case therefore that introductory material is so
@@ -140,38 +140,35 @@ one's first programs?
 
 \section{Aims and Goals}
 \subsection{Project Aims}
-It seems only apposite that a functional language for the micro:bit, assuming that it is not
+It seems only just that a functional language for the micro:bit, assuming that it is not
 self-hosting, should be written in a more mature functional language. Haskell was chosen for this
 task as it presented a good opportunity to `come to grips' with the language and the paradigm. A
-single 10-week module in Miranda was not, as anticipated, sufficient preparation for the complexity
+single 10-week UCL elective module in Miranda was not, as anticipated, sufficient preparation for the complexity
 of constructing an entire program in a language which is almost aggressive in its focus on purity. 
 
-The primary target, or goal, of the project is to produce, as a first iteration, the basis of a
+The primary target, or goal, of the project is to produce, as a proof of concept, the basis of a
 language designed primarily for teaching purposes, but practical enough to write real programs for
 the micro:bit. Many languages have been implemented over the years with the express aim of teaching
 programming concepts. Perhaps the most famous and successful of these is Scheme. However, what they
 all have in common is that they are intended for an audience who are already interested in computer
-science, or are indeed computer scientists. Even classic texts, such as \textit{The Implementation
-and Interpretation of Computer Programming} is squarely pitched at a sophisticated audience.
+science, or are indeed already computer scientists. Even classic texts, such
+as~\cite{Abelson:1996:SIC:547755} and~\cite{Friedman1900} are squarely pitched at a sophisticated audience.
 The micro:bit is the opposite: it is for students with no previous programming experience,
-students who are not mathematicians, teachers who are neither mathematicians nor programmers.
-Functional programming has a reputation in the programming community as being complex and only for a
-special type of person. The aim of this project is to show that this is not necessarily be the case.
-With this in mind, the aim is to make the language as education as possible, at the expense of
-sacrificing expressiveness. 
-
-% Mention here no call with current continuation or macros, as obscuring underlying goals, which are
-% inductive reasoning and intro to types and function composition.
+students who are not mathematicians, and teachers who are neither mathematicians nor programmers.
+Functional programming has a reputation in the programming community for being complex and only for a
+special type of person. The aim of this project is to show that this is not necessarily the case.
+With this in mind, the aim is to make the language as educational and simple as possible, at the expense 
+sacrificed expressiveness. 
 
 Development progressed iteratively. Having no previous experience of engineering a large software
 project in Haskell, initial development was largely \textit{ad hoc} and unstructured. Haskell is not
 an ideal language for development in this manner. A great deal of time was spent just in understanding 
-the principles of state manipulation in a side-effect free language. Luckily there were a number of 
+the principles of state manipulation in a side-effect free language. Luckily, there were a number of 
 tutorials which served as the backbone, or perhaps more accurately, embryo, of the final project. 
 Traces of these tutorials can still be seen scattered throughout the final codebase. These were 
 perhaps both a help and a hindrance, as their original authors had not perhaps foreseen that 
 they would be so heavily expanded and built-upon. Strong foundations might have results in a project 
-which was more realised, with fewer edge cases and areas where the solutions are not as robust as could be desired. \\
+which was more realised, with fewer edge cases and areas where the solutions are not as robust as could be desired.
 
 \subsection{Project Goals}
 Formally put, the project's goals in order of importance are 
@@ -180,51 +177,52 @@ Formally put, the project's goals in order of importance are
     \item Create an uncluttered syntax for a functional language. The initial inspiration was a
         mixture of Scheme and Miranda. Scheme was considered the better model for evaluation (but
         not for syntax) as it is very simple and relatively pure. While Scheme lacks such items as algebraic data types
-        and pattern matching, it clearly exposes the underlying lambda calculus.
+        and pattern matching, it clearly exposes the underlying lambda calculus core.
     \item Write a repl environment for students to explore code and concepts. All modern languages
         ought to have a repl, so that individual snippets of code can be tested without the delay of
         compilation and the increased difficulty of pinpointing errors. The repl environment ought
         to be `friendly' and provide as much assistance to the user as possible. 
-    \item Have effective type inference so that students do not need to explicitly type variables.
-        While not every functional language has type inference\footnote{Idris, a dependently typed language,
-            requires type annotations due to the undecidability of inference of dependent types.},
-        it is a fundamental feature of the ML family. Having type inference means that the `truth'
-        of types is not hidden from the student as it would be with JavaScript or Python, but the
-        onus of type annotations is also absent.
-    \item Compiler to micro:bit flavoured C++. This part of the project which was most
+    \item Have effective type inference so that students do not need to explicitly type variables
+        and functions. While not every functional language has type inference\footnote{Idris, a
+        dependently typed language, requires type annotations due to the undecidability of inference of
+        dependent types.}, it is a fundamental feature of the ML family. Having type inference means
+        that the `truth' of types is not hidden from the student as it would be with JavaScript or
+        Python, but the onus of explicit type annotations is also absent.
+    \item Compiler to micro:bit-flavoured C++. This part of the project which was most
         pertinent to the micro:bit, but also that which would require the most time to bring to a
         degree where compilation of even complicated programs could be accomplished with safety and
         precision. 
 \end{itemize}
 
 \chapter{Context} 
-\section{The BBC micro:bit} The BBC micro:bit is a microprocessor device aimed at
-bringing programming to young adults and teenagers. At present it supports a number of different
-programming languages, most visibly \textit{MicroPython, JavaScript} and \textit{TouchDevelop}.
-These languages, while mainstream and popular,\footnote{With the exception of \textit{TouchDevelop}
-of course.} all fundamentally support the same programming paradigm, the imperative. Doubtless it
-is vital for all would-be coders to have knowledge and experience with the imperative/procedural
-approach to structuring code, but it is not the only approach, and perhaps not the best for
-beginners or those with only a passing interest in coding. It is the contention of the author that
-a syntactically simple, (relatively) \textit{pure} functional language would make for an ideal
-teaching tool on the micro:bit, allowing the student to focus almost entirely on the problem domain,
-and a great deal less on syntax and \textit{boilerplate}. Functional languages are increasingly
-being used in every area of real-world applications. In robotics, a field where the micro:bit has
-already been used with some success, there has been some research conducted in the use of the declarative style
-for low level robotics programming\cite{frob}. This at least demonstrates that the functional style
-is applicable to the problem area, but further research would be required to test the suitability of
-the micro:bit as a low-level controller. Certainly, anything which can be programmed in MicroPython
-could also be written (possible more briefly and with fewer bugs) in a functional language.
+\section{The BBC micro:bit} The BBC micro:bit\footnote{\url{https://www.microbit.co.uk/}} is a
+microprocessor device aimed at bringing programming to young adults and teenagers. At present it
+supports a number of different programming languages, most visibly \textit{MicroPython, JavaScript}
+and \textit{TouchDevelop}. These languages, while mainstream and popular,\footnote{With the
+exception of \textit{TouchDevelop} of course.} all fundamentally support the same programming
+paradigm, the imperative. Doubtless it is vital for all would-be coders to have knowledge and
+experience with the imperative/procedural approach to structuring code, but it is not the only
+approach, and perhaps not the best for beginners or those with only a passing interest in coding.
+It is the contention of the author that a syntactically simple, (relatively) \textit{pure}
+functional language would make for an ideal teaching tool on the micro:bit, allowing the
+student to focus almost entirely on the problem domain, and a great deal less on syntax and
+`boilerplate'. Functional languages are increasingly being used in every area of real-world
+applications. In robotics, a field where the micro:bit has already been used with some success,
+there has been some research conducted in the use of the declarative style for low level robotics
+programming\cite{frob}. This at least demonstrates that the functional style is applicable to the
+problem area, but further research would be required to test the suitability of the micro:bit as
+a low-level controller. Certainly, anything which can be programmed in MicroPython could also be
+written (possible more briefly and with fewer bugs) in a functional language.
 
 \section{Teaching Languages}
 There is a long history of languages designed with the express purpose of teaching rather than
 production. These generally fall into two streams of development: reduced versions of established
-professional languages, and graphical environments. In general, the visual programming languages, of
-which \textit{Scratch} is undoubtedly the most well established, are intended for a younger age
-group. On the micro:bit \textit{Microsoft Block Editor} is of this variety. 
-\textit{Microsoft Touch Develop} and \textit{Code Kingdoms JavaScript} appear to offer a hybrid
-experience, with textual code presented in a coloured, graphical editor. Finally there is a port of
-the \textit{Python} programming language, which best typifies that school of tuition where a real
+professional languages, and graphical `drag-and-drop' environments. In general, the visual
+programming languages, of which \textit{Scratch} is undoubtedly the most well established, are
+intended for a younger age group. On the micro:bit \textit{Microsoft Block Editor} is of this
+variety. \textit{Microsoft Touch Develop} and \textit{Code Kingdoms JavaScript} appear to offer a
+hybrid experience, with textual code presented in a coloured, graphical editor. Finally there is a
+port of the Python programming language, which best typifies that school of tuition where a real
 language is used in a simplified context.
 
 \section{Python as Teaching Language}
@@ -232,11 +230,10 @@ While Python was not explicitly designed as a teaching language, in recent years
 been used as an introductory language in university settings. MIT, where Scheme was first created
 and promoted, has begun to teach its introductory courses in Python. With Python already available
 on the micro:bit, why is there the need for another text-based language on the same platform? Is
-this not just `muddying the waters' of what should be a simple educational tool. Do instructors
-really have the time to learn another language if students should express an interest in programming
+this not just `muddying the waters' of what should be a simple educational tool? Do instructors
+really have the time to learn another language in the event that students express an interest in programming
 functionally?
 
-\section{Python vs Miranda/Haskell}
 In an attempt to address some of these questions, it is necessary to derive some picture of what might
 constitute a functional language, and why it might be a useful way to teach programming to younger
 learners. Being more a philosophical stance than technical necessity, it is possible to mix various
@@ -265,10 +262,10 @@ To solve this in Python using functional concepts, something like this might be 
 
 This is clearly an improvement in terms of brevity, and is perhaps a little easier to understand.
 The main difficulty here in the physical writing of the code is balancing the parentheses,
-but any good editor should be able to do this automatically. The filter higher order function
+but any good editor should be able to do this automatically. The higher order function
 \textit{filter} has a fairly clear meaning to any native English speaker. However the rather obscure
 use of \textit{list} and, even worse, \textit{lambda} still makes this rather difficult for the
-student. There is a number of topics which would need to be explained here which reduce the utility
+student. A number of topics would need to be explained here which reduce the utility
 of this as a teaching example. Why is the syntax still relatively cumbersome? Because Python was
 not conceived as a functional language, many of these features have been grafted onto a traditional
 imperative substructure, and the syntax reveals this. The equivalent function in Haskell would be:
@@ -294,7 +291,7 @@ where p is any predicate we care to pass in, such as (==3) or (\textless2). The 
 prevent someone from passing in junk values (leading to a runtime error) but the Haskell code, with
 the addition of a simple \textit{type signature} can easily be altered to only receive integers,
 ensuring type safety. This need not be explained to the student in these terms, but they will
-benefit from their program not crashing in unexpected and difficult to detect ways.
+benefit from their program not crashing in unexpected and difficult-to-detect ways.
 
 \begin{minted}{haskell}
     sumAllOccurrences :: (Int -> Bool) -> [Int] -> Int
@@ -302,7 +299,7 @@ benefit from their program not crashing in unexpected and difficult to detect wa
 \end{minted}
 
 This is more powerful than the equivalent Python for loop definition, and a great deal more
-flexible. Obviously this could also be implemented in python using filters and lambda expressions,
+flexible. Obviously this could also be implemented in Python using filters and lambda expressions,
 but it would still need to be couched inside a function definition.\footnote{This is slightly
 disingenuous, as a list comprehension, in both Python and Haskell, would work well here. It does
 serve to illustrate the general point. Of course, list comprehensions were first introduced in
@@ -310,48 +307,50 @@ functional programming languages.}. In this simple example much of the essence o
 programming style can be seen. The advantages are clear: fewer lines of code usually means fewer
 bugs and less development time. Students can get to solving problems almost immediately, without the
 worry (or rather a reduced worry) about the syntactical correctness of their loops, or balancing
-a host of nested parentheses. %Haskell is a large and complicated language and not suitable for
-younger students\footnote{make a reference here or somewhere to the eitherT library, by Kmett}.
-Its runtime is large and complex, and would almost certainly not run efficiently on the micro:bit.
-Its emphasis on purity has led it to introduce a number of features which, while theoretically
-elegant, are complex even for experienced programmers. There is however a family of other, related,
-languages, mostly descended directly or indirectly from ML\footnote{Excepting the Lisp family
-representatives, \textit{Common Lisp} and \textit{Scheme}}, which place different emphasis on parts
-of the functional paradigm.\footnote{The table is a simplified (and slight corrected) version of the
-available from \url{https://en.wikipedia.org/wiki/Comparison_of_functional_programming_languages}.
-Monads, monoids and functors, while important concepts in functional languages, are definitely out
-of scope for a teaching language to teenagers. The approach taken by \textit{Miranda} is that which
-will be followed in the suggested implementation, hiding unnecessary detail with the loss of a
-little referential transparency.}
+a host of nested parentheses. 
+
+Haskell is a large and complicated language and not suitable for younger students. Its runtime
+is large and complex, and would almost certainly not run efficiently on the micro:bit, even
+in a reduced version. Lazy graph-reduction evaluation would rapidly exhaust the memory of the
+micro:bit, leading to constant garbage collection in a manner that might be best described as
+`thrashing'. Moreover its emphasis on purity has led it to introduce a number of features which,
+while theoretically elegant, are complex even for experienced programmers. There is however a family
+of other, related, languages, mostly descended directly or indirectly from ML\footnote{Excepting
+the Lisp family representatives, \textit{Common Lisp} and \textit{Scheme}.}, which place different
+emphasis on parts of the functional paradigm. Monads, monoids and functors, while important concepts
+in programming languages, are definitely out of scope for a teaching language to teenagers. The
+approach taken by \textit{Miranda}\footnote{See~\ref{sec:lang} for more details.} is that which will
+be followed in the suggested implementation, hiding unnecessary detail with the loss of a little
+referential transparency.
 
 \section{Research: Literature Review}
 With the thought in mind of creating a Miranda style language for the micro:bit, came the necessity
 to decide on the technologies and theoretical basis for the language. Being an implementation of the
-lambda calculus, it was necessary to choose an axis on the \textit{lambda cube} for further
-development. 
+lambda calculus, it was necessary to choose an axis on the \textit{lambda cube}\footnote{See
+Figure~\ref{fig:cube}} for further development. 
 
 As one of the principle learning goals was to develop some skill with Haskell, a number of books and
 tutorials were consulted. Of most immediate use for basic programming were \cite{Lipovaca:2011:LYH:2018642}
 and \cite{rwh}. For language design and implementation a number of websites were consulted, among which
 \cite{scheme}, \cite{diehl} were particularly useful. Two further tutorials deserve special mention
 as they gave simplified accounts of algorithm W \cite{algoW} and the usage of monad transformers
-\cite{transformers}.
+\cite{transformers}, both of which were vital to the success of the project.
 
 Many papers were consulted initially while deciding on the best approach for microML's type
-system\footnote{These are listed in the bibliography.}.
+system\footnote{These are fully listed in the bibliography.}.
 In practice, very little of this reading has made it into the language as currently constituted, but
 it is hoped that the design allows for future development to integrate some of these possible
-features more easily. Always bearing in mind of course the intended scope of the language. This perhaps
+features more easily, always bearing in mind the intended scope of the language. This
 was one of the most difficult design decisions: what had a legitimate place in a language for a
 simple processor aimed at teachers, and what could be implemented simply for the interests of the
 developer, or because it was simple to do? Design decisions based on ease of implementation or to
 please the vanity of the designer are correct only be coincidence, and this is a poor way to
-design\footnote{This recalls Tony Hoare's `Billion Dollar Mistake'.}. Of greatest use were
+design\footnote{This recalls Tony Hoare's `Billion Dollar Mistake'.}. Of great use were
 \cite{Pierce:2002:TPL:509043} with its excellent general account of type theory (and implementation
 chapters written in \textit{OCaml}) and\@\cite{Pierce:2004:ATT:1076265} with its exploration of type
 inference in ML\@. 
 
-For basic language design, both\@\cite{spj2} and\@\cite{spj1} were important, the former for the
+For basic language design, both\@\cite{spj2} and\@\cite{spj1} were very informative, the former for the
 theoretical basis and the latter for its more practical stance. Regarding language design in
 general, both~\cite{Harper:2012:PFP:2431407} and~\cite{plp} were invaluable, especially the latter
 with its very clear and concrete handling of the topic. Many details of syntax were inspired by
@@ -360,7 +359,7 @@ information gleaned from this book.
 Compiler implementation has a large body of literature. For background reading on BNF and
 parsing,~\cite{torc} gives perhaps the clearest, most modern explanation.
 \cite{Appel:1997:MCI:248430} is also extremely useful for its more practical approach. This work,
-the so-called \textit{Tiger Book} is available in a number of different languages. The ML edition is
+the so-called \textit{Tiger Book}, is available in a number of different languages. The ML edition is
 the most pertinent to this project.
 
 \subsection{The Lambda Cube}
@@ -369,6 +368,7 @@ Coquand's calculus of constructions\cite{Barendregt:1993:LCT:162552.162561}. The
 represented.\footnote{\cite{Pierce:2002:TPL:509043} has a slightly different treatment of the axes.}
 
 \begin{figure}[!h]
+    \label{fig:cube}
     \centering
     \begin{tikzpicture}
       \matrix (m) [matrix of math nodes, row sep=3em,
@@ -513,6 +513,7 @@ satisfaction. The immediate application of ADTS for micro:bit programming is not
 apparent, so, much in the manner of Scheme, these will not be considered a priority of microML.
 
 \section{Language Design} 
+\label{sec:lang}
 Miranda\textsuperscript{TM} is a language
 created by David Turner in the early 1980s\footnote{The wikipedia page says that Miranda supports
 monads. This is not correct, in the sense that it is not possible for the programmer to create
@@ -605,7 +606,7 @@ product. The user is envisaged to be a young adult, between the ages of 13 and 1
 instructor, usually a teacher and not a computer science specialist.
 
 \begin{table}
-    \begin{tabu}{|>{\columncolor[gray]{0.9}}p{3.5cm}| p{10cm} |}
+    \begin{tabu}{|>{\columncolor[gray]{0.9}}p{4cm}| p{10cm} |}
         \hline
         Use Case & \textbf{Student Use Case} \\
         \hline
@@ -621,24 +622,28 @@ instructor, usually a teacher and not a computer science specialist.
         Alternative Flows & \tabitem The student uses a text editor to right code directly. For this
         a simple vim plugin has been provided. At present, only vim is supported. \\
         \hline
-        Entry Conditions & not sure yet \\
-        \hline
-        Exit Conditions & not sure yet \\
-        \hline
     \end{tabu}
 \end{table}
 
 \begin{table}
-    \resizebox{\textwidth}{!}
-    {\begin{tabu}{l | l |}
+    \begin{tabu}{|>{\columncolor[gray]{0.9}}p{4cm}| p{10cm} |}
         \hline
-        Use Case & Student Use Case \\
-        Participating Actors & Student \\
-        Flow of Events & stuff here \\
-        Alternative Flows & stuff here \\
-        Entry Conditions & not sure yet \\
-        Exit Conditions & not sure yet \\
-    \end{tabu}}
+        Use Case & \textbf{Educator} \\
+        \hline
+        Participating Actors & Educator \\
+        \hline
+        Flow of Events & \tabitem The educator invents a problem or uses one provided by the
+        curriculum. \\
+                       & \tabitem The educator opens the repl and explores the problem domain. \\
+                       & \tabitem The educator creates some working code and copies it to a text file.  \\
+                       & \tabitem The educator runs the file through the compiler. \\
+                       & \tabitem The educator passes the resulting C++ file through \textit{yotta} \\
+                       & \tabitem The educator flashes the binary to the micro:bit. \\
+        \hline
+        Alternative Flows & \tabitem The student uses a text editor to right code directly. For this
+        a simple vim plugin has been provided. At present, only vim is supported. \\
+        \hline
+    \end{tabu}
 \end{table}
 
 \chapter{Design and Implementation}
