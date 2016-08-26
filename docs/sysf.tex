@@ -1,7 +1,51 @@
+This treatment of System F is taken from~\cite{Pierce:2002:TPL:509043}
+
 \begin{minipage}{0.4\textwidth}
-    stuff here
+    \begin{tabu}{l l r}
+        t ::= & & \\
+              & x & \textit{variable} \\
+              & $\lambda x:T.t$ & \textit{abstraction} \\
+              & t t & \textit{application} \\
+              & $\lambda X.t$ & \textit{type abstraction} \\
+              & t [T] & \textit{type application} \\
+    \end{tabu}
+    \begin{tabu}{l l r}
+        v ::= & & \\
+              & $\lambda x:T.t$ & \textit{abstraction value} \\
+              & $\lambda X.t$ & \textit{type abstraction value} \\
+    \end{tabu}
+    \begin{tabu}{l l r}
+        T ::= & & \\
+              & X & \textit{type variable} \\
+              & $T \rightarrow T $ & \textit{type of functions} \\
+              & $\forall X.T$ & \textit{universal type} \\
+    \end{tabu}
+    \begin{tabu}{l l r}
+        $\Gamma$ ::= & & \\
+              & $\varnothing$ & \textit{empty context} \\
+              & $\lambda x:T$ & \textit{type variable binding} \\
+              & $\Gamma ,T$ & \textit{application} \\
+    \end{tabu}
 \end{minipage}
 \hfill\vline\hfill
 \begin{minipage}{0.4\textwidth}
-    stuff here
+    \hspace{-10mm}
+    \tabulinesep=2.2mm
+    \begin{tabu}{l r}
+        $\displaystyle \frac{t_1 \rightarrow t\prime_1}{t_1\:t_2 \rightarrow t\prime_1\:t_2}$ & (E-App1)\\
+        $\displaystyle \frac{t_2 \rightarrow t\prime_2}{v_1\:t_2 \rightarrow v_1\:t\prime_2}$ &
+        (E-App2) \\
+        $\displaystyle (\lambda x:T_{11}.t_{12})v_2 \rightarrow [x \mapsto v_2] t_{12}$ & (E-AppAbs)
+        \\
+        $\displaystyle \frac{t_1 \rightarrow t\prime_1}{t_1[T_2] \rightarrow t\prime_1[T_2]}$ &
+        (E-TApp) \\
+        $\displaystyle (\lambda X.t_{12}[T_2]) \rightarrow [X \mapsto T_2] t_{12}$ & (E-TAppTAbs) \\
+        $\displaystyle \frac{x:T \in \Gamma}{\Gamma \vdash x:T}$ & (T-Var) \\
+        $\displaystyle \frac{\Gamma , x:T_1 \vdash t_2:T_2}{\Gamma \vdash \lambda x:T_1.t_2:T_1 \rightarrow T_2}$ & (T-Abs) \\
+        $\displaystyle \frac{\Gamma \vdash t_1:T_{11}\rightarrow T_{12}\;\Gamma \vdash
+        t_1:T_{11}}{\Gamma \vdash t_1\:t_2:T_{12}}$ & (TApp) \\
+        $\displaystyle \frac{\Gamma , X \vdash t_2:T_2}{\Gamma \vdash \lambda X.t_2 : \forall X.T_2}$ & (T-TAbs) \\
+        $\displaystyle \frac{\Gamma \vdash t_1: \forall X.T_{12}}{\Gamma \vdash t_1 [T_2]:[X \mapsto
+        T_2]T_{12}}$ & (T-TApp) \\
+    \end{tabu}
 \end{minipage}
