@@ -1,8 +1,6 @@
 -- Church encoding and Peano numeral
-
 let tr x y = x;
 let fls x y = y;
-
 let zero f x = x;
 let one f x = f x;
 let two f x = f (f x);

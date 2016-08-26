@@ -7,5 +7,4 @@ toUpper takes a lowercase letter and changes it to uppercase
     > toUpper 'a'
     > 'A' : Char
 *)
-
 let toUpper x = x
