@@ -17,4 +17,11 @@ microML
 *.fdb_latexmk
 *.bbl
 *.blg
+*.glo
+*.gls
+*.glsdefs
+*.ist
+*.lof
+*.lot
+*.ilg
 _minted-report
