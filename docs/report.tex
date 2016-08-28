@@ -350,7 +350,7 @@ as they gave simplified accounts of algorithm W \cite{algoW} and the usage of mo
 \cite{transformers}, both of which were vital to the success of the project.
 
 Many papers were consulted initially while deciding on the best approach for microML's type
-system\footnote{These are fully listed in the bibliography.}. In practice, very little of this
+system\footnote{These are detailed in the bibliography.}. In practice, very little of this
 reading has made it directly into the language as currently constituted, but it is hoped that the
 design allows for future development to integrate some of these possible features more easily,
 always bearing in mind the intended scope of the language. This was one of the most difficult
@@ -380,7 +380,6 @@ Coquand's calculus of constructions\cite{Barendregt:1993:LCT:162552.162561}. The
 represented.\footnote{\cite{Pierce:2002:TPL:509043} has a slightly different treatment of the axes.}
 
 \begin{figure} % [!h]
-    \label{fig:cube}
     \centering
     \begin{tikzpicture}
       \matrix (m) [matrix of math nodes, row sep=3em,
@@ -402,9 +401,10 @@ represented.\footnote{\cite{Pierce:2002:TPL:509043} has a slightly different tre
                 edge (m-4-3);
     \end{tikzpicture}
     \caption{The Lambda Cube}
+    \label{fig:cube}
 \end{figure}
 
-This can be understood as a exploring refinements of of type lambda calculi. Starting in the bottom
+This can be understood as exploring refinements of typed lambda calculi. Starting in the bottom
 left hand corner $\lambda \rightarrow$ is the simply type lambda calculus as developed by Church,
 Curry and Feys in the 1940s\footnote{\cite{Pierce:2002:TPL:509043} p11 gives a simple timeline
 of type theory research.}. The top right corner, the `summit' of calculi is $\lambda P \omega$,
@@ -438,7 +438,7 @@ Good type inference, with easy to read error messages, is an essential feature o
 which it would struggle to justify its existence.
 
 \section{Software, Tools, Libraries}
-Haskell is ideally suited to the creation of a \gls{DSL}. This is largely due to its
+Haskell is ideally suited to the creation of \gls{DSL}s. This is largely due to its
 \textit{algebraic data types} which can easily be used to represent the BNF of an embedded
 language. Moreover Haskell is blessed with the Parsec library of parser combinators\footnote{A
 \textit{combinator} is simply a function with no free variables, so it only operates on
@@ -454,9 +454,9 @@ are an integral part of the language, to realize that both \textit{Cabal} and \t
 rather `grafted on' aspect.
 
 All Hackage packages are available through Cabal, but version management is not
-rigorously enforced. Builds can and do break easily and frequently. So-called `Cabal
+rigorously enforced. Builds can and do break frequently and easily. So-called `Cabal
 Hell'\footnote{\url{https://wiki.haskell.org/Cabal/Survival}} is a real problem, especially for
-those with no prior experience with the tool\footnote{Indeed, this project was hit twice by Cabal
+those with no prior experience of the tool\footnote{Indeed, this project was hit twice by Cabal
 Hell, once due to a version bump of the ncurses library, and once for a new version of GHC\@.
 Some days were lost just to recreate a usable Haskell environment.}. It is poor design to inflict
 such problems on an end user who only wants to build a piece of software from source rather then
@@ -470,13 +470,11 @@ interactive environment, but provides better type information and error messages
 good integration with neovim, the author's editor of choice.} but unfortunately this also meant that some
 experimental code (specially the JIT compiler) had to be disabled. See Section~\ref{SC@2}.
 
-
-
 \chapter{Requirements and Analysis}
 
-If the task is to design and implement a functional programming language, the obvious question is: What is a functional language? 
-Examining some of the leading languages widely regarded as belonging to the family, a number of
-features emerge.
+If the task is to design and implement a functional programming language, the obvious question is:
+what is a functional language? Examining some of the leading languages widely regarded as belonging
+to the family, a number of features emerge.
 
 \begin{table}
     \resizebox{\textwidth}{!}
@@ -554,19 +552,19 @@ functional programming languages, and the direct parent of Haskell and Haskell's
 Indeed, one of the reasons for the creation of Haskell was the fact that Miranda was trademarked and
 closed source. It might best be described as a (small) subset of Haskell\footnote{Though it would
 be more accurate to describe Haskell as a superset of Miranda.}. It is still used as a teaching
-language and has a very clean, simply syntax. A reduced version of Miranda is suggested for the
-language, which will go under the working title of microML.\footnote{microMiranda would probably be
+language and has a very clean, simply syntax. A reduced version of Miranda is suggested for 
+the language, which will go under the working title of microML.\footnote{microMiranda would probably be
 a more honest name, but there might be a small risk of copyright infringement.}
 
-Miranda has an reasonably rich standard library, which comes automatically with the interpreter. MicroML
-should have a subset of this standard library, with functions such as map, filter and fold\footnote{Miranda 
-    distinguishes between left and right folds. This, while very flexible, might be
-too complex for most students. Both Clojure and Python have a simple \textit{reduce} which has the
-behaviour of a right fold. In Clojure \textit{apply} is similar to a left fold.}. As far as possible, 
-all built-in functions should be \textit{safe}, that is, there should be no
-partial functions in the standard library. A partial function is one which does not produce a legal
-result for every legal input, for example taking the head of an empty list in Haskell or Miranda
-results in a error.
+Miranda has an reasonably rich standard library, which comes loaded automatically in the
+interpreter. MicroML should have a subset of this standard library, with functions such as
+map, filter and fold\footnote{Miranda distinguishes between left and right folds. This, while
+very flexible, might be too complex for most students. Both Clojure and Python have a simple
+\textit{reduce} which has the behaviour of a right fold. In Clojure \textit{apply} is similar to
+a left fold.}. As far as possible, all built-in functions should be \textit{total}, that is, there
+should be no partial functions in the standard library. A partial function is one which does not
+produce a legal result for every legal input, for example taking the head of an empty list in
+Haskell or Miranda results in a error.
 
 \begin{minted}{haskell}
     head []
@@ -574,34 +572,29 @@ results in a error.
 \end{minted} 
 
 However this is not a necessity\footnote{The head function in Haskell's standard prelude is a legacy
-    from Miranda which unfortunately is too late to change easily. The Idris language (itself
-    written in Haskell) has a built-in function totality checker, usable from the repl, to ensure
-that such unsafe practices are deliberate rather than accidental or due to programmer laziness.} 
-and safe versions of these functions should be written for microML. 
+from Miranda which unfortunately is too late to change easily. The Idris language (itself written in
+Haskell) has a built-in function totality checker, usable from the repl, to ensure that such unsafe
+practices are deliberate rather than accidental or due to programmer laziness.} and safe versions of
+these functions should be written for microML.
 
-Laziness, or more accurately non-strictness,  is an interesting feature of many functional languages, 
+Laziness, or more accurately non-\gls{strict}, is an interesting feature of many functional languages, 
 but it is a little unclear at the moment what this would mean for programming on the micro:bit. 
 Laziness is chiefly useful when dealing with infinite data structures, which is an unlikely
 scenario. Moreover, lazy evaluation can make reasoning about the structure of a program more
 difficult than is necessary at this stage of the programmer's development, where a more literal
 `first this then this' might be easier to understand. 
 
-Another of the more interesting features of the ML family is type inference and static typing. This
-is unlikely to be of huge interest to the average student, but it has many benefits. Most
-importantly, errors which in a language like Python would only be caught at runtime do not get past
-the compilation stage of an ML-style language. Student-friendly (rather than detailed
-programmer-friendly) error messages will have to be
-written to help the student understand what they have done wrong. Type inference should limit the
-student's direct interaction with the type system, which can be very difficult to understand.
-
-Every functional language has algebraic data types. They are fundamental to how any large program is
-constructed. They can be used to simulate enumerations in other languages and as value constructors
-(vital in constructing ASTs for example). With regard to the field of robotics for example, to
-should be possible to create ADTs which describe the behaviour and attributes of the robot.
+Another of the more interesting features of the ML family is type inference and static typing.
+This is unlikely to be of huge interest to the average student, but it has many benefits. Most
+importantly, errors which in a language like Python would only be caught at runtime do not get
+past the compilation stage of an ML-style language. Student-friendly (rather than detailed
+programmer-friendly) error messages will have to be written to help the student understand what they
+have done wrong. Type inference should limit the student's direct interaction with the type system,
+which can be very difficult to understand.
 
 Immutability of data is a key (but not universal) feature of the functional paradigm. It allows for
 referential transparency and an easier approach to concurrency. Again, these are not features which
-are vital to the micro:bit, but they will help students in the future who wish to continue their
+are vital to the micro:bit, but they will help students in the future who wish to continue 
 coding. Indeed, immutability is in many ways more intuitive for students. If x = 6, then it is 6 for
 the entire program. This is a much simpler concept than having a value for x which can go up and down,
 or even change type.
@@ -610,32 +603,35 @@ or even change type.
 The following are the design constraints for microML:
 
 \begin{itemize}
-    \item C++ Compiler. This author had originally proposed using an existing Scheme to C compiler
-        to turn microML code to something runnable on the micro:bit. It would have been relatively
-        easy to convert the microML AST to Scheme. This would have taken advantage of the code
-        optimisations and garbage collection of the Scheme compiler\footnote{Either Chicken
-        \url{https://www.call-cc.org/} or \url{http://dynamo.iro.umontreal.ca/wiki/index.php/Main_Page} would have been suitable
-        choices.}. However, the client from MicroSoft preferred a direct compilation from microML to
-        C++. This, while perhaps of greater educational benefit, was also much more difficult to
-        achieve within the project time frame. 
+    \item C++ Compiler. The author's initial proposal to MicroSoft was to use an existing Scheme
+        to C compiler to turn microML code into something runnable on the micro:bit. It would have
+        been relatively easy to convert the microML AST to Scheme. This would have taken advantage of
+        the code optimisations and garbage collection of the Scheme compiler\footnote{Either Chicken
+        \url{https://www.call-cc.org/} or Gambit-C \url{http://dynamo.iro.umontreal.ca/wiki/index.php/Main_Page}
+        would have been suitable choices.}. However, the MicroSoft client preferred a direct
+        compilation from microML to C++. This, while perhaps of greater educational benefit, was also
+        much more difficult to achieve within the project time frame.
     \item Repl Environment. MicroML should be an interactive experience, with immediate feedback to
         the student. The easiest way to achieve this, rather than constantly flashing to the
         micro:bit and waiting for an error, is to have a repl which the student can use to explore
         concepts and problems. 
     \item Clear Syntax. As far as can be determined, the syntax should be intuitive and simple. That
         is, there should be ideally one way to do things (the antithesis of \textit{Perl's} ethos)
-        and consistent. For this reason some features, such as function composition, have been
-        reinterpreted to allow the student to read from left to right. The language structure also
-        minimizes the number of parentheses needed in an expression.
+        and to be consistent. For this reason some features, such as function composition, have been
+        reinterpreted to allow the student to read from left to right\footnote{Using microML's
+        `pipe' operator. See Appendix~\ref{appendix:syntax}.}. The language structure should also
+        minimize the number of parentheses needed in an expression.
 \end{itemize}
 
 \section{Use Cases}
-The primary use case is in schools. The micro:bit has been, or is intended to be, rolled
-out to every secondary school in the UK\@. As such it is has not been designed as a commercial
-product. The user is envisaged to be a young adult, between the ages of 13 and 18, and the
-instructor, usually a teacher and not a computer science specialist.
+The primary use case is in schools. The micro:bit has been, or is intended to be, rolled out to
+every secondary school in the UK\@. As such it is has not been designed as a commercial product.
+MicroML's remit therefore is very narrow, as it only has to target one limited platform with the
+express goal of acting as an educational tool. The user is envisaged to be a young adult, between
+the ages of 13 and 18, and the instructor, usually a teacher and not a computer science specialist.
 
 \begin{table}
+    \label{table:student}
     \begin{tabu}{|>{\columncolor[gray]{0.9}}p{4cm}| p{10cm} |}
         \hline
         Use Case & \textbf{Student Use Case} \\
@@ -653,9 +649,11 @@ instructor, usually a teacher and not a computer science specialist.
         a simple vim plugin has been provided. At present, only vim is supported. \\
         \hline
     \end{tabu}
+    \caption{Student Use Case.}
 \end{table}
 
 \begin{table}
+    \label{tabke:educator}
     \begin{tabu}{|>{\columncolor[gray]{0.9}}p{4cm}| p{10cm} |}
         \hline
         Use Case & \textbf{Educator} \\
@@ -674,64 +672,73 @@ instructor, usually a teacher and not a computer science specialist.
         a simple vim plugin has been provided. At present, only vim is supported. \\
         \hline
     \end{tabu}
+    \caption{Educator Use Case.}
 \end{table}
 
 \chapter{Design and Implementation}
 \section{Design}
-microML uses an enriched lambda calculus as its base
-\vspace{5mm}
+microML uses an enriched lambda calculus as its base. See Figure~\ref{fig:syntax}
 
-\begin{minipage}[t]{0.5\textwidth}
-    \begin{grammar}
-        <Expr> ::= Var
-        \alt{} Constructor 
-        \alt{} Application <Expr> <Expr>
-        \alt{} Let Name <Expr> <Expr>
-        \alt{} Literal 
-        \alt{} If <Expr> then <Expr> else <Expr>
-        \alt{} FixPoint <Expr>
-        \alt{} UnaryOp <Expr>
-        \alt{} BinOp <Expr> <Expr>
-        \alt{} PrimitiveErr 
-        \alt{} Nil
-    \end{grammar}
-\end{minipage}
-\begin{minipage}[t]{0.5\textwidth}
-    \begin{grammar}
-        <Literal> ::= Integer
-        \alt{} Double
-        \alt{} Boolean
-        \alt{} String
-        \alt{} Char
-        \alt{} Tuple of <Literal>
-    \end{grammar}
-\end{minipage}
-\vspace{5mm}
+\begin{figure}
+    \begin{minipage}[t]{0.5\textwidth}
+        \begin{grammar}
+            <Expr> ::= Var
+            \alt{} Constructor 
+            \alt{} Application <Expr> <Expr>
+            \alt{} Let Name <Expr> <Expr>
+            \alt{} Literal 
+            \alt{} If <Expr> then <Expr> else <Expr>
+            \alt{} FixPoint <Expr>
+            \alt{} UnaryOp <Expr>
+            \alt{} BinOp <Expr> <Expr>
+            \alt{} PrimitiveErr 
+            \alt{} Nil
+        \end{grammar}
+    \end{minipage}
+    \begin{minipage}[t]{0.5\textwidth}
+        \begin{grammar}
+            <Literal> ::= Integer
+            \alt{} Double
+            \alt{} Boolean
+            \alt{} String
+            \alt{} Char
+            \alt{} Tuple of <Literal>
+        \end{grammar}
+    \end{minipage}
+    \caption{MicroML's abstract syntax.}
+\label{fig:syntax}
+\end{figure}
 
-It will be observed that two number formats are supported in the parse tree, integers (which in
+It will be observed that two number formats are supported in the abstract syntax, integers (which in
 Haskell are unbounded big numbers) and doubles. The type system however only recognizes a
 generalized \textbf{Number}. This decision will be discussed more fully in Section~\ref{sec:type}.
 
 In addition to these basic primitives and control structures, microML also makes use of three
-primitives inherited from languages in the Lisp family:
+primitives inherited from languages in the Lisp family. Figure~\ref{fig:unary}
 
-\begin{grammar}
-    <UnaryOp> ::= Car
-    \alt{} Cdr
-    \alt{} Cons
-    \alt{} Show
-    \alt{} Read
-\end{grammar}
+\begin{figure}
+        \begin{grammar}
+            <UnaryOp> ::= Car 
+            \alt{} Cdr
+            \alt{} Cons
+            \alt{} Show
+            \alt{} Read
+            \alt{} Log
+            \alt{} Minus
+        \end{grammar}
+    \caption{Some of MicroML's unary operators.}
+\label{fig:unary}
+\end{figure}
 
-These primitives are accessed through the \textit{head}, \textit{tail} and :
-operator\footnote{MicroML partially follows the example set by Haskell in using : for cons. This
-was inherited from Miranda but is at odds with the literature, where :: is used for cons, and : for
-type.}, which are essential for recursing over lists.
+These primitives are accessed through the \textit{head}, \textit{tail} and~\:
+operator\footnote{MicroML partially follows the example set by Haskell in using~\: for cons. This
+was inherited from Miranda but is at odds with the literature, where~\:: is used for cons, and~\: for
+has-type.}, which are essential for recursing over lists.
 
 MicroML, in addition to floats and ints, also supports binary, octal and hex numbers\footnote{The
-    syntax for these is inspired by erlang, one simply writes the number in the form e.g.\ 2\#110 for a
-    binary 6. Likewise octal is 8\# and hex 16\#}. These are not
-treated as primitives however, and are automatically converted to an appropriate numeric representation.
+syntax for these is inspired by erlang: one simply writes the number in the form e.g.\ 2\#110 for a
+binary 6. Likewise octal is 8\# and hex 16\#}. These are not treated as primitives however, and are
+automatically converted to an appropriate numeric representation.
 
 The \textit{FixPoint} primitive allows for the creation of recursive functions by satisfying the equation
 \begin{displaymath}
@@ -744,34 +751,34 @@ The most famous fix-point combinator without a doubt is Curry's \textit{Y-combin
 \end{displaymath}
 
 To see how this can be used to simulate recursion\footnote{there are many excellent texts which
-    give detailed explanations of the \textit{Y-combinator}, such as \dots } it is necessary simply
-to supply an argument in the form of a lambda abstraction.
+give detailed explanations of the \textit{Y-combinator}, such as~\cite{citeulike:2570403}} it is necessary simply
+to supply an argument in the form of a lambda abstraction. Figure~\ref{fig:yCombinator}.
 
 \begin{figure}
-    \centering
-    \begin{eqnarray*}
-        && Y g = (\lambda f. (\lambda x.\ f (x x)) (\lambda x.\ f (x x))) g \\
-        & \to_\beta & (\lambda x.\ g (x x)) (\lambda x.\ g (x x)) \\
-        & \to_\beta & g ((\lambda x.\ g (x x)) (\lambda x.\ g (x x))) \\
-        & \equiv & g (Y g)
-    \end{eqnarray*}
+        \begin{eqnarray*}
+            && Y g = (\lambda f. (\lambda x.\ f (x x)) (\lambda x.\ f (x x))) g \\
+            & \to_\beta & (\lambda x.\ g (x x)) (\lambda x.\ g (x x)) \\
+            & \to_\beta & g ((\lambda x.\ g (x x)) (\lambda x.\ g (x x))) \\
+            & \equiv & g (Y g)
+        \end{eqnarray*}
+    \caption{Y combinator reduction.}
+    \label{fig:yCombinator}
 \end{figure}
 
 While two different number types are supported by the parser, the type checker only recognizes the
-type \textit{Number}. The compiler will benefit from knowledge of the number type, i.e.\ int or double,
+type \textbf{Number}. The compiler will benefit from knowledge of the number type, i.e.\ int or double,
 whereas the user (a school-aged student) will not.
 
 \subsection{Parsing}
-A number of different libraries were examined before settling on the `standard'
-\textit{Parsec} library of parser combinators\footnote{A combinator is a lambda expression which
-    contains no occurrences of a free variable, i.e.\ all of its arguments are
-    explicitly supplied to it, and it does not rely on any global state or globally defined
-    variables}. \textit{Parsec} is a highly
-flexible tool, perhaps more similar to \textit{ANTLR}\footnote{\url{http://www.antlr.org/}} than to
-\textit{Yacc} or \textit{Bison}. Explicit regular expressions are not required, as the parser /
-lexer is a composite of a great number of small, specialized parser functions, which are linked
+A number of different libraries were examined before settling on the `standard' \textit{Parsec}
+library of parser combinators\footnote{A combinator is a lambda abstraction which contains no
+occurrences of a free variable, i.e.\ all of its arguments are explicitly supplied to it, and it
+does not rely on any global state or globally defined variables}. \textit{Parsec} is a highly
+flexible tool, perhaps more similar to \textit{ANTLR}\footnote{\url{http://www.antlr.org/}} than
+to \textit{Yacc} or \textit{Bison}. Explicit, complex-to-read, regular expressions are not required, as the parser
+/ lexer is a composite of a great number of small, specialized parser functions, which are linked
 together. If one parser fails, the next is tried until either parsing succeeds or a fatal error
-occurs. 
+occurs.
 
 Other libraries, such as \textit{MegaParsec} and \textit{Trifecta}, both respected and powerful,
 were examined. Trifecta especially seems like a very interesting parsing library, with excellent
@@ -779,30 +786,35 @@ support for detailed, custom error messages. This would have been ideal for a te
 of the nature of microML:\@ unfortunately there is an almost total absence of documentation on the
 use of Trifecta, and internet tutorials of any size beyond the trivial do not seem to exist. The
 programming language \textbf{Idris} uses Trifecta for its parser, so future iterations of microML
-might be able to migrate to Trifecta after careful examination of the Idris source.
+might be able to migrate to Trifecta after careful examination of the Idris source. Moreover,
+Trifecta seems to suffer from `Cabal Hell' on a regular basis, as its list of dependencies is
+extensive and temperamental\footnote{The author was unable to even install the library without
+having to uninstall a great number of conflicting package versions.}.
 
-MegaParsec has excellent support for indentation sensitive grammars, which Parsec does not.
-Again, this would be a useful feature to add to microML at a later stage of development. It seems
-to be however, at the present time, misplaced energy to focus on what is essentially syntactic
-sugar when other, more vital, elements of the project are still not functioning as they should or
-have not even been started. Moreover, MegaParsec is a relatively new, and non-standard, library
-whereas most installations of Haskell ship with Parsec as a component of the standard library. Of
-course, eschewing the new in favour of that which is ubiquitous (often in the name of backwards
-compatibility) is a bad habit which retards the development of better software. In this case
-however, the added power of MegaParsec is not yet required.
+MegaParsec has excellent support for indentation sensitive grammars, which Parsec does not. Again,
+this would be a useful feature to add to microML at a later stage of development. MegaParsec
+also have the great advantage that it has the facility to be testing using HSpec\footnote{see
+Chapter~\ref{testing}.} whereas Parsec does not allow for automated testing in any Haskell
+testing framework. It seems to be, at the present time, misplaced energy to focus on what
+is essentially syntactic sugar when other, more vital, elements of the project are still not
+as functional as they should be. Moreover, MegaParsec is a relatively new,
+and non-standard, library whereas most installations of Haskell ship with Parsec as a component of
+the standard library. Of course, eschewing the new in favour of that which is ubiquitous (often
+in the name of backwards compatibility) is a bad habit which retards the development of better
+software. In this case however, the added power of MegaParsec is not yet required.
 
 Formally, parsec belongs to the family of \textbf{LL(1)} parsers. Obviously this does slightly
 reduce the flexibility of the language design\footnote{LL(1) parsers can only recognize a subset
 of the context-free languages.}. Haskell itself does not use an LL(1) parser, but rather an
-\textbf{LALR(1)} built using \textit{Happy} and \textit{Alex}, much in the manner of a parser
-constructed using \textit{Yacc}, but such power is not required for the much more limited range of
-expression available in microML\. If the language were ever to be expanded or made more robust, it
-would perhaps be reasonable to rewrite the parser to make use of this model.
+\textbf{LALR(1)} built using \textit{Happy} and \textit{Alex}\footnote{The native Haskell versions
+of Lex and Bison.}, much in the manner of a parser constructed using \textit{Yacc}, but such power
+is not required for the much more limited range of expression available in microML\. If the language
+were ever to be expanded or made more robust, it would perhaps be reasonable to rewrite the parser
+to make use of this model.
 
 \subsection{Type Inference}
 \label{sec:type}
-MicroML uses an implementation of \textit{algorithm W}\footnote{based on the following tutorial
-implementation \url{https://github.com/wh5a/Algorithm-W-Step-By-Step/blob/master/AlgorithmW.lhs}}
+MicroML uses an implementation of \textit{algorithm W}\footnote{based on~\cite{algoW}.}
 for ML-style type inference. At present it is not possible to declare the types of functions, they
 can only be inferred. As this is primarily a teaching language with a very simple type system, this
 is not the drawback that it might otherwise be.
@@ -816,88 +828,124 @@ description of System F is beyond the scope of this report. Interested readers a
 of algorithm W.
 
 At a trivial level, primitives have a predetermined type, so \textbf{(Lit (LInt 4))} has type
-\textbf{Number}, likewise \textbf{(Lit (LBoolean true))} has type \textbf{Boolean}.
+\textbf{Number}, likewise \textbf{(Lit (LBoolean true))} has type \textbf{Boolean}. At a slightly
+higher level, many operators only work on certain types, so the presence of these operators can help
+the inference system to resolve the constraints. For example (+) is defined to work only on objects
+of type Number. An expression of the type \textit{true + false} will fail with a \textit{unification
+error} as (+) is not a supported operator for this data type.
 
-At a slightly higher level, many operators only work on certain types, so the presence of these
-operators can help the inference system to resolve the constraints. For example (+) is defined to
-work only on objects of type Number. An expression of the type \textit{true + false} will fail with
-a \textit{unification error} as (+) is not a supported operator for this data type.
+Hindley-Milner is guaranteed to give the most general type signature possible. For example, the
+\textit{higher order} function `compose'\footnote{Represented in Haskell by the $\circ$ operator }
+has type (Figure~\ref{fig:typesig}).
 
-Hindley-Milner is guaranteed to give the most general type signature possible. MicroML supports
-\textit{polymorphic} types. For example, the \textit{higher order} function
-`compose'\footnote{Represented in Haskell by the $\circ$ operator } has type:
-\begin{flalign*}
-    compose : \forall\:a\:b\:c.\;(a \rightarrow b) \rightarrow (c \rightarrow a) \rightarrow c \rightarrow b
-\end{flalign*}
+\begin{figure}
+        \begin{flalign*}
+            compose : \forall\:a\:b\:c.\;(a \rightarrow b) \rightarrow (c \rightarrow a) \rightarrow c \rightarrow b \\
+            let\;compose\;f\:x\: z = f (x\:z)
+        \end{flalign*}
+    \caption{Inferred type signature and microML definition for `compose'.}
+    \label{fig:typesig}
+\end{figure}
 
-For readability's sake, the repl uses the words `for all' rather than the $\forall$ symbol.
+For readability's sake, the repl uses the words `for all' rather than the $\forall$ symbol. This
+informations is suppressed in \textit{ghci}. Testing with students needs to be conducted before it
+is possible to say whether the precision of the `for all' comment outweighs the need to explain it.
 
 MicroML has a unified \textbf{Number} type for inference, even though the underlying AST stores
 appropriate information regarding the exact form of representation. Miranda too features a unified
 number type, with automatic overloading of operators and numeric functions. This makes the interface
 a little easier to use initially, as explicit casting is not possible within Miranda. Haskell
-overcomes this problem with the use of \textit{type classes}, but this is too sophisticated a method
-for microML.\ The loss of detail regarding the types of numbers is unfortunate, but was considered
-expedient in the design so as to introduce more basic concepts of type, rather than computer
-representation.
+overcomes this problem with the use of \textit{type classes}, but this is too sophisticated a
+method for microML.\ The loss of detail regarding the types of numbers is unfortunate, but was
+considered expedient in the design so as to introduce more basic concepts of type, rather than
+computer representation. As such, microML features a limited form of \textit{ad hoc polymorphism}
+as related to operator overloading. It is not possible however for students to overload built-in
+operators, or define operators of their own\footnote{Untrammelled operator creation can lead to
+chaos: the Haskell \textit{Lens} library exports over 100 different operators, leading to code that
+can look like the proverbial `alphabet soup'. Such flexibility is useful in a research language, but
+introduces a terrible level of extra complexity in a production language.}.
 
-\subsection{Comments}
-MicroML also features a small embedded language (a variant on \textbf{markdown}) for commenting
-files. See Appendix~\ref{appendix:md} for the syntax. A separate parser was written 
-for a small subset of markdown and pretty printing facilities
-for the terminal. It is assumed that the terminal is capable of rendering standard ascii
-escape sequences. Figure~\ref{fig:comments} illustrates a typical encounter with the comment system.
+\subsection{Evaluation in the Repl}
+The microML repl environment is fully capable of evaluating every aspect of microML's syntax. As
+such is can be used either as a simple calculator, or to explore such advanced concepts as closures
+and continuation-passing style. The repl has a number of features to make it easier for students to
+use, including the ability to request the type of a function, to browse loaded functions, to import
+elements from the standard library\footnote{see Section~\ref{libs}} or load user-defined scripts.
+It also has intelligent autocomplete for keywords and functions and the ability to scroll back
+through past history of the present and previous sessions. Interactions with the repl also feature
+syntax highlighting in stdout in an effort to make the content more easily parsed by a student. It
+is recognized that the terminal is no longer an environment with which most students are at all
+familiar: even many programmers avoid its use. Every effort has been made to make it a pleasant
+experience.
+
+\subsection{Comments} MicroML also features a small embedded language, a DSL
+within a DSL for commenting files. This language is a simple variant on the
+textbf{markdown}\footnote{\url{https://daringfireball.net/projects/markdown/}} markup system. See
+Appendix~\ref{appendix:md} for the syntax. A separate parser was written for a small subset of
+markdown and pretty printing facilities for the terminal. It is assumed that the terminal is capable
+of rendering standard ascii escape sequences. Figure~\ref{fig:comments} illustrates a typical
+encounter with the comment system.
 
 \begin{figure}
     \includegraphics[width=\textwidth]{images/comment.jpg}
     {\caption{Comments as seen in the terminal}}
-    \label{fig:comments}
+\label{fig:comments}
 \end{figure}
 
 In addition to help regarding function definitions, there is also a glossary of terms for those new
 to programming. Terms in the glossary are underlined in the main commentary text.  Another teaching 
-tool has been added to the repl environment which the author believes to be unique
+tool which has been added to the repl environment and which the author believes to be unique
 is the ability to print the parse tree of an expression within the repl. See figure~\ref{fig:tree}.
 
 \begin{SCfigure}
-    \label{fig:tree}
     \includegraphics[scale=0.6]{images/tree.jpg}
     {\caption{Parse tree of a simple expression as viewed in the terminal}}
+\label{fig:tree}
 \end{SCfigure}
 
+The parse tree can also be printed out as a text string, in the form that it is constructed and
+de-constructed by the parser/evaluator. Figure~\ref{fig:parsetext}
+
+\begin{figure}
+    \includegraphics[width=\textwidth]{images/parsetext.jpg}
+    {\caption{The text string of a parsed expression}}
+    \label{fig:parsetext}
+\end{figure}
+
 \subsection{Programming Style}
-It is the intention of microML to encourage a modularity of design, aiming at function composition
+It is the intention of microML to encourage modularity of design, aiming at function composition
 above all. Large, complex functions are to be actively discouraged in favour of smaller, more
-`mobile' units. Both Haskell and Miranda support the function composition operator, a single dot.
-This is directly taken for the mathematical notion of composition, where it is notated $ f \circ g
-$. While it is doubtless more mathematically pure to copy this approach, the expected user of
-microML is not a graduate mathematician, but probably only has a GSCE level of maths. MicroML
-follows the model of \textbf{Elixir} with its left-to-right \textit{pipe} operator $ |> $. However
-microML prefers the notation $ >> $ as being more explicitly about direction and movement.
+`mobile' units. Both Haskell and Miranda contain a function composition operator, a single dot.
+This is inspired directly by the mathematical notion of composition, where it is notated $ f \circ
+g $. While it is doubtless more mathematically pure to copy this approach, the expected user of
+microML is not a graduate mathematician, and probably only has GCSE level of maths, if that. MicroML
+follows the model of \textbf{Elixir} with its left-to-right \textit{pipe} operator $|>$. However
+microML prefers the notation $>>$ as being more explicitly about direction and movement.
 
 \section{Implementation}
-MicroML is written in Haskell throughout. However it should be stated that this is not the pure
-Haskell of the 2010 report, but makes use of a number of extremely useful extensions provided by
-the Glasgow Haskell Compiler, GHC.\ This unfortunately does limit the portability of microML, 
-but it would be reasonable to say the GHC has largely become the `de facto' Haskell implementation, moving the
-language as a whole more in the direction of the Python model, which is defined by CPython, 
-rather than a formal document description.
+MicroML is written in Haskell and microML itself. However it should be stated that this is not the
+pure Haskell of the 2010 report\cite{Marlow_haskell2010}, but makes use of a number of extremely
+useful extensions provided by the Glasgow Haskell Compiler, GHC.\ This unfortunately does limit the
+portability of microML, but it would be reasonable to say the GHC has largely become the `de facto'
+Haskell implementation, moving the language as a whole more in the direction of the Python model,
+which is defined by CPython, rather than a formal document description.
 
-In addition to the main program, there is also a simple vim plugin with syntax highlighting and
+In addition to the main program, there is also a simple vim plugin with syntax highlighting,
 comment folding and a primitive autocomplete, which makes editing microML in the editor a slightly
-more pleasant experience. Granted, it is a little at odds with the stated objective of microML,
-which is ease of use and suitability for beginners, to promote vim as \textit{editor of choice} but
+more pleasant experience. Granted, it is a little at odds with the stated objective of microML ---
+which is ease of use and suitability for beginners --- to promote vim as \textit{editor of choice} but
 this was largely convenience for the author whose preferred editor is \textbf{neovim}, an ambitious
-fork of vim.\footnote{\url{https://neovim.io/}}
+refactoring fork of vim.\footnote{\url{https://neovim.io/}}
 
-External dependencies to the main program are deliberately few. An experimental JIT compiler makes
-use of LLVM\footnote{\url{http://llvm.org/}} with the associated Haskell
-bindings\footnote{Unfortunately the bindings are still only for LLVM 3.5, whereas the upstream
-version is now 3.8. For this, and other reasons to be discusses, the JIT compiler was abandoned for
-this first microML deliverable.}. The compiler also makes optional use of \textbf{clang-format}, a
-command line utility available with \textbf{clang}\footnote{\url{http://clang.llvm.org/}} for formatting 
-the generated C++ code. The graphics program \textbf{graphviz} is also used (again optionally) for 
-producing \textit{png} files of a program's callgraph. 
+External dependencies to the main program are deliberately few. An experimental JIT
+compiler makes use of LLVM\footnote{\url{http://llvm.org/}} with the associated Haskell
+bindings\footnote{Unfortunately the bindings are still only for LLVM 3.5, whereas the
+upstream version of LLVM is now 3.8. For this, and other reasons to be discussed, JIT
+compiler development was suspended for this first microML deliverable.}. The compiler
+also makes optional use of \textbf{clang-format}, a command line utility available with
+\textbf{clang}\footnote{\url{http://clang.llvm.org/}} for formatting the generated C++ code. The
+graphics program \textbf{graphviz}\footnote{\url{http://www.graphviz.org/}} is also used (again
+optionally) for producing \textit{png} files of a program's callgraph.
 
 Handling state in Haskell is by no means trivial, and does not allow for easy prototyping. One needs
 to understand exactly how to structure a solution to a problem before embarking on development,
@@ -907,7 +955,7 @@ possible to trivially wrap a function in a \textit{try / except} clause as one w
 Anything which might through an exception needs to be inside the ExceptT monad transformer. The type
 checker will reject anything else. This can be sidestepped to a certain extent by throwing an
 unchecked \textbf{error}\footnote{a wrapper around the prelude library function \textbf{undefined}},
-but such an error kills the runtime system, crashing the program.\footnote{mgrabmueller was
+but such an error kills the runtime system, crashing the program.\footnote{\cite{transformers} was
 invaluable for understanding the monad transformer abstraction.}
 
 To successfully combine state with error handling it is necessary to `string together' various monad
@@ -920,20 +968,21 @@ forget about state management and error handling details.
 \subsection{False Starts \& Dead Ends}
 Some libraries and approaches were abandoned during the development process. Most notably a deal of
 time was put into using the \textit{Language-C} library for manipulating the C AST in Haskell. While
-this would certainly be the correct approach for writing the C code generation element of microML,
+this would certainly be the robust approach for writing the C code generation element of microML,
 it was decided that time constraints did not allow for proper utilization of the library (which is
 very large) so other alternatives were explored in the hope of at least producing a testable backend
-within the time frame of the project. 
+within the time frame of the project. Moreover the library is strongly inclined to C, rather than
+C++, so many bindings are completely missing, including some data types and all object-orientated
+code constructions. There is no equivalent library for C++ on Hackage. This remains to be written. 
 
 \subsection{Project Structure}
 Every effort was made to organize the source code in a logical and consistent manner, such that
-another programmer should understand the organization without great difficulty. See
-Figure~\ref{fig:dir}
+another programmer should understand the organization without great difficulty.
+Figure~\ref{fig:dir}.
 
 \begin{figure}
-    \label{fig:dir}
     \dirtree{%
-        .1 microML
+        .1 microML.
         .2 docs.
         .2 src.
         .3 Compiler.
@@ -952,19 +1001,22 @@ Figure~\ref{fig:dir}
         .2 stack.yaml.
     }
 \caption{Directory Structure}
+\label{fig:dir}
 \end{figure}
 
 \subsubsection{JIT}\label{JIT}
-The JIT compiler makes use of the LLVM 3.5 bindings available from
-\textit{Hackage}\footnote{\url{https://hackage.haskell.org/package/llvm-general-3.5.1.2}}. LLVM is
-capable of outputting a C++ file, in addition to machine code or the LLVM \textit{IR}. An online
-tutorial\footnote{\url{http://www.stephendiehl.com/llvm/}} formed the basis for the experiment. It
-was felt that LLVM might be able to produce suitable code for the micro:bit, with optimisations well
-out of scope for a simple nano-pass compiler such as has been implemented. The JIT was abandoned
-during development however when it became clear that the generated C++ code was too heavily indebted
-to the LLVM environment. While the code was correct, it would not compile under gcc without heavy,
-intelligent, editing. It was deemed more difficult to render the code compilable under
-\textit{yotta}\footnote{\url{http://yottadocs.mbed.com/}} than it would be to simply write a simplistic native compiler.
+The inclusion of a JIT aspect was predicated on an experimental method to produce C++ code using
+the existing LLVM compiler framework. The JIT compiler makes use of the LLVM 3.5 bindings available
+from \textit{Hackage}\footnote{\url{https://hackage.haskell.org/package/llvm-general-3.5.1.2}}.
+LLVM is capable of outputting a C++ file, in addition to machine code or the LLVM \textit{IR}.
+An online tutorial\footnote{\url{http://www.stephendiehl.com/llvm/}} formed the basis for the
+experiment. It was felt that LLVM might be able to produce suitable code for the micro:bit, with
+optimisations well out of scope for a simple nano-pass compiler such as has been implemented. The
+JIT was abandoned during development however when it became clear that the generated C++ code was
+too heavily indebted to the LLVM environment. While the code was correct, it would not compile under
+\textit{gcc} without heavy, intelligent, editing. It was deemed more difficult to render the code compilable
+with \textit{yotta}\footnote{\url{http://yottadocs.mbed.com/}} than it would be to simply write a
+simplistic naive compiler.
 
 \subsubsection{Compiler}
 The compiler makes a single pass over the source file, and does not utilize an intermediate
@@ -974,22 +1026,22 @@ code is searched to ensure there is a main function. In the repl, there is no ne
 entry point, but a compiled file needs to have a clear and defined structure. If a main function is
 found not to exist, an appropriate error message is issued. Moreover, the compiler searches for
 duplicate definitions. This is partially to check for carelessness on the part of the student, but
-also to help enforce data Immutability. Top level re-declaration of values is rejected by the
+also to help enforce data immutability. Top level re-declaration of values is rejected by the
 compiler. Perhaps the most interesting feature of the preprocessing phase is found in CallGraph.hs.
-The source code is analysed and converted to a \textit{DAG}, or directed acyclic graph. This is then
+The source code is analysed and converted to a \textit{\gls{DAG}}. This is then
 searched, using a depth first search algorithm, to discover all functions reachable from
 \textit{main}. If any function, or functions are found to be unreachable, compilation is abandoned
 and a message is issued describing the procedure for creating a callgraph.png. See
 Figure~\ref{fig:callgraph}.
 
-\begin{SCfigure}
-    \includegraphics[scale=0.4]{images/callgraph.png}
+\begin{figure}
+    \includegraphics[width=\textwidth]{images/callgraph.png}
     {\caption{A example callgraph for a simple program. This would fail to compile.}}
     \label{fig:callgraph}
-\end{SCfigure}
+\end{figure}
 
 Code generation is done in much the same manner that the repl performs evaluation, but instead of
-reducing each term to normal form, translates them to statements and expressions in C++. 
+reducing each term to normal form, it translates them to statements and expressions in C++. 
 
 \subsubsection{Repl}
 The repl is probably the most fully realized interface to the language. Perhaps the most interesting
@@ -1006,34 +1058,37 @@ feature is its handling of multiple states with a custom datatype.
 
 The Repl monad carries with it three separate hashmaps, holding stateful information regarding the
 types of functions, the function definitions, and the help environment. This last is not accessible
-for writing from within the repl, but only via file.
+for writing from within the repl, but only via loaded file.
 
 \subsubsection{Libs}
+\label{libs}
 MicroML ships with a limited standard library. Functions in `standard.mml' are automatically loaded
 in the repl environment and are always available in the compiled environment. Other libraries need
 to be loaded manually with the `:using' command. The libraries available at time of writing are:
 
 \begin{itemize}
-    \item Standard: a large number of utility functions, modelled on the standard library available
+    \item standard: a large number of utility functions, modelled on the standard library available
         with Miranda (though less extensive). Students are not expected to be able to write their
         own implementations of `map' or `foldr' so these have been made always obtainable.
     \item Maths: the maths library contains some constants, such as $e$ and $\pi$, some utility
-        functions such as `floor', `ceiling', `intToFloat' and typesafe logarithmic functions.
-    \item String: as strings are literals in microML, they need their own library to allow for
-        manipulation. At present there are few functions for converting between upper and lower
+        functions such as `floor', `ceiling' and `intToFloat' and typesafe logarithmic functions.
+        These last are wrappers around Haskell's `logBase' function.
+    \item string: as strings are literals in microML, they need their own library to allow for
+        manipulation. At present there are a few functions for converting between upper and lower
         case and obtaining the ascii value of a char. This library is nascent and needs to be
         expanded.
-    \item Combinators: a library for those interesting in the pure untyped lambda calculus. The
+    \item combinators: a library for those interesting in the pure untyped lambda calculus. The
         functions presented here include $s$, $k$ and $i$, which themselves constitute a
         \textit{Turing complete} language and a number of other combinators, including those
         introduced by David Turner in his seminal paper~\cite{TUR79a}.
-    \item Church: this is another library dedicated to the underlying lambda calculus, presenting
+    \item church: this is another library dedicated to the underlying lambda calculus, presenting
         natural numbers as functions using \textit{Church encoding}\footnote{\url{https://en.wikipedia.org/wiki/Church_encoding}}.
         This is primarily intended for those students who display an interest in understanding the
         evaluation model of microML\@.
 \end{itemize}
 
 \chapter{Testing}
+\label{testing}
 
 Software testing is a vital part of any seriously intended development project. Only an arrogant
 programmer, or one of little experience (often the two go together) would claim that a function or
@@ -1045,28 +1100,30 @@ frameworks, making the writing of unit tests especially simple. Both \textit{Cab
 
 There are four generally recognized levels of software testing. Unit testing is the examination of
 individual methods or functions to ascertain that they behave as expected under a variety of
-conditions. This time of testing is best conducted during software development, in concert with the
-writing of the actual executable software. Integration testing ensures that individual modules (or
+conditions. This type of testing is best conducted during software development, in concert with the
+writing of the actual executable. Integration testing ensures that individual modules (or
 classes) work together as expected. This is one level of abstraction higher than unit-testing.
 System testing looks at the functioning of the entire system, and finally acceptance testing sees
-whether the end product will be suitable to the client. 
+whether the end product will be suitable to the client. MicroML has not been acceptance tested, and
+still requires work in this direction.
 
 The Hspec\footnote{\url{https://hspec.github.io/}} package focuses primarily on unit testing of
-Haskell functions. Real \textit{TDD} would have seen tests written in parallel with production code.
-Due to the lack of experience the author had with Haskell at the beginning of the product, this was
+Haskell functions. Real \textit{TDD} would have seen tests written in parallel with production code:
+due to the lack of experience the author had with Haskell at the beginning of the project, this was
 not the development method deployed as it would have been too heavy a cognitive burden in addition
 to wrestling with various problems of type, state and program structure. Unit tests were written
 after the fact, and, at time of writing, do not yet have full coverage of source code.
 
-To run tests while building it is necessary simply to entire the command `stack test' in the
-terminal, which is equivalent to building and testing the software.
+To run tests while building it is necessary simply to enter in the terminal the command `stack test'
+while in the project root directory, which is equivalent to building and testing the
+software.
 
 Testing the ability of the compiler to produce C++ code involved the addition of integration tests
 to the Hspec framework. These are handled separately in the form of multiple small \textit{mml}
 files. A simple bash script runs each file individually through the microML compiler. At time of
 writing, the compiler does not yet successfully pass all of these integration tests. More work needs
 to be done before the compiler can seriously be considered to be `fit for purpose'. The script must
-be run from the utils folders of the project.
+be run from the utils folder of the project.
 
 \chapter{Conclusions and Project Evaluation}
 
@@ -1075,7 +1132,7 @@ The project has met all of the goals and requirements initially specified, but t
 that the project cannot be improved or could even, in any real sense, be said to be finished. The
 syntax (see Appendix~\ref{appendix:syntax}) is clean and uncomplicated, but also quite limiting for
 students who would like to be more `expressive'. It is felt that, for those advanced students who
-find microML to be limiting, that there already exist a large number of more powerful languages
+find microML to be a tad stifling, that there already exist a large number of more powerful languages
 which they can go on to explore, not least of which is Haskell itself. 
 
 MicroML supports full parametric polymorphic type inference. As such it can be considered a complete
@@ -1197,6 +1254,9 @@ result in a number of possible compiler optimisations and greater runtime safety
     \chapter{Comment Markdown}
     \label{appendix:md}
     \input{markdown}
+    \chapter{Diary}
+    \label{appendix:diary}
+    \input{diary}
 \end{appendices}
 
 %% check this list to make sure things have been cited
