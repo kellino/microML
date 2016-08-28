@@ -79,8 +79,3 @@ endfunction
 setlocal foldexpr=GetMMLFold(v:lnum)
 setlocal foldtext=MMLFoldText()
 setlocal foldmethod=expr
-
-"augroup MMLFold
-    "au!
-    "au FileType mml call s:setMMLFolding()
-"augroup END

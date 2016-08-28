@@ -87,8 +87,8 @@ syn match    mmlOperator     "/"
 syn match    mmlOperator     ":"
 syn match    mmlAnyVar       "\<_\>"
 
-syn match    mmlNumber	      "\<-\=\d\+\>"
-syn match    mmlNumber	      "\<-\=0[x|X]\x\+\>"
+syn match    mmlNumber       "\<-\=\d\+\>"
+syn match    mmlNumber       "\<-\=0[x|X]\x\+\>"
 
 " Define the default highlighting.
 " For version 5.7 and earlier: only when not done already
