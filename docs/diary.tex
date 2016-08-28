@@ -1,0 +1,86 @@
+\section{Formalities} 
+
+\textbf{Thursday 26 May}  --- Dean asks about group.  \\
+\textbf{Friday 27 May}  --- inducted into microbit team \\
+               --- Dean confirms functional project as carte blanche \\
+--- start research into an ml style language \\
+\textbf{Saturday 28 May}  --- decide to target micropython with a haskell compiler \\
+\textbf{Sunday 29 May}  --- comparison of functional languages \\
+\textbf{Tuesday 31 May}  --- meeting with Rae at 2:30 \\
+\textbf{}  --- discussed making a dsl for microbit. Need to justify educational value. \\
+\textbf{}  --- Focus on robotics. Wants a doc detailing requirements and contraints of design. \\
+\textbf{Wednesday 1 June}  --- started drafting initial report for Rae and Peli. Hope to send tomorrow \\
+\textbf{Thursday 2 June}  --- sent initial proposal to Rae and Peli \\
+
+\section{Project Start} 
+
+\textbf{Wednesday 8 June}  --- finally hear from Rae, who is happy with the proposal. Still no word from Peli. \\
+\textbf{}  --- meeting scheduled for tomorrow morning. \\
+\textbf{}  --- Started tutorial for CoreLang (SPJ) which looks a promising base for microML \\
+\textbf{Thursday 9 June}  --- morning meeting with Rae, details of which (prepare examples of backends) are superceeded \\
+\textbf{}  --- by emails from Peli and Tom Ball, recommending using the C++ API as target language. \\
+\textbf{Friday 10 June}  --- started work in microML parser. Research Text.Indentation and Trifecta \\
+\textbf{Sunday 12 June}  --- basic work on simple parser and repl done. Only parses one line of input. \\
+\textbf{Monday 13 June}  --- started rewriting using megaparsec. Good progress made. Reused repl code \\
+\textbf{Tuesday 14 June}  --- implemented lambda parsing and most of type signature parsing. Indentation still to do \\
+\textbf{Wednesday 15 June}  --- tuples added to parser and type signatures fixed. Type aliasing added. File reading still not working \\
+\textbf{Thursday 16 June}  --- more work on parser \\
+\textbf{Friday 17 June}  --- started work on evaluation for repl. Arithemtic done and simple boolean operators \\
+\textbf{Monday 20 June}  --- little progress. Still can't store values in the repl \\
+\textbf{Tuesday 21 June}  --- started refactoring code, removing all problematic elements \\
+\textbf{Wednesday 22 June}  --- repl finally working, moving on to type inference \\
+\textbf{Thursday 23 June}  --- starting writing tests, using hspec, for parser/lexer \\
+\textbf{Friday 24 June}  --- recursion now working, but syntax needs to be improved \\
+\textbf{Monday 27 June}  --- working on pattern matching and simple type inference \\
+\textbf{Tuesday 28 June}  --- as above \\
+\textbf{Wednesday 29 June}  --- simple type inference almost working but needs to be extended. Pattern matching parser working, \\
+                    but no supporting algorithm of language support yet. \\
+\textbf{Thursday 30 June}  --- fixed type inference for numbers (a slight hack here, only allowing a Num type) \\
+\textbf{Friday 1 July}  --- working on lists. Need to rewrite the interpreter. Then finish on this part. Removed pattern matching.  \\
+                    Simplified pretty printer. \\
+\textbf{Monday 4 July}  --- recursion on lists is finally working. Once type inference on lists work, we can move on to compilation \\
+\textbf{Tuesday 5 July}  --- cons operator is working. Now only list type inference is major outstanding feature of repl. \\
+\textbf{Wednesday 6 July}  --- type inference now working on lists. Started writing github wiki. \\
+\textbf{Thursday 7 July}  --- meeting with Rae. Agreed to start writing up progress. Start debugging wip. \\
+\textbf{Friday 8 July}  --- nothing much \\
+\textbf{Monday 11 July}  --- exception handling added to inference module, not yet complete \\
+\textbf{Wednesday 13 July}  --- refactored primitive ops so that sqrt and others are now properly typechecked \\
+\textbf{Thursday 14 July}  --- very little done. Meeting with Rae\. ord, chr, toUpper and toLower. Start of string library \\
+\textbf{Friday 15 July}  --- added command line arguments to main program. Successfully compiled hello world! \\
+\textbf{Sunday 17 July}  --- fixed bug in string literal printing \\
+\textbf{Monday 18 July}  --- spent day doing codewars rather than working! \\
+\textbf{Tuesday 19 July}  --- started work on new version of compiler. Simple functions work \\
+\textbf{Wednesday 20 July}  --- finally starting to understand Monad transformers after doing tutorial. Added ExcepT to compiler module :) \\
+\textbf{Thursday 21 July}  --- started adding type inference to compiler. Lots of small bugs fixed. \\
+\textbf{Friday 22 July}  --- more error handling, for mod, head and tail, also ord and chr (though they \\
+                  can't be typechecked) \\
+\textbf{Monday 25 July}  --- finally fixed list type inference, including nested lists!!!! Happy days (I spoke too soon (: ) \\
+\textbf{Tuesday 26 July}  --- fixed pretty printing of lists. Standard library typechecks but is too general. \\
+\textbf{Monday 1 August}  --- type inference also completely fixed. Only lists left to go (or so it seems) \\
+\textbf{Tuesday 2 August}  --- lists still not working as expected. A slow day \\
+\textbf{Wednesday 3 August}  --- fresh start on compiler. Good progress made with error messages. \\
+\textbf{Thursday 4 August}  --- started working on elixir style docs. Wrote small markdown parser \\
+\textbf{Friday 5 August}  --- numerous small bug fixes, but docs not quite working yet. Must move on to compiler!! \\
+\textbf{Monday 8 August}  --- docs fixed. Compiler now refuses to compile if main is missing, or if there are \\
+                    duplicate definitions, or if a function is unreachable. All with appropriate error messages. Shell \\
+                    escape in repl now has proper error handling. :clear added as independent function. Wrote docs for standard.mml \\
+                    Removed some unreachable code from Infer.hs and improved error handling. A good day. \\
+\textbf{Tuesday 9 August}  --- little progress made. Abandoning c-dsl \\
+\textbf{Wednesday 10 Aug}  --- new version of compiler started, much simpler but appears to be working. Also \\
+                   added typesigs for built-in functions  --- this might be a good way to infer \\
+                   lambdas \\
+\textbf{Thursday 11 Aug}  --- improved callgraph. Changed to using stack as a build tool. Had to remove llvm \\
+                     as a result \\
+\textbf{Friday 12 Aug}  --- restarted compiler again, this time using ExcepT and monad stack (as per transformers tutorial) \\
+\textbf{Monday 15 Aug}  --- using RWST for compiler. Added dotfile production of callgraph. Compiler \\
+                   (though primitive) working as proof of concept. \\
+\textbf{Tuesday 16 Aug}  --- added pst command, with a nice pretty printed parse tree in the repl, complete \\
+                    with error handling. Met Earl and agreed to a PhD \\
+\textbf{Wednesday 17 Aug}  --- added clang  ---format for file. Added typeEnv into Compiler monad, but not yet \\
+                   working as expected \\
+\textbf{Thursday 18 Aug}  --- wrote folding method for microML in vim. Started write up of report \\
+\textbf{Friday 19 Aug}  --- worked on report. Used tikz for the first time in latex. \\
+\textbf{Monday 22 Aug}  --- worked on report \\
+\textbf{Tuesday 23 Aug}  --- worked on report. Wrote simple bash script to run compiler tests. Wrote unit \\
+                   tests for ListPrimitives. Bash script to compile latex with bibliography \\
+\textbf{Wednesday 24 Aug}  --- writing \\
