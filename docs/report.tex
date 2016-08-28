@@ -358,7 +358,7 @@ design decisions: what had a legitimate place in a language for a simple process
 beginners, and what could be implemented entirely for the ego and interests of the developer, or because it
 was trivial to do? Design decisions based on ease of implementation or to please the vanity of the
 designer are correct only be coincidence, and this is a poor way to design\footnote{This recalls
-Tony Hoare's `Billion Dollar Mistake'.}. Of great use were \cite{Pierce:2002:TPL:509043} with its
+Tony Hoare's `Billion Dollar Mistake'.}. Of great use were~\cite{Pierce:2002:TPL:509043} with its
 excellent general account of type theory (and implementation chapters written in \textit{OCaml})
 and\@\cite{Pierce:2004:ATT:1076265} with its exploration of type inference in ML\@.
 
@@ -383,7 +383,7 @@ represented.\footnote{\cite{Pierce:2002:TPL:509043} has a slightly different tre
     \centering
     \begin{tikzpicture}
       \matrix (m) [matrix of math nodes, row sep=3em,
-        column sep=3em]{
+        column sep=3em]{%
             & \lambda\omega & & \lambda P \omega \\
             \lambda 2 & & \lambda P 2 & \\
             & \lambda \underline{\omega} & & \lambda P \underline{\omega} \\
@@ -437,7 +437,7 @@ which it would struggle to justify its existence.
 \section{Software, Tools, Libraries}
 Haskell is ideally suited to the creation of \gls{DSL}s. This is largely due to its
 \textit{algebraic data types} which can easily be used to represent the BNF of an embedded
-language. Moreover Haskell is blessed with the Parsec library of parser combinators\footnote{A
+language. Moreover Haskell is blessed with the Parsec library\cite{leijen2001} of parser combinators\footnote{A
 \textit{combinator} is simply a function with no free variables, so it only operates on
 parameters directly passed to it without reference to any global data within the function
 body.}, which removes the necessity of writing lex and yacc files to create a functioning
@@ -1280,6 +1280,8 @@ result in a number of possible compiler optimisations and greater runtime safety
 \nocite{adams2012layout}
 \nocite{9780511608865}
 \nocite{Wadler:1995:MFP:647698.734146}
+\nocite{958}
+\nocite{Steele:1994:BIC:174675.178068}
 
 \bibliography{bibliography}{}
 \bibliographystyle{plain}
