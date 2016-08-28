@@ -1,6 +1,11 @@
 -- true and false as λcalculus 
 let tr x y = x
 let fls x y = y
+let not' p = p tr fls
+let and' p q = p q fls
+let or' p q = p tr q
+let cond p x y = p x y
+let xor' p q = p (q fls tr) q
 --SKI combinators 
 let i x = x        -- this is the same as id
 let k x y = x     -- same as constant
