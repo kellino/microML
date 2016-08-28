@@ -389,16 +389,13 @@ represented.\footnote{\cite{Pierce:2002:TPL:509043} has a slightly different tre
             & \lambda \underline{\omega} & & \lambda P \underline{\omega} \\
             \lambda \rightarrow & & \lambda P  & \\};
       \path[-stealth]
-        (m-1-2) edge (m-1-4) edge (m-2-1) edge (m-3-2)
-        (m-1-4) edge (m-3-4) edge (m-2-3)
-        (m-2-1) edge [-,line width=6pt,draw=white] (m-2-3)
-                edge (m-2-3) edge (m-4-1)
-        (m-3-2) edge (m-3-4)
-                edge (m-4-1)
-        (m-4-1) edge (m-4-3)
-        (m-3-4) edge (m-4-3)
-        (m-2-3) edge [-,line width=6pt,draw=white] (m-4-3)
-                edge (m-4-3);
+        (m-1-2) edge (m-1-4) % edge (m-2-1) edge (m-3-2)
+        (m-2-1) edge (m-1-2) edge (m-2-3)
+        (m-3-2) edge (m-3-4) edge (m-1-2) 
+        (m-4-1) edge (m-4-3) edge (m-2-1) edge (m-3-2)
+        (m-3-4) edge (m-1-4)
+        (m-4-3) edge (m-3-4) edge (m-2-3)
+        (m-2-3) edge (m-1-4);
     \end{tikzpicture}
     \caption{The Lambda Cube}
     \label{fig:cube}
@@ -966,6 +963,7 @@ however is that, once the complexity of stack construction has been overcome, th
 forget about state management and error handling details. 
 
 \subsection{False Starts \& Dead Ends}
+\label{deadend}
 Some libraries and approaches were abandoned during the development process. Most notably a deal of
 time was put into using the \textit{Language-C} library for manipulating the C AST in Haskell. While
 this would certainly be the robust approach for writing the C code generation element of microML,
@@ -1132,65 +1130,81 @@ The project has met all of the goals and requirements initially specified, but t
 that the project cannot be improved or could even, in any real sense, be said to be finished. The
 syntax (see Appendix~\ref{appendix:syntax}) is clean and uncomplicated, but also quite limiting for
 students who would like to be more `expressive'. It is felt that, for those advanced students who
-find microML to be a tad stifling, that there already exist a large number of more powerful languages
+find microML to be a tad stifling, there already exist a large number of more powerful languages
 which they can go on to explore, not least of which is Haskell itself. 
 
-MicroML supports full parametric polymorphic type inference. As such it can be considered a complete
-implementation of \textit{System F}. This could be extended to make it more flexible, e.g.\ sum and
-product types. The lack of subtyping might be considered a drawback in a genuine language. It would
-be theoretically pleasing to allow students to access the implementation details of number types,
-constraining user-defined functions to integer or double. This is not presently possible for
-functions written by students\footnote{Though it is possible for system-defined operators and
-functions. For example the modulo `\%' operator will throw and error if either of its operands are
-not integer literals. This is `hard-coded' into the inference engine, which is unfortunate.}.
+MicroML supports both ad-hoc polymorphism and full parametric polymorphic type inference. As such
+it can be considered a complete implementation of \textit{System F}. This could be extended to
+make it more flexible, e.g.\ sum and product types. The lack of subtyping might be considered a
+drawback in a genuine language. It would be theoretically pleasing to allow students to access the
+implementation details of number types, constraining user-defined functions to integer or double.
+This is not presently possible for functions written by students. It is possible for
+system-defined operators and functions. For example the modulo `\%' operator will throw an error
+if either of its operands are not integer literals. This is `hard-coded' into the inference engine,
+which is unfortunate. Figure~\ref{fig:modulo}.
+
+\begin{figure}
+    \includegraphics[width=\textwidth]{images/modulo.jpg}
+    \caption{Type error with modulo operator}
+\label{fig:modulo}
+\end{figure}
 
 The compiler element of the project successfully compiles many simple programs written in microML,
-including the traditional `hello world'
+including the traditional `hello world'. The repl is a fully-featured environment than exceeds the
+capabilities of many `professional' languages. Its error messages (the same which appear in the
+compiler) and syntax-highlighted and written in `plain English'. Figure~\ref{fig:typeError}
+
+\begin{figure}
+    \includegraphics[width=\textwidth]{images/typeError.jpg}
+    \caption{Unification error}
+\label{fig:typeError}
+\end{figure}
 
 \section{Evaluation}
 At the fundamental design level, perhaps the most unfortunate decision was to make the \textit{Expr}
-datatype a simple type with kind \textit{*}. This decision has meant that it was not possible to
-make \textit{Expr} an instance of the \textit{Functor} typeclass\footnote{A datatype needs at least
-kind $ * \rightarrow * $ to be a member of the Functor typeclass.}, meaning that a complex
-expression was not mappable or foldable. There are instances in the code where expressions have been
-converted into strings via `show' in order to filter or search for elements. This is rather
-inefficient and, given the nature and complexity of regular expressions, potentially bug-prone. This
-problem would have been alleviated by a definition for `fmap'. Once \textit{Expr} is a functor, it
-would then be relatively trivial to make a monoid instance, and even, if necessary, a monad
-instance, or at the very least an instance of \textit{Applicative}. Tag information regarding type
-could have been carried in the additional arity required by the functor typeclass. \textit{Expr}
-would then have kind $ * \rightarrow * $ with the first * being a type label. This would also have
-made inference easier and quicker. However it was nearing the end of the project before the author
-had enough knowledge and skill to be aware of these subtleties, and such a change would require a
-rather substantial rewriting of much of the MicroML module.
+datatype a simple type with kind \textit{*}\footnote{* is pronounced `type'.}. This decision
+has meant that it was not possible to make \textit{Expr} an instance of the \textit{Functor}
+typeclass\footnote{A datatype needs at least kind $* \rightarrow *$ to be a member of the
+Functor typeclass.}, meaning that a complex expression was neither mappable nor foldable. There are
+instances in the code where expressions have been converted into strings via `show' in order to
+filter or search for elements. This is rather inefficient and, given the nature and complexity
+of regular expressions, potentially bug-prone. This problem would have been alleviated by a
+definition for `fmap'. Once \textit{Expr} is a functor, it would then be relatively trivial to make
+a traversable instance, and even, if necessary, a monad instance, or at the very least an instance of
+\textit{Applicative}. Tag information regarding type could have been carried in the additional arity
+required by the functor typeclass. \textit{Expr} would then have kind $* \rightarrow *$ with the
+first * being a type primitive. This would also have made inference easier and quicker. However it was
+nearing the end of the project before the author had enough knowledge and skill to be aware of these
+subtleties, and such a change would require a rather substantial rewriting of much of the MicroML
+module.
 
 \section{Future Work}
-While the basic core of the language is largely complete (at least in the repl environment) a great
-deal of work remains to be done on the compiler and making the language more usable as an educational
-tool. As a number of features were included in an unfortunately \textit{ad hoc} manner, integration
-is not as tight as might be desired. An obvious case of this is the existence of two separate
-parsers, one for mml source code, and another for documentation. This has resulted in a rather
-fragile relationship between the two, and an over-sensitivity to context (especially around the
-existence of unanticipated whitespace) and code duplication in the Repl.Repl module. It also entails
-two passes over a source file, which is wasteful of computer resources and time. A future iteration
-would seek to unite these into one, more robust parser. Regarding the parser, it might also be a
-possibility to make it indentation sensitive. This could result in more readable source files for
-students. However, one of the stated aims of microML is to encourage piping of small functions (in
-the manner of the unix pipe) rather than building large functions. An indentation sensitive parser
-might actively encourage the growth of function complexity. Further investigation would be required
-before a definitive decision could be reached.
+While the basic core of the language is largely complete a great deal of work remains to be done on
+the compiler and making the language more usable as an educational tool. As a number of features
+were included in an unfortunately \textit{ad hoc} manner, integration is not as tight as might be
+desired. An obvious case of this is the existence of two separate parsers, one for mml source code,
+and another for documentation. This has resulted in a rather fragile relationship between the two,
+and an over-sensitivity to context (especially around the existence of unanticipated whitespace)
+and code duplication in the Repl.Repl module. It also entails two passes over a source file, which
+is wasteful of computer resources and time. A future iteration would seek to unite these into one,
+more robust parser. Regarding the parser, it might also be a possibility to make it indentation
+sensitive. This could result in more readable source files for students. However, one of the stated
+aims of microML is to encourage piping of small functions (in the manner of the unix pipe) rather
+than building large functions. An indentation sensitive parser might actively encourage the growth
+of function complexity. Further investigation would be required before a definitive decision could
+be reached.
 
-The present approach to C++ compilation, while valid as a proof of concept, is perhaps not robust
-enough to allow for genuine expansion to the level of complexity which might be required of it.
-Alternative, better, strategies would involve direct translation of the microML AST to the C++ AST,
-enabling the compiler to perform optimisations. Apart from checking the validity of the source file,
-the compiler is unable to conduct optimisation routines. Time has been the single greatest factor in
-limiting the efficacy of the compiler element of the project. There is a library for the manipulation
-of C code in Haskell\footnote{\url{https://hackage.haskell.org/package/language-c}} but there is
-nothing specifically for C++. Either the existing library would have  to be modified to allow for
-class manipulation and the micro:bit's \textit{managed types} or a new library would have to
-written. This is far beyond the scope of the present project, but would seem to be a necessary step
-to render the compiler a more industry standard product.
+The present approach to C++ compilation, while valid as a proof of concept, is perhaps not
+sufficiently robust to allow for genuine expansion to the level of complexity which might be
+required of it. Alternative, better, strategies would involve direct translation of the microML AST
+to the C++ AST, enabling the compiler to perform optimisations. Apart from checking the validity of
+the source file, the compiler is unable to conduct optimisation routines. Time has been the single
+greatest factor in limiting the efficacy of the compiler element of the project. There is a library
+for the manipulation of C code in Haskell~\ref{deadend} but there is nothing specifically for C++.
+Either the existing library would have to be modified to allow for class manipulation and the
+micro:bit's \textit{managed types} or a new library would have to written. This is far beyond the
+scope of the present project, but would seem to be a necessary step to render the compiler a more
+industry standard product.
 
 Related to the compiler is the issue of \textit{memory management} on the micro:bit. The API already
 exposes a number of managed types which do not require manual freeing, but microML supports closures
@@ -1202,13 +1216,13 @@ collector takes too much of the available memory for itself. On such a constrain
 lead to problems when attempting to use the inbuilt censors or bluetooth. An alternative might be
 the use of a \textit{region inference algorithm}\cite{Tofte:1998:RIA:291891.291894}. Work on
 MLKit\footnote{\url{http://www.elsman.com/mlkit/}} has shown that region inference memory management
-can, at least sometimes, act as a realistic replacement to garbage collection. In a system where
+can, at least sometimes, act as a realistic replacement for garbage collection. In a system where
 programs are expected to be relatively uncomplicated, such as on the micro:bit, this might be an
 ideal `fit'.
 
 Of features missing from the language definition itself, the most obvious omissions are
 \textbf{pattern matching} and \textbf{algebraic data types}. The absence of ADTs has already been
-discussed, but there presence would be most useful for writing of standard library modules. Without
+discussed, but their presence would be most useful for writing of standard library modules. Without
 ADTs the creation of new data structures, while possible, is far more difficult than need be.
 Pattern matching is largely syntactic sugar for nested \textit{if --- else if} clauses, and indeed
 is desugared in Haskell to nested case statements. A student using microML can simply write such
@@ -1225,9 +1239,12 @@ existing language.
 The type inference system is compliant with \textit{System F}. While this is not the most demanding
 of type environments within which to work, it might still be too rigid for students with no
 programming experience at all, and represent a barrier to entry. Real world programming languages
-tend rather to use a variation on $F_{<:}$. MicroML might be more successful and usable if, rather
-than extending a simple type system as it does at present, it might instead use a restricted form
-of a more complex lambda calculus. Future work might also examine the possibility of delaying, or
+tend rather to use a variation on $F_{<:}$\footnote{Pronounced F-sub. This allows for subtyping:
+a function could be made to accept only a Double, or a general Number type, where Double and
+Int are subtypes of Number. This is both a more flexible and powerful type system, and one used
+by many real world languages.}. MicroML might be more successful and usable if, rather than
+extending a simple type system as it does at present, it might instead use a restricted form of
+a more complex lambda calculus. Future work might also examine the possibility of delaying, or
 \textit{proroguing} type checking until the student has fleshed out an approximate solution to a
 problem\cite{Afshari:2012:LPP:2384592.2384595}. Type-checking then becoming an interactive tool
 for improving software, rather than an overly tight straitjacket it can seem for those not used to
@@ -1235,8 +1252,8 @@ moving within its constraints.
 
 If such a prorogued system could be implemented, then it might be possible to `climb the lambda
 cube' as it were. A student could first program dynamically, with duck typing in the manner of
-Python, then refine the program to be compliant with System F. It might therefore also be possible
-to increase program safety and security by then introducing elements of dependent types where
+Python, then refine the program to be compliant with System F. It might thereafter also be possible
+to increase program safety and security by introducing elements of dependent types where
 appropriate. This incremental approach to static typing could encourage students to work with the
 type system rather than feel they are fighting it. Even a partially dependently-typed program could
 result in a number of possible compiler optimisations and greater runtime safety.
