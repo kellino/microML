@@ -52,7 +52,7 @@ instance Pretty Expr where
 
 instance Show TypeError where
       show (UnificationFail a b) =
-        concat ["Cannot ", bold, "match", clear, " expected type ", bold, pptype a, clear, " with actual type ", bold, pptype b, clear]
+        concat ["Cannot ", "\ESC[33m", "match", clear, " expected type ", bold, pptype a, clear, " with actual type ", bold, pptype b, clear]
       show (InfiniteType (TV a) b) =
         concat ["Cannot construct the ", red, "infinite type", clear, ": ", a, " = ", pptype b]
       show (Ambigious cs) =
