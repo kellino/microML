@@ -338,6 +338,7 @@ doConsOp e1 e2 =
               return $ 
                   case t1 of
                     (TCon ty) -> TCon $ "[" ++ ty ++ "]"
+                    _         -> TCon $ "[" ++ show e1 ++ "]"
           (_, BinOp OpCons x xs) -> do
               t1 <- infer e1
               t2 <- infer x

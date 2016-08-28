@@ -30,6 +30,7 @@ microbit = TypeEnv $ Map.fromList
     , ("%"      , Forall  [] $ TArrow typeNum (TArrow typeNum typeNum))
     , ("^"      , Forall  [] $ TArrow typeNum (TArrow typeNum typeNum))
     , ("=="     , Forall  [] $ TArrow (TVar polyA) (TArrow (TVar polyA) typeBool))
+    , (">>"     , Forall  [polyA, TV "b"] $ TVar polyA `TArrow` (TVar polyA `TArrow` (TVar (TV "b")) `TArrow` (TVar $ TV "b")))
     ]
 
 lookup :: Name -> Env -> Maybe TypeScheme
