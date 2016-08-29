@@ -149,7 +149,20 @@ show takes a value and returns it as a string
     > show 'a'
     > "a" : String
 *)
-let show x = x
+let show x = _show x
+
+(*
+==read==
+***read***
+** read :: String -> Number **
+read takes a string of a number and returns something of type number
+#Example:#
+    > read "3"
+    > 3 : Number
+    > read "3.3"
+    > 3.3 : Number
+*)
+let read x = _read x
 
 (* 
 ==const==
