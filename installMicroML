@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/sh
 
 ## only tested on linux, but it should probably work in mac as well. Not a chance of windows unless
 ## you're using cygwin, with which I have no experience.
@@ -7,16 +7,33 @@
 stack=$(which stack)
 
 if [ -x "$stack" ]; then
-    echo -e "\e[1mstack found\e[0m"
-    echo -e "\e[1mrunning tests and building\e[0m"
+    printf "\e[1mstack found\e[0m\n"
+    printf "\e[1mrunning tests and building\e[0m\n"
     stack test 
-    echo -e "\e[1minstalling in $HOME/.local/bin/"
+    rc=$?
+    if [[ "$rc" != 0 ]]; then
+        printf "\n\e[31mCould not pass all tests. The build has failed\e[0m\n"
+        exit "$rc" 
+    fi
+    printf "\e[1minstalling in $HOME/.local/bin/\n"
     stack install
-    echo -e "\e[1mcopying standard libraries to home directory\e[0m"
-    cp -vr src/Libs "$HOME"/.microML/
-    echo -e "\e[1mcopying default .microMLrc to home directory\e[0m"
+    rc=$?
+    if [[ "$rc" != 0 ]]; then
+        printf "\nCould not install the executable into $HOME/.local/bin. Please copy it manually into your path\n"
+        exit "$rc"
+    fi
+    printf "\n\e[1mcopying standard libraries to home directory\e[0m\n"
+    ## delete old standard libs if they are found
+    if [ -x "$HOME"/.microML ]; then
+        printf "\n\e[1mremoving old standard library\e[0m\n"
+        rm -rf "$HOME"/.microML
+    fi
+    printf "\n\e[1minstalling standard library\e[0m\n"
+    cp -vr src/Libs "$HOME"
+    mv "$HOME/Libs" "$HOME/.microML"
+    printf "\n\e[1mcopying default .microMLrc to home directory\e[0m\n"
     cp -v utils/microMLrc "$HOME"/.microMLrc
-    echo -e "\e[1mfinished!\e[0m"
+    printf "\n\e[1mfinished!\e[0m\n"
 else 
-    echo "Could not find stack in your system path. Are you sure it's installed?"
+    printf "\e[31mCould not find stack in your system path. Are you sure it's installed?\e[0]"
 fi
