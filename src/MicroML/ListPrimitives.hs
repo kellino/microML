@@ -30,16 +30,23 @@ append _ _                                        = PrimitiveErr $ ListPrim "one
 ------------------------------------
 
 show' :: Expr -> Expr
-show' str@(Lit (LString _)) = str
-show' (Lit (LInt x))        = Lit . LString $ show x
-show' (Lit (LDouble x))     = Lit . LString $ show x
-show' (Lit (LChar x))       = Lit . LString $ show x
-show' (Lit (LBoolean x))    = Lit . LString $ show x
+show' str@(Lit (LString _))  = str
+show' (Lit (LInt x))         = Lit . LString $ show x
+show' (Lit (LDouble x))      = Lit . LString $ show x
+show' (Lit (LChar x))        = Lit . LString $ [x]
+show' (Lit (LBoolean True))  = Lit (LString "true")
+show' (Lit (LBoolean False)) = Lit (LString "false")
+show' _                      = PrimitiveErr $ ListPrim "this is not a Showable object"
 
+-- this doesn't handle binary, octal or hex yet
 read' :: Expr -> Expr
-read' int@(Lit (LInt _)) = int
-read' doub@(Lit (LDouble _)) = doub
-read' (Lit (LString x)) = Lit . LInt $ read x
+read' (Lit (LString x)) = 
+    let removeDot = filter (/= '.')
+     in if all DC.isNumber $ removeDot x 
+           then if '.' `elem` x
+                then Lit . LDouble $ read x
+                else Lit . LInt $ read x
+           else PrimitiveErr $ ListPrim "the string does not contain a number"
 
 ord' :: Expr -> Expr
 ord' (Lit (LChar a)) = Lit . LInt $ (toInteger . DC.ord) a
