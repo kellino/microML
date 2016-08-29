@@ -58,7 +58,8 @@ instance Show UnaryOp where
     show OpLog = red ++ "log" ++ clear
     show Show  = red ++ "show" ++ clear
     show Read  = red ++ "read" ++ clear
-    show x     = show x
+    show Chr   = red ++ "chr" ++ clear
+    show Ord   = red ++ "ord" ++ clear
 
 data Binop = 
         OpAdd | OpSub | OpMul | OpDiv | OpIntDiv | OpExp | OpMod 

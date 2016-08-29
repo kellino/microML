@@ -181,6 +181,8 @@ inferLambda e =
       (UnaryOp OpLog _)         -> return typeNum
       (UnaryOp Show _)          -> return $ TVar $ TV "a"
       (UnaryOp Read _)          -> return typeString
+      (UnaryOp Chr _)           -> return typeNum
+      (UnaryOp Ord _)           -> return typeChar
       (Lam _ bdy)               -> inferLambda bdy
       BinOp{}                   -> return typeNum -- placeholder
       Var{}                     -> polymorphic e         
@@ -277,6 +279,8 @@ infer expr = case expr of
           Show -> return typeString
           Read -> return typeNum
           OpLog -> infer e1 
+          Chr -> return typeChar
+          Ord -> return typeNum
 
     BinOp op e1 e2 -> 
         case op of
