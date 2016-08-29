@@ -1,10 +1,32 @@
 (* 
 ==toUpper==
-***     toUpper     ***
-** toUpper :: Char -> Char**
+***toUpper***
+** toUpper :: Char -> Char **
 toUpper takes a lowercase letter and changes it to uppercase
 #Example:#
     > toUpper 'a'
     > 'A' : Char
 *)
 let toUpper x = x
+
+(* 
+==chr==
+***chr***
+** chr :: Number -> Char **
+takes a number and returns the __ascii__ letter of that value
+#Example:#
+    > chr 97
+    > 'a' : Char
+*)
+let chr x = _chr x
+
+(* 
+==ord==
+***ord***
+** ord :: Char -> Number **
+takes an __ascii__ letter and returns its number
+#Example:#
+    > ord 'a'
+    > 97 : Number
+*)
+let ord x = _ord x
