@@ -1,0 +1,18 @@
+Primitive operators and functions, such as head and tail are not available to the inference engine.
+Therefore it was necessary to `hard code' the type signatures into the environment, thereby allowing
+students to check the type signature of various important functions, but also meaning that these
+functions can now be type checked\footnote{Haskell overcomes this problem partially by having almost
+everything as a library function, including such things as + and -, which in microML are
+primitives.}. Figure~\ref{table:typesigs}
+
+\begin{table}[ht]
+    \begin{minted}[breaklines=true]{haskell}
+          ("show"   , Forall  [polyA] (TVar polyA `TArrow` typeString))
+        , ("read"   , Forall  [] (typeString `TArrow` typeNum))
+        , ("ord"    , Forall  [] (typeChar `TArrow` typeNum))
+        , ("chr"    , Forall  [] (typeNum `TArrow` typeChar))
+    \end{minted}
+    \caption{Hard-coded type signatures, in Data.Map form}
+    \label{table:typesigs}
+\end{table}
+

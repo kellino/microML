@@ -68,4 +68,10 @@ listprims = hspec $
             it "should complain if passed a non-number string" $ 
                 read' (Lit (LString "dog")) `shouldBe` (PrimitiveErr $ ListPrim "the string does not contain a number")
 
+        describe "ord'" $ do
+            it "takes a char and returns an int" $
+                ord' (Lit (LChar 'a')) `shouldBe` (Lit (LInt 97))
 
+        describe "chr'" $ do
+            it "takes an int and returns a char" $
+                chr' (Lit (LInt 97)) `shouldBe` (Lit (LChar 'a'))
