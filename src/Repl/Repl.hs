@@ -5,6 +5,7 @@
 
 module Repl.Repl where
 
+import MicroML.Config
 import Repl.Eval hiding (mod')
 import Repl.HelpEnv
 import qualified Repl.HelpEnv as HE
@@ -12,7 +13,7 @@ import Repl.Pretty
 import Repl.ParseTree
 import Repl.Help
 
-import MicroML.Syntax hiding (clear)
+import MicroML.Syntax as S
 import MicroML.Parser
 import MicroML.Lexer hiding (contents)
 import MicroML.Typing.Env as Env
@@ -129,7 +130,7 @@ pstText expr = do
     case tyEnv of
          Left err -> liftIO . print $ err 
          Right _ -> do  --  liftIO . putStrLn . head $ tree
-             liftIO . putStrLn $ "The parsetree of " ++ bold ++ (fst . head) tree ++ "\ESC[0m" ++ " is: "
+             liftIO . putStrLn $ "The parsetree of " ++ bold ++ (fst . head) tree ++ S.clear ++ " is: "
              liftIO . putStrLn $ show . snd . head $ tree
 
 -- :browse command
@@ -226,7 +227,7 @@ options = [
       , ("quit"   , quit)
       , ("type"   , typeof)
       , ("!"      , sh)
-      , ("clear"  , clear)
+      , ("clear"  , Repl.Repl.clear)
       , ("?"      , help)
       , ("help"   , help) -- alternative
       , ("pst"    , pst) -- view parse tree of a given expression
@@ -246,6 +247,7 @@ prompt = "\ESC[33mmicroML ⊦\ESC[0m "
 
 -- this looks a little weird and distorted due to the necessity of escaping the \ character. But it
 -- does work!
+-- TODO remove hardcoding of ascii escapes just in case...
 banner :: String
 banner = "\ESC[1;31m" ++
         "            _               ___  ___ _       \n" ++
@@ -258,7 +260,14 @@ banner = "\ESC[1;31m" ++
 ini :: Repl ()
 ini = do
     using ["standard"]
-    liftIO $ putStrLn $ banner ++ "\n\n" ++ "\ESC[1mWelcome to microML\ESC[0m\n\n" 
+    liftIO $ putStrLn $ banner ++ "\n\n" ++ bold ++ "Welcome to microML" ++ S.clear ++ "\n\n"
+
+-- doesn't work yet
+getConfig :: IO ()
+getConfig = do
+    home <- getHomeDirectory 
+    conf <- readConfig $ home </> ".microMLrc"
+    print conf
 
 shell :: IO ()
 shell = flip evalStateT initState $ evalRepl prompt cmd options completer ini
