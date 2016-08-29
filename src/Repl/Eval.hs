@@ -50,6 +50,8 @@ eval env expr = case expr of
           Car   -> car a'
           Cdr   -> cdr a'
           OpLog -> log' a'
+          Chr   -> chr' a'
+          Ord   -> ord' a'
           Minus ->  case a' of
                       (Lit (LInt x))    -> Lit . LInt $ negate x
                       (Lit (LDouble x)) -> Lit . LDouble $ negate x
