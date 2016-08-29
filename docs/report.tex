@@ -70,6 +70,8 @@
 
 %% title page
 \begin{titlepage}
+  %  \includegraphics[width=\linewidth]{images/ucl_bar_black-eps-converted-to}
+  %  \vfill
     \centering
     {\scshape\LARGE University College London\par}
     \vspace{1cm}
@@ -628,7 +630,6 @@ express goal of acting as an educational tool. The user is envisaged to be a you
 the ages of 13 and 18, and the instructor, usually a teacher and not a computer science specialist.
 
 \begin{table}
-    \label{table:student}
     \begin{tabu}{|>{\columncolor[gray]{0.9}}p{4cm}| p{10cm} |}
         \hline
         Use Case & \textbf{Student Use Case} \\
@@ -647,10 +648,11 @@ the ages of 13 and 18, and the instructor, usually a teacher and not a computer 
         \hline
     \end{tabu}
     \caption{Student Use Case.}
+    \label{table:student}
 \end{table}
 
 \begin{table}
-    \label{tabke:educator}
+    \label{table:educator}
     \begin{tabu}{|>{\columncolor[gray]{0.9}}p{4cm}| p{10cm} |}
         \hline
         Use Case & \textbf{Educator} \\
@@ -1260,14 +1262,14 @@ result in a number of possible compiler optimisations and greater runtime safety
 
 %% appendices
 \begin{appendices}
-    \chapter{User Guide}
+    \chapter{Installation Guide}
     \input{user}
     \chapter{System F}
     \label{appendix:sysf}
     \input{sysf}
     \chapter{MicroML Syntax}
     \label{appendix:syntax}
-    not written yet
+    \input{syntax}
     \chapter{Comment Markdown}
     \label{appendix:md}
     \input{markdown}

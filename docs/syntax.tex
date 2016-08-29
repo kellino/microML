@@ -1,0 +1,116 @@
+\subsection{Operators}
+
+MicroML has a full complement of operators. Table~\ref{table:operators}
+
+\begin{table}
+    \resizebox{\textwidth}{!}
+    {\begin{tabu}{l r}
+        Operator & Action \\
+        \hline
+        +   & addition \\
+        -   & subtraction \\
+        /   & division (produces float) \\
+        *   & multiplication \\
+        //  & integer division (produces integer) \\
+        =   & assignment \\
+        ==  & equality test \\
+        $<$   & less than \\
+        $<=$  & less than or equal \\
+        $>$   & greater than \\
+        $>=$  & greater than or equal \\
+        \textasciicircum & exponential \\
+        \%  & integer modulo \\
+        $>>$  & pipe operator \\
+        \hline
+        true & logical true \\
+        false & logical false \\
+        or  & logical or \\
+        and & logical and \\
+        not & logical not \\
+        xor & logical xor \\
+    \end{tabu}}
+    \caption{MicroML\@: arithmetical and logical operators}
+\label{table:operators}
+\end{table}
+
+\subsection{Declarations}
+Top-level declarations for variables and functions (simple and recursive) are prefaced with
+\textit{let}:
+
+\begin{minted}{sml}
+    let x = 5
+    let double x = x * 2
+\end{minted}
+
+\textit{Locally scoped declarations} are created with the let \dots in construction:
+
+\begin{minted}{sml}
+    let addHidden y = 
+        let x = y * 2 - 3 
+        in x + y
+\end{minted}
+
+The if -- then -- else construction is an \textit{expression} in microML, so there must be an
+\textit{else}:
+
+\begin{minted}{sml}
+    if x == 0 then true else false
+\end{minted}
+
+MicroML supports \textit{anonymous functions} with a syntax similar to Haskell:
+
+\begin{minted}{sml}
+    let inc = \x -> x + 1
+\end{minted}
+
+These anonymous functions can also be used in pipes:
+
+\begin{minted}{sml}
+    microML>  (double 5) >> succ >> succ >> \x -> x^2
+    microML> 144 : Number
+    microML> (double 5) >> x -> x^2 >> succ >> succ
+    microML> 102 : Number
+\end{minted}
+
+\subsection{Number Encodings}
+MicroML supports encoding binary, octal and hex numbers:
+
+\begin{minted}{sml}
+    microML> 2#110
+    microML> 6 : Number
+    microML> 8#777
+    microML> 511 : Number
+    microML> 16#2bbad21
+    microML> 45853985 : Number
+    microML> 8#342 + 2#1111
+    microML> 241 : Number
+\end{minted}
+
+\subsection{List Syntax}
+Lists, being the fundamental data structure in microML, have a special syntax:
+
+\begin{minted}{sml}
+    microML> []   (* the empty list *)
+    microML> [1,2,3] (* list of Number *)
+\end{minted}
+
+Ranges (from small to large only) can be created with the `to' syntax:
+
+\begin{minted}{sml}
+    microML> [1 to 5]
+    microML> [1,2,3,4,5] : Number
+    microML> [`a' to `e'] 
+    microML> [`a', `b', `c', `d', `e'] : Char
+\end{minted}
+
+\subsection{Tuples}
+Tuples are created with \{  and \}
+
+\begin{minted}{sml}
+    microML> {1, 2}
+\end{minted}
+
+\subsection{Indenting}
+MicroML does not (yet) have an indentation sensitive parser. Declarations are bests written on one
+line in a file, though the parser is usually sophisticated enough to disambiguate multiline function
+declarations.
