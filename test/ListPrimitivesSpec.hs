@@ -5,7 +5,6 @@ import MicroML.ListPrimitives
 import MicroML.Syntax
 import Control.Exception (evaluate)
 
-
 listprims :: IO ()
 listprims = hspec $ 
     describe "listprims" $ do
