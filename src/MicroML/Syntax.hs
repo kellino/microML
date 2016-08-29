@@ -56,6 +56,8 @@ instance Show UnaryOp where
     show Cdr   = red ++ "Cdr" ++ clear
     show Minus = red ++ "negative" ++ clear
     show OpLog = red ++ "log" ++ clear
+    show Show  = red ++ "show" ++ clear
+    show Read  = red ++ "read" ++ clear
     show x     = show x
 
 data Binop = 
