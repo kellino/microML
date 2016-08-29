@@ -58,9 +58,8 @@ executable microML
                      pretty,
                      containers,
                      transformers,
-                     pretty-tree
-                     --setenv,
-                     --llvm-general,
-                     --llvm-general-pure
+                     pretty-tree,
+                     MissingH,
+                     ConfigFile
 
   ghc-options:   -Wall -O2 -threaded -fwarn-tabs -fno-warn-name-shadowing -fno-warn-missing-signatures -fno-warn-incomplete-patterns -fno-warn-unused-binds
