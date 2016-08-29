@@ -179,6 +179,8 @@ inferLambda e =
       (UnaryOp Car x)           -> infer x
       (UnaryOp Cdr x)           -> infer x
       (UnaryOp OpLog _)         -> return typeNum
+      (UnaryOp Show _)          -> return $ TVar $ TV "a"
+      (UnaryOp Read _)          -> return typeString
       (Lam _ bdy)               -> inferLambda bdy
       BinOp{}                   -> return typeNum -- placeholder
       Var{}                     -> polymorphic e         

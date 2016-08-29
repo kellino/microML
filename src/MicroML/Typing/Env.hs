@@ -22,7 +22,7 @@ microbit = TypeEnv $ Map.fromList
     [ ("scroll" , Forall [polyA] $ TArrow (TVar polyA) (TVar polyA))
     , ("head"   , Forall [TV "[a]"] $ TArrow (TVar $ TV "[a]") (TVar polyA))
     , ("tail"   , Forall [TV "[a]"] $ TArrow (TVar $ TV "[a]") (TVar $ TV "[a]"))
-    , (":"      , Forall [TV "a"] $ TArrow (TVar $ TV "[a]") (TVar $ TV "[a]"))
+    , (":"      , Forall [TV "a", TV "[a]"] $ (TVar $ TV "a") `TArrow` (TVar $ TV "[a]") `TArrow` (TVar $ TV "[a]"))
     , ("+"      , Forall  [] $ TArrow typeNum (TArrow typeNum typeNum))
     , ("-"      , Forall  [] $ TArrow typeNum (TArrow typeNum typeNum))
     , ("/"      , Forall  [] $ TArrow typeNum (TArrow typeNum typeNum))
@@ -30,7 +30,9 @@ microbit = TypeEnv $ Map.fromList
     , ("%"      , Forall  [] $ TArrow typeNum (TArrow typeNum typeNum))
     , ("^"      , Forall  [] $ TArrow typeNum (TArrow typeNum typeNum))
     , ("=="     , Forall  [] $ TArrow (TVar polyA) (TArrow (TVar polyA) typeBool))
-    , (">>"     , Forall  [polyA, TV "b"] $ TVar polyA `TArrow` (TVar polyA `TArrow` (TVar (TV "b")) `TArrow` (TVar $ TV "b")))
+    , (">>"     , Forall  [polyA, TV "b"] $ TVar polyA `TArrow` (TVar polyA `TArrow` TVar (TV "b") `TArrow` (TVar $ TV "b")))
+    , ("show"   , Forall [polyA] $ TVar polyA `TArrow` typeString)
+    , ("read"   , Forall [] $ typeString `TArrow` typeNum)
     ]
 
 lookup :: Name -> Env -> Maybe TypeScheme
