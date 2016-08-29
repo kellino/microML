@@ -1,0 +1,22 @@
+#!/usr/bin/bash
+
+## only tested on linux, but it should probably work in mac as well. Not a chance of windows unless
+## you're using cygwin, with which I have no experience.
+## doesn't check for clobbering, just reinstalls everything regardless
+
+stack=$(which stack)
+
+if [ -x "$stack" ]; then
+    echo -e "\e[1mstack found\e[0m"
+    echo -e "\e[1mrunning tests and building\e[0m"
+    stack test 
+    echo -e "\e[1minstalling in $HOME/.local/bin/"
+    stack install
+    echo -e "\e[1mcopying standard libraries to home directory\e[0m"
+    cp -vr src/Libs "$HOME"/.microML/
+    echo -e "\e[1mcopying default .microMLrc to home directory\e[0m"
+    cp -v utils/microMLrc "$HOME"/.microMLrc
+    echo -e "\e[1mfinished!\e[0m"
+else 
+    echo "Could not find stack in your system path. Are you sure it's installed?"
+fi
