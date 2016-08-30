@@ -61,7 +61,6 @@ pp OpLt = "<"
 pp OpGe = ">="
 pp OpGt = ">"
 pp OpCons = ":"
-pp OpComp = "º"
 
 showTree :: (String, Expr) -> IO ()
 showTree tr = putStrLn $ drawVerticalTreeWith 5 (exprToTree tr)
