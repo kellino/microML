@@ -60,6 +60,7 @@ executable microML
                      transformers,
                      pretty-tree,
                      MissingH,
-                     ConfigFile
+                     ConfigFile,
+                     split
 
   ghc-options:   -Wall -O2 -threaded -fwarn-tabs -fno-warn-name-shadowing -fno-warn-missing-signatures -fno-warn-incomplete-patterns -fno-warn-unused-binds
