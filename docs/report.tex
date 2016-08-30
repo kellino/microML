@@ -34,7 +34,6 @@
 \include{glossary}
 \makeglossaries%
 
-
 %% fake lists inside a table environment
 \usepackage{tabu}
 \usepackage{booktabs}
@@ -42,7 +41,12 @@
 
 %% draw nice frame around code fragments
 \definecolor{light-gray}{rgb}{0.9,0.9,0.9}
-\setminted{bgcolor=light-gray}  % this line causes the problem
+\setminted{%
+    bgcolor=light-gray,
+    frame=lines,
+    framesep=2mm,
+    fontsize=\footnotesize
+}  
 
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{1em}
@@ -1290,6 +1294,7 @@ result in a number of possible compiler optimisations and greater runtime safety
 \nocite{Wadler:1995:MFP:647698.734146}
 \nocite{958}
 \nocite{Steele:1994:BIC:174675.178068}
+\nocite{opac-b1081362}
 
 \bibliography{bibliography}{}
 \bibliographystyle{plain}

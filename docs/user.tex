@@ -1,5 +1,9 @@
-To build and install microML ensure that
-\textbf{stack}\footnote{\url{https://docs.haskellstack.org/en/stable/README/}} is available on your system. 
+To build and install microML on a *\textit{Nix} system there is an installation script in the main directory
+of the repository. This does not need to be run with sudo permission. See
+Appendix~\ref{appendix:samples}.  To build and install microML ensure that
+\textbf{stack}\footnote{\url{https://docs.haskellstack.org/en/stable/README/}} is installed. 
+
+\textbf{MicroML has not been tested on Windows.} 
 
 \begin{figure}
     \label{fig:help}
@@ -10,13 +14,9 @@ To build and install microML ensure that
 \begin{itemize}
     \item Download the repository from Git \url{https://github.com/kellino/microML}
     \item Unzip the repository and cd into the directory.
-    \item Run `stack build' to create an executable or `stack test' to run the tests and build.
-    \item Copy the executable into your system path.
+    \item run installMicroML
 \end{itemize}
 
-MicroML expects to find the standard library in the home directory in a folder called `.microML'.
-Create this directory and copy the files in Lib into it.
-
-Typing `microML --help' into the terminal shows the various options. See Figure~\ref{fig:help}.
+Assuming the build has been successful, typing `microML --help' into the terminal shows the various options. See Figure~\ref{fig:help}.
 
 
