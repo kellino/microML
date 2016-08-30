@@ -199,10 +199,10 @@ prefixOp name func = Ex.Prefix ( do {reservedOp name; return func } )
 primitives :: [[Op Expr]]
 primitives = [[ prefixOp "head"  (UnaryOp Car)
             ,   prefixOp "tail"  (UnaryOp Cdr)
-            ,  prefixOp  "_read"  (UnaryOp Read)
-            ,  prefixOp  "_show"  (UnaryOp Show)
-            ,  prefixOp "_ord" (UnaryOp Ord)
-            , prefixOp "_chr" (UnaryOp Chr)
+            ,   prefixOp  "_read"  (UnaryOp Read)
+            ,   prefixOp  "_show"  (UnaryOp Show)
+            ,   prefixOp "_ord"  (UnaryOp Ord)
+            ,   prefixOp "_chr"  (UnaryOp Chr)
             ,   infixOp   ":"    (BinOp OpCons) Ex.AssocRight
             ,   infixOp   "++"   (BinOp OpAppend) Ex.AssocRight ]
             , [ prefixOp  "_log" (UnaryOp OpLog)
@@ -223,8 +223,7 @@ primitives = [[ prefixOp "head"  (UnaryOp Car)
             ,   infixOp   "or"   (BinOp OpOr)  Ex.AssocLeft
             ,   infixOp   "xor"  (BinOp OpXor) Ex.AssocLeft
             ,   prefixOp  "not"  (UnaryOp Not) ]
-            , [ infixOp   "."    (BinOp OpComp) Ex.AssocRight 
-            ,   infixOp   ">>"   (BinOp OpPipe) Ex.AssocLeft ]]
+            , [ infixOp   ">>"   (BinOp OpPipe) Ex.AssocLeft ]]
 
 expr :: Parser Expr
 expr = do

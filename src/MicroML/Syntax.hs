@@ -64,7 +64,7 @@ instance Show UnaryOp where
 data Binop = 
         OpAdd | OpSub | OpMul | OpDiv | OpIntDiv | OpExp | OpMod 
       | OpOr | OpXor | OpAnd | OpEq | OpLe | OpLt | OpGe 
-      | OpGt | OpNotEq | OpCons | OpComp | OpAppend | OpPipe
+      | OpGt | OpNotEq | OpCons | OpAppend | OpPipe
       deriving (Eq, Ord)      
 
 instance Show Binop where
@@ -85,7 +85,6 @@ instance Show Binop where
     show OpGt     = red ++ "greater than" ++ clear
     show OpNotEq  = red ++ "not equal to" ++ clear
     show OpCons   = red ++ "Cons" ++ clear
-    show OpComp   = red ++ "composition" ++ clear
     show OpAppend = red ++ "concatenation" ++ clear
     show OpPipe   = red ++ "pipe" ++ clear
 
