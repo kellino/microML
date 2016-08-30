@@ -1,6 +1,9 @@
 module Main where
 
 import ListPrimitivesSpec
+import EvalSpec
 
 main :: IO ()
-main = listprims
+main = do
+    listprims
+    evalS
