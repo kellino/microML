@@ -881,6 +881,17 @@ is recognized that the terminal is no longer an environment with which most stud
 familiar: even many programmers avoid its use. Every effort has been made to make it a pleasant
 experience.
 
+\subsection{Floating Point Representation}
+\label{floatingPoint}
+Haskell uses the IEEE double-precision floating point format\cite{citeulike:3760678}.
+This is doubtless very useful for a real programming language, but it would be difficult, and
+unnecessary, to have to explain the representation of a number such as $0.1210000000001$ when the
+student was expecting to $0.121$. In a similar spirit, a student expecting to see $0.9$ will
+inevitably be confused by $0.8999999999$, even if this is an accurate representation of the number
+\textit{for the machine}. It was decided to `hide' this implementation detail from the student by
+passing doubles through a filter function \textit{truncate'} before printing to the repl. See
+Appendix~\ref{appendix:samples}.
+
 \subsection{Comments} MicroML also features a small embedded language, a DSL
 within a DSL for commenting files. This language is a simple variant on the
 textbf{markdown}\footnote{\url{https://daringfireball.net/projects/markdown/}} markup system. See

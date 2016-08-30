@@ -30,7 +30,6 @@ Figure~\ref{fig:exec}
 \label{fig:exec}
 \end{figure}
 
-
 \subsubsection{Type checking of built-in functions}
 Primitive operators and functions, such as head and tail are not available to the inference engine.
 Therefore it was necessary to `hard code' the type signatures into the environment, thereby allowing
@@ -66,6 +65,28 @@ regular expressions and other parser combinators. Figure~\ref{fig:parsec}
     \end{minted}
     \caption{The parser for microML anonymous functions}
 \label{fig:parsec}
+\end{figure}
+
+Truncating floating-point representation in the repl is done using string manipulation. The choice
+of three consecutive 0s is largely arbitrary. See Figure~\ref{fig:trunc} and
+Section~\ref{floatingPoint}.
+\begin{figure}
+    \begin{minted}{haskell}
+        truncate' :: Double -> Double
+        truncate' = read . dropZeros . show
+            where dropZeros x = head (split x) ++ "." ++ getValid (head (tail (split x)))
+                  split       = splitOn "."
+                  getValid s 
+                      | "e" `isInfixOf` s  = s
+                      | hasform s = if length s == 1 then s else  show $ read [head s] + 1
+                      | take 3 s   == "000" = "0"
+                      | otherwise  = head s : getValid (tail s) 
+
+        hasform :: String -> Bool
+        hasform (_:ys) = all (== '9') ys 
+    \end{minted}
+    \caption{The truncation function for doubles in the repl}
+\label{fig:trunc}
 \end{figure}
 
 \subsubsection{Unit Testing}
