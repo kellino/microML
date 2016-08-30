@@ -6,6 +6,8 @@ import MicroML.ListPrimitives
 import qualified Data.Map as Map
 import Data.Maybe (fromJust)
 import Data.Bits (xor)
+import Data.List.Split
+import Data.List (isInfixOf)
 
 emptyTmenv :: TermEnv
 emptyTmenv = Map.empty
@@ -101,14 +103,14 @@ xor' (Lit (LBoolean a)) (Lit (LBoolean b)) = Lit $ LBoolean $ a `xor` b
 sub :: Expr -> Expr -> Expr
 sub (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a - b
 sub (Lit (LDouble a)) (Lit (LDouble b)) = Lit $ LDouble $ a - b
-sub (Lit (LInt a)) (Lit (LDouble b)) = Lit $ LDouble $ realToFrac a - b
-sub (Lit (LDouble a)) (Lit (LInt b)) = Lit $ LDouble $ a - realToFrac b
+sub (Lit (LInt a)) (Lit (LDouble b)) = Lit . LDouble . truncate' $ realToFrac a - b
+sub (Lit (LDouble a)) (Lit (LInt b)) = Lit . LDouble . truncate' $ a - realToFrac b
 
 mul :: Expr -> Expr -> Expr
 mul (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a * b
-mul (Lit (LDouble a)) (Lit (LDouble b)) = Lit $ LDouble $ a * b
-mul (Lit (LInt a)) (Lit (LDouble b)) = Lit $ LDouble $ realToFrac a * b
-mul (Lit (LDouble a)) (Lit (LInt b)) = Lit $ LDouble $ a * realToFrac b
+mul (Lit (LDouble a)) (Lit (LDouble b)) = Lit . LDouble . truncate' $ a * b
+mul (Lit (LInt a)) (Lit (LDouble b)) = Lit . LDouble . truncate' $ realToFrac a * b
+mul (Lit (LDouble a)) (Lit (LInt b)) = Lit . LDouble . truncate' $ a * realToFrac b
 
 div' :: Expr -> Expr -> Expr
 div' (Lit (LInt a)) (Lit (LInt b)) = Lit $ LDouble $ realToFrac a / realToFrac b
@@ -165,6 +167,23 @@ opNotEq :: Expr -> Expr -> Expr
 opNotEq (Lit (LInt a)) (Lit (LDouble b)) = Lit . LBoolean $ realToFrac a /= b
 opNotEq (Lit (LDouble a)) (Lit (LInt b)) = Lit . LBoolean $ a /= realToFrac b
 opNotEq a b = Lit . LBoolean $ a /= b
+
+-- | an abritrary truncation of floating-point rounding errors. It's unlikely that this will be a
+-- problem for students. Horrible horrible code though. 
+
+-- TODO find an elegant mathematical solution to this problem, rather than nasty string manipulation
+truncate' :: Double -> Double
+truncate' = read . dropZeros . show
+    where dropZeros x = head (split x) ++ "." ++ getValid (head (tail (split x)))
+          split       = splitOn "."
+          getValid s 
+              | "e" `isInfixOf` s  = s
+              | hasform s = if length s == 1 then s else  show $ read [head s] + 1
+              | take 3 s   == "000" = "0"
+              | otherwise  = head s : getValid (tail s) 
+
+hasform :: String -> Bool
+hasform (_:ys) = all (== '9') ys 
 
 runEval :: TermEnv -> String -> Expr -> (Expr, TermEnv)
 runEval env x exp = 
