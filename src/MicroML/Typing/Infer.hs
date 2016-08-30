@@ -291,6 +291,7 @@ infer expr = case expr of
           OpEq    -> inferBinOpBool e1 e2
           OpNotEq -> inferBinOpBool e1 e2
           OpLe    -> inferBinOpBool e1 e2
+          OpPipe  -> infer e2
           _       -> 
               case (e1, e2) of
                   nil@(_, Nil)         -> throwError $ UnsupportedOperation $ "[] error " ++ show nil -- debugging
