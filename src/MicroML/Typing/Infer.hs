@@ -190,6 +190,17 @@ infer expr = case expr of
 
     Var x -> lookupEnv x
 
+    {-Lam x e -> do-}
+        {-env <- ask-}
+        {-let ts = inferExpr env e-}
+        {-case ts of-}
+             {-Left err -> error ""-}
+             {-Right ts' -> do-}
+                {-let env' = extend env ("it", ts')-}
+                {-case Env.lookup x env' of-}
+                     {-Nothing -> error ""-}
+                     {-Just t -> return t-}
+
     Lam x e -> do
        tv <- fresh
        t <- inEnv (x, Forall [] tv) (infer e)
@@ -223,6 +234,7 @@ infer expr = case expr of
                 Var _             -> do
                     TVar (TV tv) <- fresh
                     return $ TVar $ TV $ "[" ++ tv ++ "]"
+                app@App{}         -> infer app
                 x                 -> throwError $ BadArg x " is not a list"
           Cdr -> infer e1
           Show -> return typeString
@@ -230,6 +242,7 @@ infer expr = case expr of
           OpLog -> infer e1 
           Chr -> return typeChar
           Ord -> return typeNum
+          Not -> infer e1
           Minus -> do
               t1 <- infer e1
               uni t1 typeNum
@@ -245,6 +258,11 @@ infer expr = case expr of
           OpNotEq -> inferBinOpBool e1 e2
           OpLe    -> inferBinOpBool e1 e2
           OpPipe  -> infer e2
+          OpEnum  -> do
+              e1 <- infer e1
+              e2 <- infer e2
+              uni e1 e2
+              return e2
           _       -> 
               case (e1, e2) of
                   nil@(_, Nil)         -> throwError $ UnsupportedOperation $ "[] error " ++ show nil -- debugging

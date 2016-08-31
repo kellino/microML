@@ -64,7 +64,7 @@ instance Show UnaryOp where
 data Binop = 
         OpAdd | OpSub | OpMul | OpDiv | OpIntDiv | OpExp | OpMod 
       | OpOr | OpXor | OpAnd | OpEq | OpLe | OpLt | OpGe 
-      | OpGt | OpNotEq | OpCons | OpAppend | OpPipe
+      | OpGt | OpNotEq | OpCons | OpAppend | OpPipe | OpEnum
       deriving (Eq, Ord)      
 
 instance Show Binop where
@@ -87,6 +87,7 @@ instance Show Binop where
     show OpCons   = red ++ "Cons" ++ clear
     show OpAppend = red ++ "concatenation" ++ clear
     show OpPipe   = red ++ "pipe" ++ clear
+    show OpEnum   = red ++ "enum" ++ clear
 
 data MLError
     = MathsPrim String 

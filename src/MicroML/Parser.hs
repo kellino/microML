@@ -19,7 +19,7 @@ import Control.Monad (void)
 import MicroML.Lexer
 import qualified MicroML.Lexer as Lx
 import MicroML.Syntax
-import MicroML.ListPrimitives
+--import MicroML.ListPrimitives
 
 varName :: Parser String
 varName = do
@@ -206,6 +206,7 @@ primitives = [[ prefixOp "head"  (UnaryOp Car)
             ,   prefixOp "-"     (UnaryOp Minus)
             ,   infixOp   ":"    (BinOp OpCons) Ex.AssocRight
             ,   infixOp   "++"   (BinOp OpAppend) Ex.AssocRight ]
+           -- ,   infixOp  "to"    (BinOp OpEnum) Ex.AssocRight ]
             , [ prefixOp  "_log" (UnaryOp OpLog)
             ,   infixOp   "^"    (BinOp OpExp) Ex.AssocLeft ]     -- maths operators
             , [ infixOp   "*"    (BinOp OpMul) Ex.AssocLeft
@@ -238,7 +239,8 @@ parseRange = do
     void $ reserved "to"
     end <- expr
     void $ string "]"
-    return $ enumFromTo_ start end
+    return $ BinOp OpEnum start end
+    --return $ enumFromTo_ start end
 
 ------------------
 -- DECLARATIONS --
