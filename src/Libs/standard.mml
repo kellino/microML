@@ -293,12 +293,39 @@ takes the specified number from the start of the list, dropping the rest
 *)
 let take n xs = if zero? n then [] else ((head xs) : (take (n-1) (tail xs)))
 
+(*
+==foldr==
+***foldr***
+** foldr :: (a -> b -> b) -> b -> [a] -> b **
+*)
 let foldr f acc xs = if end? xs then acc else ((f (head xs)) (foldr f acc (tail xs)))
 
+(*
+==foldl==
+***foldl***
+** foldl :: (b -> a -> b) -> b -> [a] -> b **
+*)
 let foldl f acc xs = if end? xs then acc else (foldl f (f acc (head xs)) (tail xs))
+
+(*
+==foldr1==
+***foldr1***
+** foldr1 :: (a -> a -> a) -> [a] -> a **
+*)
 let foldr1 f xs = foldr f (head xs) xs
+
+(*
+==foldl1==
+***foldl1***
+** foldl1 :: (a -> a -> a) -> [a] -> a **
+*)
 let foldl1 f xs = foldl f (head xs) xs
+
+(*
+==map==
+***map***
+** map :: (a -> b) -> [a] -> [b] **
+*)
 let map f xs = foldr (\x xs' -> (f x) : xs') ([]) xs
---let filter p xs = foldr (\x y -> if (p x) then (x:y) else y) [] xs
-let until p f x = if (p x) then x else (until p f (f x))
 --let cons a b = a : b
+--let filter p xs = foldr (\x y -> if (p x) then (x:y) else y) [] xs
