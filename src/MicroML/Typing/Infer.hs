@@ -19,7 +19,7 @@ import Control.Monad.State
 import Control.Monad.RWS
 import Control.Monad.Identity
 
-import Data.List (nub, isInfixOf)
+import Data.List (nub) --, isInfixOf)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 
@@ -167,50 +167,6 @@ normalize (Forall _ body) = Forall (map snd ord) (normtype body)
         Just x -> TVar x
         Nothing -> error "type variable not in signature"
 
--- standard HM results in types which are a little too general to be useful for our purposes. Better
--- to find the most constrained signature possible to prevent programming errors
-inferLambda :: Expr -> Infer Type
-inferLambda e = 
-    case e of
-      (If cond _ _)             -> inferLambda cond
-      (BinOp _ (Var _) (Var _)) -> polymorphic e
-      (BinOp _ (Var _) x)       -> infer x
-      (BinOp _ x (Var _))       -> infer x
-      (UnaryOp Car x)           -> infer x
-      (UnaryOp Cdr x)           -> infer x
-      (UnaryOp OpLog _)         -> return typeNum
-      (UnaryOp Show _)          -> return $ TVar $ TV "a"
-      (UnaryOp Read _)          -> return typeString
-      (UnaryOp Chr _)           -> return typeNum
-      (UnaryOp Ord _)           -> return typeChar
-      (Lam _ bdy)               -> inferLambda bdy
---      BinOp{}                   -> return typeNum -- placeholder
-      Var{}                     -> polymorphic e         
-      l@Let{}                   -> infer l
-      app@App{}                 -> polymorphic app
-      x                         -> throwError $ UnsupportedOperation $ "inferLambda: " ++ show x
-
--- generates types for lhs lambdas
-polymorphic :: Expr -> Infer Type
-polymorphic (BinOp OpAdd (Var _) (Var _))    = return typeNum
-polymorphic (BinOp OpSub (Var _) (Var _))    = return typeNum
-polymorphic (BinOp OpMul (Var _) (Var _))    = return typeNum
-polymorphic (BinOp OpDiv (Var _) (Var _))    = return typeNum
-polymorphic (BinOp OpIntDiv (Var _) (Var _)) = return typeNum
-polymorphic (BinOp OpExp (Var _) (Var _))    = return typeNum
-polymorphic (BinOp OpMod (Var _) (Var _))    = return typeNum
-polymorphic (BinOp OpCons (Var _) (Var _))   = do
-    (TVar (TV tv)) <- fresh
-    return $ TVar $ TV $ "[" ++ tv ++ "]"
-polymorphic (BinOp _ (Var _) (Var _))        = fresh
-polymorphic (Var _) = fresh
-polymorphic (App _ y) = inferLambda y
-polymorphic (Lam x e) = do
-    tv <- fresh
-    t <- inEnv (x, Forall [] tv) (infer e)
-    return (tv `TArrow` t)
-polymorphic x = throwError $ UnsupportedOperation $ "polymorphic: " ++ show x
-
 -----------------------------
 -- MAIN INFERENCE FUNCTION --
 -----------------------------
@@ -223,7 +179,7 @@ infer expr = case expr of
     Lit (LString _)  -> return typeString
     Lit (LChar _)    -> return typeChar
     PrimitiveErr _   -> return typeError
-    Nil              -> return $ TCon $ "[" ++ "a" ++ "]"
+    Nil              -> return $ TVar $ TV "[a]"
 
     -- work in progress. This is just a placeholder
     Lit (LTup (x:xs)) -> do
@@ -234,14 +190,10 @@ infer expr = case expr of
 
     Var x -> lookupEnv x
 
-    Lam x e ->
-        if x `isInfixOf` show e
-           then do
-               let lam' = inferLambda e
-               t1 <- lam'
-               t <- inEnv (x, Forall [] t1) (infer e)
-               return (t1 `TArrow` t)
-           else polymorphic (Lam x e)
+    Lam x e -> do
+       tv <- fresh
+       t <- inEnv (x, Forall [] tv) (infer e)
+       return (tv `TArrow` t)
              
     App e1 e2 -> do
         t1 <- infer e1
@@ -268,13 +220,9 @@ infer expr = case expr of
               case e1 of
                 BinOp OpCons x _  -> infer x
                 Nil               -> throwError $ UnsupportedOperation "head of an empty list"
-                var@(Var _)       -> do
-                    (TCon x) <- infer var
-                    if "String" `isInfixOf` x
-                       then return typeChar
-                       else if head x /= '[' 
-                                then throwError $ UnsupportedOperation $ "\ESC[31mError: \ESC[1myou are trying to take the head of a non-list: " ++ show e1
-                                else return $ TCon $ tail . init $ x
+                Var _             -> do
+                    TVar (TV tv) <- fresh
+                    return $ TVar $ TV $ "[" ++ tv ++ "]"
                 x                 -> throwError $ UnsupportedOperation $ "car: " ++ show x
           Cdr -> infer e1
           Show -> return typeString
