@@ -754,7 +754,7 @@ The most famous fix-point combinator without a doubt is Curry's \textit{Y-combin
 \end{displaymath}
 
 To see how this can be used to simulate recursion\footnote{there are many excellent texts which
-give detailed explanations of the \textit{Y-combinator}, such as~\cite{citeulike:2570403}} it is necessary simply
+give detailed explanations of the \textit{Y-combinator}, such as~\cite{citeulike:4001400}} it is necessary simply
 to supply an argument in the form of a lambda abstraction. Figure~\ref{fig:yCombinator}.
 
 \begin{figure}
@@ -1131,7 +1131,7 @@ after the fact, and, at time of writing, do not yet have full coverage of source
 
 To run tests while building it is necessary simply to enter in the terminal the command `stack test'
 while in the project root directory, which is equivalent to building and testing the
-software.
+software. The tests are run automatically by the installation script in the main repository.
 
 Testing the ability of the compiler to produce C++ code involved the addition of integration tests
 to the Hspec framework. These are handled separately in the form of multiple small \textit{mml}
@@ -1139,6 +1139,13 @@ files. A simple bash script runs each file individually through the microML comp
 writing, the compiler does not yet successfully pass all of these integration tests. More work needs
 to be done before the compiler can seriously be considered to be `fit for purpose'. The script must
 be run from the utils folder of the project.
+
+Many errors and omissions were thrown up by the unit-testing which otherwise might not have been
+noticed until runtime, or worse, after system deployment. One particular `bug' which was not noticed
+until near submission (due to a non-comprehensive test suite) was the inability to perform
+mathematics on negative floating point numbers. The parser did not understand the order of
+precedence of the symbols. This was easily fixed but would have removed unnoticed without good unit
+testing.
 
 \chapter{Conclusions and Project Evaluation}
 
@@ -1306,6 +1313,7 @@ result in a number of possible compiler optimisations and greater runtime safety
 \nocite{958}
 \nocite{Steele:1994:BIC:174675.178068}
 \nocite{opac-b1081362}
+\nocite{cardelli1984basic}
 
 \bibliography{bibliography}{}
 \bibliographystyle{plain}
