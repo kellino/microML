@@ -203,6 +203,7 @@ primitives = [[ prefixOp "head"  (UnaryOp Car)
             ,   prefixOp  "_show"  (UnaryOp Show)
             ,   prefixOp "_ord"  (UnaryOp Ord)
             ,   prefixOp "_chr"  (UnaryOp Chr)
+            ,   prefixOp "-"     (UnaryOp Minus)
             ,   infixOp   ":"    (BinOp OpCons) Ex.AssocRight
             ,   infixOp   "++"   (BinOp OpAppend) Ex.AssocRight ]
             , [ prefixOp  "_log" (UnaryOp OpLog)
