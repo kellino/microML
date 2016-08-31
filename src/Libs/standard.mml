@@ -341,3 +341,24 @@ let map f xs = foldr (\x xs' -> (f x) : xs') [] xs
 ** filter :: (a -> Boolean) -> [a] -> [a] **
 *)
 let filter p xs = foldr (\x y -> if (p x) then (x:y) else y) [] xs
+
+(*
+==init==
+***init***
+** init :: [a] -> [a] **
+*)
+let init xs = let l = (length xs) - 1 in if l == -1 then [] else take l xs
+
+(*
+==reverse==
+***reverse***
+** reverse :: [a] -> [a] **
+*)
+let reverse xs = foldl (\x y -> y : x) [] xs
+
+(*
+==last==
+***last***
+** last :: [a] -> a **
+*)
+let last xs = let l' = reverse xs in head l'
