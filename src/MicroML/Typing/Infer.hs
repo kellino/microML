@@ -184,8 +184,9 @@ inferLambda e =
       (UnaryOp Chr _)           -> return typeNum
       (UnaryOp Ord _)           -> return typeChar
       (Lam _ bdy)               -> inferLambda bdy
-      BinOp{}                   -> return typeNum -- placeholder
+--      BinOp{}                   -> return typeNum -- placeholder
       Var{}                     -> polymorphic e         
+      l@Let{}                   -> infer l
       app@App{}                 -> polymorphic app
       x                         -> throwError $ UnsupportedOperation $ "inferLambda: " ++ show x
 
@@ -281,6 +282,10 @@ infer expr = case expr of
           OpLog -> infer e1 
           Chr -> return typeChar
           Ord -> return typeNum
+          Minus -> do
+              t1 <- infer e1
+              uni t1 typeNum
+              return t1
 
     BinOp op e1 e2 -> 
         case op of
@@ -359,7 +364,10 @@ doConsOp e1 e2 =
           (_, Var _) -> unifyWithListVar e1 e2
           (UnaryOp Car x, _) -> infer x
           (UnaryOp Cdr x, _) -> infer x
-          _     -> throwError $ UnsupportedOperation $ "unmatched cons: " ++ show e1 ++ show e2 -- debugging
+          _     -> do -- UnificationFail (infer e1) (infer e2)
+              t1 <- infer e1
+              t2 <- infer e2
+              throwError $ UnificationFail t1 t2
 
 unifyWithListVar :: Expr -> Expr -> Infer Type
 unifyWithListVar e1 e2 =
