@@ -258,16 +258,47 @@ A shortcut for **if xs == []**. Helpful when defining a __recursive__ function o
 *)
 let end? xs = if xs == [] then true else false
 
+(*
+==length==
+***length***
+** length :: [a] -> Number **
+returns the length of a list
+#Example:#
+    > length [1 to 5]
+    > 5 : Number
+    > length ['a', 'b', 'c']
+    > 3 : Number
+*)
 let length xs = if end? xs then 0 else 1 + (length (tail xs))
---let drop n xs = if zero? n then xs else (drop (n-1) (tail xs))
---let take n xs = if zero? n then [] else ((head xs) : (take (n-1) (tail xs)))
---let foldr f acc xs = if end? xs then acc else ((f (head xs)) (foldr f acc (tail xs)))
---let foldl f acc xs = if end? xs then acc else (foldl f (f acc (head xs)) (tail xs))
---let foldr1 f xs = foldr f (head xs) xs;
---let foldrl1 f xs = foldl f (head xs) xs;
---let map f xs = foldr (\x xs' -> (f x) : xs') ([]) xs;
---let filter p xs = foldr (\x y -> if (p x) then (x:y) else y) [] xs;
---let concat xs
---let concatMap xs
---let until p f x = if (p x) then x else (until p f (f x));
---let cons a b = a : b;
+
+(*
+==drop==
+***drop***
+** drop :: Number -> [a] -> [a] **
+drops the specified number from the start of a list. The opposite of __take__
+#Example:#
+    > drop 2 [1 to 5]
+    > [3,4,5] : [Number]
+*)
+let drop n xs = if zero? n then xs else (drop (n-1) (tail xs))
+
+(* 
+==take==
+***take***
+** take :: Number -> [a] -> [a] **
+takes the specified number from the start of the list, dropping the rest
+#Example:#
+    > take 2 [1 to 5]
+    > [1,2] : Number
+*)
+let take n xs = if zero? n then [] else ((head xs) : (take (n-1) (tail xs)))
+
+let foldr f acc xs = if end? xs then acc else ((f (head xs)) (foldr f acc (tail xs)))
+
+let foldl f acc xs = if end? xs then acc else (foldl f (f acc (head xs)) (tail xs))
+let foldr1 f xs = foldr f (head xs) xs
+let foldl1 f xs = foldl f (head xs) xs
+let map f xs = foldr (\x xs' -> (f x) : xs') ([]) xs
+--let filter p xs = foldr (\x y -> if (p x) then (x:y) else y) [] xs
+let until p f x = if (p x) then x else (until p f (f x))
+--let cons a b = a : b
