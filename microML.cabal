@@ -29,6 +29,7 @@ executable microML
                      Compiler.PrettyCPP,
                      MicroML.Lexer,
                      MicroML.ListPrimitives,
+                     MicroML.MathsPrimitives,
                      MicroML.Parser,
                      MicroML.Syntax,
                      MicroML.Typing.Env,
