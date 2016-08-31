@@ -88,6 +88,8 @@ cons :: Expr -> Expr -> Expr
 cons a Nil = BinOp OpCons a Nil
 cons a (BinOp OpCons x Nil) = BinOp OpCons a (BinOp OpCons x Nil)
 cons a ls@(BinOp OpCons _ _) = BinOp OpCons a ls
+cons (Lit (LChar x)) (Lit (LString y)) = Lit . LString $ x : y
+cons x y = error $ show x ++ " " ++ show y
 
 add :: Expr -> Expr -> Expr
 add (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a + b

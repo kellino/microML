@@ -60,6 +60,8 @@ instance Show TypeError where
       show (UnboundVariable a) = "Not in scope: " ++  bold ++ a ++ clear
       show (UnsupportedOperation a) = bold ++ a ++ clear
       show (UnificationMismatch a b) = show a ++ show b
+      show (BadArg a s) = ppexpr a ++ s
+
 
 ppscheme :: TypeScheme -> String
 ppscheme = render . ppr 0
