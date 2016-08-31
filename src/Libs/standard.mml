@@ -325,7 +325,19 @@ let foldl1 f xs = foldl f (head xs) xs
 ==map==
 ***map***
 ** map :: (a -> b) -> [a] -> [b] **
+performs the function (a -> b) on every element of the list [a]. Easier to see with an example.
+#Example:#
+    > let succ x = x + 2
+    > map pow [1 to 5]
+    > [2, 4, 6, 8, 10] : [Number]
+    > map (λx -> chr x) [109, 105, 99, 114, 111, 77, 76]
+    > "microML" : String
 *)
-let map f xs = foldr (\x xs' -> (f x) : xs') ([]) xs
---let cons a b = a : b
---let filter p xs = foldr (\x y -> if (p x) then (x:y) else y) [] xs
+let map f xs = foldr (\x xs' -> (f x) : xs') [] xs
+
+(*
+==filter==
+***filter***
+** filter :: (a -> Boolean) -> [a] -> [a] **
+*)
+let filter p xs = foldr (\x y -> if (p x) then (x:y) else y) [] xs
