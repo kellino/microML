@@ -223,7 +223,7 @@ infer expr = case expr of
                 Var _             -> do
                     TVar (TV tv) <- fresh
                     return $ TVar $ TV $ "[" ++ tv ++ "]"
-                x                 -> throwError $ UnsupportedOperation $ "car: " ++ show x
+                x                 -> throwError $ BadArg x " is not a list"
           Cdr -> infer e1
           Show -> return typeString
           Read -> return typeNum
@@ -305,14 +305,14 @@ doConsOp e1 e2 =
               uni t1 t2
               doConsOp x xs
           (Var _, Var _) -> do
-              ty1@(TCon t1) <- infer e1
+              t1 <- infer e1
               t2 <- infer e2
-              uni (TCon $ "[" ++ t1 ++ "]") t2
-              return ty1 
+              uni t1 t2
+              return t1
           (_, Var _) -> unifyWithListVar e1 e2
           (UnaryOp Car x, _) -> infer x
           (UnaryOp Cdr x, _) -> infer x
-          _     -> do -- UnificationFail (infer e1) (infer e2)
+          _     -> do 
               t1 <- infer e1
               t2 <- infer e2
               throwError $ UnificationFail t1 t2
