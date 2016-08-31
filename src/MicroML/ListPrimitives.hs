@@ -4,6 +4,7 @@ import MicroML.Syntax
 
 import qualified Data.Char as DC
 
+-- | doesn't work yet for vars
 enumFromTo_ :: Expr -> Expr -> Expr
 enumFromTo_ (Lit (LInt a)) (Lit (LInt b)) = foldr (BinOp OpCons) Nil $ (Lit . LInt ) <$> [a .. b]
 enumFromTo_ (Lit (LDouble a)) (Lit (LDouble b)) = foldr (BinOp OpCons) Nil $ (Lit . LDouble ) <$> [a .. b]
@@ -17,6 +18,13 @@ car (Lit (LString x)) = Lit . LChar $ head x
 cdr :: Expr -> Expr
 cdr (BinOp OpCons _ xs) = xs
 cdr (Lit (LString xs)) = Lit . LString $ tail xs
+
+cons :: Expr -> Expr -> Expr
+cons a Nil = BinOp OpCons a Nil
+cons a (BinOp OpCons x Nil) = BinOp OpCons a (BinOp OpCons x Nil)
+cons a ls@(BinOp OpCons _ _) = BinOp OpCons a ls
+cons (Lit (LChar x)) (Lit (LString y)) = Lit . LString $ x : y
+cons x y = error $ show x ++ " " ++ show y
 
 append :: Expr -> Expr -> Expr
 append xs Nil                                     = xs
