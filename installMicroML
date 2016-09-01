@@ -4,22 +4,22 @@
 ## you're using cygwin, with which I have no experience.
 ## doesn't check for clobbering, just reinstalls everything regardless
 
-stack=$(which stack)
+stack=$(which stack 2>/dev/null) 
 
 if [ -x "$stack" ]; then
     printf "\e[1mstack found\e[0m\n"
     printf "\e[1mrunning tests and building\e[0m\n"
     stack test 
     rc=$?
-    if [[ "$rc" != 0 ]]; then
+    if [ "$rc" != 0 ]; then
         printf "\n\e[31mCould not pass all tests. The build has failed\e[0m\n"
         exit "$rc" 
     fi
-    printf "\e[1minstalling in $HOME/.local/bin/\n"
+    printf "\e[1minstalling in %s/.local/bin/\n" "$HOME"
     stack install
     rc=$?
-    if [[ "$rc" != 0 ]]; then
-        printf "\nCould not install the executable into $HOME/.local/bin. Please copy it manually into your path\n"
+    if [ "$rc" != 0 ]; then
+        printf "\nCould not install the executable into %s/.local/bin. Please copy it manually into your path\n" "$HOME"
         exit "$rc"
     fi
     printf "\n\e[1mcopying standard libraries to home directory\e[0m\n"
@@ -35,5 +35,6 @@ if [ -x "$stack" ]; then
     cp -v utils/microMLrc "$HOME"/.microMLrc
     printf "\n\e[1mfinished!\e[0m\n"
 else 
-    printf "\e[31mCould not find stack in your system path. Are you sure it's installed?\e[0]"
+    printf "\e[31mCould not find stack in your system path. Please install it using your package
+    manager or go to \e[0;1mhttps://docs.haskellstack.org/en/stable/README/\e[0m\n"
 fi
