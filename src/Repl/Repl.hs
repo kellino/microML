@@ -6,7 +6,7 @@
 module Repl.Repl where
 
 import MicroML.Config
-import Repl.Eval hiding (mod')
+import Repl.Eval 
 import Repl.HelpEnv
 import qualified Repl.HelpEnv as HE
 import Repl.Pretty
@@ -117,16 +117,18 @@ cmd source = exec True (L.pack source)
 -- :pst command
 pst :: [String] -> Repl ()
 pst expr = do
+    st <- get
     tree <- hoistError $ parseProgram "<stdin>" $ L.pack $ concatMap (++ " ") expr
-    let tyEnv = inferTop Env.empty tree
+    let tyEnv = inferTop (typeEnv st) tree
     case tyEnv of
-         Left err -> liftIO . print $ err 
+         Left err -> liftIO . print $ err
          Right _ -> liftIO . showTree . head $ tree
 
 pstText :: [String] -> Repl ()
 pstText expr = do
+    st <- get
     tree <- hoistError $ parseProgram "<stdin>" $ L.pack $ concatMap (++ " ") expr
-    let tyEnv = inferTop Env.empty tree
+    let tyEnv = inferTop (typeEnv st) tree
     case tyEnv of
          Left err -> liftIO . print $ err 
          Right _ -> do  --  liftIO . putStrLn . head $ tree
