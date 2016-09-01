@@ -235,6 +235,7 @@ infer expr = case expr of
                     TVar (TV tv) <- fresh
                     return $ TVar $ TV $ "[" ++ tv ++ "]"
                 app@App{}         -> infer app
+                Lit (LString _)   -> return typeChar
                 x                 -> throwError $ BadArg x " is not a list"
           Cdr -> infer e1
           Show -> return typeString
