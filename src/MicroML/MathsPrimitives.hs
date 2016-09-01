@@ -94,7 +94,7 @@ truncate' = read . dropZeros . show
           split       = splitOn "."
           getValid s 
               | "e" `isInfixOf` s  = s
-              | hasform s = if length s == 1 then s else  show $ read [head s] + 1
+              | hasform s = if length s == 1 then s else  show $ (read [head s] :: Int) + 1
               | take 3 s   == "000" = "0"
               | otherwise  = head s : getValid (tail s) 
 
