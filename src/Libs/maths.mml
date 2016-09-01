@@ -2,9 +2,36 @@
 -- MATHS STANDARD LIBRARY --
 ----------------------------
 -- constants
+(*
+==pi==
+***pi π***
+the constant, π
+3.14159265359
+*)
 let pi = 3.14159265359
+
+(*
+==e==
+***e***
+euler's number
+2.718281828459
+*)
 let e  = 2.718281828459
+
+(*
+==abs==
+***abs***
+** abs :: Number -> Number **
+gets the absolute value of a number: that is, its distance from zero. As a result, it is always
+positive
+#Example:#
+    > abs 3
+    > 3 : Number
+    > abs (-3)      ** note the use of the parentheses! **
+    > 3 : Number
+*)
 let abs x     = if x > 0 then x else x * (-1)
+
 let negate x  = if x < 0 then abs x else x * -1
 let max a b   = if (a + 0) < (b + 0) then b else a
 let min a b   = if (a + 0) < (b + 0) then a else b
@@ -23,5 +50,25 @@ let log10 x     = _log x / _log 10
 let logBase x y = _log y / _log x
 -- naive fibonacci
 let fib n = if n < 2 then 1 else (fib (n-1)) + (fib (n-2))
+
+(*
+==factorial==
+***factorial***
+** factorial :: Number -> Number **
+finds the factorial (!) of a number
+#Example:#
+    > factorial 5      ** 5! in maths notation **
+    > 120 : Number
+factorials grow really quickly...
+    > factorial 10
+    > 3628800 : Number
+*)
+let factorial n = product [1 to n];
+
+(*
+==gcd==
+***gcd : greatest common divisor***
+** gcd :: Number -> Number -> Number **
+finds the greatest common divisor of two numbers
+*)
 let gcd a b = if a - b == 0 then a else if a < b then gcd b a else gcd b (a-b)
-(* == == *)
