@@ -18,6 +18,7 @@
 \usepackage{fancyhdr}
 \usepackage{verbatimbox}
 \usepackage{titlesec}
+\usepackage[flushleft]{threeparttable}
 % line spacing
 \linespread{1.3}
 
@@ -27,6 +28,7 @@
 \definecolor{Lawngreen}{rgb}{0.48, 0.99, 0}
 \definecolor{LRed}{rgb}{1, 0.8, 0.8}
 \definecolor{GoldenRod}{rgb}{0.93, 0.65, 0.12}
+\definecolor{light-gray}{rgb}{0.9,0.9,0.9}
 
 \usepackage[nottoc]{tocbibind} % put list of... in toc
 \usepackage[toc,page]{appendix}
@@ -40,7 +42,6 @@
 \newcommand{\tabitem}{~\llap{\textbullet}~}
 
 %% draw nice frame around code fragments
-\definecolor{light-gray}{rgb}{0.9,0.9,0.9}
 \setminted{%
     bgcolor=light-gray,
     frame=lines,
@@ -540,8 +541,8 @@ stage that any complete lambda calculus implementation has the potential to crea
 element is the syntactic sugar provided the sum and product types in languages such as ML and
 Haskell. The same is also true of tuples and lists, which do not require special status in a
 lambda calculus language, but are often given so for reasons of efficiency and programmer
-satisfaction. The immediate application of ADTS for micro:bit programming is not immediately
-apparent, so, much in the manner of Scheme, these will not be considered a priority of microML.
+satisfaction. The immediate application of ADTs for micro:bit programming is not immediately
+apparent, so, much in the manner of Scheme, these will not be considered a priority of microML\@.
 
 \section{Language Design} 
 \label{sec:lang}
@@ -603,8 +604,8 @@ the entire program. This is a much simpler concept than having a value for x whi
 or even change type.
 
 \section{Constraints}
+\label{constraints}
 The following are the design constraints for microML:
-
 \begin{itemize}
     \item C++ Compiler. The author's initial proposal to MicroSoft was to use an existing Scheme
         to C compiler to turn microML code into something runnable on the micro:bit. It would have
@@ -625,6 +626,55 @@ The following are the design constraints for microML:
         `pipe' operator. See Appendix~\ref{appendix:syntax}.}. The language structure should also
         minimize the number of parentheses needed in an expression.
 \end{itemize}
+
+\section{Final Requirements}
+The project's final requirements, in \textit{MoSCoW} form are can be seen in
+Table~\ref{table:requirements}.
+
+\newcolumntype{g}{>{\columncolor{light-gray}} l}
+\begin{table}[!htbp]
+    \begin{threeparttable}
+       \caption{Project Requirements}
+        \begin{tabular}{g l r}
+            \rowcolor{light-gray}
+            G & Requirement & P \\
+            1 & Design syntax for new language & M \\
+            2 & BNF of new language & M \\
+            3 & Create lexer & M \\
+            4 & Create parser & M \\
+            5 & Implement a lambda calculus & M \\
+            6 & Static Typing & S \\
+            7 & Type inference & S \\
+            8 & Evaluation environment & S \\
+            9 & Compiler to C++ & S \\
+            \hline
+            10 & Appropriate error messages & C \\
+            11 & Syntax highlighting in repl & C \\
+            12 & Repl history & C \\
+            13 & view parse tree in repl & C \\
+            14 & create call graph of program & C \\
+            \hline
+            15 & Vim plugin for code editing & C \\
+            16 & Folds, syntax highlighting and autocomplete & C \\
+            17 & Inline \textit{markdown style} comments in source files & C \\
+            \hline
+            18 & Comprehensive custom C++ compiler & W \\
+            \hline
+        \end{tabular}
+      \begin{tablenotes}
+            \small
+            \item Key: G = Goal, P = Priority, M = must have, S = should have, \\ 
+                C = could have, W = won't have
+      \end{tablenotes}
+    \end{threeparttable}
+\label{table:requirements}
+\end{table}
+
+Point 18 is worthy of a little extra discussion. The original intention of the project was to use
+an existing compiler (see Sections~\ref{constraints} and~\ref{JIT}) to generate the source code.
+The addition of the unexpected constraint of native code production after the initial project
+inspiration has meant that to create a completely functional compiler, in addition to all the other
+essential features, is not practicable.
 
 \section{Use Cases}
 The primary use case is in schools. The micro:bit has been, or is intended to be, rolled out to
@@ -733,7 +783,7 @@ primitives inherited from languages in the Lisp family. Figure~\ref{fig:unary}
 \label{fig:unary}
 \end{figure}
 
-These primitives are accessed through the \textit{head}, \textit{tail} and~\:
+These primitives are accessed through the \textit{head}, \textit{tail} and \textbf{$:$}
 operator\footnote{MicroML partially follows the example set by Haskell in using~\: for cons. This
 was inherited from Miranda but is at odds with the literature, where~\:: is used for cons, and~\: for
 has-type.}, which are essential for recursing over lists.
