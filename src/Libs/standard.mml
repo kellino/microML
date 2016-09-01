@@ -297,6 +297,10 @@ let take n xs = if zero? n then [] else ((head xs) : (take (n-1) (tail xs)))
 ==foldr==
 ***foldr***
 ** foldr :: (a -> b -> b) -> b -> [a] -> b **
+you can see precisely what foldr is doing with the following function
+#Example:#
+    > foldr (λx y -> "(" ++ x ++ " + " ++ y ++ ")") "0" (map show [1 to 5])
+    > "(1 + (2 + (3 + (4 + (5 + 0)))))"
 *)
 let foldr f acc xs = if end? xs then acc else ((f (head xs)) (foldr f acc (tail xs)))
 
@@ -304,6 +308,10 @@ let foldr f acc xs = if end? xs then acc else ((f (head xs)) (foldr f acc (tail 
 ==foldl==
 ***foldl***
 ** foldl :: (b -> a -> b) -> b -> [a] -> b **
+you can see precisely what foldl is doing with the following function
+#Example:#
+    > foldl (λx y -> "(" ++ x ++ " + " ++ y ++ ")") "0" (map show [1 to 5])
+    > "(((((0 + 1) + 2) + 3) + 4) + 5)"
 *)
 let foldl f acc xs = if end? xs then acc else (foldl f (f acc (head xs)) (tail xs))
 
