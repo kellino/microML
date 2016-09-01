@@ -3,8 +3,8 @@ module MicroML.Config where
 import Data.ConfigFile
 import qualified Data.Map as Map
 import Control.Monad.Except
-import System.FilePath
-import System.Directory
+--import System.FilePath
+--import System.Directory
 
 
 dark :: Map.Map String String
