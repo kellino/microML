@@ -80,7 +80,7 @@ eval env expr = case expr of
           OpGt     -> a' `opGt` b'
           OpNotEq  -> a' `opNotEq` b'
           OpCons   -> a' `cons` b'
-          OpAppend -> a' `append` b'
+          OpAppend -> eval env (a' `append` b')
           OpPipe   -> eval env (App b a)
 
 runEval :: TermEnv -> String -> Expr -> (Expr, TermEnv)

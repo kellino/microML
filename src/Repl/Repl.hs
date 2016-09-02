@@ -161,16 +161,15 @@ using args =
                let stdlib = dir </> ".microML/"
                exists <- liftIO $ doesDirectoryExist stdlib
                if exists
-                 then do 
-                    tr <- liftIO $ doesFileExist (unwords args)
-                    if tr then do
-                            -- just in case someone writes in "standard.mml", check for an extension and
-                            -- remove it, adding the extension again if necessary
-                            let safe = fst $ splitExtension $ unwords args
-                            contents <- liftIO $ L.readFile $ stdlib ++ safe ++ ".mml"
-                            exec' contents 
-                          else liftIO $ putStrLn "the file does not exist"
-                 else error "\ESC[31mError\ESC[0m: Unable to locate standard library in home directory"
+                  then do
+                      let safe = fst (splitExtension $ unwords args) ++ ".mml"
+                      tr <- liftIO $ doesFileExist $ stdlib ++ safe
+                      if tr 
+                         then do 
+                            contents <- liftIO $ L.readFile $ stdlib ++ safe
+                            exec' contents
+                         else liftIO . putStrLn $ "the file " ++ unwords args ++ " does not exist"
+                  else error "Error: Unable to locate standard library in the home directory"
 
 -- :load command
 load :: [String] -> Repl ()
