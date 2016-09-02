@@ -31,7 +31,8 @@ append xs Nil                                     = xs
 append (BinOp OpCons x Nil) xs@(BinOp OpCons _ _) = BinOp OpCons x xs
 append (BinOp OpCons x xs) ys                     = BinOp OpCons x (append xs ys)
 append (Lit (LString x)) (Lit (LString y))        = Lit . LString $ x ++ y
-append _ _                                        = PrimitiveErr $ ListPrim "one of your two objects isn't a list"
+append Nil xs                                     = xs
+append x y                                        = PrimitiveErr $ ListPrim $ show x ++ " " ++ show y
 
 ------------------------------------
 -- STRING MANIPULATION PRIMITIVES --
