@@ -162,18 +162,27 @@ using args =
                exists <- liftIO $ doesDirectoryExist stdlib
                if exists
                  then do 
-                    -- just in case someone writes in "standard.mml", check for an extension and
-                    -- remove it, adding the extension again if necessary
-                    let safe = fst $ splitExtension $ unwords args
-                    contents <- liftIO $ L.readFile $ stdlib ++ safe ++ ".mml"
-                    exec' contents 
+                    tr <- liftIO $ doesFileExist (unwords args)
+                    if tr then do
+                            -- just in case someone writes in "standard.mml", check for an extension and
+                            -- remove it, adding the extension again if necessary
+                            let safe = fst $ splitExtension $ unwords args
+                            contents <- liftIO $ L.readFile $ stdlib ++ safe ++ ".mml"
+                            exec' contents 
+                          else liftIO $ putStrLn "the file does not exist"
                  else error "\ESC[31mError\ESC[0m: Unable to locate standard library in home directory"
 
 -- :load command
 load :: [String] -> Repl ()
-load args = do
-  contents <- liftIO $ L.readFile (unwords args)
-  exec True contents
+load args =
+    if null args
+       then liftIO $ putStrLn "you must enter a filename"
+       else do 
+            tr <- liftIO $ doesFileExist (unwords args)
+            if tr then do
+                    contents <- liftIO $ L.readFile (unwords args)
+                    exec True contents
+                  else liftIO $ putStrLn "the file does not exist"
 
 -- :type command
 typeof :: [String] -> Repl ()

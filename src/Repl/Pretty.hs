@@ -32,6 +32,11 @@ instance Pretty Type where
           isArrow TArrow{} = True
           isArrow _ = False
     ppr p (TVar a) = ppr p a
+    ppr _ (TCon "Number") = text $ "\ESC[31m" ++ "Number" ++ clear
+    ppr _ (TCon "String") = text $ "\ESC[32m" ++ "String" ++ clear
+    ppr _ (TCon "Boolean") = text $ "\ESC[33m" ++ "Boolean" ++ clear
+    ppr _ (TCon "Char") = text $ "\ESC[34m" ++ "Char" ++ clear
+    ppr _ (TCon "Tuple") = text $ "\ESC[35m" ++ "Tuple" ++ clear
     ppr _ (TCon a) = text a
 
 instance Pretty TypeScheme where
@@ -61,7 +66,6 @@ instance Show TypeError where
       show (UnsupportedOperation a) = bold ++ a ++ clear
       show (UnificationMismatch a b) = show a ++ show b
       show (BadArg a s) = ppexpr a ++ s
-
 
 ppscheme :: TypeScheme -> String
 ppscheme = render . ppr 0
