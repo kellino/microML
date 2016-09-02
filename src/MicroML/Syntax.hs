@@ -68,26 +68,26 @@ data Binop =
       deriving (Eq, Ord)      
 
 instance Show Binop where
-    show OpAdd    = red ++ "addition" ++ clear
-    show OpSub    = red ++ "subtraction" ++ clear
-    show OpMul    = red ++ "multiplication" ++ clear
-    show OpDiv    = red ++ "division" ++ clear
-    show OpIntDiv = red ++ "integer division" ++ clear
-    show OpExp    = red ++ "exponents" ++ clear
-    show OpMod    = red ++ "modulo" ++ clear
-    show OpOr     = red ++ "inclusive or" ++ clear
-    show OpXor    = red ++ "exclusive or" ++ clear
-    show OpAnd    = red ++ "logical and" ++ clear
-    show OpEq     = red ++ "equals" ++ clear
-    show OpLe     = red ++ "less than or equal to" ++ clear
-    show OpLt     = red ++ "less than" ++ clear
-    show OpGe     = red ++ "greater than or equal to" ++ clear
-    show OpGt     = red ++ "greater than" ++ clear
-    show OpNotEq  = red ++ "not equal to" ++ clear
-    show OpCons   = red ++ "Cons" ++ clear
-    show OpAppend = red ++ "concatenation" ++ clear
-    show OpPipe   = red ++ "pipe" ++ clear
-    show OpEnum   = red ++ "enum" ++ clear
+    show OpAdd    =  "addition" 
+    show OpSub    =  "subtraction" 
+    show OpMul    =  "multiplication" 
+    show OpDiv    =  "division" 
+    show OpIntDiv =  "integer division" 
+    show OpExp    =  "exponents" 
+    show OpMod    =  "modulo" 
+    show OpOr     =  "inclusive or" 
+    show OpXor    =  "exclusive or" 
+    show OpAnd    =  "logical and" 
+    show OpEq     =  "equals" 
+    show OpLe     =  "less than or equal to" 
+    show OpLt     =  "less than" 
+    show OpGe     =  "greater than or equal to" 
+    show OpGt     =  "greater than" 
+    show OpNotEq  =  "not equal to" 
+    show OpCons   =  "Cons" 
+    show OpAppend =  "concatenation" 
+    show OpPipe   =  "pipe" 
+    show OpEnum   =  "enum" 
 
 data MLError
     = MathsPrim String 
