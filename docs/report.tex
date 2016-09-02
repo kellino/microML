@@ -17,6 +17,7 @@
 \usepackage{cite}
 \usepackage{fancyhdr}
 \usepackage{verbatimbox}
+\usepackage{float}
 \usepackage{titlesec}
 \usepackage[flushleft]{threeparttable}
 % line spacing
@@ -177,10 +178,12 @@ one's first programs?
 \section{Aims and Goals}
 \subsection{Project Aims}
 It seems only just that a functional language for the micro:bit, assuming that it is not
-self-hosting, should be written in a more mature functional language. Haskell was chosen for this
-task as it presented a good opportunity to `come to grips' with the language and the paradigm. A
-single 10-week UCL elective module in Miranda was not, as anticipated, sufficient preparation for the complexity
-of constructing an entire program in a language which is almost aggressive in its focus on purity. 
+self-hosting\footnote{By which is meant a language whose implementation is written in itself. For
+example, a C compiler is usually written in C and the GHC Haskell compiler is written in Haskell.},
+should be written in a more mature functional language. Originally Haskell was chosen for this task as it
+presented a good opportunity to `come to grips' with the language and the paradigm. A single 10-week
+UCL elective module in Miranda was not, as anticipated, sufficient preparation for the complexity of
+constructing an entire program in a language which is almost aggressive in its focus on purity.
 
 The primary target, or goal, of the project is to produce, as a proof of concept, the basis of a
 language designed primarily for teaching purposes, but practical enough to write real programs for
@@ -190,21 +193,14 @@ all have in common is that they are intended for an audience who are already int
 science, or are indeed already computer scientists. Even classic texts, such
 as~\cite{Abelson:1996:SIC:547755} and~\cite{Friedman1900} are squarely pitched at a sophisticated audience.
 The micro:bit is the opposite: it is for students with no previous programming experience,
-students who are not mathematicians, and teachers who are neither mathematicians nor programmers.
+students who are not mathematicians, and teachers who are neither mathematicians nor
+programmers\footnote{The micro:bit website \url{https://www.microbit.co.uk/about} explicitly states
+that the micro:bit is intended for year 7 students. This covers the age of approximately 11-12. It
+would seem a safe assumption to assume an absence of mathematical maturity.}.
 Functional programming has a reputation in the programming community for being complex and only for a
 special type of person. The aim of this project is to show that this is not necessarily the case.
 With this in mind, the aim is to make the language as educational and simple as possible, at the expense 
 sacrificed expressiveness. 
-
-Development progressed iteratively. Having no previous experience of engineering a large software
-project in Haskell, initial development was largely \textit{ad hoc} and unstructured. Haskell is not
-an ideal language for development in this manner. A great deal of time was spent just in understanding 
-the principles of state manipulation in a side-effect free language. Luckily, there were a number of 
-tutorials which served as the backbone, or perhaps more accurately, embryo, of the final project. 
-Traces of these tutorials can still be seen scattered throughout the final codebase. These were 
-perhaps both a help and a hindrance, as their original authors had not perhaps foreseen that 
-they would be so heavily expanded and built-upon. Strong foundations might have results in a project 
-which was more realised, with fewer edge cases and areas where the solutions are not as robust as could be desired.
 
 \subsection{Project Goals}
 Formally put, the project's goals in order of importance are 
@@ -229,6 +225,57 @@ Formally put, the project's goals in order of importance are
         degree where compilation of even complicated programs could be accomplished with safety and
         precision. 
 \end{itemize}
+
+\section{Formal Requirements}
+\label{formalreq}
+The project's final requirements, in
+\textit{MoSCoW}\footnote{\url{https://en.wikipedia.org/wiki/MoSCoW_method}} form can be seen in
+Table~\ref{table:requirements}.
+
+\newcolumntype{g}{>{\columncolor{light-gray}} l}
+\begin{table}[!htbp]
+    \begin{threeparttable}
+       \caption{Project Requirements}
+        \begin{tabular}{g l r}
+            \rowcolor{light-gray}
+            G & Requirement & P \\
+            1 & Design syntax for new language & M \\
+            2 & BNF of new language & M \\
+            3 & Create lexer & M \\
+            4 & Create parser & M \\
+            5 & Implement a lambda calculus & M \\
+            6 & Static Typing & S \\
+            7 & Type inference & S \\
+            8 & Evaluation environment & S \\
+            9 & Compiler to C++ & S \\
+            \hline
+            10 & Appropriate error messages & C \\
+            11 & Syntax highlighting in repl & C \\
+            12 & Repl history & C \\
+            13 & view parse tree in repl & C \\
+            14 & create call graph of program & C \\
+            \hline
+            15 & Vim plugin for code editing & C \\
+            16 & Folds, syntax highlighting and autocomplete & C \\
+            17 & Inline \textit{markdown style} comments in source files & C \\
+            \hline
+            18 & Comprehensive custom C++ compiler & W \\
+            \hline
+        \end{tabular}
+      \begin{tablenotes}
+            \small
+            \item Key: G = Goal, P = Priority, M = must have, S = should have, \\ 
+                C = could have, W = won't have
+      \end{tablenotes}
+    \end{threeparttable}
+\label{table:requirements}
+\end{table}
+
+Point 18 is worthy of a little extra discussion. The original intention of the project was to use
+an existing compiler (see Sections~\ref{constraints} and~\ref{JIT}) to generate the source code.
+The addition of the unexpected constraint of native code production after the initial project
+inspiration has meant that to create a completely functional compiler, in addition to all the other
+essential features, is not practicable.
 
 \chapter{Context} 
 \section{The BBC micro:bit} The BBC micro:bit\footnote{\url{https://www.microbit.co.uk/}} is a
@@ -513,22 +560,22 @@ completely referentially transparent. That is, a function called with the same a
 return the same results. This is not necessarily the case with a language like Scheme, which has the
 `set!' operator for manipulating global state in a non-transparent manner.
 
-The table shows clearly that there are a few central features which are associated with functional
-languages, and other features which are less essential. Bearing in mind the target audience and
-the target device, it should be fairly safe to abandon \textit{explicit} monads and
-monoids. Why explicit? Natural numbers, for example, are monoidal under both addition and multiplication\footnote{A monoid 
-a monoid (or monoid object) (M, $\mu$, $\eta$) in a monoidal category (C, x, l) is an object M
-together with two morphisms
-\begin{flalign*}
-    \mu: M \otimes M \rightarrow M \\
-    \eta: I \rightarrow M
-\end{flalign*}
+The table shows clearly that there are a few central features which are associated with
+functional languages, and other features which are less essential. Bearing in mind the target
+audience and the target device, it should be fairly safe to abandon \textit{explicit} monads
+and monoids. Why explicit? Natural numbers, for example, are monoidal under both addition and
+multiplication\footnote{A monoid or monoid object (M, $\mu$, $\eta$) in a monoidal category (C, x,
+l) is an object M together with two morphisms
+\begin{align*}
+    &\mu: M \otimes M \rightarrow M \\
+    &\eta: I \rightarrow M
+\end{align*}
 Essentially this means there must exist an associative operator and an identity value. For numbers
 this might be 
-\begin{flalign*}
-    1 + (2 + 3) \equiv (1 + 2) + 3 \\
-    1 + 0 \equiv 0 + 1
-\end{flalign*}
+\begin{align*}
+    1 + (2 + 3) &\equiv (1 + 2) + 3 \\
+    1 + 0 &\equiv 0 + 1
+\end{align*}
 }, but microML will eschew the ability to annotate user-defined types as monoidal instances. Higher
 order functions are essential to the paradigm, as is partial function application.\footnote{i.e.\
 allowing functions to accept fewer arguments than their arity would suggest. The classic example is
@@ -577,9 +624,9 @@ Haskell or Miranda results in a error.
 
 However this is not a necessity\footnote{The head function in Haskell's standard prelude is a legacy
 from Miranda which unfortunately is too late to change easily. The Idris language (itself written in
-Haskell) has a built-in function totality checker, usable from the repl, to ensure that such unsafe
+Haskell) has a built-in function \gls{totality} checker, usable from the repl, to ensure that such unsafe
 practices are deliberate rather than accidental or due to programmer laziness.} and safe versions of
-these functions should be written for microML.
+these functions should be written for microML\@.
 
 Laziness, or more accurately non-\gls{strict}, is an interesting feature of many functional languages, 
 but it is a little unclear at the moment what this would mean for programming on the micro:bit. 
@@ -605,7 +652,7 @@ or even change type.
 
 \section{Constraints}
 \label{constraints}
-The following are the design constraints for microML:
+The following are the design constraints for microML\@:
 \begin{itemize}
     \item C++ Compiler. The author's initial proposal to MicroSoft was to use an existing Scheme
         to C compiler to turn microML code into something runnable on the micro:bit. It would have
@@ -626,55 +673,6 @@ The following are the design constraints for microML:
         `pipe' operator. See Appendix~\ref{appendix:syntax}.}. The language structure should also
         minimize the number of parentheses needed in an expression.
 \end{itemize}
-
-\section{Final Requirements}
-The project's final requirements, in \textit{MoSCoW} form are can be seen in
-Table~\ref{table:requirements}.
-
-\newcolumntype{g}{>{\columncolor{light-gray}} l}
-\begin{table}[!htbp]
-    \begin{threeparttable}
-       \caption{Project Requirements}
-        \begin{tabular}{g l r}
-            \rowcolor{light-gray}
-            G & Requirement & P \\
-            1 & Design syntax for new language & M \\
-            2 & BNF of new language & M \\
-            3 & Create lexer & M \\
-            4 & Create parser & M \\
-            5 & Implement a lambda calculus & M \\
-            6 & Static Typing & S \\
-            7 & Type inference & S \\
-            8 & Evaluation environment & S \\
-            9 & Compiler to C++ & S \\
-            \hline
-            10 & Appropriate error messages & C \\
-            11 & Syntax highlighting in repl & C \\
-            12 & Repl history & C \\
-            13 & view parse tree in repl & C \\
-            14 & create call graph of program & C \\
-            \hline
-            15 & Vim plugin for code editing & C \\
-            16 & Folds, syntax highlighting and autocomplete & C \\
-            17 & Inline \textit{markdown style} comments in source files & C \\
-            \hline
-            18 & Comprehensive custom C++ compiler & W \\
-            \hline
-        \end{tabular}
-      \begin{tablenotes}
-            \small
-            \item Key: G = Goal, P = Priority, M = must have, S = should have, \\ 
-                C = could have, W = won't have
-      \end{tablenotes}
-    \end{threeparttable}
-\label{table:requirements}
-\end{table}
-
-Point 18 is worthy of a little extra discussion. The original intention of the project was to use
-an existing compiler (see Sections~\ref{constraints} and~\ref{JIT}) to generate the source code.
-The addition of the unexpected constraint of native code production after the initial project
-inspiration has meant that to create a completely functional compiler, in addition to all the other
-essential features, is not practicable.
 
 \section{Use Cases}
 The primary use case is in schools. The micro:bit has been, or is intended to be, rolled out to
@@ -823,6 +821,7 @@ type \textbf{Number}. The compiler will benefit from knowledge of the number typ
 whereas the user (a school-aged student) will not.
 
 \subsection{Parsing}
+\label{parsing}
 A number of different libraries were examined before settling on the `standard' \textit{Parsec}
 library of parser combinators\footnote{A combinator is a lambda abstraction which contains no
 occurrences of a free variable, i.e.\ all of its arguments are explicitly supplied to it, and it
@@ -892,10 +891,10 @@ Hindley-Milner is guaranteed to give the most general type signature possible. F
 has type (Figure~\ref{fig:typesig}).
 
 \begin{figure}
-        \begin{flalign*}
-            compose : \forall\:a\:b\:c.\;(a \rightarrow b) \rightarrow (c \rightarrow a) \rightarrow c \rightarrow b \\
-            let\;compose\;f\:x\: z = f (x\:z)
-        \end{flalign*}
+        \begin{align*}
+            &compose : \forall\:a\:b\:c.\;(a \rightarrow b) \rightarrow (c \rightarrow a) \rightarrow c \rightarrow b \\
+            &let\;compose\;f\:x\: z = f (x\:z)
+        \end{align*}
     \caption{Inferred type signature and microML definition for `compose'.}
     \label{fig:typesig}
 \end{figure}
@@ -933,7 +932,7 @@ experience.
 
 \subsection{Floating Point Representation}
 \label{floatingPoint}
-Haskell uses the IEEE double-precision floating point format\cite{citeulike:3760678}.
+Haskell uses the IEEE double-precision floating point format\cite{citeulike:4001400}.
 This is doubtless very useful for a real programming language, but it would be difficult, and
 unnecessary, to have to explain the representation of a number such as $0.1210000000001$ when the
 student was expecting to $0.121$. In a similar spirit, a student expecting to see $0.9$ will
@@ -1031,6 +1030,16 @@ forget about state management and error handling details.
 
 \subsection{False Starts \& Dead Ends}
 \label{deadend}
+Development progressed iteratively. Having no previous experience of engineering a large software
+project in Haskell, initial development was largely \textit{ad hoc} and unstructured. Haskell is not
+an ideal language for development in this manner. A great deal of time was spent just in understanding 
+the principles of state manipulation in a side-effect free language. Luckily, there were a number of 
+tutorials which served as the backbone, or perhaps more accurately, embryo, of the final project. 
+Traces of these tutorials can still be seen scattered throughout the final codebase. These were 
+perhaps both a help and a hindrance, as their original authors had not perhaps foreseen that 
+they would be so heavily expanded and built-upon. Strong foundations might have results in a project 
+which was more realised, with fewer edge cases and areas where the solutions are not as robust as could be desired.
+
 Some libraries and approaches were abandoned during the development process. Most notably a deal of
 time was put into using the \textit{Language-C} library for manipulating the C AST in Haskell. While
 this would certainly be the robust approach for writing the C code generation element of microML,
@@ -1099,11 +1108,11 @@ searched, using a depth first search algorithm, to discover all functions reacha
 and a message is issued describing the procedure for creating a callgraph.png. See
 Figure~\ref{fig:callgraph}.
 
-\begin{figure}
-    \includegraphics[width=\textwidth]{images/callgraph.png}
-    {\caption{A example callgraph for a simple program. This would fail to compile.}}
-    \label{fig:callgraph}
-\end{figure}
+\begin{SCfigure}
+    \includegraphics[scale=0.6]{images/callgraph.png}
+    {\caption{A example callgraph for a simple program. This would fail to compile.}
+\label{fig:callgraph}}
+\end{SCfigure}
 
 Code generation is done in much the same manner that the repl performs evaluation, but instead of
 reducing each term to normal form, it translates them to statements and expressions in C++. 
@@ -1132,29 +1141,38 @@ in the repl environment and are always available in the compiled environment. Ot
 to be loaded manually with the `:using' command. The libraries available at time of writing are:
 
 \begin{itemize}
-    \item standard: a large number of utility functions, modelled on the standard library available
+    \item \textbf{standard}: a large number of utility functions, modelled on the standard library available
         with Miranda (though less extensive). Students are not expected to be able to write their
         own implementations of `map' or `foldr' so these have been made always obtainable.
-    \item Maths: the maths library contains some constants, such as $e$ and $\pi$, some utility
+    \item \textbf{maths}: the maths library contains some constants, such as $e$ and $\pi$, some utility
         functions such as `floor', `ceiling' and `intToFloat' and typesafe logarithmic functions.
         These last are wrappers around Haskell's `logBase' function.
-    \item string: as strings are literals in microML, they need their own library to allow for
+    \item \textbf{string}: as strings are literals in microML, they need their own library to allow for
         manipulation. At present there are a few functions for converting between upper and lower
         case and obtaining the ascii value of a char. This library is nascent and needs to be
         expanded.
-    \item combinators: a library for those interesting in the pure untyped lambda calculus. The
+    \item \textbf{combinators}: a library for those interesting in the pure untyped lambda calculus. The
         functions presented here include $s$, $k$ and $i$, which themselves constitute a
         \textit{Turing complete} language and a number of other combinators, including those
         introduced by David Turner in his seminal paper~\cite{TUR79a}.
-    \item church: this is another library dedicated to the underlying lambda calculus, presenting
+    \item \textbf{church}: this is another library dedicated to the underlying lambda calculus, presenting
         natural numbers as functions using \textit{Church encoding}\footnote{\url{https://en.wikipedia.org/wiki/Church_encoding}}.
         This is primarily intended for those students who display an interest in understanding the
         evaluation model of microML\@.
 \end{itemize}
 
+It might seem an awkward decision to have separate imports for a large number of utility functions.
+For example, \textit{sum} and \textit{product} both reside in \textbf{maths}. The reasoning
+behind this decision was that students might want the opportunity to try to write these functions
+themselves. Functions in the \textbf{standard} library are considered more fundamental and possibly
+more difficult for students to write: one cannot reasonably expect an 11-year-old to write
+\textit{foldr} or \textit{filter}\footnote{foldr is defined as follows in the microML standard
+library\@: let foldr r acc xs = if end? xs then acc else ((f (head
+xs)) (foldr f acc (tail xs)))}.
+
+
 \chapter{Testing}
 \label{testing}
-
 Software testing is a vital part of any seriously intended development project. Only an arrogant
 programmer, or one of little experience (often the two go together) would claim that a function or
 module had been written without mistakes, or that all edge cases had been properly handled. It is
@@ -1173,11 +1191,43 @@ whether the end product will be suitable to the client. MicroML has not been acc
 still requires work in this direction.
 
 The Hspec\footnote{\url{https://hspec.github.io/}} package focuses primarily on unit testing of
-Haskell functions. Real \textit{TDD} would have seen tests written in parallel with production code:
-due to the lack of experience the author had with Haskell at the beginning of the project, this was
-not the development method deployed as it would have been too heavy a cognitive burden in addition
-to wrestling with various problems of type, state and program structure. Unit tests were written
-after the fact, and, at time of writing, do not yet have full coverage of source code.
+Haskell functions. With a typical Haskell program consisting of possibly hundreds of top-level
+functions, it is difficult to achieve full coverage of the code. However, the strong static type
+system means that integration tests are unavoidably a part of the language. The type system rejects
+coupling code which does not properly integrate. Unit tests are then even more useful as it is
+necessary only to check the logic of the function, rather than its compatibility with the rest of
+the program. Haskell does not have an object system, and only a very simple modular system, with a
+flat namespace. Again, this helps to reduce the necessity for testing above the level of the unit.
+
+MicroML's type system is useful for checking the integrity of a microML program, in much the same
+way that Haskell performs and enforces such checks. 
+
+\begin{figure}
+    \begin{itemize}
+        \item ListPrimitives
+        \item MathsPrimitives
+        \item Infer
+        \item CallGraph
+        \item Failure
+    \end{itemize}
+    \caption{Currently Tested with HSpec}
+\label{fig:hspec}
+\end{figure}
+
+Unfortunately, some modules are not accessible to direct, systematic testing. Most notably,
+\textit{Parsec} is not supported by the HSpec framework\footnote{though the fork
+\textit{MegaParsec} is. See Section~\ref{parsing}}. The pretty printing functions used by both the
+repl and the compiler also cannot easily be unit-testing. However, extensive testing within the repl
+environment suggests an absence of obvious bugs.
+
+\begin{figure}[H]
+    \begin{itemize}
+        \item Standard Libraries: all the standard libraries pass the type-checking algorithm.
+        \item Compiler: a bash script runs compilation tests.
+    \end{itemize}
+    \caption{Independent Tests: tested with MicroML}
+\label{fig:indtests}
+\end{figure}
 
 To run tests while building it is necessary simply to enter in the terminal the command `stack test'
 while in the project root directory, which is equivalent to building and testing the
@@ -1190,12 +1240,13 @@ writing, the compiler does not yet successfully pass all of these integration te
 to be done before the compiler can seriously be considered to be `fit for purpose'. The script must
 be run from the utils folder of the project.
 
-Many errors and omissions were thrown up by the unit-testing which otherwise might not have been
-noticed until runtime, or worse, after system deployment. One particular `bug' which was not noticed
-until near submission (due to a non-comprehensive test suite) was the inability to perform
-mathematics on negative floating point numbers. The parser did not understand the order of
-precedence of the symbols. This was easily fixed but would have removed unnoticed without good unit
-testing.
+Many errors and omissions were revealed by the unit-testing which otherwise might not have
+been noticed until runtime, or worse, after system deployment. Further work can be done
+in this direction by testing the \textit{totality} of those functions which do not exist
+within an exception-handling monad. There are now frameworks for totality checking in
+Haskell\footnote{\url{https://github.com/ucsd-progsys/liquidhaskell}} and these would help to reveal
+further edge-cases in the implementation, those not revealed by unit-testing, no matter how
+systematic.
 
 \chapter{Conclusions and Project Evaluation}
 
@@ -1215,7 +1266,7 @@ implementation details of number types, constraining user-defined functions to i
 This is not presently possible for functions written by students. It is possible for
 system-defined operators and functions. For example the modulo `\%' operator will throw an error
 if either of its operands are not integer literals. This is `hard-coded' into the inference engine,
-which is unfortunate. Figure~\ref{fig:modulo}.
+which is a design weakness. Figure~\ref{fig:modulo}.
 
 \begin{figure}
     \includegraphics[width=\textwidth]{images/modulo.jpg}
@@ -1234,6 +1285,44 @@ compiler) and syntax-highlighted and written in `plain English'. Figure~\ref{fig
 \label{fig:typeError}
 \end{figure}
 
+\newcolumntype{g}{>{\columncolor{light-gray}} l}
+\begin{table}[!htbp]
+    \begin{threeparttable}
+       \caption{Project Achievements}
+        \begin{tabular}{g l c c}
+            \rowcolor{light-gray}
+            G & Requirement & P & Achieved \\
+            1 & Design syntax for new language & M  & \checkmark\\
+            2 & BNF of new language & M  & \checkmark\\
+            3 & Create lexer & M  & \checkmark\\
+            4 & Create parser & M  & \checkmark\\
+            5 & Implement a lambda calculus & M  & \checkmark\\
+            6 & Static Typing & S  & \checkmark\\
+            7 & Type inference & S  & \checkmark\\
+            8 & Evaluation environment & S  & \checkmark\\
+            9 & Compiler to C++ & S & \checkmark \\
+            \hline
+            10 & Appropriate error messages & C & \checkmark \\
+            11 & Syntax highlighting in repl & C  & \checkmark\\
+            12 & Repl history & C  & \checkmark\\
+            13 & view parse tree in repl & C  & \checkmark\\
+            14 & create call graph of program & C  & \checkmark\\
+            \hline
+            15 & Vim plugin for code editing & C  & \checkmark\\
+            16 & Folds, syntax highlighting and autocomplete & C & \checkmark \\
+            17 & Inline \textit{markdown style} comments in source files & C & \checkmark\\
+            \hline
+            18 & Comprehensive custom C++ compiler & W & --- \\
+            \hline
+        \end{tabular}
+      \begin{tablenotes}
+            \small
+            \item Key: G = Goal, P = Priority, M = must have, S = should have, \\ 
+                C = could have, W = won't have
+      \end{tablenotes}
+    \end{threeparttable}
+\label{table:achievments}
+\end{table}
 \section{Evaluation}
 At the fundamental design level, perhaps the most unfortunate decision was to make the \textit{Expr}
 datatype a simple type with kind $*$\footnote{* is pronounced `type'.}. This decision has meant that

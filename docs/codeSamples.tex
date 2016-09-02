@@ -71,7 +71,7 @@ Truncating floating-point representation in the repl is done using string manipu
 of three consecutive 0s is largely arbitrary. See Figure~\ref{fig:trunc} and
 Section~\ref{floatingPoint}.
 \begin{figure}
-    \begin{minted}{haskell}
+    \begin{minted}[breaklines=true]{haskell}
         truncate' :: Double -> Double
         truncate' = read . dropZeros . show
             where dropZeros x = head (split x) ++ "." ++ getValid (head (tail (split x)))
