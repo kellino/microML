@@ -1236,21 +1236,20 @@ compiler) and syntax-highlighted and written in `plain English'. Figure~\ref{fig
 
 \section{Evaluation}
 At the fundamental design level, perhaps the most unfortunate decision was to make the \textit{Expr}
-datatype a simple type with kind \textit{*}\footnote{* is pronounced `type'.}. This decision
-has meant that it was not possible to make \textit{Expr} an instance of the \textit{Functor}
-typeclass\footnote{A datatype needs at least kind $* \rightarrow *$ to be a member of the
-Functor typeclass.}, meaning that a complex expression was neither mappable nor foldable. There are
-instances in the code where expressions have been converted into strings via `show' in order to
-filter or search for elements. This is rather inefficient and, given the nature and complexity
-of regular expressions, potentially bug-prone. This problem would have been alleviated by a
-definition for `fmap'. Once \textit{Expr} is a functor, it would then be relatively trivial to make
-a traversable instance, and even, if necessary, a monad instance, or at the very least an instance of
-\textit{Applicative}. Tag information regarding type could have been carried in the additional arity
-required by the functor typeclass. \textit{Expr} would then have kind $* \rightarrow *$ with the
-first * being a type primitive. This would also have made inference easier and quicker. However it was
-nearing the end of the project before the author had enough knowledge and skill to be aware of these
-subtleties, and such a change would require a rather substantial rewriting of much of the MicroML
-module.
+datatype a simple type with kind $*$\footnote{* is pronounced `type'.}. This decision has meant that
+it was not possible to make \textit{Expr} an instance of the \textit{Functor} typeclass\footnote{A
+datatype needs at least kind $* \rightarrow *$ to be a member of the Functor typeclass.}, with the
+result that a complex expression was neither mappable nor foldable. There are instances in the code
+where expressions have been converted into strings via `show' in order to filter or search for
+elements. This is rather inefficient and, given the nature and complexity of regular expressions,
+potentially bug-prone. This problem would have been alleviated by a definition for `fmap'. Once
+\textit{Expr} is a functor, it would then be relatively trivial to make a traversable instance, and
+even, if necessary, a monad instance, or at the very least an instance of \textit{Applicative}.
+Tag information regarding type could have been carried in the additional arity required by the
+functor typeclass. \textit{Expr} would then have kind $* \rightarrow *$ with the first * being a
+type primitive. This would also have made inference easier and quicker. However it was nearing the
+end of the project before the author had enough knowledge and skill to be aware of these subtleties,
+and such a change would require a rather substantial rewriting of much of the MicroML module.
 
 \section{Future Work}
 While the basic core of the language is largely complete a great deal of work remains to be done on
