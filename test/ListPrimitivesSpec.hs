@@ -43,7 +43,7 @@ listprims = hspec $
             it "joins lists" $
                 append (BinOp OpCons (Lit (LInt 1)) Nil) (BinOp OpCons (Lit (LInt 2)) Nil) `shouldBe` (BinOp OpCons (Lit (LInt 1)) (BinOp OpCons (Lit (LInt 2)) Nil) :: Expr)
             it "should fail on non-lists" $
-                append (Lit (LInt 1)) (Lit (LInt 2)) `shouldBe` (PrimitiveErr . ListPrim $ "one of your two objects isn't a list")
+                append (Lit (LInt 1)) (Lit (LInt 2)) `shouldBe` (PrimitiveErr . ListPrim $ "Lit (LInt 1) Lit (LInt 2)")
 
         describe "show'" $ do
             it "returns a string from a string" $
