@@ -14,9 +14,9 @@ data Type
 data TypeScheme = Forall [TVar] Type
     deriving (Show, Eq, Ord)
 
-typeNum       = TCon "\ESC[31mNumber\ESC[0m"
-typeBool      = TCon "\ESC[32mBoolean\ESC[0m"
-typeString    = TCon "\ESC[33mString\ESC[0m"
-typeChar      = TCon "\ESC[34mChar\ESC[0m"
-typeTup       = TCon $ "{" ++ "\ESC[36mTuple\ESC[0m" ++ "}"
-typeError     = TCon "\ESC[1mError\ESC[0m"
+typeNum       = TCon "Number"
+typeBool      = TCon "Boolean"
+typeString    = TCon "String"
+typeChar      = TCon "Char"
+typeTup       = TCon $ "{" ++ "Tuple" ++ "}"
+typeError     = TCon "Error"

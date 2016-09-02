@@ -228,15 +228,14 @@ infer expr = case expr of
     UnaryOp op e1 -> 
         case op of
           Car -> 
-              case e1 of
-                BinOp OpCons x _  -> infer x
-                Nil               -> throwError $ UnsupportedOperation "head of an empty list"
-                Var _             -> do
-                    TVar (TV tv) <- fresh
-                    return $ TVar $ TV $ "[" ++ tv ++ "]"
-                app@App{}         -> infer app
-                Lit (LString _)   -> return typeChar
-                x                 -> throwError $ BadArg x " is not a list"
+            case e1 of
+                 BinOp OpCons x _ -> infer x
+                 Nil -> throwError $ UnsupportedOperation "head of an emtpy list"
+                 Lit (LString _) -> return typeChar
+                 var@(Var _) -> do
+                     t1 <- infer var 
+                     return t1
+                 _  -> infer e1
           Cdr -> infer e1
           Show -> return typeString
           Read -> return typeNum
