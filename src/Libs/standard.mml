@@ -370,3 +370,11 @@ let reverse xs = foldl (\x y -> y : x) [] xs
 ** last :: [a] -> a **
 *)
 let last xs = let l' = reverse xs in head l'
+
+let smaller xs = filter (\x -> x < head xs) (tail xs)
+let greater xs = filter (\x -> x >= head xs) (tail xs)
+
+let quicksort xs = 
+    if xs == [] 
+    then [] 
+    else (quicksort (smaller xs)) ++ [head xs] ++ (quicksort (greater xs));
