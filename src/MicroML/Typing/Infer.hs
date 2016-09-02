@@ -179,7 +179,7 @@ infer expr = case expr of
     Lit (LString _)  -> return typeString
     Lit (LChar _)    -> return typeChar
     PrimitiveErr _   -> return typeError
-    Nil              -> return $ TVar $ TV "[a]"
+    Nil              -> return typeNil
 
     -- work in progress. This is just a placeholder
     Lit (LTup (x:xs)) -> do
@@ -265,7 +265,7 @@ infer expr = case expr of
               return e2
           _       -> 
               case (e1, e2) of
-                  nil@(_, Nil)         -> throwError $ UnsupportedOperation $ "[] error " ++ show nil -- debugging
+                  (Nil, xs)            -> infer xs
                   (Lit (LInt _),_)     -> doBinaryMathsOp op e1 e2
                   (Lit (LDouble _),_)  -> doBinaryMathsOp op e1 e2
                   (Lit (LBoolean _),_) -> doBinaryBoolOp op e1 e2
@@ -306,6 +306,9 @@ inferBinOpBool e1 e2 = do
 doConsOp :: Expr -> Expr -> Infer Type
 doConsOp e1 e2 = 
      case (e1, e2) of 
+          (Nil, _) -> do
+              t2 <- infer e2
+              throwError $ UnificationFail t2 typeNil
           (App x y , _) -> do
               t1 <- infer x
               t2 <- infer y
