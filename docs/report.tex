@@ -233,7 +233,7 @@ The project's final requirements, in
 Table~\ref{table:requirements}.
 
 \newcolumntype{g}{>{\columncolor{light-gray}} l}
-\begin{table}[!htbp]
+\begin{table}[H]
     \begin{threeparttable}
        \caption{Project Requirements}
         \begin{tabular}{g l r}
@@ -473,7 +473,7 @@ Most importantly, subtyping (represented as $\lambda F_{<:}$) is missing as a co
 even though almost all language which support record syntax must allow some form of subtyping.
 
 $\lambda 2$, or \textit{System F}, is that system which allows for \gls{parametric polymorphism} (often
-called \textit{generics} in such languages as Java and C++)\footnote{See~\ref{appendix:sysf} for
+called \textit{generics} in such languages as Java and C++)\footnote{See Appendix~\ref{appendix:sysf} for
 details for a more complete description.}. This seemed a suitable target for microML's type system.
 It has the added advantage that there is a well-established algorithm, the Damas --- Milner algorithm
 W, which runs in $\mathcal{O}(n)$ time for non-pathological input\footnote{Worst case complexity
