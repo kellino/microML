@@ -11,6 +11,8 @@ import MicroML.Typing.Env
 import MicroML.Typing.TypeError
 
 import qualified Data.Map as Map
+import Data.List (intercalate, isInfixOf)
+import Data.List.Split (splitOn)
 import Text.PrettyPrint
 
 parensIf ::  Bool -> Doc -> Doc
@@ -36,8 +38,9 @@ instance Pretty Type where
     ppr _ (TCon "String") = text $ "\ESC[32m" ++ "String" ++ clear
     ppr _ (TCon "Boolean") = text $ "\ESC[33m" ++ "Boolean" ++ clear
     ppr _ (TCon "Char") = text $ "\ESC[34m" ++ "Char" ++ clear
-    ppr _ (TCon "Tuple") = text $ "\ESC[35m" ++ "Tuple" ++ clear
-    ppr _ (TCon a) = text a
+    ppr _ (TCon (x:xs))
+              | x == '{' = text $ "{" ++ intercalate ", " (map pprLit (splitOn "," $ init xs)) ++ "}"
+              | otherwise = text (x:xs)
 
 instance Pretty TypeScheme where
     ppr p (Forall [] t) = ppr p t
@@ -53,6 +56,7 @@ instance Pretty Expr where
     ppr _ (Lit (LBoolean False)) = text "false"
     ppr _ Nil                    = text "empty list"
     ppr _ ls@(BinOp OpCons _ _)  = text $ matchBrackets (ppList ls)
+    ppr _ (Lit (LTup xs))        = text $ "{" ++ intercalate ", " (map ppexpr xs) ++ "}"
     ppr _ xs                     = text $ show xs
 
 instance Show TypeError where
@@ -84,6 +88,7 @@ ppList l@Lit{}           =
       Lit (LDouble n)      -> show n
       Lit (LString n)      -> show n
       Lit (LChar n)        -> show n
+      tup@(Lit (LTup _))   -> ppexpr tup
       Lit (LBoolean True)  -> "true"
       Lit (LBoolean False) -> "false"
 ppList x                 = show x
@@ -91,6 +96,16 @@ ppList x                 = show x
 matchBrackets :: String -> String
 matchBrackets st = let len = length . takeWhile (== ']') . reverse $ st
                   in replicate len '[' ++ st
+
+-- | more nasty kludge code here :(
+pprLit :: String -> String
+pprLit xs 
+    | "LInt" `isInfixOf` xs = "Number"
+    | "LDouble" `isInfixOf` xs = "Number"
+    | "LChar" `isInfixOf` xs = "Char"
+    | "LString" `isInfixOf` xs = "String"
+    | "LBoolean" `isInfixOf` xs = "Boolean"
+    | otherwise = xs
 
 ppexpr :: Expr -> String
 ppexpr = render . ppr 0
