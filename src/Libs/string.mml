@@ -1,15 +1,4 @@
 (* 
-==toUpper==
-***toUpper***
-** toUpper :: Char -> Char **
-toUpper takes a lowercase letter and changes it to uppercase
-#Example:#
-    > toUpper 'a'
-    > 'A' : Char
-*)
-let toUpper x = x
-
-(* 
 ==chr==
 ***chr***
 ** chr :: Number -> Char **
@@ -30,3 +19,37 @@ takes an __ascii__ letter and returns its number
     > 97 : Number
 *)
 let ord x = _ord x
+
+(* 
+==toUpper==
+***toUpper***
+** toUpper :: Char -> Char **
+toUpper takes a lowercase letter and changes it to uppercase
+#Example:#
+    > toUpper 'a'
+    > 'A' : Char
+*)
+let toUpper x = chr ((ord x) - 32)
+
+(* 
+==toLower==
+***toLower***
+** toLower :: Char -> Char **
+toLower takes a lowercase letter and changes it to uppercase
+#Example:#
+    > toLower 'A'
+    > 'a' : Char
+*)
+let toLower x = chr ((ord x) + 32)
+
+(*
+==pack==
+***pack***
+** pack :: [Char] -> String **
+strings are __immutable__ in microML, so if you want to do things to them you need to __unpack__
+then and then pack them again. pack takes a list of chars and returns a string.
+#Example:#
+    > pack ['h','e','l','l','o']
+    > "hello" : String
+*)
+let pack xs = foldr (\x y -> x : y) "" xs
