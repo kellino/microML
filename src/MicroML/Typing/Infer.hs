@@ -181,22 +181,14 @@ infer expr = case expr of
     PrimitiveErr _   -> return typeError
     Nil              -> return typeNil
 
-    Lit (LTup xs) -> 
-        return $ TCon $ "{" ++ intercalate ", " (map show xs) ++ "}"
+    Lit (LTup xs) -> return $ TCon $ "{" ++ intercalate ", " (map show xs) ++ "}"
 
     Var x -> lookupEnv x
 
     Lam x e -> do
-        env <- ask
-        tv <- fresh
-        let env' = env `extend` (x, Forall [] tv)
-        t1 <- infer env' e
-        return (t1 `TArrow` t1)
-
-    {-Lam x e -> do-}
-       {-tv <- fresh-}
-       {-t <- inEnv (x, Forall [] tv) (infer e)-}
-       {-return (tv `TArrow` t)-}
+       tv <- fresh
+       t <- inEnv (x, Forall [] tv) (infer e)
+       return (tv `TArrow` t)
              
     App e1 e2 -> do
         t1 <- infer e1
