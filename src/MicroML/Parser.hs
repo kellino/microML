@@ -140,7 +140,7 @@ lambda = do
 letrecin :: Parser Expr
 letrecin = do
     reserved "let"
-    x <- identifier
+    x <- varName
     reservedOp "="
     void spaces
     e1 <- expr
