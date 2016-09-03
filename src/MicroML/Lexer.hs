@@ -18,7 +18,7 @@ reservedNames = [ "let", "in", "if", "then", "else", "case", "of", "and",
                   "or", "not", "xor", "head", "tail", "to", "where", "true", "false", "try", "except", "using" ]
 
 reservedOps :: [String]
-reservedOps = [ "->", "\\", "+", "*", "-", "=", "==", "%", "^", "/", "<=", ">=", ">", "<", ":", "_", "++" ]
+reservedOps = [ "->", "\\", "+", "*", "-", "=", "==", "%", "^", "/", "<=", ">=", ">", "<", ":", "_", "++", "::="]
 
 lexer :: Tok.GenTokenParser L.Text () Identity
 lexer = Tok.makeTokenParser Tok.LanguageDef

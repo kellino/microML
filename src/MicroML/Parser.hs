@@ -19,7 +19,6 @@ import Control.Monad (void)
 import MicroML.Lexer
 import qualified MicroML.Lexer as Lx
 import MicroML.Syntax
---import MicroML.ListPrimitives
 
 varName :: Parser String
 varName = do
@@ -33,7 +32,7 @@ constructorName = do
     name@(n:_) <- identifier
     if isUpper n
        then return name
-       else fail "a \ESC[1mconstructor\ESC[0m must start with a capital letter"
+       else fail "a constructor must start with a capital letter"
 
 float :: Parser Double
 float = Tok.float lexer
@@ -240,13 +239,29 @@ parseRange = do
     end <- expr
     void $ string "]"
     return $ BinOp OpEnum start end
-    --return $ enumFromTo_ start end
 
 ------------------
 -- DECLARATIONS --
 ------------------
 
 type Binding = (String, Expr)
+
+-- placeholders for datatype parser
+dataDecl :: Parser Binding
+dataDecl = do
+    name <- constructorName
+    params <- many varName
+    reservedOp "::="
+    types <- datatype `sepBy` string "|"
+    return (name, Constructor name)
+
+datatype :: Parser Expr
+datatype = do
+    void spaces
+    name <- constructorName
+    params <- many varName
+    void spaces
+    return $ Constructor name
 
 letDecl :: Parser Binding
 letDecl = do
@@ -266,7 +281,10 @@ val = do
   return ("it", ex)
 
 decl :: Parser Binding
-decl = try val <|> letDecl <?> "a declaration"
+decl = try val 
+    <|> letDecl 
+    <|> dataDecl
+    <?> "a declaration"
 
 top :: Parser Binding
 top = do

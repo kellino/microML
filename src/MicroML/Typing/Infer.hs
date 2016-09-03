@@ -19,7 +19,7 @@ import Control.Monad.State
 import Control.Monad.RWS
 import Control.Monad.Identity
 
-import Data.List (nub) --, isInfixOf)
+import Data.List (nub, intercalate)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 
@@ -181,30 +181,22 @@ infer expr = case expr of
     PrimitiveErr _   -> return typeError
     Nil              -> return typeNil
 
-    -- work in progress. This is just a placeholder
-    Lit (LTup (x:xs)) -> do
-        t1 <- infer x
-        tv <- fresh
-        uni t1 tv
-        infer $ Lit . LTup $ xs
+    Lit (LTup xs) -> 
+        return $ TCon $ "{" ++ intercalate ", " (map show xs) ++ "}"
 
     Var x -> lookupEnv x
 
-    {-Lam x e -> do-}
-        {-env <- ask-}
-        {-let ts = inferExpr env e-}
-        {-case ts of-}
-             {-Left err -> error ""-}
-             {-Right ts' -> do-}
-                {-let env' = extend env ("it", ts')-}
-                {-case Env.lookup x env' of-}
-                     {-Nothing -> error ""-}
-                     {-Just t -> return t-}
-
     Lam x e -> do
-       tv <- fresh
-       t <- inEnv (x, Forall [] tv) (infer e)
-       return (tv `TArrow` t)
+        env <- ask
+        tv <- fresh
+        let env' = env `extend` (x, Forall [] tv)
+        t1 <- infer env' e
+        return (t1 `TArrow` t1)
+
+    {-Lam x e -> do-}
+       {-tv <- fresh-}
+       {-t <- inEnv (x, Forall [] tv) (infer e)-}
+       {-return (tv `TArrow` t)-}
              
     App e1 e2 -> do
         t1 <- infer e1
@@ -230,11 +222,9 @@ infer expr = case expr of
           Car -> 
             case e1 of
                  BinOp OpCons x _ -> infer x
-                 Nil -> throwError $ UnsupportedOperation "head of an emtpy list"
+                 Nil -> throwError $ UnsupportedOperation "head of an empty list"
                  Lit (LString _) -> return typeChar
-                 var@(Var _) -> do
-                     t1 <- infer var 
-                     return t1
+                 var@(Var _) -> infer var 
                  _  -> infer e1
           Cdr -> infer e1
           Show -> return typeString
@@ -333,10 +323,7 @@ doConsOp e1 e2 =
           (_, Var _) -> unifyWithListVar e1 e2
           (UnaryOp Car x, _) -> infer x
           (UnaryOp Cdr x, _) -> infer x
-          _     -> do 
-              t1 <- infer e1
-              t2 <- infer e2
-              throwError $ UnificationFail t1 t2
+          (x, y)    -> unifyWithListVar x y
 
 unifyWithListVar :: Expr -> Expr -> Infer Type
 unifyWithListVar e1 e2 =
@@ -345,7 +332,8 @@ unifyWithListVar e1 e2 =
       (_, _) -> do
           t1 <- infer e1
           t2 <- infer e2
-          throwError $ UnificationFail t1 t2
+          uni t1 t2
+          return t2
 
 newListTypeCon :: Expr -> Infer Type
 newListTypeCon e1 = do
