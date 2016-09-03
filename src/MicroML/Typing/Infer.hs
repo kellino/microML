@@ -78,8 +78,8 @@ lookupEnv :: Name -> Infer Type
 lookupEnv x = do
   (TypeEnv env) <- ask
   case Map.lookup x env of
-      Nothing   ->  throwError $ UnboundVariable $ show x
-      Just s    ->  instantiate s
+      Nothing   -> throwError $ UnboundVariable $ show x
+      Just s    -> instantiate s
 
 -- letters and fresh generate new names for polymorphic variables
 letters :: [String]
