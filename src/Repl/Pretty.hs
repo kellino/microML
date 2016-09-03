@@ -39,6 +39,7 @@ instance Pretty Type where
     ppr _ (TCon "Boolean") = text $ "\ESC[33m" ++ "Boolean" ++ clear
     ppr _ (TCon "Char") = text $ "\ESC[34m" ++ "Char" ++ clear
     ppr _ (TCon (x:xs))
+              | x == '[' = text $ "[" ++ concatMap pprLit (splitOn "," $ init xs) ++ "]"
               | x == '{' = text $ "{" ++ intercalate ", " (map pprLit (splitOn "," $ init xs)) ++ "}"
               | otherwise = text (x:xs)
 
@@ -100,7 +101,7 @@ matchBrackets st = let len = length . takeWhile (== ']') . reverse $ st
 -- | more nasty kludge code here :(
 pprLit :: String -> String
 pprLit xs 
-    | "LInt" `isInfixOf` xs = "Number"
+    | "LInt" `isInfixOf` xs = "\ESC[31m" ++ "Number" ++ clear
     | "LDouble" `isInfixOf` xs = "Number"
     | "LChar" `isInfixOf` xs = "Char"
     | "LString" `isInfixOf` xs = "String"
