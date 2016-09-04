@@ -126,6 +126,7 @@ tuple = do
     void $ string "{"
     elems <- commaSep expr
     void $ string "}"
+    void spaces
     return $ Lit $ LTup elems
 
 lambda :: Parser Expr
