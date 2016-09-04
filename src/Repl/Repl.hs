@@ -279,6 +279,7 @@ ini = do
            using ["standard"]
            liftIO $ putStrLn "\n\ESC[1mWelcome to microML\ESC[0m\t\t\t\ESC[33;1mversion 0.05\ESC[1;31m\n"
            getBanner 
+           liftIO $ putStrLn "\n\n"
        else do
           using ["standard"]
           liftIO $ putStrLn $ standardBanner ++ "\n\n" ++ bold ++ "Welcome to microML" ++ S.clear ++ "\n\n"
