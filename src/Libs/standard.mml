@@ -388,12 +388,18 @@ let quicksort xs =
     else
     (quicksort (smaller xs)) ++ [head xs] ++ (quicksort (greater xs));
 
-
+(*
+==merge==
+***merge***
+** merge [a] -> [a] -> [a] **
+merge is a helper function for mergesort
+*)
 let merge = \xs ys ->  
     if ys == [] then xs
     else if xs == [] then ys
     else if (head xs) <= (head ys) then (head xs):(merge (tail xs) ys)
     else (head ys):(merge xs (tail ys)) 
+
 (*
 ==mergesort==
 ***mergesort***
