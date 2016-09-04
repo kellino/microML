@@ -1,0 +1,54 @@
+A quasi-quicksort in microML\@. This does not sort in place, as is necessary for a true quicksort
+implementation. Figure~\ref{fig:quicksort}
+
+\begin{figure}[H]
+    \begin{minted}[breaklines=true]{sml}
+        let quicksort xs = 
+            let smaller = \xs -> filter (\x -> x < head xs) (tail xs) in
+            let greater = \xs -> filter (\x -> x >= head xs) (tail xs) in
+            if xs == [] 
+            then [] 
+            else
+            (quicksort (smaller xs)) ++ [head xs] ++ (quicksort (greater xs));
+    \end{minted}
+    \caption{Pseudo-Quicksort}
+\label{fig:quicksort}
+\end{figure}
+
+Mergesort implemented in microML\@. Figure~\ref{fig:mergesort}
+
+\begin{figure}[H]
+    \begin{minted}[breaklines=true]{sml}
+        let merge = \xs ys ->  
+            if ys == [] then xs
+            else if xs == [] then ys
+            else if (head xs) <= (head ys) then (head xs):(merge (tail xs) ys)
+            else (head ys):(merge xs (tail ys)) 
+
+        let mergesort xs =
+            let fsthalf = \xs -> take ((length xs) // 2) xs in 
+            let sndhalf = \xs -> drop ((length xs) // 2) xs in
+            if xs == [] then []
+            else if (length xs) == 1 then xs
+            else merge (mergesort (fsthalf xs)) (mergesort (sndhalf xs))
+    \end{minted}
+    \caption{Mergesort in microML}
+\label{fig:mergesort}
+\end{figure}
+
+As far as possible, higher-order functions within the standard library are written with `foldr' as a
+base. This provides a constant interface for all forms of list manipulation, and as such acts as the
+higher-order `primitive' for microML\@. Figure~\ref{fig:foldr}
+
+\begin{figure}[H]
+    \begin{minted}[breaklines=true]{sml}
+        let foldr f acc xs = if end? xs then acc else ((f (head xs)) (foldr f acc (tail xs)))
+        let map f xs = foldr (\x xs' -> (f x) : xs') [] xs
+        let filter p xs = foldr (\x y -> if (p x) then (x:y) else y) [] xs
+        let foldr1 f xs = foldr f (head xs) xs
+    \end{minted}
+    \caption{foldr in the standard library}
+\label{fig:foldr}
+\end{figure}
+
+
