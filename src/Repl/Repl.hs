@@ -257,7 +257,8 @@ prompt = "\ESC[33mmicroML ⊦\ESC[0m "
 
 getBanner :: Repl ()
 getBanner = do
-    _ <- liftIO $ S.system "figlet -f $(ls /usr/share/figlet/fonts/*.flf |shuf -n1) \"microML\" | cowsay -n -f $(ls /usr/share/cows | shuf -n1) | lolcat"
+    _ <- liftIO $ S.system "figlet -f $(ls /usr/share/figlet/fonts/*.flf |shuf -n1) \"microML\"\
+                         \| cowsay -n -f $(ls /usr/share/cows | shuf -n1) | lolcat"
     return ()
 
 standardBanner :: String
