@@ -1,0 +1,120 @@
+The standard libraries are arranged as follows:
+
+\begin{table}[H]
+    \begin{tabular}{l r}
+    \rowcolor{light-gray}
+        \textbf{combinators} & \\
+        Function & Type Signature \\
+        \hline
+        tr & $\forall a b. a \rightarrow b \rightarrow a$ \\
+        fls & $\forall a b. a \rightarrow b \rightarrow b$ \\
+        not' & $\forall a b c d e. ((a \rightarrow b \rightarrow a) \rightarrow (c \rightarrow d \rightarrow d) \rightarrow e) \rightarrow e$ \\
+        and' & $\forall a b c d. (a \rightarrow (b \rightarrow c \rightarrow c) \rightarrow d) \rightarrow a \rightarrow d$ \\
+        or' & $\forall a b c d. ((a \rightarrow b \rightarrow a) \rightarrow c \rightarrow d) \rightarrow c \rightarrow d$ \\
+        cond & $\forall a b c. (a \rightarrow b \rightarrow c) \rightarrow a \rightarrow b \rightarrow c$ \\
+        i & $\forall a. a \rightarrow a \rightarrow a$ \\
+        k & $\forall a b. a \rightarrow b \rightarrow a$ \\
+        s & $\forall a b c. (a \rightarrow b \rightarrow c) (a \rightarrow b) \rightarrow a \rightarrow c$ \\
+        mu & $\forall a. (a \rightarrow a) \rightarrow a$ \\
+        b & $\forall a b c. (a \rightarrow b) \rightarrow (c \rightarrow a) \rightarrow c \rightarrow b$\\
+        c & $\forall a b c. (a \rightarrow b \rightarrow c) \rightarrow b \rightarrow a \rightarrow b$ \\
+        w & $\forall a b. (a \rightarrow a \rightarrow b) \rightarrow a \rightarrow b$ \\
+    \end{tabular}
+    \caption{Combinators library}
+\label{table:combinators}
+\end{table}
+
+
+\begin{table}[H]
+    \begin{tabular}{l r}
+    \rowcolor{light-gray}
+    \textbf{standard} & \\
+    Function & Type Signature \\
+    \hline
+    head & $\forall a. [a] \rightarrow a$ \\
+    tail & $\forall a. [a] \rightarrow [a]$ \\
+    id & $\forall a \rightarrow a$ \\
+    zero? &  $Number \rightarrow Boolean$ \\
+    odd? & $Number \rightarrow Boolean$ \\
+    even? & $Number \rightarrow Boolean$ \\
+    positive? & $Number \rightarrow Boolean$ \\
+    negative? & $Number \rightarrow Boolean$ \\
+    show & $\forall a. a \rightarrow String$ \\
+    read  & $String \rightarrow Number$ \\
+    const & $\forall a b. a \rightarrow b$ \\
+    succ & $Number \rightarrow Number$ \\
+    flip & $\forall a b c. (a \rightarrow b \rightarrow c) \rightarrow b \rightarrow a \rightarrow c$ \\
+    twice & $\forall a. (a \rightarrow a) \rightarrow a \rightarrow a$ \\
+    pipe & $\forall a b. a \rightarrow a (a \rightarrow b) \rightarrow b$ \\
+    compose & $\forall a b c. (a \rightarrow b) \rightarrow (c \rightarrow a) \rightarrow c \rightarrow b$\\
+    end? & $Number \rightarrow Boolean$ \\
+    length & $\forall a. [a] \rightarrow Number$ \\
+    drop & $\forall a. Number \rightarrow [a] \rightarrow [a]$ \\
+    take & $\forall a. Number \rightarrow [a] \rightarrow [a]$ \\
+    foldr & $\forall a b. (a \rightarrow b \rightarrow b) \rightarrow b \rightarrow [a] \rightarrow b$\\
+    foldl & $\forall a b. (b \rightarrow a \rightarrow b) \rightarrow b \rightarrow [a] \rightarrow b$\\
+    foldr1 & $\forall a. (a \rightarrow a \rightarrow a) \rightarrow [a] \rightarrow a$\\
+    foldl1 & $\forall a. (a \rightarrow a \rightarrow a) \rightarrow [a] \rightarrow a$\\
+    map & $\forall a b. (a \rightarrow b) \rightarrow [a] \rightarrow [b]$ \\
+    filter & $\forall a. (a \rightarrow Boolean) \rightarrow [a] \rightarrow [a] $\\
+    init & $\forall a. [a] \rightarrow [a]$ \\
+    reverse & $\forall a. [a] \rightarrow [a]$ \\
+    last & $\forall a. [a] \rightarrow a$ \\
+    quicksort & $\forall a. [a] \rightarrow [a]$ \\
+    mergesort & $\forall a. [a] \rightarrow [a]$ \\
+    \end{tabular}
+    \caption{Standard library}
+\label{table:standard}
+\end{table}
+
+\begin{table}
+    \begin{tabular}{l r}
+    \rowcolor{light-gray}
+        \textbf{maths} & \\
+        Function & Type Signature \\
+        \hline
+        pi & $Number$ \\
+        e & $Number$ \\
+        abs & $Number \rightarrow Number$ \\
+        negate & $Number \rightarrow Number$ \\
+        max & $Number \rightarrow Number \rightarrow Number$ \\
+        min & $Number \rightarrow Number \rightarrow Number$ \\
+        intToFloat & $Number \rightarrow Number$ \\
+        reciprocal & $Number \rightarrow Number$ \\
+        square & $Number \rightarrow Number$ \\
+        sqrt & $Number \rightarrow Number$ \\
+        sum & $[Number] \rightarrow Number$ \\
+        product & $[Number] \rightarrow Number$ \\
+        floor & $Number \rightarrow Number$ \\
+        ceiling & $Number \rightarrow Number$ \\
+        floattoInt & $Number \rightarrow Number$ \\
+        ln & $Number \rightarrow Number$ \\
+        log2 & $Number \rightarrow Number$ \\
+        log10 & $Number \rightarrow Number$ \\
+        logBase & $Number \rightarrow Number$ \\
+        fib & $Number \rightarrow Number$ \\
+        factorial & $Number \rightarrow Number$ \\
+        ceiling & $Number \rightarrow Number$ \\
+        gcd & $Number \rightarrow Number \rightarrow Number$ \\
+    \end{tabular}
+    \caption{Maths library}
+\label{table:maths}
+\end{table}
+
+\begin{table}[H]
+    \begin{tabular}{l r}
+    \rowcolor{light-gray}
+        \textbf{string} & \\
+        Function & Type Signature \\
+        \hline
+        chr & $Number \rightarrow Char$ \\
+        ord & $Char \rightarrow Number$ \\
+        toUpper & $Char \rightarrow Char$ \\
+        toLower & $Char \rightarrow Char$ \\
+        pack & $[Char] \rightarrow String$ \\
+    \end{tabular}
+    \caption{String library}
+\label{table:string}
+\end{table}
+\textbf{church} contains the first ten peano numbers only, and a function to test for the zero
+value.
