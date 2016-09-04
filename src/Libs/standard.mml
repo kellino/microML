@@ -251,12 +251,12 @@ What has happened here?
 let compose f g x = f (g x)
 
 (*
-==end?==
-***end?***
-** end? :: [a] -> Boolean **
+==empty?==
+***empty?***
+** empty? :: [a] -> Boolean **
 A shortcut for **if xs == []**. Helpful when defining a __recursive__ function on a list.
 *)
-let end? xs = if xs == [] then true else false
+let empty? xs = if xs == [] then true else false
 
 (*
 ==length==
@@ -269,7 +269,7 @@ returns the length of a list
     > length ['a', 'b', 'c']
     > 3 : Number
 *)
-let length xs = if end? xs then 0 else 1 + (length (tail xs))
+let length xs = if empty? xs then 0 else 1 + (length (tail xs))
 
 (*
 ==drop==
@@ -302,7 +302,7 @@ you can see precisely what foldr is doing with the following function
     > foldr (λx y -> "(" ++ x ++ " + " ++ y ++ ")") "0" (map show [1 to 5])
     > "(1 + (2 + (3 + (4 + (5 + 0)))))"
 *)
-let foldr f acc xs = if end? xs then acc else ((f (head xs)) (foldr f acc (tail xs)))
+let foldr f acc xs = if empty? xs then acc else ((f (head xs)) (foldr f acc (tail xs)))
 
 (*
 ==foldl==
@@ -313,7 +313,7 @@ you can see precisely what foldl is doing with the following function
     > foldl (λx y -> "(" ++ x ++ " + " ++ y ++ ")") "0" (map show [1 to 5])
     > "(((((0 + 1) + 2) + 3) + 4) + 5)"
 *)
-let foldl f acc xs = if end? xs then acc else (foldl f (f acc (head xs)) (tail xs))
+let foldl f acc xs = if empty? xs then acc else (foldl f (f acc (head xs)) (tail xs))
 
 (*
 ==foldr1==
