@@ -255,11 +255,13 @@ completer = Prefix (wordCompleter comp) defaultMatcher
 prompt :: String
 prompt = "\ESC[33mmicroML ⊦\ESC[0m "
 
--- this looks a little weird and distorted due to the necessity of escaping the \ character. But it
--- does work!
--- TODO remove hardcoding of ascii escapes just in case...
-banner :: String
-banner = "\ESC[1;31m" ++
+getBanner :: Repl ()
+getBanner = do
+    _ <- liftIO $ S.system "figlet -f $(ls /usr/share/figlet/fonts/*.flf |shuf -n1) \"microML\" | cowsay -n -f $(ls /usr/share/cows | shuf -n1) | lolcat"
+    return ()
+
+standardBanner :: String
+standardBanner = "\ESC[1;31m" ++
         "            _               ___  ___ _       \n" ++
         "           (_)              |  \\/  || |      \n" ++
         "  _ __ ___  _  ___ _ __ ___ | .  . || |           \ESC[33;1mversion 0.05\ESC[1;31m\n" ++
@@ -269,8 +271,17 @@ banner = "\ESC[1;31m" ++
 
 ini :: Repl ()
 ini = do
-    using ["standard"]
-    liftIO $ putStrLn $ banner ++ "\n\n" ++ bold ++ "Welcome to microML" ++ S.clear ++ "\n\n"
+    fig <- liftIO $ findExecutable "figlet"
+    cow <- liftIO $ findExecutable "cowsay"
+    lol <- liftIO $ findExecutable "lolcat"
+    if not (null fig) && not (null cow) && not (null lol)
+       then do
+           using ["standard"]
+           liftIO $ putStrLn "\n\ESC[1mWelcome to microML\ESC[0m\t\t\t\ESC[33;1mversion 0.05\ESC[1;31m\n"
+           getBanner 
+       else do
+          using ["standard"]
+          liftIO $ putStrLn $ standardBanner ++ "\n\n" ++ bold ++ "Welcome to microML" ++ S.clear ++ "\n\n"
 
 -- doesn't work yet
 getConfig :: IO ()
