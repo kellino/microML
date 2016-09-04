@@ -1134,6 +1134,16 @@ The Repl monad carries with it three separate hashmaps, holding stateful informa
 types of functions, the function definitions, and the help environment. This last is not accessible
 for writing from within the repl, but only via loaded file.
 
+If `figlet', `cowsay' and `lolcat' are available on the system path, the repl generates a random
+banner each time it is opened. This is intended for the entertainment of the students (who are
+young) and the make the repl a more enticing environment. Figure~\ref{fig:banner}
+
+\begin{figure}
+    \includegraphics[width=\textwidth]{images/randomBanner.jpg}
+    \caption{Two random banners in the repl}
+\label{fig:banner}
+\end{figure}
+
 \subsubsection{Libs}
 \label{libs}
 MicroML ships with a limited standard library. Functions in `standard.mml' are automatically loaded
@@ -1430,12 +1440,18 @@ result in a number of possible compiler optimisations and greater runtime safety
     \chapter{MicroML Syntax}
     \label{appendix:syntax}
     \input{syntax}
+    \chapter{MicroML Code Samples}
+    \label{appendix:mmlcode}
+    \input{mmlcode}
     \chapter{Comment Markdown}
     \label{appendix:md}
     \input{markdown}
     \chapter{Using the Repl}
     \label{appendix:repl}
     \input{repl}
+    \chapter{Standard Libraries}
+    \label{appendix:libs}
+    \input{libs}
     \chapter{Code Samples}
     \label{appendix:samples}
     \input{codeSamples}
