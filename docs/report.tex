@@ -1177,7 +1177,7 @@ behind this decision was that students might want the opportunity to try to writ
 themselves. Functions in the \textbf{standard} library are considered more fundamental and possibly
 more difficult for students to write: one cannot reasonably expect an 11-year-old to write
 \textit{foldr} or \textit{filter}\footnote{foldr is defined as follows in the microML standard
-library\@: let foldr r acc xs = if end? xs then acc else ((f (head
+library\@: let foldr r acc xs = if empty? xs then acc else ((f (head
 xs)) (foldr f acc (tail xs)))}.
 
 

@@ -42,7 +42,7 @@ higher-order `primitive' for microML\@. Figure~\ref{fig:foldr}
 
 \begin{figure}[H]
     \begin{minted}[breaklines=true]{sml}
-        let foldr f acc xs = if end? xs then acc else ((f (head xs)) (foldr f acc (tail xs)))
+        let foldr f acc xs = if empty? xs then acc else ((f (head xs)) (foldr f acc (tail xs)))
         let map f xs = foldr (\x xs' -> (f x) : xs') [] xs
         let filter p xs = foldr (\x y -> if (p x) then (x:y) else y) [] xs
         let foldr1 f xs = foldr f (head xs) xs
