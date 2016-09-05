@@ -235,7 +235,7 @@ can be seen in Table~\ref{table:requirements}. For a more detailed breakdown, se
 Appendix~\ref{appendix:functionalRequirements}.
 
 \newcolumntype{g}{>{\columncolor{light-gray}} l}
-\begin{table}[h]
+\begin{table}
     \begin{threeparttable}
        \caption{Project Requirements}
         \begin{tabular}{g l r}
@@ -277,7 +277,7 @@ Point 18 is worthy of a little extra discussion. The original intention of the p
 an existing compiler (see Sections~\ref{constraints} and~\ref{JIT}) to generate the source code.
 The addition of the unexpected constraint of native code production after the initial project
 inspiration has meant that to create a completely functional compiler, in addition to all the other
-essential features, is not practicable.
+essential features, is not practicable within the time available.
 
 \section{Personal Goals}
 \label{personal}
@@ -286,7 +286,7 @@ figure~\ref{fig:intentions}. The scope of the project is very ambitious, and the
 of the area at the beginning of the project consisted of 3 weeks of automata theory in UCL module
 COMPGC04 and a 10 week introductory course to functional programming, also at UCL. 
 
-\begin{figure}
+\begin{figure}[H]
     \begin{itemize}
         \item \textbf{Haskell}: module COMPGC16 provided a basis upon which to build, but did not
             progress beyond writing simple functions. No attempt was made at teaching how to build a
@@ -315,6 +315,11 @@ COMPGC04 and a 10 week introductory course to functional programming, also at UC
     \caption{Personal Goals}
 \label{fig:intentions}
 \end{figure}
+
+Given the potential scale and complexity of the project, and the limited amount of time within which
+to conduct it, microML is best considered a foundation upon which to build a micro:bit targetted
+language, rather than a completely finished product. This will take a great deal more time and
+development before it could reasonably be `rolled out' into production.
 
 \chapter{Context} 
 \label{context}
