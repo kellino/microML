@@ -1,4 +1,32 @@
-let g:funcs = split('Number 
-            \ String
-            \ Char
-            \ Boolean')
+let g:funcs = split('id
+            \ map
+            \ foldr
+            \ foldl
+            \ foldr1
+            \ foldl1
+            \ const
+            \ let
+            \ else
+            \ then
+            \ filter
+            \ reverse
+            \ head
+            \ tail
+            \ zero?
+            \ odd?
+            \ even?
+            \ positive?
+            \ negative?
+            \ show
+            \ read
+            \ succ
+            \ flip
+            \ twice
+            \ pipe
+            \ compose
+            \ length
+            \ drop
+            \ take
+            \ init
+            \ quicksort
+            \ mergesort')
