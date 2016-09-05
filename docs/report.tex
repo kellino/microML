@@ -228,12 +228,13 @@ Formally put, the project's goals in order of importance are
 
 \section{Formal Requirements}
 \label{formalreq}
-The project's final requirements, in
-\textit{MoSCoW}\footnote{\url{https://en.wikipedia.org/wiki/MoSCoW_method}} form can be seen in
-Table~\ref{table:requirements}.
+A summary of the project's final requirements, in
+\textit{MoSCoW}\footnote{\url{https://en.wikipedia.org/wiki/MoSCoW_method}} form
+can be seen in Table~\ref{table:requirements}. For a more detailed breakdown, see
+Appendix~\ref{appendix:functionalRequirements}.
 
 \newcolumntype{g}{>{\columncolor{light-gray}} l}
-\begin{table}[H]
+\begin{table}[h]
     \begin{threeparttable}
        \caption{Project Requirements}
         \begin{tabular}{g l r}
@@ -247,7 +248,7 @@ Table~\ref{table:requirements}.
             6 & Static Typing & S \\
             7 & Type inference & S \\
             8 & Evaluation environment & S \\
-            9 & Compiler to C++ & S \\
+            9 & Proof of concept compiler to C++ & S \\
             \hline
             10 & Appropriate error messages & C \\
             11 & Syntax highlighting in repl & C \\
@@ -255,9 +256,9 @@ Table~\ref{table:requirements}.
             13 & view parse tree in repl & C \\
             14 & create call graph of program & C \\
             \hline
-            15 & Vim plugin for code editing & C \\
-            16 & Folds, syntax highlighting and autocomplete & C \\
-            17 & Inline \textit{markdown style} comments in source files & C \\
+            15 & Editor support for coding& C \\
+            16 & Folds, syntax highlighting and autocomplete in editor & C \\
+            17 & Inline \textit{markdown} style comments in source files & C \\
             \hline
             18 & Comprehensive custom C++ compiler & W \\
             \hline
@@ -276,6 +277,39 @@ an existing compiler (see Sections~\ref{constraints} and~\ref{JIT}) to generate 
 The addition of the unexpected constraint of native code production after the initial project
 inspiration has meant that to create a completely functional compiler, in addition to all the other
 essential features, is not practicable.
+
+\section{Personal Goals}
+The author's intentions, when the project was first suggested to the client, are detailed in
+figure~\ref{fig:intentions}. The scope of the project is very ambitious, and the author's knowledge
+of the area at the beginning of the project consisted of 3 weeks of automata theory in UCL module
+COMPGC04 and a 10 week introductory course to functional programming, also at UCL. 
+
+\begin{figure}
+    \begin{itemize}
+        \item Haskell: module COMPGC16 provided a basis upon which to build, but did not
+            progress beyond writing simple functions. No attempt was made at teaching how to build a
+            `genuine' piece of software. MicroML is the author's first attempt at such in a
+            functional language.
+        \item Automata Theory: module COMPGC04 was an introduction to systems infrastructure. The
+            author was particularly interested by the theory behind parsers, lexers and compilers.
+            This project offered the opportunity to learn more about these areas.
+        \item Lambda Calculus:  beyond a brief introduction to the simple untyped lambda
+            calculus, the author had no other experience whatsoever with the area of computational
+            theory. Even the notation was, at the beginning, completely unfamiliar. Moreover the
+            author was unaware at the start of the various refinements to the lambda calculus added
+            by researchers. The choice of calculus upon which to build microML evolved along with
+            the author's knowledge.
+        \item Type Theory: the author was very interested in the potential of type theory to make
+            programming easier and safer. Having no background in logic, the notation and concepts
+            were initially a strong barrier to progress. The development of microML afforded the
+            opportunity to tackle this area in a practical manner, rather than in a purely
+            theoretical fashion.
+        \item Language Design: microML offered the opportunity for the author to develop a language
+            `from scratch', with free reign over syntax and computational model. 
+    \end{itemize}
+    \caption{Personal Goals}
+\label{fig:intentions}
+\end{figure}
 
 \chapter{Context} 
 \section{The BBC micro:bit} The BBC micro:bit\footnote{\url{https://www.microbit.co.uk/}} is a
@@ -680,51 +714,39 @@ every secondary school in the UK\@. As such it is has not been designed as a com
 MicroML's remit therefore is very narrow, as it only has to target one limited platform with the
 express goal of acting as an educational tool. The user is envisaged to be a young adult, between
 the ages of 13 and 18, and the instructor, usually a teacher and not a computer science specialist.
+Table~\ref{table:useCases}.
 
-\begin{table}
-    \begin{tabu}{|>{\columncolor[gray]{0.9}}p{4cm}| p{10cm} |}
-        \hline
-        Use Case & \textbf{Student Use Case} \\
-        \hline
-        Participating Actors & Student \\
-        \hline
-        Flow of Events & \tabitem The student starts with a problem set by the instructor. \\
-                       & \tabitem The student opens the repl and explores the problem domain. \\
-                       & \tabitem The student creates some working code and copies it to a text file.  \\
-                       & \tabitem The student runs the file through the compiler. \\
-                       & \tabitem The student passes the resulting C++ file through \textit{yotta} \\
-                       & \tabitem The student flashes the binary to the micro:bit. \\
-        \hline
-        Alternative Flows & \tabitem The student uses a text editor to right code directly. For this
-        a simple vim plugin has been provided. At present, only vim is supported. \\
-        \hline
-    \end{tabu}
-    \caption{Student Use Case.}
-    \label{table:student}
+MicroML does not represent a `typical' software engineering project, and its scope is as broad as
+any general purpose programming language. Therefore the use cases focus more on interaction with the
+repl and compiler, as the use-cases are potentially infinite due to microML's being \textit{Turing
+Complete}.
+
+\newcolumntype{g}{>{\columncolor{light-gray}} l}
+\begin{table}[H]
+    \begin{tabular}{g l c c}
+        \rowcolor{light-gray}
+        ID & Use Case & Primary Actor & Secondary Actor \\
+        1 & Installation process & All & None \\
+        2 & Open repl & All & None \\
+        3 & Close repl & All & None \\
+        4 & Read help information from terminal & All & None \\
+        5 & Perform simple calculations & All & None \\
+        6 & Load script into repl for testing & All & None \\
+        7 & Read help information in repl & All & None \\
+        8 & Read developer comments in scripts & Educator & Student \\
+        9 & View repl history & All & None \\
+        10 & Explore code interactively & All & None \\
+        11 & Write tutorial information in user scripts & Educator & Student \\
+        12 & View parse tree in terminal & All & None \\
+        13 & View callgraph of user script & All & None \\
+        14 & Check script for mistakes and redundancies & All & None \\
+        15 & Compile script for flashing to micro:bit & All & None \\
+        16 & Interactive debugging in repl & All & None \\
+    \end{tabular}
+    \caption{Overview of Use Cases}
+\label{table:useCases}
 \end{table}
 
-\begin{table}
-    \label{table:educator}
-    \begin{tabu}{|>{\columncolor[gray]{0.9}}p{4cm}| p{10cm} |}
-        \hline
-        Use Case & \textbf{Educator} \\
-        \hline
-        Participating Actors & Educator \\
-        \hline
-        Flow of Events & \tabitem The educator invents a problem or uses one provided by the
-        curriculum. \\
-                       & \tabitem The educator opens the repl and explores the problem domain. \\
-                       & \tabitem The educator creates some working code and copies it to a text file.  \\
-                       & \tabitem The educator runs the file through the compiler. \\
-                       & \tabitem The educator passes the resulting C++ file through \textit{yotta} \\
-                       & \tabitem The educator flashes the binary to the micro:bit. \\
-        \hline
-        Alternative Flows & \tabitem The student uses a text editor to right code directly. For this
-        a simple vim plugin has been provided. At present, only vim is supported. \\
-        \hline
-    \end{tabu}
-    \caption{Educator Use Case.}
-\end{table}
 
 \chapter{Design and Implementation}
 \section{Design}
@@ -1171,15 +1193,15 @@ to be loaded manually with the `:using' command. The libraries available at time
         evaluation model of microML\@.
 \end{itemize}
 
+See Appendix~\ref{appendix:libs} for more details.
+
 It might seem an awkward decision to have separate imports for a large number of utility functions.
 For example, \textit{sum} and \textit{product} both reside in \textbf{maths}. The reasoning
 behind this decision was that students might want the opportunity to try to write these functions
 themselves. Functions in the \textbf{standard} library are considered more fundamental and possibly
 more difficult for students to write: one cannot reasonably expect an 11-year-old to write
 \textit{foldr} or \textit{filter}\footnote{foldr is defined as follows in the microML standard
-library\@: let foldr r acc xs = if empty? xs then acc else ((f (head
-xs)) (foldr f acc (tail xs)))}.
-
+library\@: let foldr r acc xs = if empty? xs then acc else ((f (head xs)) (foldr f acc (tail xs)))}.
 
 \chapter{Testing}
 \label{testing}
@@ -1310,19 +1332,19 @@ compiler) and syntax-highlighted and written in `plain English'. Figure~\ref{fig
             6 & Static Typing & S  & \checkmark\\
             7 & Type inference & S  & \checkmark\\
             8 & Evaluation environment & S  & \checkmark\\
-            9 & Compiler to C++ & S & \checkmark \\
+            9 & Proof of concept compiler to C++ & S & \checkmark \\
             \hline
-            10 & Appropriate error messages & C & \checkmark \\
-            11 & Syntax highlighting in repl & C  & \checkmark\\
-            12 & Repl history & C  & \checkmark\\
-            13 & view parse tree in repl & C  & \checkmark\\
-            14 & create call graph of program & C  & \checkmark\\
+            10 & Appropriate error messages & C & \checkmark\\
+            11 & Syntax highlighting in repl & C & \checkmark\\
+            12 & Repl history & C & \checkmark\\
+            13 & view parse tree in repl & C & \checkmark\\
+            14 & create call graph of program & C & \checkmark\\
             \hline
-            15 & Vim plugin for code editing & C  & \checkmark\\
-            16 & Folds, syntax highlighting and autocomplete & C & \checkmark \\
-            17 & Inline \textit{markdown style} comments in source files & C & \checkmark\\
+            15 & Editor support for coding & C & \checkmark\\
+            16 & Folds, syntax highlighting and autocomplete in editor & C & \checkmark\\
+            17 & Inline \textit{markdown} style comments in source files & C & \checkmark\\
             \hline
-            18 & Comprehensive custom C++ compiler & W & --- \\
+            18 & Comprehensive custom C++ compiler & W  & --- \\
             \hline
         \end{tabular}
       \begin{tablenotes}
@@ -1333,22 +1355,28 @@ compiler) and syntax-highlighted and written in `plain English'. Figure~\ref{fig
     \end{threeparttable}
 \label{table:achievments}
 \end{table}
+
 \section{Evaluation}
-At the fundamental design level, perhaps the most unfortunate decision was to make the \textit{Expr}
-datatype a simple type with kind $*$\footnote{* is pronounced `type'.}. This decision has meant that
-it was not possible to make \textit{Expr} an instance of the \textit{Functor} typeclass\footnote{A
-datatype needs at least kind $* \rightarrow *$ to be a member of the Functor typeclass.}, with the
-result that a complex expression was neither mappable nor foldable. There are instances in the code
+At the fundamental design level, perhaps the most limiting decision taken was to make the
+\textit{Expr} datatype a simple type with kind $*$\footnote{$*$ is pronounced `type'. It represents
+the \textit{arity} of a type constructor. Therefore a simple, \textit{concrete} type, such as
+Integer, has kind $*$. A \textit{higher-kinded} type takes more than one parameter and returns a
+concrete type from these. In this sense it is a function over types. The Either datatype in Haskell
+has kind $* \rightarrow * \rightarrow *$ because it takes two types as arguments and returns one
+of them depending on the result of the computation.}. This decision has meant that it was not
+possible to make \textit{Expr} an instance of the \textit{Functor} typeclass\footnote{A datatype
+needs at least kind $* \rightarrow *$ to be a member of the Functor typeclass.}, with the result
+that a complex expression was neither mappable nor foldable. There are instances in the code
 where expressions have been converted into strings via `show' in order to filter or search for
 elements. This is rather inefficient and, given the nature and complexity of regular expressions,
 potentially bug-prone. This problem would have been alleviated by a definition for `fmap'. Once
 \textit{Expr} is a functor, it would then be relatively trivial to make a traversable instance, and
-even, if necessary, a monad instance, or at the very least an instance of \textit{Applicative}.
-Tag information regarding type could have been carried in the additional arity required by the
-functor typeclass. \textit{Expr} would then have kind $* \rightarrow *$ with the first * being a
-type primitive. This would also have made inference easier and quicker. However it was nearing the
-end of the project before the author had enough knowledge and skill to be aware of these subtleties,
-and such a change would require a rather substantial rewriting of much of the MicroML module.
+even, if necessary, a monad instance, or at the very least an instance of \textit{Applicative}. Tag
+information regarding type could have been carried in the additional arity required by the functor
+typeclass. \textit{Expr} would then have kind $* \rightarrow *$ with the first $*$ being a type
+primitive. This would also have made inference easier and quicker. However it was nearing the end of
+the project before the author had enough knowledge and skill to be aware of these subtleties, and
+such a change would require a rather substantial rewriting of much of the MicroML module.
 
 \section{Future Work}
 While the basic core of the language is largely complete a great deal of work remains to be done on
@@ -1434,6 +1462,9 @@ result in a number of possible compiler optimisations and greater runtime safety
 \begin{appendices}
     \chapter{Installation Guide}
     \input{user}
+    \chapter{Functional and Non-Functional Requirements}
+    \label{appendix:functionalRequirements}
+    \input{req}
     \chapter{System F}
     \label{appendix:sysf}
     \input{sysf}
