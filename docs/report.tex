@@ -1087,7 +1087,7 @@ Every effort was made to organize the source code in a logical and consistent ma
 another programmer should understand the organization without great difficulty.
 Figure~\ref{fig:dir}.
 
-\begin{figure}
+\begin{figure}[H]
     \dirtree{%
         .1 microML.
         .2 docs.
@@ -1243,13 +1243,15 @@ the program. Haskell does not have an object system, and only a very simple modu
 flat namespace. Again, this helps to reduce the necessity for testing above the level of the unit.
 
 MicroML's type system is useful for checking the integrity of a microML program, in much the same
-way that Haskell performs and enforces such checks. 
+way that Haskell performs and enforces such checks. As such, the standard libraries, all of which
+are know to be correct in their implementation, act as further tests of microML's type inference
+mechanisms: the failure to correctly infer a correct function definition points to a deficiency in
+the inference execution.
 
 \begin{figure}
     \begin{itemize}
         \item ListPrimitives
         \item MathsPrimitives
-        \item Infer
         \item CallGraph
         \item Failure
     \end{itemize}
@@ -1282,6 +1284,26 @@ files. A simple bash script runs each file individually through the microML comp
 writing, the compiler does not yet successfully pass all of these integration tests. More work needs
 to be done before the compiler can seriously be considered to be `fit for purpose'. The script must
 be run from the utils folder of the project.
+
+\begin{figure}
+    \begin{minted}{sml}
+        let main =
+            let s = "hello microML"
+            in scroll s
+    \end{minted}
+    \begin{minted}{cpp}
+        #include "MicroBit.h"
+        MicroBit uBit;
+        int main() {
+          ubit.init();
+          ManagedString s = "hello microML";
+          uBit.display.scroll(s);
+          fiber_release();
+        }
+    \end{minted}
+    \caption{A simple mml program compiled to micro:bit c++}
+\label{fig:compiler}
+\end{figure}
 
 Many errors and omissions were revealed by the unit-testing which otherwise might not have
 been noticed until runtime, or worse, after system deployment. Further work can be done
