@@ -1,4 +1,4 @@
-let text1 = "hello"
-let text2 = ", there"
+let text1 = "hello, "
+let text2 = "there"
 
 let main = (text1 ++ text2) >> scroll
