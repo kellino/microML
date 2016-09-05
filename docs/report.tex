@@ -173,7 +173,8 @@ type analysis and inference, have a great deal to offer to the programming commu
 of expressiveness and safety. Must it be the case therefore that introductory material is so
 intimidating? Is there a way to encourage students to think functionally, in a type-orientated
 manner, without the heavy mathematical `baggage' that is simply surplus to requirements when writing
-one's first programs?
+one's first programs? Can functional programming be brought to students through the medium of the
+micro:bit?\footnote{see Chapter~\ref{context}.}
 
 \section{Aims and Goals}
 \subsection{Project Aims}
@@ -195,8 +196,8 @@ as~\cite{Abelson:1996:SIC:547755} and~\cite{Friedman1900} are squarely pitched a
 The micro:bit is the opposite: it is for students with no previous programming experience,
 students who are not mathematicians, and teachers who are neither mathematicians nor
 programmers\footnote{The micro:bit website \url{https://www.microbit.co.uk/about} explicitly states
-that the micro:bit is intended for year 7 students. This covers the age of approximately 11-12. It
-would seem a safe assumption to assume an absence of mathematical maturity.}.
+that the micro:bit is intended for year 7 students. This covers the age of approximately 11 --- 12. It
+would seem safe to assume an absence of mathematical maturity.}.
 Functional programming has a reputation in the programming community for being complex and only for a
 special type of person. The aim of this project is to show that this is not necessarily the case.
 With this in mind, the aim is to make the language as educational and simple as possible, at the expense 
@@ -279,6 +280,7 @@ inspiration has meant that to create a completely functional compiler, in additi
 essential features, is not practicable.
 
 \section{Personal Goals}
+\label{personal}
 The author's intentions, when the project was first suggested to the client, are detailed in
 figure~\ref{fig:intentions}. The scope of the project is very ambitious, and the author's knowledge
 of the area at the beginning of the project consisted of 3 weeks of automata theory in UCL module
@@ -286,32 +288,36 @@ COMPGC04 and a 10 week introductory course to functional programming, also at UC
 
 \begin{figure}
     \begin{itemize}
-        \item Haskell: module COMPGC16 provided a basis upon which to build, but did not
+        \item \textbf{Haskell}: module COMPGC16 provided a basis upon which to build, but did not
             progress beyond writing simple functions. No attempt was made at teaching how to build a
             `genuine' piece of software. MicroML is the author's first attempt at such in a
             functional language.
-        \item Automata Theory: module COMPGC04 was an introduction to systems infrastructure. The
+        \item \textbf{Automata Theory}: module COMPGC04 was an introduction to systems infrastructure. The
             author was particularly interested by the theory behind parsers, lexers and compilers.
             This project offered the opportunity to learn more about these areas.
-        \item Lambda Calculus:  beyond a brief introduction to the simple untyped lambda
-            calculus, the author had no other experience whatsoever with the area of computational
+        \item \textbf{Lambda Calculus}:  beyond a brief introduction to the simple untyped lambda
+            calculus, the author had had no other experience whatsoever with the area of computational
             theory. Even the notation was, at the beginning, completely unfamiliar. Moreover the
             author was unaware at the start of the various refinements to the lambda calculus added
             by researchers. The choice of calculus upon which to build microML evolved along with
             the author's knowledge.
-        \item Type Theory: the author was very interested in the potential of type theory to make
+        \item \textbf{Type Theory}: the author was very interested in the potential of type theory to make
             programming easier and safer. Having no background in logic, the notation and concepts
             were initially a strong barrier to progress. The development of microML afforded the
             opportunity to tackle this area in a practical manner, rather than in a purely
             theoretical fashion.
-        \item Language Design: microML offered the opportunity for the author to develop a language
+        \item \textbf{Language Design}: microML offered the opportunity for the author to develop a language
             `from scratch', with free reign over syntax and computational model. 
+        \item \textbf{Educational Benefits}: the author can well remember his first attempts at programming,
+            and the associated difficulties. MicroML is a tentative step towards making introductory
+            programming easier and more enjoyable.
     \end{itemize}
     \caption{Personal Goals}
 \label{fig:intentions}
 \end{figure}
 
 \chapter{Context} 
+\label{context}
 \section{The BBC micro:bit} The BBC micro:bit\footnote{\url{https://www.microbit.co.uk/}} is a
 microprocessor device aimed at bringing programming to young adults and teenagers. At present it
 supports a number of different programming languages, most visibly \textit{MicroPython, JavaScript}
@@ -1283,7 +1289,8 @@ systematic.
 \chapter{Conclusions and Project Evaluation}
 
 \section{Achievements}
-The project has met all of the goals and requirements initially specified, but this is not to say
+The project has met all of the goals and requirements initially specified\footnote{see
+Table~\ref{table:achievments}}, but this is not to say
 that the project cannot be improved or could even, in any real sense, be said to be finished. The
 syntax (see Appendix~\ref{appendix:syntax}) is clean and uncomplicated, but also quite limiting for
 students who would like to be more `expressive'. It is felt that, for those advanced students who
@@ -1355,6 +1362,15 @@ compiler) and syntax-highlighted and written in `plain English'. Figure~\ref{fig
     \end{threeparttable}
 \label{table:achievments}
 \end{table}
+
+\section{Personal Progress}
+During the course of development the author was obliged to tackle every one of his personal goals as
+listed in Section~\ref{personal}. It would be hard to accurately judge how much has been learnt in
+the course of the development of microML\@. It is a truism to state that `if I could start the
+project again knowing what I know now\dots' but this is undoubtedly the case. MicroML has
+successfully revealed how much the author has learnt, but also how much there still is to learn. It
+has been an intellectually draining experience but a new world of concepts and modes of thinking
+have been opened up, which hopefully now can be further explored.
 
 \section{Evaluation}
 At the fundamental design level, perhaps the most limiting decision taken was to make the
