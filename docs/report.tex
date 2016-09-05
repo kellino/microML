@@ -1061,17 +1061,20 @@ however is that, once the complexity of stack construction has been overcome, th
 `locked away' within one or two data types and functions, allowing the programmer essentially to
 forget about state management and error handling details. 
 
-\subsection{False Starts \& Dead Ends}
+\subsection{Development Style: Explorations and \textit{Cul-de-Sacs}}
 \label{deadend}
-Development progressed iteratively. Having no previous experience of engineering a large software
-project in Haskell, initial development was largely \textit{ad hoc} and unstructured. Haskell is not
-an ideal language for development in this manner. A great deal of time was spent just in understanding 
-the principles of state manipulation in a side-effect free language. Luckily, there were a number of 
-tutorials which served as the backbone, or perhaps more accurately, embryo, of the final project. 
-Traces of these tutorials can still be seen scattered throughout the final codebase. These were 
-perhaps both a help and a hindrance, as their original authors had not perhaps foreseen that 
-they would be so heavily expanded and built-upon. Strong foundations might have results in a project 
-which was more realised, with fewer edge cases and areas where the solutions are not as robust as could be desired.
+Development progressed in an exploratory, rather than iterative, manner. Having no previous
+experience of engineering a large software project in Haskell, initial development was largely
+\textit{ad hoc} and unstructured. This was a necessary first step: a total unfamiliarity with the
+tools and libraries available made a more systematic approach impractical. Haskell is not an ideal
+language for development in this manner however. A great deal of time was spent just in understanding the
+principles of state manipulation in a side-effect free language. Luckily, there were a number of
+tutorials which served as the backbone, or perhaps more accurately, embryo, of the final
+project\footnote{Especially useful were~\cite{algoW},~\cite{scheme } and~\cite{diehl}.}.
+Many traces of these tutorials can still be seen scattered throughout the final codebase. These were
+perhaps both a help and a hindrance, as their original authors had surely not foreseen that they
+would be so heavily expanded and built-upon. Strong foundations might have resulted in a project
+which was more flexible and mature.
 
 Some libraries and approaches were abandoned during the development process. Most notably a deal of
 time was put into using the \textit{Language-C} library for manipulating the C AST in Haskell. While
@@ -1080,7 +1083,8 @@ it was decided that time constraints did not allow for proper utilization of the
 very large) so other alternatives were explored in the hope of at least producing a testable backend
 within the time frame of the project. Moreover the library is strongly inclined to C, rather than
 C++, so many bindings are completely missing, including some data types and all object-orientated
-code constructions. There is no equivalent library for C++ on Hackage. This remains to be written. 
+code constructions. There is no equivalent library for C++ on Hackage. This remains to be written.
+For more details on the progress of the project, see Appendix~\ref{appendix:diary}.
 
 \subsection{Project Structure}
 Every effort was made to organize the source code in a logical and consistent manner, such that
@@ -1110,6 +1114,12 @@ Figure~\ref{fig:dir}.
 \caption{Directory Structure}
 \label{fig:dir}
 \end{figure}
+
+The main logic of the language is contained in the MicroML directory. Here is to be found the lexer,
+parser, list and maths primitives and other modules. The typing directory is also contained within this
+central core. As ancillary modules, representing the interfaces to the language proper, the Repl,
+Compiler and Jit logic exist in their own, independent directories. As far as possible shared logic
+resides entirely in the MicroML directory.
 
 \subsubsection{JIT}\label{JIT}
 The inclusion of a JIT aspect was predicated on an experimental method to produce C++ code using
@@ -1214,6 +1224,20 @@ more difficult for students to write: one cannot reasonably expect an 11-year-ol
 \textit{foldr} or \textit{filter}\footnote{foldr is defined as follows in the microML standard
 library\@: let foldr r acc xs = if empty? xs then acc else ((f (head xs)) (foldr f acc (tail xs)))}.
 
+\subsubsection{Vim Plugin}
+MicroML also has a simple vim plugin (installable with any of the popular package managers) which
+provided syntax highlighting, automatic folding of code, and autocompletion of built-in functions.
+This is written in \textit{vimscript}. Future work could also add linting and interactive sessions
+with the repl through the use of neovim's jobcontrol and remote plugin facilities. See
+Appendix~\ref{appendix:samples} for code samples.
+
+\begin{figure}[H]
+    \includegraphics[width=\textwidth]{images/vim.jpg}
+    {\caption{Folding and syntax highlighting in the editor}}
+\label{fig:foldVim}
+\end{figure}
+
+
 \chapter{Testing}
 \label{testing}
 Software testing is a vital part of any seriously intended development project. Only an arrogant
@@ -1255,7 +1279,7 @@ the inference execution.
         \item CallGraph
         \item Failure
     \end{itemize}
-    \caption{Currently Tested with HSpec}
+    \caption{Modules currently tested with HSpec}
 \label{fig:hspec}
 \end{figure}
 
@@ -1280,24 +1304,25 @@ software. The tests are run automatically by the installation script in the main
 
 Testing the ability of the compiler to produce C++ code involved the addition of integration tests
 to the Hspec framework. These are handled separately in the form of multiple small \textit{mml}
-files. A simple bash script runs each file individually through the microML compiler. At time of
-writing, the compiler does not yet successfully pass all of these integration tests. More work needs
-to be done before the compiler can seriously be considered to be `fit for purpose'. The script must
-be run from the utils folder of the project.
+files. A simple bash script runs each file individually through the microML compiler. The compiler
+is a proof of concept: more work needs to be done before the compiler can seriously be considered to
+be `fit for purpose'. The script must be run from the utils folder of the project.
 
 \begin{figure}
     \begin{minted}{sml}
         let main =
-            let s = "hello microML"
-            in scroll s
+            let s = "hello " in
+            let t = "there" in
+            scroll s ++ t
     \end{minted}
     \begin{minted}{cpp}
         #include "MicroBit.h"
         MicroBit uBit;
         int main() {
           ubit.init();
-          ManagedString s = "hello microML";
-          uBit.display.scroll(s);
+          ManagedString s = "hello";
+          ManagedString t = "there";
+          uBit.display.scroll(s + t);
           fiber_release();
         }
     \end{minted}
