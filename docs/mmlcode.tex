@@ -1,41 +1,3 @@
-A quasi-quicksort in microML\@. This does not sort in place, as is necessary for a true quicksort
-implementation. Figure~\ref{fig:quicksort}
-
-\begin{figure}[H]
-    \begin{minted}[breaklines=true]{sml}
-        let quicksort xs = 
-            let smaller = \xs -> filter (\x -> x < head xs) (tail xs) in
-            let greater = \xs -> filter (\x -> x >= head xs) (tail xs) in
-            if xs == [] 
-            then [] 
-            else
-            (quicksort (smaller xs)) ++ [head xs] ++ (quicksort (greater xs));
-    \end{minted}
-    \caption{Pseudo-Quicksort}
-\label{fig:quicksort}
-\end{figure}
-
-Mergesort implemented in microML\@. Figure~\ref{fig:mergesort}
-
-\begin{figure}[H]
-    \begin{minted}[breaklines=true]{sml}
-        let merge = \xs ys ->  
-            if ys == [] then xs
-            else if xs == [] then ys
-            else if (head xs) <= (head ys) then (head xs):(merge (tail xs) ys)
-            else (head ys):(merge xs (tail ys)) 
-
-        let mergesort xs =
-            let fsthalf = \xs -> take ((length xs) // 2) xs in 
-            let sndhalf = \xs -> drop ((length xs) // 2) xs in
-            if xs == [] then []
-            else if (length xs) == 1 then xs
-            else merge (mergesort (fsthalf xs)) (mergesort (sndhalf xs))
-    \end{minted}
-    \caption{Mergesort in microML}
-\label{fig:mergesort}
-\end{figure}
-
 As far as possible, higher-order functions within the standard library are written with `foldr' as a
 base. This provides a constant interface for all forms of list manipulation, and as such acts as the
 higher-order `primitive' for microML\@. Figure~\ref{fig:foldr}
@@ -51,4 +13,24 @@ higher-order `primitive' for microML\@. Figure~\ref{fig:foldr}
 \label{fig:foldr}
 \end{figure}
 
+Logs, for reasons of efficiency, are primitives in the language, however other maths functions can
+be written quite comfortably in microML.
 
+\begin{figure}
+    \begin{minted}{sml}
+        let sin x = 
+            if x == 90 then 1 -- because of rounding errors, let's cheat a little here
+            else if x == 180 then 0
+            else let y = (x / 180) * pi 
+                  in y - (y^3 / 6) + (y^5 / 120) - (y^7 / 5070) + (y^9 / 362880) - (y^11 / 39916800) 
+                  -- hard code the factorials for efficiency
+
+        let cos x = 
+            if x == 180 then (-1)
+            else sin (90 - x)
+
+        let tan x = (sin x) / (cos x)
+    \end{minted}
+    \caption{Sine, cosine and tan in microML}
+\label{fig:maths}
+\end{figure}
