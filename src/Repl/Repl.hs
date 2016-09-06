@@ -53,7 +53,7 @@ hoistError :: (Show a1) => Either a1 a -> Repl a
 hoistError (Right val) = return val
 hoistError (Left err) = do
     liftIO $ print err
-    tryAction abort
+    abort
 
 evalDef :: TermEnv -> (String, Expr) -> TermEnv
 evalDef env (nm, ex) = termEnv'

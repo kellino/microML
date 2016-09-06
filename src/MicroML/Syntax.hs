@@ -52,14 +52,14 @@ data UnaryOp =
     deriving (Eq, Ord)
 
 instance Show UnaryOp where
-    show Car   = red ++ "Car" ++ clear
-    show Cdr   = red ++ "Cdr" ++ clear
-    show Minus = red ++ "negative" ++ clear
-    show OpLog = red ++ "log" ++ clear
-    show Show  = red ++ "show" ++ clear
-    show Read  = red ++ "read" ++ clear
-    show Chr   = red ++ "chr" ++ clear
-    show Ord   = red ++ "ord" ++ clear
+    show Car   = "Car" 
+    show Cdr   = "Cdr"
+    show Minus = "negative" 
+    show OpLog = "log" 
+    show Show  = "show" 
+    show Read  = "read"
+    show Chr   = "chr"
+    show Ord   = "ord" 
 
 data Binop = 
         OpAdd | OpSub | OpMul | OpDiv | OpIntDiv | OpExp | OpMod 
