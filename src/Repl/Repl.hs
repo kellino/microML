@@ -55,13 +55,11 @@ hoistError (Left err) = do
     liftIO $ print err
     abort
 
-ignoreError :: Either a1 a -> Repl a
-ignoreError (Right val) = return val
-
 evalDef :: TermEnv -> (String, Expr) -> TermEnv
 evalDef env (nm, ex) = termEnv'
   where (_, termEnv') = runEval env nm ex
 
+-- read the help info into a dictionary
 toHelpenv :: [HelpBlock] -> HelpEnv
 toHelpenv ls = HEnv $ Map.fromList ls
 
