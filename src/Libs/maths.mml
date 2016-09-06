@@ -66,9 +66,39 @@ factorials grow really quickly...
 let factorial n = product [1 to n];
 
 (*
+==sin==
+***sin***
+** sin :: Number -> Number **
+finds the sign of an angle (using the Taylor series)
+*)
+let sin x = 
+    if x == 90 then 1 -- because of rounding errors, let's cheat a little here
+    else if x == 180 then 0
+    else let y = (x / 180) * pi 
+          in y - (y^3 / 6) + (y^5 / 120) - (y^7 / 5070) + (y^9 / 362880) -- hard code the factorials
+
+(*
+==cos==
+***cosine***
+** cos :: Number -> Number **
+finds the cosine of an angle (using the Taylor series
+*)
+let cos x = 
+    if x == 180 then (-1)
+    else sin (90 - x)
+
+(*
+==tan==
+***tan***
+** tan :: Number -> Number **
+tan of an angle
+*)
+let tan x = (sin x) / (cos x)
+
+(*
 ==gcd==
 ***gcd : greatest common divisor***
 ** gcd :: Number -> Number -> Number **
 finds the greatest common divisor of two numbers
 *)
-let gcd a b = if a - b == 0 then a else if a < b then gcd b a else gcd b (a-b)
+let gcd a b = if a == b then a else if a < b then gcd b a else gcd b (a-b)
