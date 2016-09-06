@@ -171,6 +171,24 @@ normalize (Forall _ body) = Forall (map snd ord) (normtype body)
 -- MAIN INFERENCE FUNCTION --
 -----------------------------
 
+inferLamba :: Name -> Expr -> Infer Type
+inferLamba nm e1 =
+    case e1 of
+         Lam nm' e2         -> inferLamba nm' e2
+         BinOp OpEq _ Nil   -> return $ TVar $ TV "[a]"
+         BinOp OpAdd _ _    -> return typeNum
+         BinOp OpSub _ _    -> return typeNum
+         BinOp OpMul _ _    -> return typeNum
+         BinOp OpIntDiv _ _ -> return typeNum
+         BinOp OpDiv _ _    -> return typeNum
+         BinOp OpExp _ _    -> return typeNum
+         BinOp OpMod _ _    -> return typeNum
+         UnaryOp OpLog _    -> return typeNum
+         UnaryOp Chr _      -> return typeNum
+         UnaryOp Ord _      -> return typeChar
+         UnaryOp Read _    -> return typeString
+         _                  -> fresh
+
 infer :: Expr -> Infer Type
 infer expr = case expr of
     Lit (LInt _)     -> return typeNum
@@ -186,9 +204,14 @@ infer expr = case expr of
     Var x -> lookupEnv x
 
     Lam x e -> do
-       tv <- fresh
-       t <- inEnv (x, Forall [] tv) (infer e)
-       return (tv `TArrow` t)
+        t1 <- inferLamba x e
+        t2 <- inEnv (x, Forall [] t1) (infer e)
+        return (t1 `TArrow` t2)
+        
+    {-Lam x e -> do-}
+       {-tv <- fresh-}
+       {-t <- inEnv (x, Forall [] tv) (infer e)-}
+       {-return (tv `TArrow` t)-}
              
     App e1 e2 -> do
         t1 <- infer e1
