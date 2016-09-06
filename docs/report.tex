@@ -474,8 +474,10 @@ the so-called \textit{Tiger Book}, is available in a number of different languag
 the most pertinent to this project.
 
 \subsection{The Lambda Cube}
-The Lambda Cube was introduced by mathematician Henk Barendregt as a visualization framework for
-Coquand's calculus of constructions\cite{Barendregt:1993:LCT:162552.162561}. The simple untyped lambda calculus is not
+The Lambda Cube was introduced by mathematician Henk Barendregt as a visualization framework
+for Coquand's calculus of constructions\cite{Barendregt:1993:LCT:162552.162561}. The simple
+untyped lambda calculus\footnote{Both~\cite{Harper:2012:PFP:2431407} and~\cite{scott}
+argue persuasively that \textit{untyped} should really be \textit{unityped}.} is not
 represented.\footnote{\cite{Pierce:2002:TPL:509043} has a slightly different treatment of the axes.}
 
 \begin{figure} % [!h]
@@ -618,8 +620,8 @@ l) is an object M together with two morphisms
 Essentially this means there must exist an associative operator and an identity value. For numbers
 this might be 
 \begin{align*}
-    1 + (2 + 3) &\equiv (1 + 2) + 3 \\
-    1 + 0 &\equiv 0 + 1
+    &1 + (2 + 3) \equiv (1 + 2) + 3 \\
+    &1 + 0 \equiv 1 \equiv 0 + 1
 \end{align*}
 }, but microML will eschew the ability to annotate user-defined types as monoidal instances. Higher
 order functions are essential to the paradigm, as is partial function application.\footnote{i.e.\
@@ -761,7 +763,7 @@ Complete}.
 
 \chapter{Design and Implementation}
 \section{Design}
-microML uses an enriched lambda calculus as its base. See Figure~\ref{fig:syntax}
+MicroML uses an enriched lambda calculus as its base. See Figure~\ref{fig:syntax}
 
 \begin{figure}
     \begin{minipage}[t]{0.5\textwidth}
@@ -1012,11 +1014,55 @@ de-constructed by the parser/evaluator. Figure~\ref{fig:parsetext}
 It is the intention of microML to encourage modularity of design, aiming at function composition
 above all. Large, complex functions are to be actively discouraged in favour of smaller, more
 `mobile' units. Both Haskell and Miranda contain a function composition operator, a single dot.
-This is inspired directly by the mathematical notion of composition, where it is notated $ f \circ
-g $. While it is doubtless more mathematically pure to copy this approach, the expected user of
+This is inspired directly by the mathematical notion of composition, where it is notated $f \circ
+g$. While it is doubtless more mathematically pure to copy this approach, the expected user of
 microML is not a graduate mathematician, and probably only has GCSE level of maths, if that. MicroML
 follows the model of \textbf{Elixir} with its left-to-right \textit{pipe} operator $|>$. However
-microML prefers the notation $>>$ as being more explicitly about direction and movement.
+microML prefers the notation $>>$ as being more explicitly about direction and movement. See
+Figure~\ref{fig:pipe}.
+
+\begin{figure}
+    \includegraphics[width=\textwidth]{images/pipe.jpg}
+    \caption{The pipe operator in a complex expression.}
+\label{fig:pipe}
+\end{figure}
+
+MicroML is Turing complete, so it is possible to express even complex algorithms in its simple
+syntax. Figure~\ref{fig:quicksort} shows the source code from the library \textbf{standard} for
+quicksort\footnote{Technically a pseudo-quicksort, as quicksort must sort in place, as this does
+not.} and Figure~\ref{fig:mergesort} shows the standard implementation of mergesort. 
+
+\begin{figure}
+    \begin{minted}[breaklines=true]{sml}
+        let quicksort xs = 
+            let smaller = \xs -> filter (\x -> x < head xs) (tail xs) in
+            let greater = \xs -> filter (\x -> x >= head xs) (tail xs) in
+            if xs == [] 
+            then [] 
+            else (quicksort (smaller xs)) ++ [head xs] ++ (quicksort (greater xs))
+    \end{minted}
+    \caption{Quicksort in microML}
+\label{fig:quicksort}
+\end{figure}
+    
+\begin{figure}
+    \begin{minted}[breaklines=true]{sml}
+        let merge = \xs ys ->  
+            if ys == [] then xs
+            else if xs == [] then ys
+            else if (head xs) <= (head ys) then (head xs):(merge (tail xs) ys)
+            else (head ys):(merge xs (tail ys)) 
+
+        let mergesort xs =
+            let fsthalf = \xs -> take ((length xs) // 2) xs in 
+            let sndhalf = \xs -> drop ((length xs) // 2) xs in
+            if xs == [] then []
+            else if (length xs) == 1 then xs
+            else merge (mergesort (fsthalf xs)) (mergesort (sndhalf xs))
+    \end{minted}
+    \caption{Mergesort in microML}
+\label{fig:mergesort}
+\end{figure}
 
 \section{Implementation}
 MicroML is written in Haskell and microML itself. However it should be stated that this is not the
