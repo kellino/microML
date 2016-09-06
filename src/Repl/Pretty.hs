@@ -62,11 +62,11 @@ instance Pretty Expr where
 
 instance Show TypeError where
       show (UnificationFail a b) =
-        concat ["Cannot ", "\ESC[33m", "match", clear, " expected type ", bold, pptype a, clear, " with actual type ", bold, pptype b, clear]
+        concat ["Cannot ", "\ESC[33m", "match", clear, " expected type ", pptype a, " with actual type ", pptype b]
       show (InfiniteType (TV a) b) =
         concat ["Cannot construct the ", red, "infinite type", clear, ": ", a, " = ", pptype b]
       show (Ambigious cs) =
-        concat ["Cannot not match expected type: '" ++ pptype a ++ "' with actual type: '" ++ pptype b ++ "'\n" | (a,b) <- cs]
+        concat ["Cannot match expected type: '" ++ pptype a ++ "' with actual type: '" ++ pptype b ++ "'\n" | (a,b) <- cs]
       show (UnboundVariable a) = "Not in scope: " ++  bold ++ a ++ clear
       show (UnsupportedOperation a) = bold ++ a ++ clear
       show (UnificationMismatch a b) = show a ++ show b
@@ -102,10 +102,10 @@ matchBrackets st = let len = length . takeWhile (== ']') . reverse $ st
 pprLit :: String -> String
 pprLit xs 
     | "LInt" `isInfixOf` xs = "\ESC[31m" ++ "Number" ++ clear
-    | "LDouble" `isInfixOf` xs = "Number"
-    | "LChar" `isInfixOf` xs = "Char"
-    | "LString" `isInfixOf` xs = "String"
-    | "LBoolean" `isInfixOf` xs = "Boolean"
+    | "LDouble" `isInfixOf` xs = "\ESC[31m" ++ "Number" ++ clear
+    | "LChar" `isInfixOf` xs = "\ESC[34m" ++ "Char" ++ clear
+    | "LString" `isInfixOf` xs = "\ESC[32m" ++ "String" ++ clear
+    | "LBoolean" `isInfixOf` xs = "\ESC[33m" ++ "Boolean" ++ clear
     | otherwise = xs
 
 ppexpr :: Expr -> String
