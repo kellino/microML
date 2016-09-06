@@ -1,10 +1,12 @@
+-- | a crazy mishmash of very dodgy code, but it seems to work. Will need drastic refactoring at
+-- some point...
+
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 
 module MicroML.Typing.Infer (
-  inferTop,
-  constraintsExpr,
+  inferTop
 ) where
 
 import MicroML.Typing.Env
@@ -175,7 +177,10 @@ inferLamba :: Name -> Expr -> Infer Type
 inferLamba nm e1 =
     case e1 of
          Lam nm' e2         -> inferLamba nm' e2
-         BinOp OpEq _ Nil   -> return $ TVar $ TV "[a]"
+         If e2 _ _          -> inferLamba nm e2
+         {-BinOp OpEq nm Nil   -> do-}
+             {-TVar (TV tv) <- fresh-}
+             {-return $ TVar $ TV $ "[" ++ tv ++ "]"-}
          BinOp OpAdd _ _    -> return typeNum
          BinOp OpSub _ _    -> return typeNum
          BinOp OpMul _ _    -> return typeNum
@@ -187,6 +192,7 @@ inferLamba nm e1 =
          UnaryOp Chr _      -> return typeNum
          UnaryOp Ord _      -> return typeChar
          UnaryOp Read _    -> return typeString
+         BinOp OpLt e2 _  -> inferLamba nm e2
          _                  -> fresh
 
 infer :: Expr -> Infer Type
