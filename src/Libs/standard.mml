@@ -297,6 +297,7 @@ let take n xs = if zero? n then [] else ((head xs) : (take (n-1) (tail xs)))
 ==foldr==
 ***foldr***
 ** foldr :: (a -> b -> b) -> b -> [a] -> b **
+performs a right __fold__ on a list
 you can see precisely what foldr is doing with the following function
 #Example:#
     > foldr (λx y -> "(" ++ x ++ " + " ++ y ++ ")") "0" (map show [1 to 5])
@@ -308,6 +309,7 @@ let foldr f acc xs = if empty? xs then acc else ((f (head xs)) (foldr f acc (tai
 ==foldl==
 ***foldl***
 ** foldl :: (b -> a -> b) -> b -> [a] -> b **
+performs a left __fold__ on a list
 you can see precisely what foldl is doing with the following function
 #Example:#
     > foldl (λx y -> "(" ++ x ++ " + " ++ y ++ ")") "0" (map show [1 to 5])
@@ -385,8 +387,7 @@ let quicksort xs =
     let greater = \xs -> filter (\x -> x >= head xs) (tail xs) in
     if xs == [] 
     then [] 
-    else
-    (quicksort (smaller xs)) ++ [head xs] ++ (quicksort (greater xs));
+    else (quicksort (smaller xs)) ++ [head xs] ++ (quicksort (greater xs))
 
 (*
 ==merge==

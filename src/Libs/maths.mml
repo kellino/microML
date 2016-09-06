@@ -31,7 +31,6 @@ positive
     > 3 : Number
 *)
 let abs x     = if x > 0 then x else x * (-1)
-
 let negate x  = if x < 0 then abs x else x * -1
 let max a b   = if (a + 0) < (b + 0) then b else a
 let min a b   = if (a + 0) < (b + 0) then a else b
@@ -69,19 +68,20 @@ let factorial n = product [1 to n];
 ==sin==
 ***sin***
 ** sin :: Number -> Number **
-finds the sign of an angle (using the Taylor series)
+finds the sine of an angle (using the Taylor series)
 *)
 let sin x = 
     if x == 90 then 1 -- because of rounding errors, let's cheat a little here
     else if x == 180 then 0
     else let y = (x / 180) * pi 
-          in y - (y^3 / 6) + (y^5 / 120) - (y^7 / 5070) + (y^9 / 362880) -- hard code the factorials
+          in y - (y^3 / 6) + (y^5 / 120) - (y^7 / 5070) + (y^9 / 362880) - (y^11 / 39916800) 
+          -- hard code the factorials for efficiency
 
 (*
 ==cos==
 ***cosine***
 ** cos :: Number -> Number **
-finds the cosine of an angle (using the Taylor series
+finds the cosine of an angle (using the Taylor series)
 *)
 let cos x = 
     if x == 180 then (-1)
@@ -91,13 +91,14 @@ let cos x =
 ==tan==
 ***tan***
 ** tan :: Number -> Number **
-tan of an angle
+tan of an angle 
+** tan x = sin x / cos x **
 *)
 let tan x = (sin x) / (cos x)
 
 (*
 ==gcd==
-***gcd : greatest common divisor***
+***greatest common divisor***
 ** gcd :: Number -> Number -> Number **
 finds the greatest common divisor of two numbers
 *)
