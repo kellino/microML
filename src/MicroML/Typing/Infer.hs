@@ -222,6 +222,7 @@ infer expr = case expr of
     FixPoint e1 -> do
         t1 <- infer e1
         tv <- fresh
+        --t1 <- inEnv ("", Forall [] tv) (infer e1)
         uni (tv `TArrow` tv) t1
         return tv
 
