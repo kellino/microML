@@ -256,6 +256,11 @@ infer expr = case expr of
           OpNotEq -> inferBinOpBool e1 e2
           OpLe    -> inferBinOpBool e1 e2
           OpPipe  -> infer e2
+          OpAppend -> do
+              t1 <- infer e1
+              t2 <- infer e2
+              uni t1 t2
+              return t2
           OpEnum  -> do
               e1 <- infer e1
               e2 <- infer e2

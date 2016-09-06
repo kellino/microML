@@ -206,7 +206,6 @@ primitives = [[ prefixOp "head"  (UnaryOp Car)
             ,   prefixOp "-"     (UnaryOp Minus)
             ,   infixOp   ":"    (BinOp OpCons) Ex.AssocRight
             ,   infixOp   "++"   (BinOp OpAppend) Ex.AssocRight ]
-           -- ,   infixOp  "to"    (BinOp OpEnum) Ex.AssocRight ]
             , [ prefixOp  "_log" (UnaryOp OpLog)
             ,   infixOp   "^"    (BinOp OpExp) Ex.AssocLeft ]     -- maths operators
             , [ infixOp   "*"    (BinOp OpMul) Ex.AssocLeft

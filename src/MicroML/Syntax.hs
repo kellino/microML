@@ -73,7 +73,7 @@ instance Show Binop where
     show OpMul    =  "multiplication" 
     show OpDiv    =  "division" 
     show OpIntDiv =  "integer division" 
-    show OpExp    =  "exponents" 
+    show OpExp    =  "exponent" 
     show OpMod    =  "modulo" 
     show OpOr     =  "inclusive or" 
     show OpXor    =  "exclusive or" 
