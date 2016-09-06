@@ -1,12 +1,17 @@
 module MicroML.Syntax where
 
 import qualified Data.Map as Map
+import Control.Monad.Except
+import Control.Monad.Identity
 
 --------------------
 -- TYPES SYNONYMS --
 --------------------
 
+type Eval a =  ExceptT String Identity a
+
 type TermEnv = Map.Map String Expr
+
 type Name = String
 type VarName = String
 type ConName = String

@@ -1,6 +1,7 @@
 module MicroML.ListPrimitives where
 
 import MicroML.Syntax
+import Control.Monad.Except
 
 import qualified Data.Char as DC
 
@@ -38,14 +39,14 @@ append x y                                        = PrimitiveErr $ ListPrim $ sh
 -- STRING MANIPULATION PRIMITIVES --
 ------------------------------------
 
-show' :: Expr -> Expr
-show' str@(Lit (LString _))  = str
-show' (Lit (LInt x))         = Lit . LString $ show x
-show' (Lit (LDouble x))      = Lit . LString $ show x
-show' (Lit (LChar x))        = Lit . LString $ [x]
-show' (Lit (LBoolean True))  = Lit (LString "true")
-show' (Lit (LBoolean False)) = Lit (LString "false")
-show' _                      = PrimitiveErr $ ListPrim "this is not a Showable object"
+show' :: Expr -> Eval Expr
+show' str@(Lit (LString _))  = return str
+show' (Lit (LInt x))         = return $ Lit . LString $ show x
+show' (Lit (LDouble x))      = return $ Lit . LString $ show x
+show' (Lit (LChar x))        = return $ Lit . LString $ [x]
+show' (Lit (LBoolean True))  = return $ Lit (LString "true")
+show' (Lit (LBoolean False)) = return $ Lit (LString "false")
+show' _                      = throwError "not a Showable object"
 
 -- this doesn't handle binary, octal or hex yet
 read' :: Expr -> Expr

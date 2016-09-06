@@ -5,6 +5,8 @@ import Data.List (isInfixOf)
 import Data.List.Split (splitOn)
 import Data.Bits (xor)
 
+import Control.Monad.Except
+
 add :: Expr -> Expr -> Expr
 add (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a + b
 add (Lit (LDouble a)) (Lit (LDouble b)) = Lit $ LDouble $ a + b
@@ -16,11 +18,12 @@ or' (Lit (LBoolean a)) (Lit (LBoolean b)) = Lit $ LBoolean $ a || b
 and' (Lit (LBoolean a)) (Lit (LBoolean b)) = Lit $ LBoolean $ a && b
 xor' (Lit (LBoolean a)) (Lit (LBoolean b)) = Lit $ LBoolean $ a `xor` b
 
-sub :: Expr -> Expr -> Expr
-sub (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a - b
-sub (Lit (LDouble a)) (Lit (LDouble b)) = Lit $ LDouble $ a - b
-sub (Lit (LInt a)) (Lit (LDouble b)) = Lit . LDouble . truncate' $ realToFrac a - b
-sub (Lit (LDouble a)) (Lit (LInt b)) = Lit . LDouble . truncate' $ a - realToFrac b
+sub :: Expr -> Expr -> Eval Expr
+sub (Lit (LInt a)) (Lit (LInt b)) = return $ Lit $ LInt $ a - b
+sub (Lit (LDouble a)) (Lit (LDouble b)) = return $ Lit $ LDouble $ a - b
+sub (Lit (LInt a)) (Lit (LDouble b)) = return $ Lit . LDouble . truncate' $ realToFrac a - b
+sub (Lit (LDouble a)) (Lit (LInt b)) = return $ Lit . LDouble . truncate' $ a - realToFrac b
+sub _ _ = throwError "not sure what you're trying to do there..."
 
 mul :: Expr -> Expr -> Expr
 mul (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a * b

@@ -56,8 +56,14 @@ hoistError (Left err) = do
     abort
 
 evalDef :: TermEnv -> (String, Expr) -> TermEnv
-evalDef env (nm, ex) = termEnv'
-  where (_, termEnv') = runEval env nm ex
+evalDef env (nm, ex) = 
+ case runEval env nm ex of
+      Right (_, tm) -> tm
+      Left err -> env
+
+{-evalDef :: TermEnv -> (String, Expr) -> TermEnv-}
+{-evalDef env (nm, ex) = termEnv'-}
+  {-where Right (_, termEnv') = runEval env nm ex-}
 
 -- read the help info into a dictionary
 toHelpenv :: [HelpBlock] -> HelpEnv
@@ -80,8 +86,10 @@ exec update source = do
     case Prelude.lookup "it" mod' of
       Nothing -> return ()
       Just ex -> do
-        let (val, _) = runEval (termEnv st') "it" ex
-        showOutput val st'
+          let Right (val, _) = runEval (termEnv st') "it" ex
+          showOutput val st'
+        {-let (val, _) = runEval (termEnv st') "it" ex-}
+        {-showOutput val st'-}
 
 -- | execution function at initial loading time
 exec' :: L.Text -> Repl ()
