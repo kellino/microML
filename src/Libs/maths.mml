@@ -121,7 +121,7 @@ let floatToInt x = floor x
 ** ln :: Number -> Number **
 the natural log of a number
 *)
-let ln x        = _log x
+let ln x = _log x
 
 (*
 ==log2==
@@ -129,7 +129,7 @@ let ln x        = _log x
 ** log2 :: Number -> Number **
 the base 2 log of a number
 *)
-let log2 x      = _log x / _log x
+let log2 x = _log x / _log x
 
 (*
 ==log10==
@@ -137,7 +137,7 @@ let log2 x      = _log x / _log x
 ** log10 :: Number -> Number **
 the base 10 log of a number
 *)
-let log10 x     = _log x / _log 10
+let log10 x = _log x / _log 10
 
 (*
 ==logBase==
@@ -145,9 +145,7 @@ let log10 x     = _log x / _log 10
 ** logBase :: Number -> Number **
 the log of a number at any base you like!
 *)
-let logBase x y = 
-    let y' = y + 0 in
-    _log y' / _log x
+let logBase x y = let y' = y + 0 in _log y' / _log x
 
 (*
 ==fib==
@@ -155,6 +153,46 @@ let logBase x y =
 ** fib :: Number -> Number **
 *)
 let fib n = if n < 2 then 1 else (fib (n-1)) + (fib (n-2))
+
+(*
+==radians==
+***radians***
+** radians :: Number -> Number **
+radians converts __degrees__ to __radians__
+*)
+let radians x = (x / 180) * pi
+
+(*
+==sin==
+***sin***
+** sin :: Number -> Number **
+finds the sine of an angle (using the Taylor series)
+*)
+let sin x = if x == 90 then 1 else if x == 180 then 0 else let y = radians x in y - (y^3 / 6) + (y^5 / 120) - (y^7 / 5070) + (y^9 / 362880) - (y^11 / 39916800) 
+
+(*
+==cos==
+***cosine***
+** cos :: Number -> Number **
+finds the cosine of an angle (using the Taylor series)
+*)
+let cos x = if x == 180 then (-1) else sin (90 - x)
+
+(*
+==tan==
+***tan***
+** tan :: Number -> Number **
+tan of an angle
+*)
+let tan x = (sin x) / (cos x)
+
+(*
+==gcd==
+***greatest common divisor***
+** gcd :: Number -> Number -> Number **
+finds the greatest common divisor of two numbers
+*)
+let gcd a b = if a == b then a else if a < b then gcd b a else gcd b (a-b)
 
 (*
 ==factorial==
@@ -169,43 +207,4 @@ factorials grow really quickly...
     > 3628800 : Number
 *)
 let factorial n = product [1 to n];
-
-(*
-==sin==
-***sin***
-** sin :: Number -> Number **
-finds the sine of an angle (using the Taylor series)
-*)
-let sin x = 
-    if x == 90 then 1 -- because of rounding errors, let's cheat a little here
-    else if x == 180 then 0
-    else let y = (x / 180) * pi 
-          in y - (y^3 / 6) + (y^5 / 120) - (y^7 / 5070) + (y^9 / 362880) - (y^11 / 39916800) 
-          -- hard code the factorials for efficiency
-
-(*
-==cos==
-***cosine***
-** cos :: Number -> Number **
-finds the cosine of an angle (using the Taylor series)
-*)
-let cos x = 
-    if x == 180 then (-1)
-    else sin (90 - x)
-
-(*
-==tan==
-***tan***
-** tan :: Number -> Number **
-tan of an angle 
-** tan x = sin x / cos x **
-*)
-let tan x = (sin x) / (cos x)
-
-(*
-==gcd==
-***greatest common divisor***
-** gcd :: Number -> Number -> Number **
-finds the greatest common divisor of two numbers
-*)
-let gcd a b = if a == b then a else if a < b then gcd b a else gcd b (a-b)
+(* == == *)

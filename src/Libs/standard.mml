@@ -280,10 +280,7 @@ drops the specified number from the start of a list. The opposite of __take__
     > drop 2 [1 to 5]
     > [3,4,5] : [Number]
 *)
-let drop n xs = 
-    if zero? n then xs 
-    else if (length xs) < n then []
-    else (drop (n-1) (tail xs))
+let drop n xs = if zero? n then xs else if (length xs) < n then [] else (drop (n-1) (tail xs))
 
 (* 
 ==take==
@@ -305,10 +302,7 @@ drops every nth element from a list
     > dropEvery 2 [1 to 10] ** drops every 2nd element from the list **
     > [1, 3, 5, 7, 9] : [Number]
 *)
-let dropEvery n xs = 
-    if xs == []
-    then []
-    else (head xs) : (dropEvery n (drop n xs))
+let dropEvery n xs = if xs == [] then [] else (head xs) : (dropEvery n (drop n xs))
 
 (*
 ==foldr==
@@ -399,12 +393,7 @@ sorts a list in ascending order, using the quicksort algorithm
     > quicksort [7,4,5,2,8,1,10,3,6,9]
     > quicksort [1,2,3,4,5,6,7,8,9,10]
 *)
-let quicksort xs = 
-    let smaller = \xs -> filter (\x -> x < head xs) (tail xs) in
-    let greater = \xs -> filter (\x -> x >= head xs) (tail xs) in
-    if xs == [] 
-    then [] 
-    else (quicksort (smaller xs)) ++ [head xs] ++ (quicksort (greater xs))
+let quicksort xs = let smaller = \xs -> filter (\x -> x < head xs) (tail xs) in let greater = \xs -> filter (\x -> x >= head xs) (tail xs) in if xs == [] then [] else (quicksort (smaller xs)) ++ [head xs] ++ (quicksort (greater xs))
 
 (*
 ==merge==
@@ -412,11 +401,7 @@ let quicksort xs =
 ** merge [a] -> [a] -> [a] **
 merge is a helper function for mergesort
 *)
-let merge = \xs ys ->  
-    if ys == [] then xs
-    else if xs == [] then ys
-    else if (head xs) <= (head ys) then (head xs):(merge (tail xs) ys)
-    else (head ys):(merge xs (tail ys)) 
+let merge = \xs ys ->  if ys == [] then xs else if xs == [] then ys else if (head xs) <= (head ys) then (head xs):(merge (tail xs) ys) else (head ys):(merge xs (tail ys)) 
 
 (*
 ==mergesort==
@@ -427,9 +412,4 @@ sorts a list in ascending order, using the mergesort algorithm
     > mergesort [7,4,5,2,8,1,10,3,6,9]
     > mergesort [1,2,3,4,5,6,7,8,9,10]
 *)
-let mergesort xs =
-    let fsthalf = \xs -> take ((length xs) // 2) xs in 
-    let sndhalf = \xs -> drop ((length xs) // 2) xs in
-    if xs == [] then []
-    else if (length xs) == 1 then xs
-    else merge (mergesort (fsthalf xs)) (mergesort (sndhalf xs))
+let mergesort xs = let fsthalf = \xs -> take ((length xs) // 2) xs in let sndhalf = \xs -> drop ((length xs) // 2) xs in if xs == [] then [] else if (length xs) == 1 then xs else merge (mergesort (fsthalf xs)) (mergesort (sndhalf xs))
