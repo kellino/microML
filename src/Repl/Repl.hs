@@ -46,7 +46,7 @@ data IState = IState
       }
 
 initState :: IState
-initState = IState Env.microbit emptyTmenv HE.empty 
+initState = IState Env.microbit emptyTmenv HE.empty configEmpty
 
 type Repl a = HaskelineT (StateT IState IO) a
 
@@ -96,6 +96,7 @@ exec' source = do
     let st' = st { termEnv = foldl' evalDef (termEnv st) mod'
                  , typeEnv = typeEnv' `mappend` typeEnv st 
                  , helpEnv = toHelpenv helpEnv' `mappend` helpEnv st
+                 , configEnv = getConfig
                  }
     put st'
 
