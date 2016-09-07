@@ -1,6 +1,3 @@
--- | a crazy mishmash of very dodgy code, but it seems to work. Will need drastic refactoring at
--- some point...
-
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeSynonymInstances #-}
@@ -21,7 +18,7 @@ import Control.Monad.State
 import Control.Monad.RWS
 import Control.Monad.Identity
 
-import Data.List (nub, intercalate)
+import Data.List (nub, intercalate) --, isInfixOf)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 
@@ -31,7 +28,7 @@ type Infer a = (RWST Env [Constraint] InferState (Except TypeError) a)
 -- | Inference state
 data InferState = InferState { count :: Int }
 
--- | initial state
+-- | Initial inference state
 initInfer :: InferState
 initInfer = InferState { count = 0 }
 
@@ -39,6 +36,7 @@ initInfer = InferState { count = 0 }
 -- Inference
 -------------------------------------------------------------------------------
 
+-- | Run the inference monad
 runInfer :: Env -> Infer Type -> Either TypeError (Type, [Constraint])
 runInfer env m = runExcept $ evalRWST m env initInfer
 
@@ -67,8 +65,8 @@ lookupEnv :: Name -> Infer Type
 lookupEnv x = do
   (TypeEnv env) <- ask
   case Map.lookup x env of
-      Nothing   -> throwError $ UnboundVariable $ show x
-      Just s    -> instantiate s
+      Nothing   ->  throwError $ UnboundVariable $ show x
+      Just s    ->  instantiate s
 
 -- letters and fresh generate new names for polymorphic variables
 letters :: [String]
@@ -93,9 +91,6 @@ generalize env t  = Forall as t
 ---------------------------
 -- OVERLOADED OPERATIONS --
 ---------------------------
-
--- | this would doubtless all be easier and cleaner with typeclasses etc etc, but good enough for
--- the time being.
 
 mathsOps :: Map.Map Binop Type
 mathsOps = Map.fromList [
@@ -137,14 +132,12 @@ boolOps = Map.fromList [
 -- INFERENCE --
 ---------------
 
--- | get the type of a toplevel expression
 inferTop :: Env -> [(Name, Expr)] -> Either TypeError Env
 inferTop env [] = Right env
 inferTop env ((name, ex):xs) = case inferExpr env ex of
   Left err -> Left err
   Right ty -> inferTop (extend env (name, ty)) xs
 
--- | tidy it all up
 normalize :: TypeScheme -> TypeScheme
 normalize (Forall _ body) = Forall (map snd ord) (normtype body)
   where
@@ -166,11 +159,10 @@ normalize (Forall _ body) = Forall (map snd ord) (normtype body)
 -----------------------------
 
 -- | get the type of a lambda, otherwise we risk overgeneralizing the type sig
-inferLamba :: Name -> Expr -> Infer Type
-inferLamba nm e1 =
+inferLambda :: Name -> Expr -> Infer Type
+inferLambda nm e1 =
     case e1 of
-         Lam nm' e2         -> inferLamba nm' e2
-         If e2 _ _          -> inferLamba nm e2
+         If e2 _ _          -> inferLambda nm e2
          BinOp OpAdd _ _    -> return typeNum
          BinOp OpSub _ _    -> return typeNum
          BinOp OpMul _ _    -> return typeNum
@@ -178,15 +170,13 @@ inferLamba nm e1 =
          BinOp OpDiv _ _    -> return typeNum
          BinOp OpExp _ _    -> return typeNum
          BinOp OpMod _ _    -> return typeNum
-         BinOp _ e2 _       -> inferLamba nm e2
+         BinOp _ e2 _       -> inferLambda nm e2
          UnaryOp OpLog _    -> return typeNum
          UnaryOp Chr _      -> return typeNum
          UnaryOp Ord _      -> return typeChar
          UnaryOp Read _     -> return typeString
          _                  -> fresh
 
--- | the big inference mechanism. TODO tidy up and refactor - there's probably a fair amount of dead
--- code in here
 infer :: Expr -> Infer Type
 infer expr = case expr of
     Lit (LInt _)     -> return typeNum
@@ -202,10 +192,11 @@ infer expr = case expr of
     Var x -> lookupEnv x
 
     Lam x e -> do
-        t1 <- inferLamba x e
-        t2 <- inEnv (x, Forall [] t1) (infer e)
-        return (t1 `TArrow` t2)
-        
+       tv <- inferLambda x e
+       --tv <- fresh
+       t <- inEnv (x, Forall [] tv) (infer e)
+       return (tv `TArrow` t)
+             
     App e1 e2 -> do
         t1 <- infer e1
         t2 <- infer e2
@@ -232,7 +223,9 @@ infer expr = case expr of
                  BinOp OpCons x _ -> infer x
                  Nil -> throwError $ UnsupportedOperation "head of an empty list"
                  Lit (LString _) -> return typeChar
-                 var@(Var _) -> infer var 
+                 var@(Var _) -> do
+                     t1 <- infer var 
+                     return t1
                  _  -> infer e1
           Cdr -> infer e1
           Show -> return typeString
@@ -256,17 +249,11 @@ infer expr = case expr of
           OpNotEq -> inferBinOpBool e1 e2
           OpLe    -> inferBinOpBool e1 e2
           OpPipe  -> infer e2
-          OpAppend -> do
-              t1 <- infer e1
-              t2 <- infer e2
-              uni t1 t2
-              return t2
           OpEnum  -> do
               e1 <- infer e1
               e2 <- infer e2
               uni e1 e2
               return e2
-          -- every other case
           _       -> 
               case (e1, e2) of
                   (Nil, xs)            -> infer xs
@@ -308,51 +295,21 @@ inferBinOpBool e1 e2 = do
     return typeBool
 
 doConsOp :: Expr -> Expr -> Infer Type
-doConsOp e1 e2 = 
-     case (e1, e2) of 
-          (Nil, _) -> do
-              t2 <- infer e2
-              throwError $ UnificationFail t2 typeNil
-          (App x y , _) -> do
-              t1 <- infer x
-              t2 <- infer y
-              uni t1 t2
-              return t1
-          (_, Nil) -> do
-              t1 <- infer e1
-              return $ 
-                  case t1 of
-                    (TCon ty) -> TCon $ "[" ++ ty ++ "]"
-                    _         -> TCon $ "[" ++ show e1 ++ "]"
-          (_, BinOp OpCons x xs) -> do
-              t1 <- infer e1
-              t2 <- infer x
-              uni t1 t2
-              doConsOp x xs
-          (Var _, Var _) -> do
-              t1 <- infer e1
-              t2 <- infer e2
-              uni t1 t2
-              return t1
-          (_, Var _) -> unifyWithListVar e1 e2
-          (UnaryOp Car x, _) -> infer x
-          (UnaryOp Cdr x, _) -> infer x
-          (x, y)    -> unifyWithListVar x y
-
+doConsOp e1 e2 = do
+    t1 <- infer e1
+    t2 <- infer e2
+    case (t1, t2) of
+         (TVar (TV x), typeNil) -> return $ TVar $ TV $ "[" ++ x ++ "]"
+         (TCon x, typeNil) -> return $ TCon $ "[" ++ x ++ "]"
+         
 unifyWithListVar :: Expr -> Expr -> Infer Type
 unifyWithListVar e1 e2 =
     case (e1, e2) of
-      (l1@(Lit (LTup _)), l2@(Lit (LTup _))) -> do
-          t1 <- infer l1
-          t2 <- infer l2
-          uni t1 t2
-          return t2
       (Lit{} , _) -> newListTypeCon e1
       (_, _) -> do
           t1 <- infer e1
           t2 <- infer e2
-          uni t1 t2
-          return t2
+          throwError $ UnificationFail t1 t2
 
 newListTypeCon :: Expr -> Infer Type
 newListTypeCon e1 = do
@@ -364,6 +321,7 @@ doBinaryMathsOp op e1 e2 = do
     t1 <- infer e1
     t2 <- infer e2
     case op of 
+      OpCons   -> getOp mathsOps op t1 t2
       OpAdd    -> getOp mathsOps op t1 t2
       OpSub    -> getOp mathsOps op t1 t2
       OpMul    -> getOp mathsOps op t1 t2
@@ -433,6 +391,7 @@ emptySubst = mempty
 compose :: Subst -> Subst -> Subst
 (Subst s1) `compose` (Subst s2) = Subst $ Map.map (apply (Subst s1)) s2 `Map.union` s1
 
+-- | Run the constraint solver
 runSolve :: [Constraint] -> Either TypeError Subst
 runSolve cs = runIdentity $ runExceptT $ solver st
   where st = (emptySubst, cs)
@@ -461,12 +420,10 @@ solver (su, cs) =
       su1  <- unifies t1 t2
       solver (su1 `compose` su, apply su1 cs0)
 
--- | bind a variable to a type
 bind ::  TVar -> Type -> Solve Subst
 bind a t | t == TVar a     = return emptySubst
          | occursCheck a t = throwError $ InfiniteType a t
          | otherwise       = return (Subst $ Map.singleton a t)
 
--- | don't allow infinite types!
 occursCheck ::  Substitutable a => TVar -> a -> Bool
 occursCheck a t = a `Set.member` ftv t
