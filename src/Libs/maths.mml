@@ -31,23 +31,129 @@ positive
     > 3 : Number
 *)
 let abs x     = if x > 0 then x else x * (-1)
+
+(*
+==negate==
+***negate***
+** negate :: Number -> Number **
+*)
 let negate x  = if x < 0 then abs x else x * -1
+
+(*
+==max==
+***max***
+** max :: Number -> Number -> Number **
+*)
 let max a b   = if (a + 0) < (b + 0) then b else a
+
+(*
+==min==
+***min***
+** min :: Number -> Number -> Number **
+*)
 let min a b   = if (a + 0) < (b + 0) then a else b
+(*
+==intToFloat==
+***intToFloat***
+** intToFloat :: Number -> Number **
+*)
 let intToFloat x = x + 0.0
+
+(*
+==reciprocal==
+***reciprocal***
+** reciprocal :: Number -> Number **
+*)
 let reciprocal x = 1 / x
+
+(*
+==square==
+***square***
+** square :: Number -> Number **
+*)
 let square a = a * a
+
+(*
+==sqrt==
+***sqrt***
+** sqrt :: Number -> Number **
+*)
 let sqrt x = x^0.5
+
+(*
+==sum==
+***sum***
+** sum :: [Number] -> Number **
+*)
 let sum xs = foldr (\x y -> x + y) 0 xs
+
+(*
+==product==
+***product***
+** product :: [Number] -> Number **
+*)
 let product xs = foldr (\x y -> x * y) 1 xs
+
+(*
+==floor==
+***floor***
+** floor :: Number -> Number **
+*)
 let floor x = x // 1
+
+(*
+==ceiling==
+***ceiling***
+** ceiling :: Number -> Number **
+*)
 let ceiling x = 1 + (floor x)
+
+(*
+==floatToInt==
+***floatToInt***
+** floatToInt :: Number -> Number **
+*)
 let floatToInt x = floor x
+
+(*
+==ln==
+***ln***
+** ln :: Number -> Number **
+the natural log of a number
+*)
 let ln x        = _log x
+
+(*
+==log2==
+***log2***
+** log2 :: Number -> Number **
+the base 2 log of a number
+*)
 let log2 x      = _log x / _log x
+
+(*
+==log10==
+***log10***
+** log10 :: Number -> Number **
+the base 10 log of a number
+*)
 let log10 x     = _log x / _log 10
-let logBase x y = _log y / _log x
--- naive fibonacci
+
+(*
+==logBase==
+***logBase***
+** logBase :: Number -> Number **
+the log of a number at any base you like!
+*)
+let logBase x y = 
+    let y' = y + 0 in
+    _log y' / _log x
+
+(*
+==fib==
+***fibonacci***
+** fib :: Number -> Number **
+*)
 let fib n = if n < 2 then 1 else (fib (n-1)) + (fib (n-2))
 
 (*

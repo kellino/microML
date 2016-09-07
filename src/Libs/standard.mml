@@ -280,7 +280,10 @@ drops the specified number from the start of a list. The opposite of __take__
     > drop 2 [1 to 5]
     > [3,4,5] : [Number]
 *)
-let drop n xs = if zero? n then xs else (drop (n-1) (tail xs))
+let drop n xs = 
+    if zero? n then xs 
+    else if (length xs) < n then []
+    else (drop (n-1) (tail xs))
 
 (* 
 ==take==
@@ -292,6 +295,20 @@ takes the specified number from the start of the list, dropping the rest
     > [1,2] : Number
 *)
 let take n xs = if zero? n then [] else ((head xs) : (take (n-1) (tail xs)))
+
+(*
+==dropEvery==
+***dropEvery***
+** dropEvery :: Number -> [a] -> [a] **
+drops every nth element from a list
+#Example:#
+    > dropEvery 2 [1 to 10] ** drops every 2nd element from the list **
+    > [1, 3, 5, 7, 9] : [Number]
+*)
+let dropEvery n xs = 
+    if xs == []
+    then []
+    else (head xs) : (dropEvery n (drop n xs))
 
 (*
 ==foldr==
