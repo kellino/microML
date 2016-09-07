@@ -298,9 +298,19 @@ doConsOp :: Expr -> Expr -> Infer Type
 doConsOp e1 e2 = do
     t1 <- infer e1
     t2 <- infer e2
-    case (t1, t2) of
-         (TVar (TV x), typeNil) -> return $ TVar $ TV $ "[" ++ x ++ "]"
-         (TCon x, typeNil) -> return $ TCon $ "[" ++ x ++ "]"
+    case (e1, e2) of
+         (_, Nil) -> return t1
+         (x, y) -> do
+             uni t1 t2
+             return t2
+
+{-doConsOp :: Expr -> Expr -> Infer Type-}
+{-doConsOp e1 e2 = do-}
+    {-t1 <- infer e1-}
+    {-t2 <- infer e2-}
+    {-case (t1, t2) of-}
+         {-(TVar (TV x), typeNil) -> return $ TVar $ TV $ "[" ++ x ++ "]"-}
+         {-(TCon x, typeNil) -> return $ TCon $ "[" ++ x ++ "]"-}
          
 unifyWithListVar :: Expr -> Expr -> Infer Type
 unifyWithListVar e1 e2 =
