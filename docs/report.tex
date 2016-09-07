@@ -6,6 +6,7 @@
 \usepackage{minted}
 \usepackage{dirtree}
 \usepackage{palatino}
+\usepackage{longtable}
 \usepackage{syntax}
 \usepackage{geometry}
 \usepackage[hidelinks]{hyperref}
@@ -379,10 +380,10 @@ following list:
 To do this in an imperative manner, something like the following might be written:
 
 \begin{minted}{haskell}
-    sum = 0
-    for i in range(len(nums)):
-        if nums[i] == 3:
-        sum += 3
+sum = 0
+for i in range(len(nums)):
+    if nums[i] == 3:
+    sum += 3
 \end{minted}
 
 To solve this in Python using functional concepts, something like this might be used:
@@ -1035,12 +1036,12 @@ not.} and Figure~\ref{fig:mergesort} shows the standard implementation of merges
 
 \begin{figure}
     \begin{minted}[breaklines=true]{sml}
-        let quicksort xs = 
-            let smaller = \xs -> filter (\x -> x < head xs) (tail xs) in
-            let greater = \xs -> filter (\x -> x >= head xs) (tail xs) in
-            if xs == [] 
-            then [] 
-            else (quicksort (smaller xs)) ++ [head xs] ++ (quicksort (greater xs))
+let quicksort xs = 
+    let smaller = \xs -> filter (\x -> x < head xs) (tail xs) in
+    let greater = \xs -> filter (\x -> x >= head xs) (tail xs) in
+    if xs == [] 
+    then [] 
+    else (quicksort (smaller xs)) ++ [head xs] ++ (quicksort (greater xs))
     \end{minted}
     \caption{Quicksort in microML}
 \label{fig:quicksort}
@@ -1048,21 +1049,38 @@ not.} and Figure~\ref{fig:mergesort} shows the standard implementation of merges
     
 \begin{figure}
     \begin{minted}[breaklines=true]{sml}
-        let merge = \xs ys ->  
-            if ys == [] then xs
-            else if xs == [] then ys
-            else if (head xs) <= (head ys) then (head xs):(merge (tail xs) ys)
-            else (head ys):(merge xs (tail ys)) 
+let merge = \xs ys ->  
+    if ys == [] then xs
+    else if xs == [] then ys
+    else if (head xs) <= (head ys) then (head xs):(merge (tail xs) ys)
+    else (head ys):(merge xs (tail ys)) 
 
-        let mergesort xs =
-            let fsthalf = \xs -> take ((length xs) // 2) xs in 
-            let sndhalf = \xs -> drop ((length xs) // 2) xs in
-            if xs == [] then []
-            else if (length xs) == 1 then xs
-            else merge (mergesort (fsthalf xs)) (mergesort (sndhalf xs))
+let mergesort xs =
+    let fsthalf = \xs -> take ((length xs) // 2) xs in 
+    let sndhalf = \xs -> drop ((length xs) // 2) xs in
+    if xs == [] then []
+    else if (length xs) == 1 then xs
+    else merge (mergesort (fsthalf xs)) (mergesort (sndhalf xs))
     \end{minted}
     \caption{Mergesort in microML}
 \label{fig:mergesort}
+\end{figure}
+
+It is also possible to express complex mathematics in MicroML with relative ease.
+Figure~\ref{fig:arctan}.
+
+\begin{figure}
+    \begin{minted}{sml}
+let arctan n = 
+    let x = abs n in 
+    let i = if x <= 2 - (sqrt 3)
+        then x 
+        else ((sqrt 3) * x - 1) / ((sqrt 3) + x) in 
+    let at = i - (i^3 / 3) + (i^5 / 5) - (i^7 / 7) in 
+    (pi / 6) + at >> \x -> x * (180 / pi) -- degrees
+    \end{minted}
+    \caption{arctan in microML}
+\label{fig:arctan}
 \end{figure}
 
 \section{Implementation}
@@ -1212,12 +1230,12 @@ The repl is probably the most fully realized interface to the language. Perhaps 
 feature is its handling of multiple states with a custom datatype. 
 
 \begin{minted}{haskell}
-    data IState = IState
-        { typeEnv :: Env
-        , termEnv :: TermEnv
-        , helpEnv :: HelpEnv
-        }
-    type Repl a = HaskelineT (StateT IState IO) a
+data IState = IState
+    { typeEnv :: Env
+    , termEnv :: TermEnv
+    , helpEnv :: HelpEnv
+    }
+type Repl a = HaskelineT (StateT IState IO) a
 \end{minted}
 
 The Repl monad carries with it three separate hashmaps, holding stateful information regarding the
@@ -1357,21 +1375,21 @@ be `fit for purpose'. The script must be run from the utils folder of the projec
 
 \begin{figure}
     \begin{minted}{sml}
-        let main =
-            let s = "hello " in
-            let t = "there" in
-            scroll s ++ t
+let main =
+    let s = "hello " in
+    let t = "there" in
+    scroll s ++ t
     \end{minted}
     \begin{minted}{cpp}
-        #include "MicroBit.h"
-        MicroBit uBit;
-        int main() {
-          ubit.init();
-          ManagedString s = "hello";
-          ManagedString t = "there";
-          uBit.display.scroll(s + t);
-          fiber_release();
-        }
+#include "MicroBit.h"
+MicroBit uBit;
+int main() {
+  ubit.init();
+  ManagedString s = "hello ";
+  ManagedString t = "there";
+  uBit.display.scroll(s + t);
+  fiber_release();
+}
     \end{minted}
     \caption{A simple mml program compiled to micro:bit c++}
 \label{fig:compiler}

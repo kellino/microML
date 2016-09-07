@@ -4,10 +4,10 @@ higher-order `primitive' for microML\@. Figure~\ref{fig:foldr}
 
 \begin{figure}[H]
     \begin{minted}[breaklines=true]{sml}
-        let foldr f acc xs = if empty? xs then acc else ((f (head xs)) (foldr f acc (tail xs)))
-        let map f xs = foldr (\x xs' -> (f x) : xs') [] xs
-        let filter p xs = foldr (\x y -> if (p x) then (x:y) else y) [] xs
-        let foldr1 f xs = foldr f (head xs) xs
+let foldr f acc xs = if empty? xs then acc else ((f (head xs)) (foldr f acc (tail xs)))
+let map f xs = foldr (\x xs' -> (f x) : xs') [] xs
+let filter p xs = foldr (\x y -> if (p x) then (x:y) else y) [] xs
+let foldr1 f xs = foldr f (head xs) xs
     \end{minted}
     \caption{foldr in the standard library}
 \label{fig:foldr}
@@ -17,19 +17,19 @@ Logs, for reasons of efficiency, are primitives in the language, however other m
 be written quite comfortably in microML.
 
 \begin{figure}
-    \begin{minted}{sml}
-        let sin x = 
-            if x == 90 then 1 -- because of rounding errors, let's cheat a little here
-            else if x == 180 then 0
-            else let y = (x / 180) * pi 
-                  in y - (y^3 / 6) + (y^5 / 120) - (y^7 / 5070) + (y^9 / 362880) - (y^11 / 39916800) 
-                  -- hard code the factorials for efficiency
+    \begin{minted}[breaklines=true]{sml}
+let sin x = 
+    if x == 90 then 1 -- because of rounding errors, let's cheat a little here
+    else if x == 180 then 0
+    else let y = (x / 180) * pi 
+          in y - (y^3 / 6) + (y^5 / 120) - (y^7 / 5070) + (y^9 / 362880) - (y^11 / 39916800) 
+          -- hard code the factorials for efficiency
 
-        let cos x = 
-            if x == 180 then (-1)
-            else sin (90 - x)
+let cos x = 
+    if x == 180 then (-1)
+    else sin (90 - x)
 
-        let tan x = (sin x) / (cos x)
+let tan x = (sin x) / (cos x)
     \end{minted}
     \caption{Sine, cosine and tan in microML}
 \label{fig:maths}

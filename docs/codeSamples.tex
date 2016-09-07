@@ -7,25 +7,25 @@ Figure~\ref{fig:exec}
 \begin{landscape}
 \begin{figure}
     \begin{minted}[breaklines=true]{haskell}
-        -- | execution function while repl is running
-        exec :: Bool -> L.Text -> Repl ()
-        exec update source = do
-            st       <- get
+-- | execution function while repl is running
+exec :: Bool -> L.Text -> Repl ()
+exec update source = do
+    st       <- get
 
-            mod'     <- hoistError $ parseProgram "<stdin>" source
-            typeEnv' <- hoistError $ inferTop (typeEnv st) mod'
+    mod'     <- hoistError $ parseProgram "<stdin>" source
+    typeEnv' <- hoistError $ inferTop (typeEnv st) mod'
 
-            let st' = st { termEnv = foldl' evalDef (termEnv st) mod'
-                         , typeEnv = typeEnv' `mappend` typeEnv st 
-                         }
+    let st' = st { termEnv = foldl' evalDef (termEnv st) mod'
+                 , typeEnv = typeEnv' `mappend` typeEnv st 
+                 }
 
-            when update (put st')
+    when update (put st')
 
-            case Prelude.lookup "it" mod' of
-              Nothing -> return ()
-              Just ex -> do
-                let (val, _) = runEval (termEnv st') "it" ex
-                showOutput val st'
+    case Prelude.lookup "it" mod' of
+      Nothing -> return ()
+      Just ex -> do
+        let (val, _) = runEval (termEnv st') "it" ex
+        showOutput val st'
     \end{minted}
     \caption{The exec function in Repl.Repl}
 \label{fig:exec}
@@ -42,10 +42,10 @@ primitives.}. Figure~\ref{fig:typesigs}
 
 \begin{figure}
     \begin{minted}[breaklines=true]{haskell}
-          ("show"   , Forall  [polyA] (TVar polyA `TArrow` typeString))
-        , ("read"   , Forall  [] (typeString `TArrow` typeNum))
-        , ("ord"    , Forall  [] (typeChar `TArrow` typeNum))
-        , ("chr"    , Forall  [] (typeNum `TArrow` typeChar))
+  ("show"   , Forall  [polyA] (TVar polyA `TArrow` typeString))
+, ("read"   , Forall  [] (typeString `TArrow` typeNum))
+, ("ord"    , Forall  [] (typeChar `TArrow` typeNum))
+, ("chr"    , Forall  [] (typeNum `TArrow` typeChar))
     \end{minted}
     \caption{Hard-coded type signatures, in Data.Map form}
 \label{fig:typesigs}
@@ -57,13 +57,13 @@ regular expressions and other parser combinators. Figure~\ref{fig:parsec}
 
 \begin{figure}
     \begin{minted}{haskell}
-        lambda :: Parser Expr
-        lambda = do
-            reservedOp "\\"
-            args <- many varName
-            reservedOp "->"
-            body <- expr
-            return $ foldr Lam body args
+lambda :: Parser Expr
+lambda = do
+    reservedOp "\\"
+    args <- many varName
+    reservedOp "->"
+    body <- expr
+    return $ foldr Lam body args
     \end{minted}
     \caption{The parser for microML anonymous functions}
 \label{fig:parsec}
@@ -73,18 +73,18 @@ of three consecutive 0s is largely arbitrary. See Figure~\ref{fig:trunc} and
 Section~\ref{floatingPoint}.
 \begin{figure}
     \begin{minted}[breaklines=true]{haskell}
-        truncate' :: Double -> Double
-        truncate' = read . dropZeros . show
-            where dropZeros x = head (split x) ++ "." ++ getValid (head (tail (split x)))
-                  split       = splitOn "."
-                  getValid s 
-                      | "e" `isInfixOf` s  = s
-                      | hasform s = if length s == 1 then s else  show $ read [head s] + 1
-                      | take 3 s   == "000" = "0"
-                      | otherwise  = head s : getValid (tail s) 
+truncate' :: Double -> Double
+truncate' = read . dropZeros . show
+    where dropZeros x = head (split x) ++ "." ++ getValid (head (tail (split x)))
+          split       = splitOn "."
+          getValid s 
+              | "e" `isInfixOf` s  = s
+              | hasform s = if length s == 1 then s else  show $ read [head s] + 1
+              | take 3 s   == "000" = "0"
+              | otherwise  = head s : getValid (tail s) 
 
-        hasform :: String -> Bool
-        hasform (_:ys) = all (== '9') ys 
+hasform :: String -> Bool
+hasform (_:ys) = all (== '9') ys 
     \end{minted}
     \caption{The truncation function for doubles in the repl}
 \label{fig:trunc}
@@ -97,22 +97,22 @@ Figure~\ref{fig:unit}
 \begin{landscape}
 \begin{figure}
     \begin{minted}[breaklines=true]{haskell}
-        listprims :: IO ()
-        listprims = hspec $ 
-            describe "listprims" $ do
-                describe "car" $ do
-                    it "gets the head of a list" $ 
-                        car (BinOp OpCons (Lit (LInt 3)) Nil) `shouldBe` (Lit (LInt 3) :: Expr)
-                    it "gets the head of a string" $
-                        car (Lit (LString "hello")) `shouldBe` (Lit (LChar 'h') :: Expr)
-                    it "should fail on non-list ints" $ 
-                        evaluate (car (Lit (LInt 1)))        `shouldThrow` anyException
-                    it "should fail on non-list doubles" $ 
-                        evaluate (car (Lit (LDouble 1)))     `shouldThrow` anyException
-                    it "should fail on non-list chars" $ 
-                        evaluate (car (Lit (LChar 'a')))     `shouldThrow` anyException
-                    it "should fail on non-list bools" $ 
-                        evaluate (car (Lit (LBoolean True))) `shouldThrow` anyException
+listprims :: IO ()
+listprims = hspec $ 
+    describe "listprims" $ do
+        describe "car" $ do
+            it "gets the head of a list" $ 
+                car (BinOp OpCons (Lit (LInt 3)) Nil) `shouldBe` (Lit (LInt 3) :: Expr)
+            it "gets the head of a string" $
+                car (Lit (LString "hello")) `shouldBe` (Lit (LChar 'h') :: Expr)
+            it "should fail on non-list ints" $ 
+                evaluate (car (Lit (LInt 1)))        `shouldThrow` anyException
+            it "should fail on non-list doubles" $ 
+                evaluate (car (Lit (LDouble 1)))     `shouldThrow` anyException
+            it "should fail on non-list chars" $ 
+                evaluate (car (Lit (LChar 'a')))     `shouldThrow` anyException
+            it "should fail on non-list bools" $ 
+                evaluate (car (Lit (LBoolean True))) `shouldThrow` anyException
     \end{minted}
     \caption{Unit testing}
 \label{fig:unit}
@@ -126,68 +126,68 @@ The installation script is written in bash\footnote{The script makes use of bash
 iterations might need to take this into account.}. Figure~\ref{fig:installation}
 \begin{figure}
     \begin{minted}[breaklines=true]{bash}
-        function join_by { local IFS="$1"; shift; echo "$*"; }
-        ## check for this software. Only stack is essential
-        stack=$(which stack 2>/dev/null) 
-        fig=$(which figlet 2>/dev/null)
-        cow=$(which cowsay 2>/dev/null)
-        lol=$(which lolcat 2>/dev/null)
-        if [ ! -x "$fig" ]; then
-            progs=("${progs[@]}" "figlet ")
-        fi
-        if [ ! -x "$cow" ]; then
-            progs=("${progs[@]}" " cowsay ")
-        fi
-        if [ ! -x "$lol" ]; then
-            progs=("${progs[@]}" " lolcat")
-        fi
-        if [ -x "$stack" ]; then
-            printf "\e[1mstack found\e[0m\n"
-            printf "\e[1mrunning tests and building\e[0m\n"
-            stack test 
-            rc=$?
-            if [ "$rc" != 0 ]; then
-                printf "\n\e[31mCould not pass all tests. The build has failed\e[0m\n"
-                exit "$rc" 
-            fi
-            printf "\e[1minstalling in %s/.local/bin/\n" "$HOME"
-            stack install
-            rc=$?
-            if [ "$rc" != 0 ]; then
-                printf "\nCould not install the executable into %s/.local/bin. Please copy it manually into your path\n" "$HOME"
-                exit "$rc"
-            fi
-            printf "\n\e[1mcopying standard libraries to home directory\e[0m\n"
+function join_by { local IFS="$1"; shift; echo "$*"; }
+## check for this software. Only stack is essential
+stack=$(which stack 2>/dev/null) 
+fig=$(which figlet 2>/dev/null)
+cow=$(which cowsay 2>/dev/null)
+lol=$(which lolcat 2>/dev/null)
+if [ ! -x "$fig" ]; then
+    progs=("${progs[@]}" "figlet ")
+fi
+if [ ! -x "$cow" ]; then
+    progs=("${progs[@]}" " cowsay ")
+fi
+if [ ! -x "$lol" ]; then
+    progs=("${progs[@]}" " lolcat")
+fi
+if [ -x "$stack" ]; then
+    printf "\e[1mstack found\e[0m\n"
+    printf "\e[1mrunning tests and building\e[0m\n"
+    stack test 
+    rc=$?
+    if [ "$rc" != 0 ]; then
+        printf "\n\e[31mCould not pass all tests. The build has failed\e[0m\n"
+        exit "$rc" 
+    fi
+    printf "\e[1minstalling in %s/.local/bin/\n" "$HOME"
+    stack install
+    rc=$?
+    if [ "$rc" != 0 ]; then
+        printf "\nCould not install the executable into %s/.local/bin. Please copy it manually into your path\n" "$HOME"
+        exit "$rc"
+    fi
+    printf "\n\e[1mcopying standard libraries to home directory\e[0m\n"
 
-            ## delete old standard libs if they are found
-            if [ -x "$HOME"/.microML ]; then
-                printf "\n\e[1mremoving old standard library\e[0m\n"
-                rm -rf "$HOME"/.microML
-            fi
-            printf "\n\e[1minstalling standard library\e[0m\n"
+    ## delete old standard libs if they are found
+    if [ -x "$HOME"/.microML ]; then
+        printf "\n\e[1mremoving old standard library\e[0m\n"
+        rm -rf "$HOME"/.microML
+    fi
+    printf "\n\e[1minstalling standard library\e[0m\n"
 
-            cp -vr src/Libs "$HOME"
-            mv "$HOME/Libs" "$HOME/.microML"
-            printf "\n\e[1mcopying default .microMLrc to home directory\e[0m\n"
-            cp -v utils/microMLrc "$HOME"/.microMLrc
-            printf "\n\e[1mfinished!\e[0m\n"
+    cp -vr src/Libs "$HOME"
+    mv "$HOME/Libs" "$HOME/.microML"
+    printf "\n\e[1mcopying default .microMLrc to home directory\e[0m\n"
+    cp -v utils/microMLrc "$HOME"/.microMLrc
+    printf "\n\e[1mfinished!\e[0m\n"
 
-            if [ -n "$progs" ]; then
-                len=${#progs[@]}
-                if [ "$len" -eq 1 ]; then
-                    str="${progs[*]}"
-                elif [ "$len" -eq 2 ]; then
-                    str=$(join_by $"&" "${progs[@]}")
-                else 
-                    str=$("figlet, cowsay and lolcat")
-                fi
-                #str=$(join_by , "${progs[@]}")
-                printf "\e[1mYou can have a more interesting repl if you also install %s\e[0m\n" "$str"
-            fi
+    if [ -n "$progs" ]; then
+        len=${#progs[@]}
+        if [ "$len" -eq 1 ]; then
+            str="${progs[*]}"
+        elif [ "$len" -eq 2 ]; then
+            str=$(join_by $"&" "${progs[@]}")
         else 
-            printf "\e[31mCould not find stack in your system path. Please install it using your package
-            manager or go to \e[0;1mhttps://docs.haskellstack.org/en/stable/README/\e[0m\n"
+            str=$("figlet, cowsay and lolcat")
         fi
+        #str=$(join_by , "${progs[@]}")
+        printf "\e[1mYou can have a more interesting repl if you also install %s\e[0m\n" "$str"
+    fi
+else 
+    printf "\e[31mCould not find stack in your system path. Please install it using your package
+    manager or go to \e[0;1mhttps://docs.haskellstack.org/en/stable/README/\e[0m\n"
+fi
     \end{minted}
     \caption{Bash installation script}
 \label{fig:installation}
@@ -197,22 +197,22 @@ interest, as it autofolds comments, setting the function name as its `title'. Se
 Figures~\ref{fig:fold} and~\ref{fig:foldVim}
 \begin{figure}
     \begin{minted}[breaklines=true]{vim}
-        function! GetMMLFold(lnum) 
-            let l:line = getline( a:lnum )
-            " Beginning of comment
-            if l:line =~? '\v^\s*--' || l:line =~? '\v^\s*(\*'
-                return '2'
-            endif
-            if l:line =~? '\v^\s*$'
-                let l:nextline = getline(a:lnum + 1)
-                if l:nextline =~# '^--' || l:nextline =~? '^(\*'
-                    return '0'
-                else
-                    return '-1'
-                endif
-            endif
-            return '1'
-        endfunction 
+function! GetMMLFold(lnum) 
+    let l:line = getline( a:lnum )
+    " Beginning of comment
+    if l:line =~? '\v^\s*--' || l:line =~? '\v^\s*(\*'
+        return '2'
+    endif
+    if l:line =~? '\v^\s*$'
+        let l:nextline = getline(a:lnum + 1)
+        if l:nextline =~# '^--' || l:nextline =~? '^(\*'
+            return '0'
+        else
+            return '-1'
+        endif
+    endif
+    return '1'
+endfunction 
     \end{minted}
     \caption{Part of the folding function for vim}
 \label{fig:fold}
