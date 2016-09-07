@@ -248,7 +248,7 @@ infer expr = case expr of
           OpEq    -> inferBinOpBool e1 e2
           OpNotEq -> inferBinOpBool e1 e2
           OpLe    -> inferBinOpBool e1 e2
-          OpPipe  -> infer e2
+          OpPipe  -> infer (App e2 e1)
           OpEnum  -> do
               e1 <- infer e1
               e2 <- infer e2
