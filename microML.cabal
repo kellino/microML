@@ -12,7 +12,7 @@ Cabal-version:  >=1.6
 
 test-suite microMLTest
   hs-source-dirs:    test, src
-  main-is:           Main.hs
+  main-is:           TestMain.hs
   type:              exitcode-stdio-1.0
   ghc-options:       -Wall -threaded
   build-depends:     base,
