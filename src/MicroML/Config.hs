@@ -10,6 +10,3 @@ loadConfig file = do
     putStrLn "Your setting is: "
     let config = forceEither $ items cp "colourscheme"
     print config
-
-{-main :: IO ()-}
-{-main = config-}
