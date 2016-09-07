@@ -1,1 +1,11 @@
-config file for microML
+## config file for microML
+
+## simple ansi colour codes, in this case for a dark terminal
+
+[colourscheme]
+number = 31
+string = 32
+char = 34
+boolean = 33
+error = 31
+prompt = 33
