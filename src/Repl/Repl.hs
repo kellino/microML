@@ -42,10 +42,11 @@ data IState = IState
       { typeEnv :: Env      -- Type environment
       , termEnv :: TermEnv  -- Value environment
       , helpEnv :: HelpEnv  -- Help environment
+      , configEnv :: ConfigEnv -- Config environment
       }
 
 initState :: IState
-initState = IState Env.microbit emptyTmenv HE.empty
+initState = IState Env.microbit emptyTmenv HE.empty 
 
 type Repl a = HaskelineT (StateT IState IO) a
 
