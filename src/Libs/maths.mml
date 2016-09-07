@@ -145,7 +145,7 @@ let log10 x = _log x / _log 10
 ** logBase :: Number -> Number **
 the log of a number at any base you like!
 *)
-let logBase x y = let y' = y + 0 in _log y' / _log x
+let logBase x y = _log (y + 0) / _log (x + 0)
 
 (*
 ==fib==
@@ -153,6 +153,32 @@ let logBase x y = let y' = y + 0 in _log y' / _log x
 ** fib :: Number -> Number **
 *)
 let fib n = if n < 2 then 1 else (fib (n-1)) + (fib (n-2))
+
+(*
+==gcd==
+***greatest common divisor***
+** gcd :: Number -> Number -> Number **
+finds the greatest common divisor of two numbers
+*)
+let gcd a b = if (a + 0) == b then a else if a < b then gcd b a else gcd b (a-b)
+
+(*
+==factorial==
+***factorial***
+** factorial :: Number -> Number **
+finds the factorial (!) of a number
+#Example:#
+    > factorial 5      ** 5! in maths notation **
+    > 120 : Number
+factorials grow really quickly...
+    > factorial 10
+    > 3628800 : Number
+*)
+let factorial n = product [1 to n];
+
+--------------------
+-- TRIG FUNCTIONS --
+--------------------
 
 (*
 ==radians==
@@ -186,25 +212,9 @@ tan of an angle
 *)
 let tan x = (sin x) / (cos x)
 
-(*
-==gcd==
-***greatest common divisor***
-** gcd :: Number -> Number -> Number **
-finds the greatest common divisor of two numbers
-*)
-let gcd a b = if a == b then a else if a < b then gcd b a else gcd b (a-b)
+let arctan n = let x = abs n in let i = if x <= (2 - (sqrt 3)) then x else ((sqrt 3) * x - 1) / ((sqrt 3) + x) in let at = i - (i^3 / 3) + (i^5 / 5) - (i^7 / 7) in (pi / 6) + at >> \x -> x * (180 / pi)
 
-(*
-==factorial==
-***factorial***
-** factorial :: Number -> Number **
-finds the factorial (!) of a number
-#Example:#
-    > factorial 5      ** 5! in maths notation **
-    > 120 : Number
-factorials grow really quickly...
-    > factorial 10
-    > 3628800 : Number
-*)
-let factorial n = product [1 to n];
+let arcsin x = arctan (x / (sqrt (1 - x^2)))
+
+let arccos x = arctan ((sqrt (1 - x^2)) / x)
 (* == == *)
