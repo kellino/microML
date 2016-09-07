@@ -36,6 +36,7 @@ let abs x     = if x > 0 then x else x * (-1)
 ==negate==
 ***negate***
 ** negate :: Number -> Number **
+turns a positive number negative, or a negative number positive
 *)
 let negate x  = if x < 0 then abs x else x * -1
 
@@ -116,6 +117,39 @@ let ceiling x = 1 + (floor x)
 let floatToInt x = floor x
 
 (*
+==fib==
+***fibonacci***
+** fib :: Number -> Number **
+*)
+let fib n = if n < 2 then 1 else (fib (n-1)) + (fib (n-2))
+
+(*
+==gcd==
+***greatest common divisor***
+** gcd :: Number -> Number -> Number **
+finds the greatest common divisor of two numbers
+*)
+let gcd a b = if (a + 0) == b then a else if a < b then gcd b a else gcd b (a-b)
+
+(*
+==factorial==
+***factorial***
+** factorial :: Number -> Number **
+finds the factorial (!) of a number
+#Example:#
+    > factorial 5      ** 5! in maths notation **
+    > 120 : Number
+factorials grow really quickly...
+    > factorial 10
+    > 3628800 : Number
+*)
+let factorial n = product [1 to n];
+
+----------------
+-- LOGARITHMS --
+----------------
+
+(*
 ==ln==
 ***ln***
 ** ln :: Number -> Number **
@@ -147,38 +181,9 @@ the log of a number at any base you like!
 *)
 let logBase x y = _log (y + 0) / _log (x + 0)
 
-(*
-==fib==
-***fibonacci***
-** fib :: Number -> Number **
-*)
-let fib n = if n < 2 then 1 else (fib (n-1)) + (fib (n-2))
-
-(*
-==gcd==
-***greatest common divisor***
-** gcd :: Number -> Number -> Number **
-finds the greatest common divisor of two numbers
-*)
-let gcd a b = if (a + 0) == b then a else if a < b then gcd b a else gcd b (a-b)
-
-(*
-==factorial==
-***factorial***
-** factorial :: Number -> Number **
-finds the factorial (!) of a number
-#Example:#
-    > factorial 5      ** 5! in maths notation **
-    > 120 : Number
-factorials grow really quickly...
-    > factorial 10
-    > 3628800 : Number
-*)
-let factorial n = product [1 to n];
-
---------------------
--- TRIG FUNCTIONS --
---------------------
+----------------------------
+-- TRIGONOMETRY FUNCTIONS --
+----------------------------
 
 (*
 ==radians==
@@ -212,9 +217,27 @@ tan of an angle
 *)
 let tan x = (sin x) / (cos x)
 
+(*
+==arctan==
+***arctan***
+** arctan :: Number -> Number **
+the inverse of tan
+*)
 let arctan n = let x = abs n in let i = if x <= (2 - (sqrt 3)) then x else ((sqrt 3) * x - 1) / ((sqrt 3) + x) in let at = i - (i^3 / 3) + (i^5 / 5) - (i^7 / 7) in (pi / 6) + at >> \x -> x * (180 / pi)
 
+(*
+==arcsin==
+***arcsin***
+** arcsin :: Number -> Number **
+the inverse of sin
+*)
 let arcsin x = arctan (x / (sqrt (1 - x^2)))
 
+(*
+==arccos==
+***arccos***
+** arccos :: Number -> Number **
+tan of an angle
+*)
 let arccos x = arctan ((sqrt (1 - x^2)) / x)
 (* == == *)
