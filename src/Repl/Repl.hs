@@ -252,7 +252,7 @@ completer :: CompleterStyle (StateT IState IO)
 completer = Prefix (wordCompleter comp) defaultMatcher
 
 prompt :: String
-prompt = "\ESC[33mmicroML ⊦\ESC[0m "
+prompt = "microML ⊦ " ++ S.clear
 
 getBanner :: Repl ()
 getBanner = do
@@ -280,16 +280,21 @@ ini = do
            liftIO $ putStrLn "\n\ESC[1mWelcome to microML\ESC[0m\t\t\t\ESC[33;1mversion 0.05\ESC[1;31m\n"
            getBanner 
            liftIO $ putStrLn "\n\n"
+           liftIO getConfig
        else do
           using ["standard"]
           liftIO $ putStrLn $ standardBanner ++ "\n\n" ++ bold ++ "Welcome to microML" ++ S.clear ++ "\n\n"
+          liftIO getConfig
 
 -- doesn't work yet
 getConfig :: IO ()
 getConfig = do
     home <- getHomeDirectory 
-    conf <- readConfig $ home </> ".microMLrc"
-    print conf
+    let file = home </> ".microMLrc"
+    exists <- doesFileExist file
+    if exists
+       then loadConfig file
+       else error "no configuration file found"
 
 shell :: IO ()
 shell = flip evalStateT initState $ evalRepl prompt cmd options completer ini

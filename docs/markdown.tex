@@ -1,19 +1,29 @@
-An example comment is taken from the standard library is:
+An example comment is taken from the standard library is seen in Figure~\ref{fig:odd}
 
-\begin{minted}{sml}
-    (*
-    ==odd?==
-    ***odd?***
-    ** odd? :: Number -> Boolean **
-    odd? checks if a number is odd, 
-     returning a __boolean__ value.
-    \#Example:\#
-        > odd? 5
-        > true : Boolean
-        > odd? 4
-        > false : Boolean
-    *)
-\end{minted}
+\begin{figure}
+    \begin{minted}{sml}
+(*
+==odd?==
+***odd?***
+** odd? :: Number -> Boolean **
+odd? checks if a number is odd, 
+ returning a __boolean__ value.
+\#Example:\#
+    > odd? 5
+    > true : Boolean
+    > odd? 4
+    > false : Boolean
+*)
+    \end{minted}
+    \caption{Markdown comment for the standard library function odd?}
+\label{fig:odd}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[width=\textwidth]{images/odd.jpg}
+    \caption{odd? as seen in the terminal}
+\label{fig:oddterm}
+\end{figure}
 
 \begin{itemize}
     \item a \textbf{comment} begins with `(*' and ends with `*)'

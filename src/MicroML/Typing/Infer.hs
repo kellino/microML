@@ -300,7 +300,7 @@ doConsOp e1 e2 = do
     t2 <- infer e2
     case (e1, e2) of
          (_, Nil) -> return t1
-         (x, y) -> do
+         (_, _) -> do
              uni t1 t2
              return t2
 
