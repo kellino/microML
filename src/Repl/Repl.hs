@@ -23,6 +23,8 @@ import qualified Data.Map as Map
 import qualified Data.Text.Lazy as L
 import qualified Data.Text.Lazy.IO as L
 import Data.List (isPrefixOf, foldl')
+import qualified Data.ConfigFile as DC
+import Data.Either.Utils
 
 import Control.Monad.State.Strict
 import Control.Exception (catch, IOException)
@@ -288,13 +290,18 @@ ini = do
           liftIO getConfig
 
 -- doesn't work yet
-getConfig :: IO ()
+getConfig :: Repl ()
 getConfig = do
-    home <- getHomeDirectory 
+    home <- liftIO getHomeDirectory 
     let file = home </> ".microMLrc"
-    exists <- doesFileExist file
+    exists <- liftIO $ doesFileExist file
     if exists
-       then loadConfig file
+       then do
+            conf <- liftIO $ DC.readfile DC.emptyCP file
+            let cp = forceEither conf
+            putStrLn "Your setting is: "
+            let config = forceEither $ DC.items cp "colourscheme"
+            print config
        else error "no configuration file found"
 
 shell :: IO ()

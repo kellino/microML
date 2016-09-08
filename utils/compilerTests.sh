@@ -8,8 +8,8 @@ do
     filename=$(basename "$f")
     newfile="${filename%.*}"
     if [ -x "$ml" ]; then
-        printf "attempting to compile \e[1m%s\e[0m\n" "$filename" >> output.txt
-        microML -c "$f" "../test/compiler/res/$newfile" >> output.txt
+        printf "attempting to compile \e[1m%s\e[0m\n" "$filename" 
+        microML -c "$f" "../test/compiler/res/$newfile" 
     else
         echo "\e[31mError:\e[0m microML is not in your system path" 
         break
