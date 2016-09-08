@@ -9,11 +9,16 @@ import MicroML.Typing.Type
 import MicroML.Syntax
 import MicroML.Typing.Env
 import MicroML.Typing.TypeError
+import MicroML.Config
 
 import qualified Data.Map as Map
+import Data.Maybe (fromJust)
 import Data.List (intercalate, isInfixOf)
 import Data.List.Split (splitOn)
 import Text.PrettyPrint
+
+getColour :: ConfigEnv -> String -> String 
+getColour env colour = "\ESC[" ++ fromJust (Map.lookup colour env) ++ "m"
 
 parensIf ::  Bool -> Doc -> Doc
 parensIf True = parens
@@ -111,14 +116,14 @@ pprLit xs
 ppexpr :: Expr -> String
 ppexpr = render . ppr 0
 
-ppsig :: (Expr, TypeScheme) -> String
-ppsig (a, b) = pbold ++ ppexpr a ++ clear ++ " : " ++ ppscheme b
+ppsig :: (Expr, TypeScheme) -> ConfigEnv -> String
+ppsig (a, b) conf = getColour conf "bold" ++ ppexpr a ++ clear ++ " : " ++ ppscheme b
 
-ppsig' :: (String, TypeScheme) -> String
-ppsig' (a, b) = pbold ++ a ++ clear ++ " : " ++ ppscheme b
+ppsig' :: ConfigEnv -> (String, TypeScheme) -> String
+ppsig' conf (a, b) = getColour conf "bold" ++ a ++ clear ++ " : " ++ ppscheme b
 
-ppenv :: Env -> [String]
-ppenv (TypeEnv env) = map ppsig' $ Map.toList env
+ppenv :: Env -> ConfigEnv -> [String]
+ppenv (TypeEnv env) conf = map (ppsig' conf) (Map.toList env)
 
 pbold :: String
 pbold = "\ESC[37m"

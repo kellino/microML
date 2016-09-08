@@ -27,6 +27,7 @@ executable microML
                      Compiler.Failure,
                      Compiler.MicroBitHeader,
                      Compiler.PrettyCPP,
+                     MicroML.Config,
                      MicroML.Lexer,
                      MicroML.ListPrimitives,
                      MicroML.MathsPrimitives,
@@ -62,6 +63,7 @@ executable microML
                      pretty-tree,
                      MissingH,
                      ConfigFile,
-                     split
+                     split,
+                     terminfo-hs
 
   ghc-options:   -Wall -O2 -threaded -fwarn-tabs -fno-warn-name-shadowing -fno-warn-missing-signatures -fno-warn-incomplete-patterns -fno-warn-unused-binds

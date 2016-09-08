@@ -25,6 +25,7 @@ import qualified Data.Text.Lazy.IO as L
 import Data.List (isPrefixOf, foldl')
 import qualified Data.ConfigFile as DC
 import Data.Either.Utils
+import Data.Maybe (fromJust)
 
 import Control.Monad.State.Strict
 import Control.Exception (catch, IOException)
@@ -105,7 +106,7 @@ exec' source = do
 showOutput :: Expr -> IState -> Repl ()
 showOutput arg st = 
     case Env.lookup "it" (typeEnv st) of
-      Just val -> liftIO $ putStrLn $ ppsig (arg, val)
+      Just val -> liftIO $ putStrLn $ ppsig (arg, val) (configEnv st)
       Nothing -> return ()
 
 cmd :: String -> Repl ()
@@ -141,7 +142,7 @@ pstText expr = do
 browse :: [String] -> Repl ()
 browse _ = do
   st <- get
-  liftIO $ mapM_ putStrLn $ ppenv (typeEnv st)
+  liftIO $ mapM_ putStrLn $ ppenv (typeEnv st) (configEnv st)
 
 help :: [String] -> Repl ()
 help args = 
@@ -194,7 +195,7 @@ typeof args =
           st <- get
           let arg = unwords args
           case Env.lookup arg (typeEnv st) of
-            Just val -> liftIO $ putStrLn $ ppsig' (arg, val)
+            Just val -> liftIO $ putStrLn $ ppsig' (configEnv st) (arg, val)
             Nothing  -> liftIO $ putStrLn $ "microML: " ++ show arg ++ " is not in scope"
 
 -- :quit command
@@ -291,7 +292,8 @@ ini = do
           liftIO $ putStrLn $ standardBanner ++ "\n\n" ++ bold ++ "Welcome to microML" ++ S.clear ++ "\n\n"
           getConfig
 
--- read the config file (if it exists) and stores it in the global state
+-- | reads the config file (if it exists) and stores it in the global state
+-- also queries terminfo for max colours supported
 getConfig :: Repl ()
 getConfig = do
     home <- liftIO getHomeDirectory 
@@ -303,9 +305,11 @@ getConfig = do
            conf <- liftIO $ DC.readfile DC.emptyCP file
            let cp = forceEither conf
            let config = forceEither $ DC.items cp "colourscheme"
-           let st' = st { configEnv = Map.fromList config `mappend` configEnv st }
+           c <- liftIO maxColours
+           let config' = config ++ [("term", show $ fromJust c)]
+           let st' = st { configEnv = Map.fromList config' `mappend` configEnv st }
            put st'
-       else error "no configuration file found"
+       else error "Error: no configuration file found"
 
 shell :: IO ()
 shell = flip evalStateT initState $ evalRepl prompt cmd options completer ini

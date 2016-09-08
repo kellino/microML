@@ -13,6 +13,7 @@ extra-deps:
 - StateVar-1.1.0.4
 - ansi-terminal-0.6.2.3
 - async-2.1.0
+- attoparsec-0.13.0.2
 - base-orphans-0.5.4
 - bifunctors-5.4.1
 - boxes-0.1.4
@@ -21,6 +22,7 @@ extra-deps:
 - contravariant-1.4
 - distributive-0.5.0.2
 - either-4.4.1.1
+- errors-2.1.2
 - exceptions-0.8.3
 - free-4.12.4
 - hashable-1.2.4.0
@@ -46,16 +48,21 @@ extra-deps:
 - regex-compat-0.95.1
 - regex-posix-0.95.2
 - repline-0.1.5.0
+- safe-0.3.9
+- scientific-0.3.4.9
 - semigroupoids-5.1
 - semigroups-0.18.2
 - setenv-0.1.1.3
 - split-0.2.3.1
 - stm-2.4.4.1
 - tagged-0.8.5
+- terminfo-hs-0.2.1
 - text-1.2.2.1
 - tf-random-0.5
 - transformers-base-0.4.4
 - transformers-compat-0.5.1.4
+- unexceptionalio-0.3.0
 - unordered-containers-0.2.7.1
+- vector-0.11.0.0
 - void-0.7.1
 resolver: ghc-7.10.3
