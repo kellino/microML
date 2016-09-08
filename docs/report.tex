@@ -196,8 +196,7 @@ all have in common is that they are intended for an audience who are already int
 science, or are indeed already computer scientists. Even classic texts, such
 as~\cite{Abelson:1996:SIC:547755} and~\cite{Friedman1900} are squarely pitched at a sophisticated audience.
 The micro:bit is the opposite: it is for students with no previous programming experience,
-students who are not mathematicians, and teachers who are neither mathematicians nor
-programmers\footnote{The micro:bit website \url{https://www.microbit.co.uk/about} explicitly states
+students who are not mathematicians\footnote{The micro:bit website \url{https://www.microbit.co.uk/about} explicitly states
 that the micro:bit is intended for year 7 students. This covers the age of approximately 11 --- 12. It
 would seem safe to assume an absence of mathematical maturity.}.
 Functional programming has a reputation in the programming community for being complex and only for a
@@ -284,7 +283,7 @@ essential features, is not practicable within the time available.
 \section{Personal Goals}
 \label{personal}
 The author's intentions, when the project was first suggested to the client, are detailed in
-figure~\ref{fig:intentions}. The scope of the project is very ambitious, and the author's knowledge
+Table~\ref{fig:intentions}. The scope of the project is very ambitious, and the author's knowledge
 of the area at the beginning of the project consisted of 3 weeks of automata theory in UCL module
 COMPGC04 and a 10 week introductory course to functional programming, also at UCL. 
 
@@ -300,7 +299,7 @@ COMPGC04 and a 10 week introductory course to functional programming, also at UC
         \item \textbf{Lambda Calculus}:  beyond a brief introduction to the simple untyped lambda
             calculus, the author had had no other experience whatsoever with the area of computational
             theory. Even the notation was, at the beginning, completely unfamiliar. Moreover the
-            author was unaware at the start of the various refinements to the lambda calculus added
+            author was unaware, at the start, of the various refinements to the lambda calculus added
             by researchers. The choice of calculus upon which to build microML evolved along with
             the author's knowledge.
         \item \textbf{Type Theory}: the author was very interested in the potential of type theory to make
@@ -538,14 +537,18 @@ Good type inference, with easy to read error messages, is an essential feature o
 which it would struggle to justify its existence.
 
 \section{Software, Tools, Libraries}
-Haskell is ideally suited to the creation of \gls{DSL}s. This is largely due to its
-\textit{algebraic data types} which can easily be used to represent the BNF of an embedded
-language. Moreover Haskell is blessed with the Parsec library\cite{leijen2001} of parser combinators\footnote{A
-\textit{combinator} is simply a function with no free variables, so it only operates on
-parameters directly passed to it without reference to any global data within the function
-body.}, which removes the necessity of writing lex and yacc files to create a functioning
-parser. A parser for another language can be implemented directly in Haskell, using
-standard Haskell syntax. Haskell moreover has an extensive library system, located on
+Haskell is well suited to the creation of domain specific languages, or \gls{DSL}s\footnote{One
+might argue this ready facility for embedded languages is a negative feature of the
+language, as it can lead library writers to create what are, for all intents and purposes,
+completely new languages which need to be mastered for each new task. The \textit{Lens} library
+for example exports over 100 difference operators.}. This is
+largely due to its \textit{algebraic data types} which can easily be used to represent the BNF
+of an embedded language. Moreover Haskell is blessed with the Parsec library\cite{leijen2001} of
+parser combinators\footnote{A \textit{combinator} is simply a function with no free variables,
+so it only operates on parameters directly passed to it without reference to any global data
+within the function body.}, which removes the necessity of writing lex and yacc files to create
+a functioning parser. A parser for another language can be implemented directly in Haskell,
+using standard Haskell syntax. Haskell moreover has an extensive library system, located on
 \textit{Hackage}\footnote{\url{https://hackage.haskell.org/}}. There is a library for almost any
 conceivable requirement. Haskell has two main build tools for project management, \textit{Cabal} and
 \textit{Stack}. Neither is as tightly integrated into the language as might be ideal. One need only
@@ -565,7 +568,7 @@ maintaining a stable list of packages and creating a strong \textit{sandboxed} e
 development. The price to be paid is a reduced number of available libraries, so build problems
 can still occur with dependencies not part of the \textit{\gls{lts}} system. MicroML was firstly a Cabal
 project, but was migrated to Stack later in development. This largely produced a more stable build
-and allowed for the use of \textit{intero}\footnote{intero is an alternative to ghci --- the Haskell
+and allowed for the use of \textit{intero}\footnote{intero is an alternative to \gls{ghci} --- the Haskell
 interactive environment, but provides better type information and error messages, moreover it has
 good integration with neovim, the author's editor of choice.} but unfortunately this also meant that some
 experimental code (specially the JIT compiler) had to be disabled. See Section~\ref{SC@2}.
@@ -937,8 +940,9 @@ has type (Figure~\ref{fig:typesig}).
 \end{figure}
 
 For readability's sake, the repl uses the words `for all' rather than the $\forall$ symbol. This
-informations is suppressed in \textit{ghci}. Testing with students needs to be conducted before it
-is possible to say whether the precision of the `for all' comment outweighs the need to explain it.
+information is suppressed in \textit{ghci}\footnote{The Haskell repl. See glossary. }. Testing with
+students needs to be conducted before it is possible to say whether the precision of the `for all'
+comment outweighs the need to explain it.
 
 MicroML has a unified \textbf{Number} type for inference, even though the underlying AST stores
 appropriate information regarding the exact form of representation. Miranda too features a unified
@@ -1113,7 +1117,7 @@ to understand exactly how to structure a solution to a problem before embarking 
 otherwise one risks having to rewrite large sections of code when it becomes apparent that a
 particular function needs to reside inside a particular monad, and does not. For example it is not
 possible to trivially wrap a function in a \textit{try / except} clause as one would in Python.
-Anything which might through an exception needs to be inside the ExceptT monad transformer. The type
+Anything which might throw an exception needs to be inside the ExceptT monad transformer. The type
 checker will reject anything else. This can be sidestepped to a certain extent by throwing an
 unchecked \textbf{error}\footnote{a wrapper around the prelude library function \textbf{undefined}},
 but such an error kills the runtime system, crashing the program.\footnote{\cite{transformers} was
@@ -1234,6 +1238,7 @@ data IState = IState
     { typeEnv :: Env
     , termEnv :: TermEnv
     , helpEnv :: HelpEnv
+    , configEnv :: ConfigEnv
     }
 type Repl a = HaskelineT (StateT IState IO) a
 \end{minted}
