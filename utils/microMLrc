@@ -3,6 +3,7 @@
 ## simple ansi colour codes, in this case for a dark terminal
 
 [colourscheme]
+bold = 1
 number = 31
 string = 32
 char = 34
