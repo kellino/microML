@@ -23,6 +23,8 @@ import qualified Data.Map as Map
 import qualified Data.Text.Lazy as L
 import qualified Data.Text.Lazy.IO as L
 import Data.List (isPrefixOf, foldl')
+import qualified Data.ConfigFile as DC
+import Data.Either.Utils
 
 import Control.Monad.State.Strict
 import Control.Exception (catch, IOException)
@@ -39,13 +41,14 @@ import qualified System.Process as S
 -----------
 
 data IState = IState
-      { typeEnv :: Env      -- Type environment
-      , termEnv :: TermEnv  -- Value environment
-      , helpEnv :: HelpEnv  -- Help environment
+      { typeEnv :: Env         -- Type environment
+      , termEnv :: TermEnv     -- Value environment
+      , helpEnv :: HelpEnv     -- Help environment
+      , configEnv :: ConfigEnv -- Config environment
       }
 
 initState :: IState
-initState = IState Env.microbit emptyTmenv HE.empty
+initState = IState Env.microbit emptyTmenv HE.empty configEmpty
 
 type Repl a = HaskelineT (StateT IState IO) a
 
@@ -83,7 +86,8 @@ exec update source = do
         let (val, _) = runEval (termEnv st') "it" ex
         showOutput val st'
 
--- | execution function at initial loading time
+-- | execution function for initial loading
+-- TODO: a lot of code repetition here, should be merged with exec
 exec' :: L.Text -> Repl ()
 exec' source = do
     st       <- get
@@ -107,9 +111,9 @@ showOutput arg st =
 cmd :: String -> Repl ()
 cmd source = exec True (L.pack source) 
 
--------------------------------------------------------------------------------
--- Commands
--------------------------------------------------------------------------------
+--------------
+-- Commands --
+--------------
 
 -- | view the parse tree of an expression in the repl
 -- :pst command
@@ -209,9 +213,9 @@ sh arg = liftIO $
                     hPutStr stderr ("Warning: Couldn't run " ++ unwords arg ++ " " ++ err ++ "\n")
                     return ()) 
 
--------------------------------------------------------------------------------
--- Interactive Shell
--------------------------------------------------------------------------------
+-----------------------
+-- Interactive Shell --
+-----------------------
 
 -- Prefix tab completer
 defaultMatcher :: MonadIO m => [(String, CompletionFunc m)]
@@ -243,9 +247,9 @@ options = [
       , ("load"   , load)
       ]
 
--------------------------------------------------------------------------------
--- Entry Point
--------------------------------------------------------------------------------
+-----------------
+-- Entry Point --
+-----------------
 
 completer :: CompleterStyle (StateT IState IO)
 completer = Prefix (wordCompleter comp) defaultMatcher
@@ -268,6 +272,8 @@ standardBanner = "\ESC[1;31m" ++
         " | | | | | | | (__| | | (_) | |  | || |____  \n" ++
         " |_| |_| |_|_|\\___|_|  \\___/\\_|  |_/\\_____/  \ESC[0m"
 
+-- | initialize the repl environment. Look for the dependencies for the fancy banner, and if not,
+-- use the boring standard one.
 ini :: Repl ()
 ini = do
     fig <- liftIO $ findExecutable "figlet"
@@ -279,20 +285,26 @@ ini = do
            liftIO $ putStrLn "\n\ESC[1mWelcome to microML\ESC[0m\t\t\t\ESC[33;1mversion 0.05\ESC[1;31m\n"
            getBanner 
            liftIO $ putStrLn "\n\n"
-           --liftIO getConfig
+           getConfig
        else do
           using ["standard"]
           liftIO $ putStrLn $ standardBanner ++ "\n\n" ++ bold ++ "Welcome to microML" ++ S.clear ++ "\n\n"
-          --liftIO getConfig
+          getConfig
 
--- doesn't work yet
-getConfig :: IO ()
+-- read the config file (if it exists) and stores it in the global state
+getConfig :: Repl ()
 getConfig = do
-    home <- getHomeDirectory 
+    home <- liftIO getHomeDirectory 
     let file = home </> ".microMLrc"
-    exists <- doesFileExist file
+    exists <- liftIO $ doesFileExist file
     if exists
-       then loadConfig file
+       then do
+           st <- get
+           conf <- liftIO $ DC.readfile DC.emptyCP file
+           let cp = forceEither conf
+           let config = forceEither $ DC.items cp "colourscheme"
+           let st' = st { configEnv = Map.fromList config `mappend` configEnv st }
+           put st'
        else error "no configuration file found"
 
 shell :: IO ()
