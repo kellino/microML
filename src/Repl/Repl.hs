@@ -311,5 +311,6 @@ getConfig = do
            put st'
        else error "Error: no configuration file found"
 
+-- | main function for the repl
 shell :: IO ()
 shell = flip evalStateT initState $ evalRepl prompt cmd options completer ini
