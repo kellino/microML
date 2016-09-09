@@ -60,6 +60,7 @@ instance Show UnaryOp where
     show Read  = "read"
     show Chr   = "chr"
     show Ord   = "ord" 
+    show Not   = "not"
 
 data Binop = 
         OpAdd | OpSub | OpMul | OpDiv | OpIntDiv | OpExp | OpMod 
@@ -96,9 +97,9 @@ data MLError
     deriving (Eq, Ord)
 
 instance Show MLError where
-    show (MathsPrim str) = show str
-    show (ListPrim str)  = show str
-    show (CharPrim str)  = show str
+    show (MathsPrim str) = str
+    show (ListPrim str)  = str
+    show (CharPrim str)  = str
 
 -----------------
 -- HELPER DEFS --
