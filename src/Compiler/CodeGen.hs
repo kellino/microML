@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE FlexibleContexts #-}
 
 module Compiler.CodeGen where
 
@@ -41,14 +42,20 @@ data CodeState = CodeState
             { userCode :: UserCode
             , typeEnv :: Env }
 
-initState :: [(String, Expr)] -> CodeState
-initState code = CodeState (Map.fromList code) (genTypeEnv code)
+initState :: CodeState
+initState = CodeState Map.empty Env.empty
 
-genTypeEnv :: [(String, Expr)] -> Env
-genTypeEnv cd = 
-    case inferTop Env.empty cd of
-         Left err -> error "type error"
-         Right val -> val
+checkTypes prog = do
+    st <- get
+    let code = Map.fromList prog
+    let typeEnv' = inferTop (typeEnv st) prog
+    case typeEnv' of
+         Left err -> error $ show err
+         Right ty -> do
+            let st' = st { userCode = code `mappend` userCode st
+                         , typeEnv = ty `mappend` typeEnv st }
+            put st'
+            return prog
 
 -------------------------
 -- CPP CODE GENERATION -- 
@@ -62,9 +69,11 @@ fresh = do
     return $ text (letters !! count s)
     where letters = [1..] >>= flip replicateM ['a' .. 'z']
 
-genTopLevel ::  (String, Expr) -> Compiler Doc
-genTopLevel ("main", expr) = generateMain expr
-genTopLevel (nm, expr) = generateFunc nm expr
+genTopLevel :: [(Name, Expr)] -> Compiler [Doc]
+genTopLevel = mapM gtl 
+        where gtl ::  (String, Expr) -> Compiler Doc
+              gtl ("main", expr) = generateMain expr
+              gtl (nm, expr) = generateFunc nm expr
 
 generateMain ::  Expr -> Compiler Doc
 generateMain ex = do
@@ -153,9 +162,10 @@ writeToFile dest code = do
     -- if clang-format exists, then use it to clean up the formatting.
     formatPrintedFile cFile
 
-codegen :: [(String, Expr)] -> Compiler [Doc]
-codegen = mapM genTopLevel 
-        . reachableFromMain 
+codegen :: [(Name, Expr)] -> Compiler [Doc]
+codegen = genTopLevel 
+        -- . checkTypes 
+        . reachableFromMain
 
 runCompiler :: CodeState -> Compiler a -> Either Failure (a, [Doc])
 runCompiler env m = runExcept $ evalRWST m env initCompiler
@@ -164,6 +174,6 @@ compile :: L.Text -> L.Text -> String -> IO ()
 compile source dest filename = do
     let res = hoistError $ parseProgram filename source
     let code = checkForDuplicates res
-    case runCompiler (initState code) $ codegen code of
+    case runCompiler initState $ codegen code of
          Left e -> print $ tellError e
          Right r -> writeToFile dest $ fst r

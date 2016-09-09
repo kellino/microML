@@ -25,6 +25,8 @@ import MicroML.Syntax
 --   is very crude and not fit for purpose. It assumes each function only occupies one line and that
 --   there are no comments!
 
+-- | search the program for duplicate definitions and, if found, throw an error. Possibly a little
+-- bit too strict and rigid, but good for catching silly student errors.
 checkForDuplicates :: [(String, Expr)] -> [(String, Expr)]
 checkForDuplicates code 
   | length code == length nubbed  = code
