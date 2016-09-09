@@ -1336,6 +1336,14 @@ necessary only to check the logic of the function, rather than its compatibility
 the program. Haskell does not have an object system, and only a very simple modular system, with a
 flat namespace. Again, this helps to reduce the necessity for testing above the level of the unit.
 
+While HSpec is undoubtedly useful, it does have a number of limitations. The most obvious is its
+inability to test functions which have not been publicly exported. Due to Haskell's flat namespace,
+it is possible to select functions to be publicly exported when the module is included in another
+module. All other functions are private and inaccessible. However this also means that they are
+inaccessible to HSpec. The best solution is to test those functions which are publicly exposed in an
+effort to examine the workings of the private functions. This is not ideal. Moreover HSpec does not
+easily allow for the testing of IO.
+
 MicroML's type system is useful for checking the integrity of a microML program, in much the same
 way that Haskell performs and enforces such checks. As such, the standard libraries, all of which
 are know to be correct in their implementation, act as further tests of microML's type inference
@@ -1346,8 +1354,8 @@ the inference execution.
     \begin{itemize}
         \item ListPrimitives
         \item MathsPrimitives
+        \item Eval
         \item CallGraph
-        \item Failure
     \end{itemize}
     \caption{Modules currently tested with HSpec}
 \label{fig:hspec}
