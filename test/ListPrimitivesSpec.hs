@@ -22,7 +22,6 @@ listprims = hspec $
             it "should fail on non-list bools" $ 
                 evaluate (car (Lit (LBoolean True))) `shouldThrow` anyException
 
-
         describe "cdr" $ do
             it "gets the tail of a string" $
                 cdr (BinOp OpCons (Lit (LInt 1)) (BinOp OpCons (Lit (LInt 2)) Nil)) `shouldBe` ((BinOp OpCons (Lit (LInt 2)) Nil) :: Expr)
