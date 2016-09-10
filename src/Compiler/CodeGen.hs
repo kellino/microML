@@ -166,6 +166,7 @@ codegen :: [(Name, Expr)] -> Compiler [Doc]
 codegen = genTopLevel 
         -- . checkTypes 
         . reachableFromMain
+        . checkForDuplicates
 
 runCompiler :: CodeState -> Compiler a -> Either Failure (a, [Doc])
 runCompiler env m = runExcept $ evalRWST m env initCompiler
