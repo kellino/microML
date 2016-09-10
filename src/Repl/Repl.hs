@@ -22,13 +22,13 @@ import MicroML.Typing.Infer
 import qualified Data.Map as Map
 import qualified Data.Text.Lazy as L
 import qualified Data.Text.Lazy.IO as L
-import Data.List (isPrefixOf, foldl', isInfixOf)
+import Data.List (isPrefixOf, foldl')
 import qualified Data.ConfigFile as DC
 import Data.Either.Utils
 import Data.Maybe (fromJust)
 
 import Control.Monad.State.Strict
-import Control.Exception (catch, IOException)
+import Control.Exception 
 
 import System.IO
 import System.Exit
