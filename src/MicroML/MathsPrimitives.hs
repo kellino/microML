@@ -21,6 +21,7 @@ sub (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a - b
 sub (Lit (LDouble a)) (Lit (LDouble b)) = Lit $ LDouble $ a - b
 sub (Lit (LInt a)) (Lit (LDouble b)) = Lit . LDouble . truncate' $ realToFrac a - b
 sub (Lit (LDouble a)) (Lit (LInt b)) = Lit . LDouble . truncate' $ a - realToFrac b
+sub _ _ = PrimitiveErr $ MathsPrim "perhaps you meant (-)"
 
 mul :: Expr -> Expr -> Expr
 mul (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a * b

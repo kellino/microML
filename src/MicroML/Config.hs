@@ -42,17 +42,17 @@ putColour :: ConfigEnv -> String -> String
 putColour conf = unwords . pc . words
     where pc [] = []
           pc (x:xs) 
-              | x == "Number" = (getColour conf "number" ++ x ++ clear) : pc xs
+              | x == "Number"  = (getColour conf "number" ++ x ++ clear) : pc xs
               | x == "(Number" = ('(' : (getColour conf "number" ++ "Number" ++ clear)) : pc xs
               | x == "Number)" = ((getColour conf "number" ++ "Number" ++ clear) ++ ")") : pc xs
 
-              | x == "String" = (getColour conf "string" ++ x ++ clear) : pc xs
+              | x == "String"  = (getColour conf "string" ++ x ++ clear) : pc xs
               | x == "(String" = ('(' : (getColour conf "string" ++ x ++ clear)) : pc xs
               | x == "String)" = ((getColour conf "string" ++ x ++ clear) ++ ")") : pc xs
 
-              | x == "Char" = (getColour conf "char" ++ x ++ clear) : pc xs
-              | x == "(Char" = ('(' : (getColour conf "char" ++ x ++ clear)) : pc xs
-              | x == "Char)" = ((getColour conf "char" ++ x ++ clear) ++ ")") : pc xs
+              | x == "Char"    = (getColour conf "char" ++ x ++ clear) : pc xs
+              | x == "(Char"   = ('(' : (getColour conf "char" ++ x ++ clear)) : pc xs
+              | x == "Char)"   = ((getColour conf "char" ++ x ++ clear) ++ ")") : pc xs
 
               | x == "Boolean" = (getColour conf "boolean" ++ x ++ clear) : pc xs
               | x == "(Boolean" = ('(' : (getColour conf "boolean" ++ "Boolean" ++ clear)) : pc xs
