@@ -12,13 +12,9 @@ import MicroML.Typing.TypeError
 import MicroML.Config
 
 import qualified Data.Map as Map
-import Data.Maybe (fromJust)
 import Data.List (intercalate, isInfixOf)
 import Data.List.Split (splitOn)
 import Text.PrettyPrint
-
-getColour :: ConfigEnv -> String -> String 
-getColour env colour = "\ESC[" ++ fromJust (Map.lookup colour env) ++ "m"
 
 parensIf ::  Bool -> Doc -> Doc
 parensIf True = parens
@@ -39,10 +35,10 @@ instance Pretty Type where
           isArrow TArrow{} = True
           isArrow _ = False
     ppr p (TVar a) = ppr p a
-    ppr _ (TCon "Number") = text $ "\ESC[31m" ++ "Number" ++ clear
-    ppr _ (TCon "String") = text $ "\ESC[32m" ++ "String" ++ clear
-    ppr _ (TCon "Boolean") = text $ "\ESC[33m" ++ "Boolean" ++ clear
-    ppr _ (TCon "Char") = text $ "\ESC[34m" ++ "Char" ++ clear
+    ppr _ (TCon "Number") = text "Number"
+    ppr _ (TCon "String") = text "String" 
+    ppr _ (TCon "Boolean") = text "Boolean"
+    ppr _ (TCon "Char") = text "Char" 
     ppr _ (TCon (x:xs))
               | x == '[' = text $ "[" ++ intercalate ", " (map pprLit (splitOn "," $ init xs)) ++ "]"
               | x == '{' = text $ "{" ++ intercalate ", " (map pprLit (splitOn "," $ init xs)) ++ "}"

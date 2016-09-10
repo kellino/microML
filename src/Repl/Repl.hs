@@ -106,7 +106,7 @@ exec' source = do
 showOutput :: Expr -> IState -> Repl ()
 showOutput arg st = 
     case Env.lookup "it" (typeEnv st) of
-      Just val -> liftIO $ putStrLn $ ppsig (arg, val) (configEnv st)
+      Just val -> liftIO $ putStrLn $ putColour (configEnv st) $ ppsig (arg, val) (configEnv st)
       Nothing -> return ()
 
 cmd :: String -> Repl ()
@@ -142,7 +142,7 @@ pstText expr = do
 browse :: [String] -> Repl ()
 browse _ = do
   st <- get
-  liftIO $ mapM_ putStrLn $ ppenv (typeEnv st) (configEnv st)
+  liftIO $ mapM_ (putStrLn . putColour (configEnv st)) $ ppenv (typeEnv st) (configEnv st)
 
 help :: [String] -> Repl ()
 help args = 
@@ -195,7 +195,7 @@ typeof args =
           st <- get
           let arg = unwords args
           case Env.lookup arg (typeEnv st) of
-            Just val -> liftIO $ putStrLn $ ppsig' (configEnv st) (arg, val)
+            Just val -> liftIO $ putStrLn $ putColour (configEnv st) $ ppsig' (configEnv st) (arg, val)
             Nothing  -> liftIO $ putStrLn $ "microML: " ++ show arg ++ " is not in scope"
 
 -- :quit command
@@ -306,8 +306,10 @@ getConfig = do
            let cp = forceEither conf
            let config = forceEither $ DC.items cp "colourscheme"
            c <- liftIO maxColours
-           let config' = config ++ [("term", show $ fromJust c)]
-           let st' = st { configEnv = Map.fromList config' `mappend` configEnv st }
+           let term = show $ fromJust c
+           let config' = config ++ [("term", term)]
+           let escaped = escape config' term
+           let st' = st { configEnv = Map.fromList escaped `mappend` configEnv st }
            put st'
        else error "Error: no configuration file found"
 
