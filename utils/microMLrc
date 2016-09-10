@@ -1,6 +1,11 @@
 ## config file for microML
 
 ## simple ansi colour codes, see https://en.wikipedia.org/wiki/ANSI_escape_code for more details
+# first of all, find out what type of terminal you have
+
+# $ echo $TERM
+# if the response says 256, then you can choose numbers between 0 and 255 for your colours
+# otherwise you can choose from 31 to 39
 
 [colourscheme]
 bold = 1
@@ -9,4 +14,5 @@ string = 32
 char = 34
 boolean = 33
 error = 31
+arrow = 34
 prompt = 33
