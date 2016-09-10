@@ -22,7 +22,7 @@ import MicroML.Typing.Infer
 import qualified Data.Map as Map
 import qualified Data.Text.Lazy as L
 import qualified Data.Text.Lazy.IO as L
-import Data.List (isPrefixOf, foldl')
+import Data.List (isPrefixOf, foldl', isInfixOf)
 import qualified Data.ConfigFile as DC
 import Data.Either.Utils
 import Data.Maybe (fromJust)
