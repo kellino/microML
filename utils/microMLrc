@@ -1,6 +1,6 @@
 ## config file for microML
 
-## simple ansi colour codes, in this case for a dark terminal
+## simple ansi colour codes, see https://en.wikipedia.org/wiki/ANSI_escape_code for more details
 
 [colourscheme]
 bold = 1
