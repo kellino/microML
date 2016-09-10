@@ -37,7 +37,7 @@ mathsprims = hspec $
 
             -- test for failure, but the type checker should prevent this ever happening
             it "should fail on other input" $
-                evaluate (sub (Lit (LChar 'a')) (Lit (LChar 'a'))) `shouldThrow` anyException
+                sub (Lit (LChar 'a')) (Lit (LChar 'a')) `shouldBe` PrimitiveErr (MathsPrim "perhaps you meant (-)")
     
         describe "mul" $ do
             it "should mul two integers" $
