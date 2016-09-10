@@ -9,10 +9,10 @@
 
 [colourscheme]
 bold = 1
-number = 31
-string = 32
+number = 160
+string = 54
 char = 34
-boolean = 33
+boolean = 226
 error = 31
 arrow = 34
 prompt = 33
