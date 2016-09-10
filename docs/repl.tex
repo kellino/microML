@@ -21,3 +21,25 @@ The following commands are available in the repl (Table~\ref{tabel:repl}):
 \end{table}
 
 Interactions in the repl are \textbf{line-orientated}. Multiline input is not yet supported.
+
+The repl supports some configuration via \textit{microMLrc}, which is placed in the user's home
+directory upon installation. The default file is see in Figure~\ref{fig:config}.
+
+\begin{figure}
+    \begin{minted}[breaklines=true]{bash}
+## config file for microML
+
+## simple ansi colour codes, see https://en.wikipedia.org/wiki/ANSI_escape_code for more details
+
+[colourscheme]
+bold = 1
+number = 31
+string = 32
+char = 34
+boolean = 33
+error = 31
+prompt = 33
+    \end{minted}
+    \caption{Configuration file for microML}
+\label{fig:config}
+\end{figure}

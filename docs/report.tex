@@ -25,6 +25,25 @@
 % line spacing
 \linespread{1.3}
 
+\usepackage{listings}
+\lstloadlanguages{Haskell}
+\lstnewenvironment{code}
+    {\lstset{}%
+      \csname lst@SetFirstLabel\endcsname}
+    {\csname lst@SaveFirstLabel\endcsname}
+    \lstset{
+      basicstyle=\small\ttfamily,
+      flexiblecolumns=false,
+      basewidth={0.5em,0.45em},
+      literate={+}{{$+$}}1 {/}{{$/$}}1 {*}{{$*$}}1 {=}{{$=$}}1
+               {>}{{$>$}}1 {<}{{$<$}}1 {\\}{{$\lambda$}}1
+               {\\\\}{{\char`\\\char`\\}}1
+               {->}{{$\rightarrow$}}2 {>=}{{$\geq$}}2 {<-}{{$\leftarrow$}}2
+               {<=}{{$\leq$}}2 {=>}{{$\Rightarrow$}}2 
+               {\ .}{{$\circ$}}2 {\ .\ }{{$\circ$}}2
+               {>>}{{>>}}2 {>>=}{{>>=}}2
+               {|}{{$\mid$}}1               
+    }
 % custom colours
 \usepackage{color, colortbl}
 \definecolor{Seagreen}{rgb}{0.18, 0.54, 0.34}
@@ -232,8 +251,7 @@ Formally put, the project's goals in order of importance are
 \label{formalreq}
 A summary of the project's final requirements, in
 \textit{MoSCoW}\footnote{\url{https://en.wikipedia.org/wiki/MoSCoW_method}} form
-can be seen in Table~\ref{table:requirements}. For a more detailed breakdown, see
-Appendix~\ref{appendix:functionalRequirements}.
+can be seen in Table~\ref{table:requirements}. 
 
 \newcolumntype{g}{>{\columncolor{light-gray}} l}
 \begin{table}
@@ -1307,6 +1325,12 @@ Appendix~\ref{appendix:samples} for code samples.
 \label{fig:foldVim}
 \end{figure}
 
+\subsubsection{Configuration File}
+MicroML installs a simple configuration file in the home directory of the user when initially
+installed. This allows the user to already the colours as seen in the repl. At present it supports
+only basic ansi colour code escape sequences, but this could easily be expanded in the future to
+allow for all manner of customizations. See Appendix~\ref{appendix:repl} for the standard
+configuration file. MicroML automatically detects the number of colours supported by the terminal.
 
 \chapter{Testing}
 \label{testing}
@@ -1608,9 +1632,6 @@ result in a number of possible compiler optimisations and greater runtime safety
 \begin{appendices}
     \chapter{Installation Guide}
     \input{user}
-    \chapter{Functional and Non-Functional Requirements}
-    \label{appendix:functionalRequirements}
-    \input{req}
     \chapter{System F}
     \label{appendix:sysf}
     \input{sysf}
