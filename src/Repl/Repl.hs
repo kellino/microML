@@ -256,7 +256,7 @@ completer :: CompleterStyle (StateT IState IO)
 completer = Prefix (wordCompleter comp) defaultMatcher
 
 prompt :: String
-prompt = "microML ⊦ " ++ S.clear
+prompt = "\ESC[33mmicroML ⊦ " ++ S.clear
 
 getBanner :: Repl ()
 getBanner = do
