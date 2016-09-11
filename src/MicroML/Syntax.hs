@@ -32,6 +32,7 @@ data Expr
   | UnaryOp UnaryOp Expr
   | Closure Name Expr TermEnv
   | PrimitiveErr MLError
+  | List Expr
   | Nil
   deriving (Show, Eq, Ord)
 

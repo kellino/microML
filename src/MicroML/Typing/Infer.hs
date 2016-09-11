@@ -18,7 +18,7 @@ import Control.Monad.State
 import Control.Monad.RWS
 import Control.Monad.Identity
 
-import Data.List (nub, intercalate) --, isInfixOf)
+import Data.List (nub, intercalate)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 
@@ -187,13 +187,18 @@ infer expr = case expr of
     PrimitiveErr _   -> return typeError
     Nil              -> return typeNil
 
+    List xs          -> do
+        t <- infer xs
+        case t of
+             (TCon t1) -> return $ TCon $ "t " ++ t1
+             (TVar (TV t1)) -> return $ TVar $ TV $ "t " ++ t1
+
     Lit (LTup xs) -> return $ TCon $ "{" ++ intercalate ", " (map show xs) ++ "}"
 
     Var x -> lookupEnv x
 
     Lam x e -> do
        tv <- inferLambda x e
-       --tv <- fresh
        t <- inEnv (x, Forall [] tv) (infer e)
        return (tv `TArrow` t)
              
@@ -249,11 +254,18 @@ infer expr = case expr of
           OpNotEq -> inferBinOpBool e1 e2
           OpLe    -> inferBinOpBool e1 e2
           OpPipe  -> infer (App e2 e1)
+          OpAppend -> do
+              t1 <- infer e1
+              t2 <- infer e2
+              uni t1 t2
+              return t2
           OpEnum  -> do
-              e1 <- infer e1
-              e2 <- infer e2
-              uni e1 e2
-              return e2
+              t1 <- infer e1
+              t2 <- infer e2
+              uni t1 t2
+              case t2 of
+                   (TCon tv) -> return $ TCon $ "t " ++ tv
+                   (TVar (TV tv)) -> return $ TVar $ TV $ "t " ++ tv
           _       -> 
               case (e1, e2) of
                   (Nil, xs)            -> infer xs
@@ -261,6 +273,11 @@ infer expr = case expr of
                   (Lit (LDouble _),_)  -> doBinaryMathsOp op e1 e2
                   (Lit (LBoolean _),_) -> doBinaryBoolOp op e1 e2
                   (Lit (LChar _),_)    -> doBinaryCharOp op e1 e2
+                  (List xs, List ys)   -> do
+                      t1 <- infer xs
+                      t2 <- infer ys
+                      uni t1 t2
+                      return t2
                   (Lit (LString _),_)  -> do
                       t1 <- infer e1
                       t2 <- infer e2
@@ -300,6 +317,7 @@ doConsOp e1 e2 = do
     t2 <- infer e2
     case (e1, e2) of
          (_, Nil) -> return t1
+         (_, List Nil) -> return t1
          (_, _) -> do
              uni t1 t2
              return t2
@@ -308,10 +326,12 @@ doConsOp e1 e2 = do
 {-doConsOp e1 e2 = do-}
     {-t1 <- infer e1-}
     {-t2 <- infer e2-}
-    {-case (t1, t2) of-}
-         {-(TVar (TV x), typeNil) -> return $ TVar $ TV $ "[" ++ x ++ "]"-}
-         {-(TCon x, typeNil) -> return $ TCon $ "[" ++ x ++ "]"-}
-         
+    {-case (e1, e2) of-}
+         {-(_, Nil) -> return t1-}
+         {-(_, _) -> do-}
+             {-uni t1 t2-}
+             {-return t2-}
+
 unifyWithListVar :: Expr -> Expr -> Infer Type
 unifyWithListVar e1 e2 =
     case (e1, e2) of
@@ -319,7 +339,7 @@ unifyWithListVar e1 e2 =
       (_, _) -> do
           t1 <- infer e1
           t2 <- infer e2
-          throwError $ UnificationFail t1 t2
+          throwError $ UnsupportedOperation "the problem is here"
 
 newListTypeCon :: Expr -> Infer Type
 newListTypeCon e1 = do
@@ -415,6 +435,10 @@ unifyMany (t1 : ts1) (t2 : ts2) =
 unifyMany t1 t2 = throwError $ UnificationMismatch t1 t2
 
 unifies :: Type -> Type -> Solve Subst
+unifies typeNum (TCon "t Number") = return emptySubst
+unifies typeChar (TCon "t Char") = return emptySubst
+unifies typeString (TCon "t String") = return emptySubst
+unifies typeBool (TCon "t Boolean") = return emptySubst
 unifies t1 t2 | t1 == t2 = return emptySubst
 unifies (TVar v) t = v `bind` t
 unifies t (TVar v) = v `bind` t

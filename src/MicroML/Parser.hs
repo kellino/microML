@@ -119,7 +119,7 @@ list = do
     void $ spaces *> char '['
     elems <- commaSep expr
     void $ char ']' <* spaces
-    return $ foldr (BinOp OpCons) Nil elems
+    return $ List $ foldr (BinOp OpCons) Nil elems
 
 tuple :: Parser Expr
 tuple = do
