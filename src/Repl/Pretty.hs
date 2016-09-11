@@ -12,7 +12,7 @@ import MicroML.Typing.TypeError
 import MicroML.Config
 
 import qualified Data.Map as Map
-import Data.List (intercalate, isInfixOf)
+import Data.List (intercalate)
 import Data.List.Split (splitOn)
 import Text.PrettyPrint
 
@@ -23,8 +23,8 @@ parensIf False = id
 class Pretty p where
     ppr :: Int -> p -> Doc
 
-instance Pretty Name where
-    ppr _  = text 
+{-instance Pretty Name where-}
+    {-ppr _  = text -}
 
 instance Pretty TVar where
     ppr _ (TV x) = text x
@@ -39,10 +39,11 @@ instance Pretty Type where
     ppr _ (TCon "String") = text "String" 
     ppr _ (TCon "Boolean") = text "Boolean"
     ppr _ (TCon "Char") = text "Char" 
-    ppr _ (TCon (x:xs))
-              | x == '[' = text $ "[" ++ intercalate ", " (map pprLit (splitOn "," $ init xs)) ++ "]"
-              | x == '{' = text $ "{" ++ intercalate ", " (map pprLit (splitOn "," $ init xs)) ++ "}"
-              | otherwise = text (x:xs)
+    ppr _ (TCon t1) = text $ opening ++ last ty ++ closing
+        where ty = splitOn " " t1
+              opening = concat $ replicate (length ty - 1) "["
+              closing = concat $ replicate (length ty - 1) "]"
+
 
 instance Pretty TypeScheme where
     ppr p (Forall [] t) = ppr p t
@@ -57,8 +58,9 @@ instance Pretty Expr where
     ppr _ (Lit (LBoolean True))  = text "true"
     ppr _ (Lit (LBoolean False)) = text "false"
     ppr _ Nil                    = text "empty list"
-    ppr _ ls@(BinOp OpCons _ _)  = text $ matchBrackets (ppList ls)
+    ppr _ ls@(BinOp OpCons _ _)  = text $ ppList ls
     ppr _ (Lit (LTup xs))        = text $ "{" ++ intercalate ", " (map ppexpr xs) ++ "}"
+    ppr _ (List xs)              = text $ "[" ++ ppList xs  ++ "]"
     ppr _ xs                     = text $ show xs
 
 instance Show TypeError where
@@ -77,10 +79,10 @@ ppscheme = render . ppr 0
 pptype :: Type -> String
 pptype = render . ppr 0
 
--- WIP: doesn't quite work as expected on nested lists --
 ppList :: Expr -> String
-ppList (BinOp OpCons x Nil) = ppList x ++ "]"
-ppList (BinOp OpCons Nil (BinOp OpCons x xs)) = "[" ++ ppList x ++ ppList xs
+ppList (List xs) = "[" ++ ppList xs ++ "]"
+ppList (BinOp OpCons x Nil) = ppList x
+ppList (BinOp OpCons Nil (BinOp OpCons x xs)) = ppList x ++ ppList xs
 ppList (BinOp OpCons x xs)  = ppList x ++ ", " ++ ppList xs
 ppList l@Lit{}           = 
     case l of
@@ -92,20 +94,6 @@ ppList l@Lit{}           =
       Lit (LBoolean True)  -> "true"
       Lit (LBoolean False) -> "false"
 ppList x                 = show x
-
-matchBrackets :: String -> String
-matchBrackets st = let len = length . takeWhile (== ']') . reverse $ st
-                  in replicate len '[' ++ st
-
--- | more nasty kludge code here :(
-pprLit :: String -> String
-pprLit xs 
-    | "LInt" `isInfixOf` xs = "\ESC[31m" ++ "Number" ++ clear
-    | "LDouble" `isInfixOf` xs = "\ESC[31m" ++ "Number" ++ clear
-    | "LChar" `isInfixOf` xs = "\ESC[34m" ++ "Char" ++ clear
-    | "LString" `isInfixOf` xs = "\ESC[32m" ++ "String" ++ clear
-    | "LBoolean" `isInfixOf` xs = "\ESC[33m" ++ "Boolean" ++ clear
-    | otherwise = xs
 
 ppexpr :: Expr -> String
 ppexpr = render . ppr 0
