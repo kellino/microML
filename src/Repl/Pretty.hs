@@ -44,7 +44,6 @@ instance Pretty Type where
               opening = concat $ replicate (length ty - 1) "["
               closing = concat $ replicate (length ty - 1) "]"
 
-
 instance Pretty TypeScheme where
     ppr p (Forall [] t) = ppr p t
     ppr p (Forall ts t) = text "for all" <+> hcat (punctuate space (map (ppr p) ts)) <> text "." <+> ppr p t
