@@ -6,20 +6,23 @@ import qualified Data.Char as DC
 
 -- | doesn't work yet for vars
 enumFromTo_ :: Expr -> Expr -> Expr
-enumFromTo_ (Lit (LInt a)) (Lit (LInt b)) = foldr (BinOp OpCons) Nil $ (Lit . LInt ) <$> [a .. b]
-enumFromTo_ (Lit (LDouble a)) (Lit (LDouble b)) = foldr (BinOp OpCons) Nil $ (Lit . LDouble ) <$> [a .. b]
-enumFromTo_ (Lit (LChar a)) (Lit (LChar b))     = foldr (BinOp OpCons) Nil $ (Lit . LChar) <$> [a .. b]
+enumFromTo_ (Lit (LInt a)) (Lit (LInt b)) = List $ foldr (BinOp OpCons) Nil $ (Lit . LInt ) <$> [a .. b]
+enumFromTo_ (Lit (LDouble a)) (Lit (LDouble b)) = List $ foldr (BinOp OpCons) Nil $ (Lit . LDouble ) <$> [a .. b]
+enumFromTo_ (Lit (LChar a)) (Lit (LChar b))     = List $ foldr (BinOp OpCons) Nil $ (Lit . LChar) <$> [a .. b]
 enumFromTo_ _ _                                 = PrimitiveErr $ ListPrim ""
 
 car :: Expr -> Expr 
 car (BinOp OpCons x _) = x
+car (List (BinOp OpCons x _)) = x
 car (Lit (LString x)) = Lit . LChar $ head x
 
 cdr :: Expr -> Expr
 cdr (BinOp OpCons _ xs) = xs
+cdr (List (BinOp OpCons _ xs)) = List xs
 cdr (Lit (LString xs)) = Lit . LString $ tail xs
 
 cons :: Expr -> Expr -> Expr
+cons a (List xs) = List $ cons a xs
 cons a Nil = BinOp OpCons a Nil
 cons a (BinOp OpCons x Nil) = BinOp OpCons a (BinOp OpCons x Nil)
 cons a ls@(BinOp OpCons _ _) = BinOp OpCons a ls
@@ -29,6 +32,7 @@ cons x y = error $ show x ++ " " ++ show y
 append :: Expr -> Expr -> Expr
 append xs Nil                                     = xs
 append Nil xs                                     = xs
+append (List xs) (List ys)                        = List $ append xs ys
 append (BinOp OpCons x Nil) xs@(BinOp OpCons _ _) = BinOp OpCons x xs
 append (BinOp OpCons x xs) ys                     = BinOp OpCons x (append xs ys)
 append (Lit (LString x)) (Lit (LString y))        = Lit . LString $ x ++ y
