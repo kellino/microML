@@ -8,6 +8,7 @@ import MicroML.Parser
 import Compiler.MicroBitHeader
 import Compiler.CallGraph
 import Compiler.Failure
+import qualified Compiler.Failure as F
 import Compiler.PrettyCPP
 import MicroML.Typing.Infer
 import MicroML.Typing.Env
@@ -44,18 +45,6 @@ data CodeState = CodeState
 
 initState :: CodeState
 initState = CodeState Map.empty Env.empty
-
-checkTypes prog = do
-    st <- get
-    let code = Map.fromList prog
-    let typeEnv' = inferTop (typeEnv st) prog
-    case typeEnv' of
-         Left err -> error $ show err
-         Right ty -> do
-            let st' = st { userCode = code `mappend` userCode st
-                         , typeEnv = ty `mappend` typeEnv st }
-            put st'
-            return prog
 
 -------------------------
 -- CPP CODE GENERATION -- 
@@ -162,11 +151,11 @@ writeToFile dest code = do
     -- if clang-format exists, then use it to clean up the formatting.
     formatPrintedFile cFile
 
+checkIntegrity :: [(Name, Expr)] -> [(Name, Expr)]
+checkIntegrity = reachableFromMain . checkForDuplicates
+
 codegen :: [(Name, Expr)] -> Compiler [Doc]
-codegen = genTopLevel 
-        -- . checkTypes 
-        . reachableFromMain
-        . checkForDuplicates
+codegen = genTopLevel . checkIntegrity
 
 runCompiler :: CodeState -> Compiler a -> Either Failure (a, [Doc])
 runCompiler env m = runExcept $ evalRWST m env initCompiler
@@ -176,5 +165,5 @@ compile source dest filename = do
     let res = hoistError $ parseProgram filename source
     let code = checkForDuplicates res
     case runCompiler initState $ codegen code of
-         Left e -> print $ tellError e
+         Left e -> print $ F.tellError e
          Right r -> writeToFile dest $ fst r

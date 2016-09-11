@@ -10,12 +10,7 @@ import Data.Maybe (fromJust)
 emptyTmenv :: TermEnv
 emptyTmenv = Map.empty
 
-hoistPrimError :: Show a => Either a Expr -> Expr
-hoistPrimError e = 
-    case e of
-      Right val -> val
-      Left err  -> PrimitiveErr $ ListPrim $ show err
-
+-- | main eval function for the repl
 eval :: TermEnv -> Expr -> Expr
 eval env expr = case expr of
     num@(Lit (LInt _))      -> num

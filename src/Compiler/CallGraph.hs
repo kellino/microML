@@ -1,8 +1,4 @@
-module Compiler.CallGraph 
-    ( checkForDuplicates
-    , reachableFromMain
-    , drawGraph) 
-    where
+module Compiler.CallGraph where
 
 import Data.List (nub, nubBy, sort, (\\))
 import Data.Graph
@@ -43,9 +39,11 @@ getFuncName n code = "\ESC[1m" ++ (fst . head . drop (n-1)) code ++ "\ESC[0m"
 -- UNREACHABLE CODE -- 
 ----------------------
 
+-- | is there a main? If not, throw an error straightaway and don't do any more work
 doesMainExist :: [(String, Expr)] -> Either String [(String, Expr)]
 doesMainExist code = if "main" `elem` map fst code then Right code else Left "no main"
 
+-- | rearrange program so main function is first in list
 putMainFirst :: [(String, Expr)] -> [(String, Expr)]
 putMainFirst code = dropWhile notMain code ++ takeWhile notMain code
     where notMain (x,_) = x /= "main"
@@ -80,7 +78,7 @@ buildGraph code = buildG (1, length code) $ concatMap (\(x, xs) -> zip (repeat x
     where table = zip (getTopLevel mainFirst) [1..] 
           mainFirst = putMainFirst code
           call c t = map (\(x, xs) -> (tLookup x t, map (`tLookup` t) xs)) (getOrderedNodes c)
-          tLookup x' t' = fromJust $ lookup x' t'
+          tLookup x' t' = fromJust $ Prelude.lookup x' t'
 
 -- | super simple directed graph in graphviz dot format
 formatDot :: [(String, Expr)] -> String
@@ -88,6 +86,7 @@ formatDot cd = "digraph G {\n" ++ concat body ++ "}"
     where body = map (\x -> show (fst x) ++ " -> " ++ show (snd x) ++ ";\n") 
             $ concatMap (\(y, ys) -> zip (repeat y) ys) $ getOrderedNodes cd
 
+-- | assumes write permission for the tmp directory. This is not a portable solution.
 writeDot :: String -> IO ()
 writeDot = writeFile "/tmp/callgraph.dot" 
 
@@ -118,7 +117,7 @@ reachableFromMain cd =
     let reach = sort $ reachable (buildGraph cd) 1
         all'   = [1..(length cd)]
      in if reach /= all'
-           then error $ tellError (map fst (getOrderedNodes cd)) (all' \\ reach)
+           then error $ Compiler.CallGraph.tellError (map fst (getOrderedNodes cd)) (all' \\ reach)
            else cd
 
 -----------
@@ -138,4 +137,3 @@ tellError nodes unreachable =
 
 redError :: String
 redError = red ++ "Error: " ++ clear
-
