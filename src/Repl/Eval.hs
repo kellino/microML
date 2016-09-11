@@ -19,6 +19,7 @@ eval env expr = case expr of
     str@(Lit (LString _))   -> str
     bool@(Lit (LBoolean _)) -> bool
     tup@(Lit (LTup _))      -> tup
+    ls@(List _)             -> ls
     Nil                     -> Nil
     Var x                   -> fromJust (Map.lookup x env) -- the type checker ensures we never get this far
     FixPoint e              -> eval env (App e (FixPoint e))
