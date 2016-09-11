@@ -1,1 +1,2 @@
+-- should fail to compile
 let main = 'a' + 2
