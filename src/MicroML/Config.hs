@@ -8,6 +8,7 @@ import qualified System.Terminfo.Caps as C
 import System.Environment (lookupEnv)
 import Data.Maybe (fromJust)
 import qualified Data.Map as Map
+import Data.List (isInfixOf)
 
 type ConfigEnv = Map.Map OptionSpec String
 
@@ -45,19 +46,27 @@ putColour conf = unwords . pc . words
               | x == "Number"  = (getColour conf "number" ++ x ++ clear) : pc xs
               | x == "(Number" = ('(' : (getColour conf "number" ++ "Number" ++ clear)) : pc xs
               | x == "Number)" = ((getColour conf "number" ++ "Number" ++ clear) ++ ")") : pc xs
+              | "Number" `isInfixOf` x = ((opening ++ (getColour conf "number" ++ ty x ++ clear)) ++ closing) : pc xs
 
               | x == "String"  = (getColour conf "string" ++ x ++ clear) : pc xs
               | x == "(String" = ('(' : (getColour conf "string" ++ x ++ clear)) : pc xs
               | x == "String)" = ((getColour conf "string" ++ x ++ clear) ++ ")") : pc xs
+              | "String" `isInfixOf` x = ((opening ++ (getColour conf "string" ++ ty x ++ clear)) ++ closing) : pc xs
 
               | x == "Char"    = (getColour conf "char" ++ x ++ clear) : pc xs
               | x == "(Char"   = ('(' : (getColour conf "char" ++ x ++ clear)) : pc xs
               | x == "Char)"   = ((getColour conf "char" ++ x ++ clear) ++ ")") : pc xs
+              | "Char" `isInfixOf` x = ((opening ++ (getColour conf "char" ++ ty x ++ clear)) ++ closing) : pc xs
 
               | x == "Boolean" = (getColour conf "boolean" ++ x ++ clear) : pc xs
               | x == "(Boolean" = ('(' : (getColour conf "boolean" ++ "Boolean" ++ clear)) : pc xs
               | x == "Boolean)" = (getColour conf "boolean" ++ "Boolean" ++ clear ++ ")") : pc xs
+              | "Boolean" `isInfixOf` x = ((opening ++ (getColour conf "bool" ++ ty x ++ clear)) ++ closing) : pc xs
 
               | x == "Error" = (getColour conf "error" ++ x ++ clear) : pc xs
               | x == "→" = (getColour conf "arrow" ++ x ++ clear) : pc xs
               | otherwise    = x : pc xs
+                    where ty = filter (\x -> x /= '[' && x /= ']')
+                          opening = concat $ replicate times "["
+                          closing = concat $ replicate times "]" 
+                          times = length $ filter (== '[') x
