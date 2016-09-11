@@ -1,5 +1,8 @@
 # microML
 
+**for UCL MSc Computer Science.**
+
+
 microML is a simple functional programming language designed for the *BBC micro:bit* microcomputer. It is
 essentially a lisp, with a bit of ml style sugar on the syntax.
 
@@ -14,6 +17,7 @@ Declarations (simple and recursive) are introduced with a _let_
 
 ```ml
 microML ⊦ let x = 5
+microML ⊦ 5 : Number
 microML ⊦ let incBy1 x = x + 1
 microML ⊦ :type inc
 microML ⊦ inc : Number -> Number
@@ -42,6 +46,9 @@ microML ⊦ 120 : Number
 TODO
 ====
 
+My first attempt at writing anything more than an individual function in Haskell... and it shows it.
+Lots of good stuff here, but also a lot that needs to be rewritten when there's the time now that I
+understand a bit more about how to do things.
+
 + Working on type inference at the moment...
 + Compiler to C++ (for the micro:bit)
-+ A bit more syntactic sugar
