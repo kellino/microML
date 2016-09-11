@@ -1,3 +1,0 @@
-let scroll = "uBit.display.scroll"
-
-let main = scroll "hello and goodbye"
