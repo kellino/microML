@@ -56,5 +56,5 @@ mathsprims = hspec $
                 truncate' 0.8999999 `shouldBe` 0.9
             it "should round repeating decimal with leading number" $
                 truncate' 1.2999999 `shouldBe` 1.3
-            it "should not round 1.299993" $
+            it "should round not 1.299993" $
                 truncate' 1.299993 `shouldBe` 1.299993
