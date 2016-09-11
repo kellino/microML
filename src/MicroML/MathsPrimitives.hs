@@ -18,10 +18,10 @@ xor' (Lit (LBoolean a)) (Lit (LBoolean b)) = Lit $ LBoolean $ a `xor` b
 
 sub :: Expr -> Expr -> Expr
 sub (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a - b
-sub (Lit (LDouble a)) (Lit (LDouble b)) = Lit $ LDouble $ a - b
+sub (Lit (LDouble a)) (Lit (LDouble b)) = Lit $ LDouble $ truncate' $ a - b
 sub (Lit (LInt a)) (Lit (LDouble b)) = Lit . LDouble . truncate' $ realToFrac a - b
 sub (Lit (LDouble a)) (Lit (LInt b)) = Lit . LDouble . truncate' $ a - realToFrac b
-sub _ _ = PrimitiveErr $ MathsPrim "perhaps you meant (-)"
+sub x _ = PrimitiveErr $ MathsPrim $ "perhaps you meant (-" ++ show x ++ ")?"
 
 mul :: Expr -> Expr -> Expr
 mul (Lit (LInt a)) (Lit (LInt b)) = Lit $ LInt $ a * b
@@ -85,9 +85,8 @@ opNotEq (Lit (LInt a)) (Lit (LDouble b)) = Lit . LBoolean $ realToFrac a /= b
 opNotEq (Lit (LDouble a)) (Lit (LInt b)) = Lit . LBoolean $ a /= realToFrac b
 opNotEq a b = Lit . LBoolean $ a /= b
 
--- | an abritrary truncation of floating-point rounding errors. It's unlikely that this will be a
+-- | an arbitrary truncation of floating-point rounding errors. It's unlikely that this will be a
 -- problem for students. Horrible horrible code though. 
-
 -- TODO find an elegant mathematical solution to this problem, rather than nasty string manipulation
 truncate' :: Double -> Double
 truncate' = read . dropZeros . show
@@ -100,4 +99,4 @@ truncate' = read . dropZeros . show
               | otherwise  = head s : getValid (tail s) 
 
 hasform :: String -> Bool
-hasform (_:ys) = all (== '9') ys 
+hasform (_:ys) = all (== '9') ys
