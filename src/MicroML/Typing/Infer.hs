@@ -322,16 +322,6 @@ doConsOp e1 e2 = do
              uni t1 t2
              return t2
 
-{-doConsOp :: Expr -> Expr -> Infer Type-}
-{-doConsOp e1 e2 = do-}
-    {-t1 <- infer e1-}
-    {-t2 <- infer e2-}
-    {-case (e1, e2) of-}
-         {-(_, Nil) -> return t1-}
-         {-(_, _) -> do-}
-             {-uni t1 t2-}
-             {-return t2-}
-
 unifyWithListVar :: Expr -> Expr -> Infer Type
 unifyWithListVar e1 e2 =
     case (e1, e2) of
@@ -339,12 +329,12 @@ unifyWithListVar e1 e2 =
       (_, _) -> do
           t1 <- infer e1
           t2 <- infer e2
-          throwError $ UnsupportedOperation "the problem is here"
+          throwError $ UnificationFail t1 t2
 
 newListTypeCon :: Expr -> Infer Type
 newListTypeCon e1 = do
     (TCon ty) <- infer e1
-    return $ TCon $ "[" ++ ty ++ "]"
+    return $ TCon $ "t " ++ ty
 
 doBinaryMathsOp :: Binop -> Expr -> Expr -> Infer Type
 doBinaryMathsOp op e1 e2 = do
@@ -435,10 +425,10 @@ unifyMany (t1 : ts1) (t2 : ts2) =
 unifyMany t1 t2 = throwError $ UnificationMismatch t1 t2
 
 unifies :: Type -> Type -> Solve Subst
-unifies typeNum (TCon "t Number") = return emptySubst
-unifies typeChar (TCon "t Char") = return emptySubst
-unifies typeString (TCon "t String") = return emptySubst
-unifies typeBool (TCon "t Boolean") = return emptySubst
+unifies (TCon "Number") (TCon "t Number") = return emptySubst
+unifies (TCon "Char") (TCon "t Char") = return emptySubst
+unifies (TCon "String") (TCon "t String") = return emptySubst
+unifies (TCon "Boolean") (TCon "t Boolean") = return emptySubst
 unifies t1 t2 | t1 == t2 = return emptySubst
 unifies (TVar v) t = v `bind` t
 unifies t (TVar v) = v `bind` t
