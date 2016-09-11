@@ -22,6 +22,7 @@
 \usepackage{titlesec}
 \usepackage[flushleft]{threeparttable}
 \usepackage{pdflscape}
+\usepackage{url}
 % line spacing
 \linespread{1.3}
 
@@ -195,7 +196,7 @@ of expressiveness and safety. Must it be the case therefore that introductory ma
 intimidating? Is there a way to encourage students to think functionally, in a type-orientated
 manner, without the heavy mathematical `baggage' that is simply surplus to requirements when writing
 one's first programs? Can functional programming be brought to students through the medium of the
-micro:bit?\footnote{see Chapter~\ref{context}.}
+micro:bit?\footnote{See Chapter~\ref{context}.}
 
 \section{Aims and Goals}
 \subsection{Project Aims}
@@ -459,7 +460,7 @@ referential transparency.
 With the thought in mind of creating a Miranda style language for the micro:bit, came the necessity
 to decide on the technologies and theoretical basis for the language. Being an implementation of the
 lambda calculus, it was necessary to choose an axis on the \textit{lambda cube}\footnote{See
-Figure~\ref{fig:cube}} for further development. 
+Figure~\ref{fig:cube}.} for further development. 
 
 As one of the principle learning goals was to develop some skill with Haskell, a number of books and
 tutorials were consulted. Of most immediate use for basic programming were \cite{Lipovaca:2011:LYH:2018642}
@@ -587,7 +588,7 @@ maintaining a stable list of packages and creating a strong \textit{sandboxed} e
 development. The price to be paid is a reduced number of available libraries, so build problems
 can still occur with dependencies not part of the \textit{\gls{lts}} system. MicroML was firstly a Cabal
 project, but was migrated to Stack later in development. This largely produced a more stable build
-and allowed for the use of \textit{intero}\footnote{intero is an alternative to \gls{ghci} --- the Haskell
+and allowed for the use of \textit{intero}\footnote{Intero is an alternative to \gls{ghci} --- the Haskell
 interactive environment, but provides better type information and error messages, moreover it has
 good integration with neovim, the author's editor of choice.} but unfortunately this also meant that some
 experimental code (specially the JIT compiler) had to be disabled. See Section~\ref{SC@2}.
@@ -675,7 +676,7 @@ Indeed, one of the reasons for the creation of Haskell was the fact that Miranda
 closed source. It might best be described as a (small) subset of Haskell\footnote{Though it would
 be more accurate to describe Haskell as a superset of Miranda.}. It is still used as a teaching
 language and has a very clean, simply syntax. A reduced version of Miranda is suggested for 
-the language, which will go under the working title of microML.\footnote{microMiranda would probably be
+the language, which will go under the working title of microML.\footnote{MicroMiranda would probably be
 a more honest name, but there might be a small risk of copyright infringement.}
 
 Miranda has an reasonably rich standard library, which comes loaded automatically in the
@@ -725,19 +726,21 @@ or even change type.
 \label{constraints}
 The following are the design constraints for microML\@:
 \begin{itemize}
-    \item C++ Compiler. The author's initial proposal to MicroSoft was to use an existing Scheme
+    \item \textbf{C++ Compiler}\@: The author's initial proposal to MicroSoft was to either target MicroPython
+        or use an existing Scheme
         to C compiler to turn microML code into something runnable on the micro:bit. It would have
-        been relatively easy to convert the microML AST to Scheme. This would have taken advantage of
+        been relatively easy to convert the microML AST to Scheme or Python as they both directly support the
+        computational model of microML\@. This could have taken advantage of
         the code optimisations and garbage collection of the Scheme compiler\footnote{Either Chicken
         \url{https://www.call-cc.org/} or Gambit-C \url{http://dynamo.iro.umontreal.ca/wiki/index.php/Main_Page}
         would have been suitable choices.}. However, the MicroSoft client preferred a direct
         compilation from microML to C++. This, while perhaps of greater educational benefit, was also
         much more difficult to achieve within the project time frame.
-    \item Repl Environment. MicroML should be an interactive experience, with immediate feedback to
+    \item \textbf{Repl Environment}\@: MicroML should be an interactive experience, with immediate feedback to
         the student. The easiest way to achieve this, rather than constantly flashing to the
         micro:bit and waiting for an error, is to have a repl which the student can use to explore
         concepts and problems. 
-    \item Clear Syntax. As far as can be determined, the syntax should be intuitive and simple. That
+    \item \textbf{Clear Syntax}\@: As far as can be determined, the syntax should be intuitive and simple. That
         is, there should be ideally one way to do things (the antithesis of \textit{Perl's} ethos)
         and to be consistent. For this reason some features, such as function composition, have been
         reinterpreted to allow the student to read from left to right\footnote{Using microML's
@@ -802,6 +805,7 @@ MicroML uses an enriched lambda calculus as its base. See Figure~\ref{fig:syntax
             \alt{} UnaryOp <Expr>
             \alt{} BinOp <Expr> <Expr>
             \alt{} PrimitiveErr 
+            \alt{} List <Expr>
             \alt{} Nil
         \end{grammar}
     \end{minipage}
@@ -847,7 +851,7 @@ has-type.}, which are essential for recursing over lists.
 
 MicroML, in addition to floats and ints, also supports binary, octal and hex numbers\footnote{The
 syntax for these is inspired by erlang: one simply writes the number in the form e.g.\ 2\#110 for a
-binary 6. Likewise octal is 8\# and hex 16\#}. These are not treated as primitives however, and are
+binary 6. Likewise octal is 8\# and hex 16\#. See~\ref{encodings}.}. These are not treated as primitives however, and are
 automatically converted to an appropriate numeric representation.
 
 The \textit{FixPoint} primitive allows for the creation of recursive functions by satisfying the equation
@@ -860,8 +864,8 @@ The most famous fix-point combinator without a doubt is Curry's \textit{Y-combin
     Y = (\lambda f. (\lambda x.\ f (x x)) (\lambda x.\ f (x x)))
 \end{displaymath}
 
-To see how this can be used to simulate recursion\footnote{there are many excellent texts which
-give detailed explanations of the \textit{Y-combinator}, such as~\cite{citeulike:4001400}} it is necessary simply
+To see how this can be used to simulate recursion\footnote{There are many excellent texts which
+give detailed explanations of the \textit{Y-combinator}, such as~\cite{citeulike:4001400}.} it is necessary simply
 to supply an argument in the form of a lambda abstraction. Figure~\ref{fig:yCombinator}.
 
 \begin{figure}
@@ -884,7 +888,7 @@ whereas the user (a school-aged student) will not.
 A number of different libraries were examined before settling on the `standard' \textit{Parsec}
 library of parser combinators\footnote{A combinator is a lambda abstraction which contains no
 occurrences of a free variable, i.e.\ all of its arguments are explicitly supplied to it, and it
-does not rely on any global state or globally defined variables}. \textit{Parsec} is a highly
+does not rely on any global state or globally defined variables.}. \textit{Parsec} is a highly
 flexible tool, perhaps more similar to \textit{ANTLR}\footnote{\url{http://www.antlr.org/}} than
 to \textit{Yacc} or \textit{Bison}. Explicit, complex-to-read, regular expressions are not required, as the parser
 / lexer is a composite of a great number of small, specialized parser functions, which are linked
@@ -904,7 +908,7 @@ having to uninstall a great number of conflicting package versions.}.
 
 MegaParsec has excellent support for indentation sensitive grammars, which Parsec does not. Again,
 this would be a useful feature to add to microML at a later stage of development. MegaParsec
-also have the great advantage that it has the facility to be testing using HSpec\footnote{see
+also have the great advantage that it has the facility to be testing using HSpec\footnote{See
 Chapter~\ref{testing}.} whereas Parsec does not allow for automated testing in any Haskell
 testing framework. It seems to be, at the present time, misplaced energy to focus on what
 is essentially syntactic sugar when other, more vital, elements of the project are still not
@@ -925,7 +929,7 @@ to make use of this model.
 
 \subsection{Type Inference}
 \label{sec:type}
-MicroML uses an implementation of \textit{algorithm W}\footnote{based on~\cite{algoW}.}
+MicroML uses an implementation of \textit{algorithm W}\footnote{Based on~\cite{algoW}.}
 for ML-style type inference. At present it is not possible to declare the types of functions, they
 can only be inferred. As this is primarily a teaching language with a very simple type system, this
 is not the drawback that it might otherwise be.
@@ -946,7 +950,7 @@ of type Number. An expression of the type \textit{true + false} will fail with a
 error} as (+) is not a supported operator for this data type.
 
 Hindley-Milner is guaranteed to give the most general type signature possible. For example, the
-\textit{higher order} function `compose'\footnote{Represented in Haskell by the $\circ$ operator }
+\textit{higher order} function `compose'\footnote{Represented in Haskell by the $.$ operator.}
 has type (Figure~\ref{fig:typesig}).
 
 \begin{figure}
@@ -982,7 +986,7 @@ The microML repl environment is fully capable of evaluating every aspect of micr
 such is can be used either as a simple calculator, or to explore such advanced concepts as closures
 and continuation-passing style. The repl has a number of features to make it easier for students to
 use, including the ability to request the type of a function, to browse loaded functions, to import
-elements from the standard library\footnote{see Section~\ref{libs}} or load user-defined scripts.
+elements from the standard library\footnote{See Section~\ref{libs}.} or load user-defined scripts.
 It also has intelligent autocomplete for keywords and functions and the ability to scroll back
 through past history of the present and previous sessions. Interactions with the repl also feature
 syntax highlighting in stdout in an effort to make the content more easily parsed by a student. It
@@ -1138,7 +1142,7 @@ particular function needs to reside inside a particular monad, and does not. For
 possible to trivially wrap a function in a \textit{try / except} clause as one would in Python.
 Anything which might throw an exception needs to be inside the ExceptT monad transformer. The type
 checker will reject anything else. This can be sidestepped to a certain extent by throwing an
-unchecked \textbf{error}\footnote{a wrapper around the prelude library function \textbf{undefined}},
+unchecked \textbf{error}\footnote{A wrapper around the prelude library function \textbf{undefined}.},
 but such an error kills the runtime system, crashing the program.\footnote{\cite{transformers} was
 invaluable for understanding the monad transformer abstraction.}
 
@@ -1310,8 +1314,8 @@ For example, \textit{sum} and \textit{product} both reside in \textbf{maths}. Th
 behind this decision was that students might want the opportunity to try to write these functions
 themselves. Functions in the \textbf{standard} library are considered more fundamental and possibly
 more difficult for students to write: one cannot reasonably expect an 11-year-old to write
-\textit{foldr} or \textit{filter}\footnote{foldr is defined as follows in the microML standard
-library\@: let foldr r acc xs = if empty? xs then acc else ((f (head xs)) (foldr f acc (tail xs)))}.
+\textit{foldr} or \textit{filter}\footnote{\textbf{foldr} is defined as follows in the microML standard
+library\@: let foldr r acc xs = if empty? xs then acc else ((f (head xs)) (foldr f acc (tail xs))).}.
 
 \subsubsection{Vim Plugin}
 MicroML also has a simple vim plugin (installable with any of the popular package managers) which
@@ -1387,8 +1391,8 @@ the inference execution.
 \end{figure}
 
 Unfortunately, some modules are not accessible to direct, systematic testing. Most notably,
-\textit{Parsec} is not supported by the HSpec framework\footnote{though the fork
-\textit{MegaParsec} is. See Section~\ref{parsing}}. The pretty printing functions used by both the
+\textit{Parsec} is not supported by the HSpec framework\footnote{Though the fork
+\textit{MegaParsec} is. See Section~\ref{parsing}.}. The pretty printing functions used by both the
 repl and the compiler also cannot easily be unit-testing. However, extensive testing within the repl
 environment suggests an absence of obvious bugs.
 
@@ -1444,7 +1448,7 @@ systematic.
 \chapter{Conclusions and Project Evaluation}
 
 \section{Achievements}
-The project has met all of the goals and requirements initially specified\footnote{see
+The project has met all of the goals and requirements initially specified\footnote{See
 Table~\ref{table:achievments}}, but this is not to say
 that the project cannot be improved or could even, in any real sense, be said to be finished. The
 syntax (see Appendix~\ref{appendix:syntax}) is clean and uncomplicated, but also quite limiting for
@@ -1603,8 +1607,8 @@ in the language at some point, even if it cannot be regarded as a \textit{primit
 functional style. 
 
 Another important feature at present only partially implemented is user-defined
-exceptions\footnote{the parser and typechecker recognize the syntax, but the evaluator and compiler
-do not}. The approach in~\cite{deGroote1995} to a lambda calculus of exception handling would make
+exceptions\footnote{The parser and typechecker recognize the syntax, but the evaluator and compiler
+do not.}. The approach in~\cite{deGroote1995} to a lambda calculus of exception handling would make
 for an area of further interesting study, allowing exceptions to be thoroughly integrated into the
 existing language.
 
