@@ -53,10 +53,10 @@ initState = IState Env.microbit emptyTmenv HE.empty configEmpty
 
 type Repl a = HaskelineT (StateT IState IO) a
 
-hoistError :: (Show a1) => Either a1 a -> Repl a
-hoistError (Right val) = return val
-hoistError (Left err) = do
-    liftIO $ print err
+hoistError :: (Show a1) => ConfigEnv -> Either a1 a -> Repl a
+hoistError _ (Right val) = return val
+hoistError conf (Left err) = do
+    liftIO $ putStrLn $ putColour conf $ show err
     abort
 
 evalDef :: TermEnv -> (String, Expr) -> TermEnv
@@ -72,8 +72,8 @@ exec :: Bool -> L.Text -> Repl ()
 exec update source = do
     st       <- get
 
-    mod'     <- hoistError $ parseProgram "<stdin>" source
-    typeEnv' <- hoistError $ inferTop (typeEnv st) mod'
+    mod'     <- hoistError (configEnv st) $ parseProgram "<stdin>" source
+    typeEnv' <- hoistError (configEnv st) $ inferTop (typeEnv st) mod'
 
     let st' = st { termEnv = foldl' evalDef (termEnv st) mod'
                  , typeEnv = typeEnv' `mappend` typeEnv st 
@@ -93,9 +93,9 @@ exec' :: L.Text -> Repl ()
 exec' source = do
     st       <- get
 
-    mod'     <- hoistError $ parseProgram "<stdin>" source
-    typeEnv' <- hoistError $ inferTop (typeEnv st) mod'
-    helpEnv' <- hoistError $ parseHelp "<from file>" source
+    mod'     <- hoistError (configEnv st) $ parseProgram "<stdin>" source
+    typeEnv' <- hoistError (configEnv st) $ inferTop (typeEnv st) mod'
+    helpEnv' <- hoistError (configEnv st) $ parseHelp "<from file>" source
 
     let st' = st { termEnv = foldl' evalDef (termEnv st) mod'
                  , typeEnv = typeEnv' `mappend` typeEnv st 
@@ -121,7 +121,7 @@ cmd source = exec True (L.pack source)
 pst :: [String] -> Repl ()
 pst expr = do
     st <- get
-    tree <- hoistError $ parseProgram "<stdin>" $ L.pack $ concatMap (++ " ") expr
+    tree <- hoistError (configEnv st) $ parseProgram "<stdin>" $ L.pack $ concatMap (++ " ") expr
     let tyEnv = inferTop (typeEnv st) tree
     case tyEnv of
          Left err -> liftIO . print $ err
@@ -130,11 +130,11 @@ pst expr = do
 pstText :: [String] -> Repl ()
 pstText expr = do
     st <- get
-    tree <- hoistError $ parseProgram "<stdin>" $ L.pack $ concatMap (++ " ") expr
+    tree <- hoistError (configEnv st) $ parseProgram "<stdin>" $ L.pack $ concatMap (++ " ") expr
     let tyEnv = inferTop (typeEnv st) tree
     case tyEnv of
          Left err -> liftIO . print $ err 
-         Right _ -> do  --  liftIO . putStrLn . head $ tree
+         Right _ -> do 
              liftIO . putStrLn $ "The parsetree of " ++ bold ++ (fst . head) tree ++ S.clear ++ " is: "
              liftIO . putStrLn $ show . snd . head $ tree
 

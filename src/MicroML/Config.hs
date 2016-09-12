@@ -23,12 +23,15 @@ maxColours = do
     return $ colours db
 
 escapeCode :: String -> String
-escapeCode "16" = "\ESC["
+escapeCode "15" = "\ESC["
 escapeCode "255" = "\ESC[38;5;"
 escapeCode _ = error "unsupported terminal type"
 
 getColour :: ConfigEnv -> String -> String 
 getColour env colour = fromJust (Map.lookup colour env)
+
+checkRange :: [(String, String)] -> Int -> Bool
+checkRange = undefined
 
 escape :: [(String, String)] -> String -> [(String, String)]
 escape xs term = map (\(x,y) -> if x == "bold" then new x y esc' else new x y esc) xs 
