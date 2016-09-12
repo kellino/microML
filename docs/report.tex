@@ -1356,14 +1356,16 @@ System testing looks at the functioning of the entire system, and finally accept
 whether the end product will be suitable to the client. MicroML has not been acceptance tested, and
 still requires work in this direction.
 
-The Hspec\footnote{\url{https://hspec.github.io/}} package focuses primarily on unit testing of
-Haskell functions. With a typical Haskell program consisting of possibly hundreds of top-level
-functions, it is difficult to achieve full coverage of the code. However, the strong static type
-system means that integration tests are unavoidably a part of the language. The type system rejects
-coupling code which does not properly integrate. Unit tests are then even more useful as it is
-necessary only to check the logic of the function, rather than its compatibility with the rest of
-the program. Haskell does not have an object system, and only a very simple modular system, with a
-flat namespace. Again, this helps to reduce the necessity for testing above the level of the unit.
+Haskell's type system reduces the necessity for `external' tests, however there are a number of
+unit testing frameworks available. The Hspec\footnote{\url{https://hspec.github.io/}} package
+focuses primarily on unit testing of Haskell functions. With a typical Haskell program consisting
+of possibly hundreds of top-level functions, it is difficult to achieve full coverage of the code.
+However, the strong static type system means that integration tests are unavoidably a part of the
+language. The type system rejects coupling code which does not properly integrate. Unit tests are
+then even more useful as it is necessary only to check the logic of the function, rather than its
+compatibility with the rest of the program. Haskell does not have an object system, and only a very
+simple modular system, with a flat namespace. Again, this helps to reduce the necessity for testing
+above the level of the unit.
 
 While HSpec is undoubtedly useful, it does have a number of limitations. The most obvious is its
 inability to test functions which have not been publicly exported. Due to Haskell's flat namespace,
