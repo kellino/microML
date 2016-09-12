@@ -6,8 +6,6 @@ import MicroML.MathsPrimitives
 import MicroML.Syntax
 import Control.Exception (evaluate)
 
-import Repl.Eval
-
 mathsprims :: IO ()
 mathsprims = hspec $
     describe "mathsprims" $ do
@@ -34,10 +32,6 @@ mathsprims = hspec $
                 sub (Lit (LInt 2)) (Lit (LDouble 1.1)) `shouldBe` Lit (LDouble 0.9)
             it "should sub a double and an int" $
                 sub (Lit (LDouble 1.1)) (Lit (LInt 1)) `shouldBe` Lit (LDouble 0.1)
-
-            -- test for failure, but the type checker should prevent this ever happening
-            {-it "should fail on other input" $-}
-                {-evaluate (sub (Lit (LChar 'a')) (Lit (LChar 'a'))) `shouldThrow` anyException-}
     
         describe "mul" $ do
             it "should mul two integers" $
