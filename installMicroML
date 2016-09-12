@@ -1,17 +1,18 @@
 #!/usr/bin/bash
 
-## only tested on linux, but it should probably work in mac as well. Not a chance of windows unless
+## only tested on linux, but it should probably work on mac as well. Not a chance of windows unless
 ## you're using cygwin, with which I have no experience.
 ## doesn't check for clobbering, just reinstalls everything regardless
 
-function join_by { local IFS="$1"; shift; echo "$*"; }
+join_by() { local IFS="$1"; shift; echo "$*"; }
 
 ## check for this software. Only stack is essential
 stack=$(which stack 2>/dev/null) 
 fig=$(which figlet 2>/dev/null)
 cow=$(which cowsay 2>/dev/null)
 lol=$(which lolcat 2>/dev/null)
-
+dot=$(which dot 2>/dev/null)
+cl=$(which clang-format 2>/dev/null)
 
 if [ ! -x "$fig" ]; then
     progs=("${progs[@]}" "figlet ")
@@ -38,7 +39,8 @@ if [ -x "$stack" ]; then
     stack install
     rc=$?
     if [ "$rc" != 0 ]; then
-        printf "\nCould not install the executable into %s/.local/bin. Please copy it manually into your path\n" "$HOME"
+        printf "\nCould not install the executable into %s/.local/bin. 
+        \ Please copy it manually into your path\n" "$HOME"
         exit "$rc"
     fi
     printf "\n\e[1mcopying standard libraries to home directory\e[0m\n"
@@ -66,8 +68,15 @@ if [ -x "$stack" ]; then
         else 
             str=$("figlet, cowsay and lolcat")
         fi
-        #str=$(join_by , "${progs[@]}")
         printf "\e[1mYou can have a more interesting repl if you also install %s\e[0m\n" "$str"
+    fi
+
+    if [ ! -x "$dot" ]; then
+        printf "\e[1mIf you install \e[32mdot\e[0;1m then you can make callgraphs of your programs.\e[0m\n"
+    fi
+
+    if [ ! -x "$cl" ]; then
+        printf "\e[1mIf you install \e[32mclang-format\e[0;1m then you can format your C++ code.\e[0m\n"
     fi
 else 
     printf "\e[31mCould not find stack in your system path. Please install it using your package
