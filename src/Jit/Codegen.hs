@@ -1,3 +1,5 @@
+-- | largely derived from a tutorial by Stephen Diehl http://www.stephendiehl.com/llvm/
+
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Jit.Codegen where

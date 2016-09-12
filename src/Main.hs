@@ -18,6 +18,7 @@ import Data.List (nub)
 
 type File = String
 
+-- | command line options
 data Flag = 
       Interpreter
     | Jit
@@ -27,6 +28,7 @@ data Flag =
     | Help
     deriving (Eq, Ord, Enum, Show, Bounded)
 
+-- | actions and help messages
 flags :: [OptDescr Flag]
 flags = 
     [ Option ['j'] [] (NoArg Jit)
@@ -61,11 +63,12 @@ parseCmds argv =
                   exitWith (ExitFailure 1)
               where header = "Usage: microML [-jcio] [file ...]"
 
+-- | sends flags and data to the correct part of microML
 microML :: Flag -> [FilePath] -> IO ()
 microML arg fs =
     case arg of
       Interpreter -> shell
-      ObjectFile  -> undefined
+      ObjectFile  -> undefined -- not yet implemented. Possibly to be removed?
       CallGraph   -> 
           if length fs /= 1 -- only accept one file at a time
              then die $ red ++ "Exit Failure: " ++ clear ++ "you must provide only one source file at a time. Sorry :("
@@ -90,6 +93,7 @@ microML arg fs =
                         ++ " Are you sure it is installed?"
              else die "This jit is not yet operable"
 
+-- | this is it: the main entry point for microML
 main :: IO ()
 main = do
     (args, files) <- getArgs >>= parseCmds

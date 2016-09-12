@@ -1,3 +1,4 @@
+-- | Custom Error monad for the compiler
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE FlexibleContexts #-}

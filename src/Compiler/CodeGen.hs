@@ -58,12 +58,14 @@ fresh = do
     return $ text (letters !! count s)
     where letters = [1..] >>= flip replicateM ['a' .. 'z']
 
+-- | generate C++ for functions
 genTopLevel :: [(Name, Expr)] -> Compiler [Doc]
 genTopLevel = mapM gtl 
         where gtl ::  (String, Expr) -> Compiler Doc
               gtl ("main", expr) = generateMain expr
               gtl (nm, expr) = generateFunc nm expr
 
+-- | handle the main function separately, as the return type is already known
 generateMain ::  Expr -> Compiler Doc
 generateMain ex = do
     ex' <- genBody ex
@@ -135,6 +137,8 @@ hoistError :: Show a =>  Either a [(String, Expr)] -> [(String, Expr)]
 hoistError (Right val) = val
 hoistError (Left err) = error $ "\ESC[31;1mParse Error\ESC[0m: " ++ show err
 
+-- | check if the output file has an extension, strip it if present and add .cpp. Perhaps redundant,
+-- but safe.
 validateExtension :: String -> String
 validateExtension fl -- = if (snd . splitExtension) fl == ".cpp" then fl else (fst . splitExtension $ fl) ++ ".cpp"
     | extension == ".cpp" = fl
@@ -151,6 +155,7 @@ writeToFile dest code = do
     -- if clang-format exists, then use it to clean up the formatting.
     formatPrintedFile cFile
 
+-- is the code complete and without repetitions?
 checkIntegrity :: [(Name, Expr)] -> [(Name, Expr)]
 checkIntegrity = reachableFromMain . checkForDuplicates
 
@@ -160,6 +165,7 @@ codegen = genTopLevel . checkIntegrity
 runCompiler :: CodeState -> Compiler a -> Either Failure (a, [Doc])
 runCompiler env m = runExcept $ evalRWST m env initCompiler
 
+-- | main compilation function
 compile :: L.Text -> L.Text -> String -> IO ()
 compile source dest filename = do
     let res = hoistError $ parseProgram filename source

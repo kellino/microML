@@ -59,6 +59,7 @@ getRHSVars (nm, xs) = (nm, nub . extract . words . stripQuotes . stripParens . s
                             | x == "Var" = go (y:acc) ys
                             | otherwise = go acc (y:ys)
 
+-- | extract the names of toplevel functions definitions
 getTopLevel :: [(String, Expr)] -> [String]
 getTopLevel = foldr (\(x, _) a -> x : a) []  
 
@@ -73,6 +74,7 @@ getOrderedNodes code =
          Right _ -> isCalled (putMainFirst code)
          Left  _ -> error $ redError ++ "no main function found"
 
+-- convert program to DAG
 buildGraph :: [(String, Expr)] -> Graph
 buildGraph code = buildG (1, length code) $ concatMap (\(x, xs) -> zip (repeat x) xs) $ call mainFirst table
     where table = zip (getTopLevel mainFirst) [1..] 
@@ -124,6 +126,7 @@ reachableFromMain cd =
 -- ERROR --
 -----------
 
+-- report any errors during code generation
 tellError :: [String] -> [Int] -> String
 tellError nodes unreachable = 
     let funcs = map (\x -> nodes !! (x-1)) unreachable

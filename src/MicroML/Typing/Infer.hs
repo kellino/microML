@@ -40,6 +40,7 @@ initInfer = InferState { count = 0 }
 runInfer :: Env -> Infer Type -> Either TypeError (Type, [Constraint])
 runInfer env m = runExcept $ evalRWST m env initInfer
 
+-- infer and expressions, returning either a typescheme or throwing an error
 inferExpr :: Env -> Expr -> Either TypeError TypeScheme
 inferExpr env ex = case runInfer env (infer ex) of
   Left err -> Left err
@@ -54,7 +55,7 @@ closeOver = normalize . generalize Env.empty
 uni :: Type -> Type -> Infer ()
 uni t1 t2 = tell [(t1, t2)]
 
--- | Extend type environment
+-- | Extend type environment locally
 inEnv :: (Name, TypeScheme) -> Infer a -> Infer a
 inEnv (x, sc) m = do
   let scope e = restrict e x `extend` (x, sc)
@@ -132,6 +133,7 @@ boolOps = Map.fromList [
 -- INFERENCE --
 ---------------
 
+-- | infer type of toplevel definitions
 inferTop :: Env -> [(Name, Expr)] -> Either TypeError Env
 inferTop env [] = Right env
 inferTop env ((name, ex):xs) = case inferExpr env ex of
@@ -159,6 +161,7 @@ normalize (Forall _ body) = Forall (map snd ord) (normtype body)
 -----------------------------
 
 -- | get the type of a lambda, otherwise we risk overgeneralizing the type sig
+-- this is a bit of a hack, but good enough for our purposes
 inferLambda :: Name -> Expr -> Infer Type
 inferLambda nm e1 =
     case e1 of
@@ -403,15 +406,14 @@ getOp dict op t1 t2 = do
 -- Constraint Solver
 -------------------------------------------------------------------------------
 
--- | The empty substitution
+-- | empty substitution
 emptySubst :: Subst
 emptySubst = mempty
 
--- | Compose substitutions
+-- | compose substitutions
 compose :: Subst -> Subst -> Subst
 (Subst s1) `compose` (Subst s2) = Subst $ Map.map (apply (Subst s1)) s2 `Map.union` s1
 
--- | Run the constraint solver
 runSolve :: [Constraint] -> Either TypeError Subst
 runSolve cs = runIdentity $ runExceptT $ solver st
   where st = (emptySubst, cs)
@@ -424,6 +426,7 @@ unifyMany (t1 : ts1) (t2 : ts2) =
      return (su2 `compose` su1)
 unifyMany t1 t2 = throwError $ UnificationMismatch t1 t2
 
+-- | unify types, throwing UnificationFail if it can't be done.
 unifies :: Type -> Type -> Solve Subst
 unifies (TCon "Number") (TCon "t Number") = return emptySubst
 unifies (TCon "Char") (TCon "t Char") = return emptySubst
@@ -435,7 +438,7 @@ unifies t (TVar v) = v `bind` t
 unifies (TArrow t1 t2) (TArrow t3 t4) = unifyMany [t1, t2] [t3, t4]
 unifies t1 t2 = throwError $ UnificationFail t1 t2
 
--- Unification solver
+-- unification solver
 solver :: Unifier -> Solve Subst
 solver (su, cs) =
   case cs of
@@ -444,10 +447,12 @@ solver (su, cs) =
       su1  <- unifies t1 t2
       solver (su1 `compose` su, apply su1 cs0)
 
+-- | bind a polymorphic parameter to a type
 bind ::  TVar -> Type -> Solve Subst
 bind a t | t == TVar a     = return emptySubst
          | occursCheck a t = throwError $ InfiniteType a t
          | otherwise       = return (Subst $ Map.singleton a t)
 
+-- don't allow infinite types!
 occursCheck ::  Substitutable a => TVar -> a -> Bool
 occursCheck a t = a `Set.member` ftv t
