@@ -240,4 +240,11 @@ let arcsin x = arctan (x / (sqrt (1 - x^2)))
 tan of an angle
 *)
 let arccos x = arctan ((sqrt (1 - x^2)) / x)
-(* == == *)
+
+(*
+==triangleNumbers==
+***triangleNumbers***
+** triangleNumbers :: Number -> [Number] **
+list of triangle numbers 
+*)
+let triangleNumbers n = scanl1 (\x y -> x + y) [1 to (n+1)];

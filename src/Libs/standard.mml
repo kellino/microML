@@ -343,6 +343,27 @@ let foldr1 f xs = foldr f (head xs) xs
 let foldl1 f xs = foldl f (head xs) xs
 
 (*
+==scanl==
+***scanl***
+** scanl :: (b -> a -> b) -> b -> [a] -> [b] **
+*)
+let scanl f x xs = if empty? xs then [] else x : (scanl f (f x (head xs)) (tail xs))
+
+(*
+==scanl1==
+***scanl1***
+** scanl1 :: (b -> a -> b) -> b -> [a] -> [b] **
+*)
+let scanl1 f xs = scanl f (head xs) (tail xs)
+
+(*
+==scanr==
+***scanr***
+** scanr :: (a -> b -> b) -> b -> [a] -> [b] **
+*)
+let scanr f x xs = if empty? xs then [] else (f (head xs) x) : (scanr f x (tail xs))
+
+(*
 ==map==
 ***map***
 ** map :: (a -> b) -> [a] -> [b] **
