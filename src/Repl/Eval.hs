@@ -60,7 +60,7 @@ eval env expr = case expr of
         case op of
           OpEnum   -> enumFromTo_ a' b'
           OpAdd    -> a' `add` b'
-          OpSub    -> a' `sub`  b'
+          OpSub    -> a' `sub` b'
           OpMul    -> a' `mul`  b'
           OpDiv    -> a' `div'` b'
           OpIntDiv -> a' `intDiv` b'
