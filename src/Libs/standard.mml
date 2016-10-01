@@ -251,6 +251,13 @@ What has happened here?
 let compose f g x = f (g x)
 
 (*
+==replicate==
+***replicate***
+** replicate :: Number -> a -> [a] **
+*)
+let replicate n x = if n == 1 then (x:[]) else x : (replicate (n-1) x)
+
+(*
 ==empty?==
 ***empty?***
 ** empty? :: [a] -> Boolean **
@@ -376,6 +383,13 @@ performs the function (a -> b) on every element of the list [a]. Easier to see w
     > "microML" : String
 *)
 let map f xs = foldr (\x xs' -> (f x) : xs') [] xs
+
+(*
+==concatMap==
+***concatMap***
+** concatMap :: (a -> [b]) -> a -> [b] **
+*)
+let concatMap f = foldr (\x y -> (f x) ++ y) [];
 
 (*
 ==filter==
