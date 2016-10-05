@@ -248,3 +248,11 @@ let arccos x = arctan ((sqrt (1 - x^2)) / x)
 list of triangle numbers 
 *)
 let triangleNumbers n = scanl1 (\x y -> x + y) [1 to (n+1)];
+
+(*
+==choose==
+***choose***
+** choose :: Number -> Number -> Number **
+n choose k
+*)
+let choose n k = (factorial n) / ((factorial k) * (factorial (n-k)))
