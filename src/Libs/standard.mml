@@ -420,6 +420,14 @@ let reverse xs = foldl (\x y -> y : x) [] xs
 let last xs = let l' = reverse xs in head l'
 
 (*
+==sequence==
+***sequence***
+** sequence :: [a] -> [a] -> [[a]] **
+Finite sequence
+*)
+let sequence xs ys = let seq = \z bs -> foldr (\y a -> (z:y:[]):a) [] bs in if empty? xs then [] else (seq (head xs) ys) : (sequence (tail xs) ys)
+
+(*
 ==quicksort==
 ***quicksort***
 ** quicksort :: [a] -> [a] **
