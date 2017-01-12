@@ -1,5 +1,13 @@
 # microML
 
+**UPDATE**
+
+At the moment I simply have no time to work on this, or to fix the many, many, many problems and
+dreadful code scattered throughout the project. This was my first attempt at writing anything real in
+Haskell, and I'm sad to say it's pretty obvious. Please regard this as an interesting curiosity
+only! Do not attempt to use!!!
+
+
 **for UCL MSc Computer Science.**
 
 
